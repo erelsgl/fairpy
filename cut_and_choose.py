@@ -2,7 +2,11 @@
 Implementation of the classic cut-and-choose protocol
 for fair cake-cutting among two agents.
 
-Author: Erel Segal-Halevi
+References:
+
+    Abram, Genesis 13:8-9.
+
+Programmer: Erel Segal-Halevi
 Since: 2019-11
 """
 

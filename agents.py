@@ -74,6 +74,25 @@ class Agent(ABC):
         """
         return sum([self.eval(*interval) for interval in piece])
 
+    def partition_values(self, partition:List[float]):
+        """
+        Evaluate all the pieces in the given partition.
+        :param partition: a list of k cut-points [cut1,cut2,...]
+        :return: a list of k+1 values: eval(0,cut1), eval(cut1,cut2), ...
+
+        >>> a = Agent([1,2,3,4])
+        >>> a.partition_values([1,2])
+        [1.0, 2.0, 7.0]
+        >>> a.partition_values([3,3])
+        [6.0, 0.0, 4.0]
+        """
+
+        values = []
+        values.append(self.eval(0, partition[0]))
+        for i in range(len(partition) - 1):
+            values.append(self.eval(partition[i], partition[i + 1]))
+        values.append(self.eval(partition[-1], self.cake_length()))
+        return values
 
 
 class PiecewiseConstantAgent(Agent):
