@@ -5,11 +5,13 @@ Demonstration of the simplex of partitions.
 
 References:
 
-    Walter Stromquist, "How to cut a cake fairly."
-    The American Mathematical Monthly 87.8 (1980): 640-644.
+    Walter Stromquist (1980):
+    "How to cut a cake fairly."
+    The American mathematical monthly, 87(8), 640-644.
 
-    Francis Edward Su, "Rental harmony: Sperner's lemma in fair division."
-    The American mathematical monthly 106.10 (1999): 930-942.
+    Francis Edward Su (1999):
+    "Rental harmony: Sperner's lemma in fair division."
+    The American mathematical monthly, 106(10), 930-942.
 
 Programmer: Erel Segal-Halevi
 Since: 2019-11

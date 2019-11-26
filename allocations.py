@@ -1,7 +1,7 @@
 """
 Defines cake-allocations.
 
-Author: Erel Segal-Halevi
+Programmer: Erel Segal-Halevi
 Since: 2019-11
 """
 

@@ -1,7 +1,7 @@
 """
 Defines agents with various kinds of valuation functions.
 
-Author: Erel Segal-Halevi
+Programmer: Erel Segal-Halevi
 Since: 2019-11
 """
 

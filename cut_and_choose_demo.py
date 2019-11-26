@@ -3,7 +3,7 @@
 """
 Demonstration of the cut-and-choose protocol.
 
-Author: Erel Segal-Halevi
+Programmer: Erel Segal-Halevi
 Since: 2019-11
 """
 
