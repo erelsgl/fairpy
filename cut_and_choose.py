@@ -14,9 +14,8 @@ from agents import *
 from allocations import *
 from typing import *
 
-import logging, sys
+import logging
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
 def cut_and_choose(agents: List[Agent])->Allocation:
