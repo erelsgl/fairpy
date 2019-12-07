@@ -21,7 +21,10 @@ print(Alice)
 print(George)
 
 print("\n### Alice cuts and George chooses:")
-print(cut_and_choose.cut_and_choose([Alice, George]))
+print(cut_and_choose.asymmetric_protocol([Alice, George]))
 
 print("\n### George cuts and Alice chooses:")
-print(cut_and_choose.cut_and_choose([George, Alice]))
+print(cut_and_choose.asymmetric_protocol([George, Alice]))
+
+print("\n### Symmetric protocol:")
+print(cut_and_choose.symmetric_protocol([Alice, George]))
