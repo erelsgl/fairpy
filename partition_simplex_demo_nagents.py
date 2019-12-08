@@ -15,7 +15,7 @@ import logging, sys
 partition_simplex.logger.addHandler(logging.StreamHandler(sys.stdout))
 partition_simplex.logger.setLevel(logging.INFO)
 
-samples_per_side = 200
+samples_per_side = 300
 figsize_in_inches=(8, 7)
 dpi=80
 
