@@ -80,7 +80,7 @@ class Agent(ABC):
         :param partition: a list of k cut-points [cut1,cut2,...]
         :return: a list of k+1 values: eval(0,cut1), eval(cut1,cut2), ...
 
-        >>> a = Agent([1,2,3,4])
+        >>> a = PiecewiseConstantAgent([1,2,3,4])
         >>> a.partition_values([1,2])
         [1.0, 2.0, 7.0]
         >>> a.partition_values([3,3])
@@ -99,7 +99,7 @@ class PiecewiseConstantAgent(Agent):
     """
     A PiecewiseConstantAgent is an Agent whose value function has a constant density on a finite number of intervals.
 
-    >>> a = PiecewiseConstantAgent([11,22,33,44])
+    >>> a = PiecewiseConstantAgent([11,22,33,44]) # Four desired intervals: the leftmost has value 11, the second one 22, etc.
     >>> a.cake_value()
     110
     >>> a.cake_length()
@@ -114,26 +114,25 @@ class PiecewiseConstantAgent(Agent):
     44.0
 
 
-    >>> b = PiecewiseConstantAgent([11,22,33,44], "Bob")
-    >>> b.name()
-    'Bob'
+    >>> Alice = PiecewiseConstantAgent([11,22,33,44], "Alice")
+    >>> Alice.name()
+    'Alice'
     """
 
     def __init__(self, values:list, name:str=None):
         super().__init__(name)
         self.values = np.array(values)
         self.length = len(values)
-        self.total_length_cache = len(values)
         self.total_value_cache = sum(values)
 
     def __repr__(self):
-        return "{}:PiecewiseConstantAgent{}".format(self.my_name, self.values)
+        return "{} is a piecewise-constant agent with values {} and total value={}".format(self.my_name, self.values, self.total_value_cache)
 
     def cake_value(self):
         return self.total_value_cache
 
     def cake_length(self):
-        return self.total_length_cache
+        return self.length
 
     def eval(self, start:float, end:float):
         """
@@ -170,7 +169,7 @@ class PiecewiseConstantAgent(Agent):
         toCeiling = int(np.ceil(end))
         toCeilingRemovedFraction = (toCeiling - end)
 
-        val = 0.0;
+        val = 0.0
         val += (self.values[fromFloor] * fromFraction)
         val += self.values[fromFloor + 1:toCeiling].sum()
         val -= (self.values[toCeiling - 1] * toCeilingRemovedFraction)
@@ -221,6 +220,136 @@ class PiecewiseConstantAgent(Agent):
 
         # Value is too high: return None
         return None
+
+
+
+class PiecewiseUniformAgent(Agent):
+    """
+    A PiecewiseUniformAgent is an Agent with a finite number of desired intervals, all of which have the same value-density (1).
+
+    >>> a = PiecewiseUniformAgent([(0,1),(2,4),(6,9)])   # Three desired intervals: (0..1) and (2..4) and (6..9).
+    >>> a.cake_value()
+    6
+    >>> a.cake_length()
+    9
+    >>> a.eval(0,1.5)
+    1.0
+    >>> a.mark(0, 2)
+    3
+    >>> a.name()
+    'Anonymous'
+
+
+    >>> George = PiecewiseUniformAgent([(0,1),(2,4),(6,9)], "George")
+    >>> George.name()
+    'George'
+    """
+
+    def __init__(self, desired_regions:List[tuple], name:str=None):
+        super().__init__(name)
+        self.desired_regions = desired_regions
+        self.desired_regions.sort(key=lambda region:region[0]) # sort desired regions from left to right
+        self.length = max([region[1] for region in desired_regions])
+        self.total_value_cache = sum([region[1]-region[0] for region in desired_regions])
+
+    def __repr__(self):
+        return "{} is a piecewise-uniform agent with desired regions {} and total value={}".format(self.my_name, self.desired_regions, self.total_value_cache)
+
+    def cake_value(self):
+        return self.total_value_cache
+
+    def cake_length(self):
+        return self.length
+
+    def eval(self, start:float, end:float):
+        """
+        Answer an Eval query: return the value of the interval [start,end].
+
+        :param start: Location on cake where the calculation starts.
+        :param end:   Location on cake where the calculation ends.
+        :return: Value of [start,end]
+
+        >>> a = PiecewiseUniformAgent([(0,1),(2,4),(6,9)])
+        >>> a.eval(0,1)
+        1.0
+        >>> a.eval(-1, 1.5)
+        1.0
+        >>> a.eval(0.5, 1.5)
+        0.5
+        >>> a.eval(0.5, 2.5)
+        1.0
+        >>> a.eval(0.5, 4.5)
+        2.5
+        >>> a.eval(1.5, 11)
+        5.0
+        >>> a.eval(3, 11)
+        4.0
+        >>> a.eval(3, 1)
+        0.0
+        """
+        if end <= start:
+            return 0.0  # special case not covered by loop below
+
+        val = 0.0
+        for (region_start, region_end) in self.desired_regions:
+            if region_end < start:
+                continue  # the entire region is to the left of the eval start point - ignore region.
+            if end < region_start:
+                continue  # the entire region is to the right of the eval start point - ignore region.
+
+            # Here, start <= region_end and region_start <= end.
+            # So,   start <= min(end,region_end) and region_start <= min(end,region_end).
+            # So,   max(start,region_start) <= min(end,region_end).
+            value_from_region = min(end, region_end) - max(start, region_start)
+            val += value_from_region
+
+        return val
+
+    def mark(self, start:float, target_value:float):
+        """
+        Answer a Mark query: return "end" such that the value of the interval [start,end] is target_value.
+
+        :param start: Location on cake where the calculation starts.
+        :param targetValue: required value for the piece [start,end]
+        :return: the end of an interval with a value of target_value.
+        If the value is too high - returns None.
+
+        >>> a = PiecewiseUniformAgent([(0,1),(2,4),(6,9)])
+        >>> a.mark(0, 1)
+        1
+        >>> a.mark(0, 1.5)
+        2.5
+        >>> a.mark(0.5, 1.5)
+        3.0
+        >>> a.mark(1.5, 0.01)
+        2.01
+        >>> a.mark(1.5, 2)
+        4
+        >>> a.mark(1, 100)
+        >>> a.mark(1, 0)
+        1
+        """
+        # the cake to the left of 0 and to the right of length is considered worthless.
+        if target_value < 0:
+            raise ValueError("sum out of range (should be positive): {}".format(sum))
+
+        for (region_start, region_end) in self.desired_regions:
+            if region_end < start:
+                continue    # the entire region is to the left of the mark start point - ignore region.
+
+            effective_start = max(start, region_start)
+            region_value = region_end - effective_start
+
+            if region_value < target_value:  # the entire region is to the left of the mark start point - ignore region.
+                target_value -= region_value
+                continue
+
+            # Here, start <= region_end and region_value >= target_value.
+            return effective_start + target_value
+
+        # Value is too high: return None
+        return None
+
 
 
 if __name__ == "__main__":

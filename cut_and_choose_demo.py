@@ -14,8 +14,8 @@ import cut_and_choose, logging, sys
 cut_and_choose.logger.addHandler(logging.StreamHandler(sys.stdout))
 cut_and_choose.logger.setLevel(logging.INFO)
 
-Alice = PiecewiseConstantAgent ([1,2,1], name="Alice")
-George = PiecewiseConstantAgent([0,1,2,3],    name="George")
+Alice = PiecewiseUniformAgent ([(0,1),(3,6)], name="Alice")   # Alice has two desired intervals, 0..1 and 3..6. Each interval has value 1.
+George = PiecewiseConstantAgent([1,3,5,7],    name="George")  # George has four desired intervals: 0..1 with value 1, 1..2 with value 3, etc.
 
 print(Alice)
 print(George)

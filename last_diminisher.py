@@ -26,27 +26,28 @@ def last_diminisher(agents: List[Agent])->Allocation:
     :return: a proportional cake-allocation.
 
     >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
+    >>> last_diminisher([Alice])
+    > Alice gets [(0, 2)] with value 66.00
+    <BLANKLINE>
     >>> George = PiecewiseConstantAgent([11,55], "George")
     >>> last_diminisher([Alice, George])
     > Alice gets [(0, 1.0)] with value 33.00
     > George gets [(1.0, 2)] with value 55.00
     <BLANKLINE>
     >>> last_diminisher([George, Alice])
-    > George gets [(1.4, 2)] with value 33.00
-    > Alice gets [(0, 1.4)] with value 46.20
+    > George gets [(1.0, 2)] with value 55.00
+    > Alice gets [(0, 1.0)] with value 33.00
     <BLANKLINE>
-
-    >>> Alice = PiecewiseConstantAgent([33,33,33], "Alice")
-    >>> last_diminisher([Alice, George])
-    > Alice gets [(1.5, 3)] with value 49.50
-    > George gets [(0, 1.5)] with value 38.50
-    <BLANKLINE>
-    >>> last_diminisher([George, Alice])
-    > George gets [(0, 1.4)] with value 33.00
-    > Alice gets [(1.4, 3)] with value 52.80
+    >>> Abraham = PiecewiseConstantAgent([4,1,1], "Abraham")
+    >>> last_diminisher([Abraham, George, Alice])
+    > Abraham gets [(0, 0.5)] with value 2.00
+    > George gets [(1.1666666666666667, 2)] with value 45.83
+    > Alice gets [(0.5, 1.1666666666666667)] with value 22.00
     <BLANKLINE>
     """
     num_of_agents = len(agents)
+    if num_of_agents==0:
+        raise ValueError("There must be at least one agent")
     allocation = Allocation(agents)
     start=0
     active_agents = list(range(num_of_agents))
@@ -61,7 +62,7 @@ def last_diminisher_recursive(start:float, agents: List[Agent], active_agents:Li
     :param agents: the list of all n agents in the original protocol.
     :param active_agents: list of indices of those agents who are still active (not allocated yet).
     :param allocation: the current allocation (will be updated during the run).
-    :return:
+    :return: nothing - the allocation is modified in place.
     """
     num_of_active_agents = len(active_agents)
 
