@@ -4,8 +4,13 @@
 
 ### For one programmer
 
-* Xiaotie Deng, Qi Qi, Amin Saberi.
+* Jeff Edmonds, Kirk Pruhs (2006).
+["Balanced allocations of cake"](http://people.cs.pitt.edu/~kirk/papers/focs2006.pdf)
+Proceedings of FOCS 2006, 623--634.
+
+* Xiaotie Deng, Qi Qi, Amin Saberi (2012).
 ["Algorithmic solutions for envy-free cake cutting"](https://pubsonline.informs.org/doi/pdf/10.1287/opre.1120.1116).
+Operations Research 60(6),  1461--1476.
 *Algorithm 1*.
 
 * Yuga J Cohler,  John K Lai, and David C Parkes, Ariel D Procaccia (2011).
