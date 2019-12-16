@@ -14,13 +14,15 @@ Operations Research 60(6),  1461--1476.
 *Algorithm 1*.
 
 * Yuga J Cohler,  John K Lai, and David C Parkes, Ariel D Procaccia (2011).
-["Optimal envy-free cake cutting"](https://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/download/3638/3938).
+["Optimal envy-free cake cutting"](https://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewPaper/3638).
 Proceedings of AAAI 2011.
+([alternative link](http://procaccia.info/papers/maxsw.aaai11.pdf)).
 *Algorithms 1 and 2*. 
 
 *  David Kurokawa, John K. Lai, Ariel D Procaccia (2013). 
-["How to Cut a Cake Before the Party Ends"](http://www.aaai.org/ocs/index.php/AAAI/AAAI13/paper/viewFile/6365/7206). 
+["How to Cut a Cake Before the Party Ends"](https://www.aaai.org/ocs/index.php/AAAI/AAAI13/paper/viewPaper/6365).
 Proceedings of AAAI 2013. 
+([alternative link](http://procaccia.info/papers/unicake.aaai13.pdf)). 
 *Algorithms 1 and 2*. 
 
 * Yiling Chen, John K. Lai, David C. Parkes, Ariel D. Procaccia (2013): 
