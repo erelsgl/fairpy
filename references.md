@@ -1,5 +1,22 @@
 # References
 
+
+## In construction
+
+* Eshwar Ram Arunachaleswaran, Siddharth Barman, Rachitesh Kumar, Nidhi Rathi (2019). 
+["Fair and Efficient Cake Division with Connected Pieces"](https://arxiv.org/abs/1907.11019).
+Proceedings of WINE 2019, 57--70.
+*Algorithm 1*.
+  * Programmer: Uri Zitser
+
+* Yiling Chen, John K. Lai, David C. Parkes, Ariel D. Procaccia (2013): 
+["Truth, justice, and cake cutting"](http://procaccia.info/papers/justruth.geb.pdf). 
+Games and Economic Behavior. 77 (1): 284–297. 
+*Mechanism 1 (in section 3), and the algorithm described in section 4*.
+  * Programmer: Ofek Israel
+ 
+
+
 ## Future work
 
 ### For one programmer
@@ -25,11 +42,6 @@ Proceedings of AAAI 2013.
 ([alternative link](http://procaccia.info/papers/unicake.aaai13.pdf)). 
 *Algorithms 1 and 2*. 
 
-* Yiling Chen, John K. Lai, David C. Parkes, Ariel D. Procaccia (2013): 
-["Truth, justice, and cake cutting"](http://procaccia.info/papers/justruth.geb.pdf). 
-Games and Economic Behavior. 77 (1): 284–297. 
-*Mechanism 1 (in section 3), and the algorithm described in section 4*. 
-
 * Richard Cole, Vasilis Gkatzelis, Gagan Goel (2013):
 ["Mechanism Design for Fair Division: Allocating Divisible Items Without Payments"](https://arxiv.org/abs/1212.1522).
 Proceedings of EC 2013. 251–-268.
@@ -44,11 +56,6 @@ Proceedings of AAMAS 2013, 343--350.
 ["The complexity of cake cutting with unequal shares"](https://arxiv.org/abs/1709.03152)
 Proceedings of SAGT 2018, pages={19--30}.
 *Sections 4 and 7*.
-
-* Eshwar Ram Arunachaleswaran, Siddharth Barman, Rachitesh Kumar, Nidhi Rathi (2019). 
-["Fair and Efficient Cake Division with Connected Pieces"](https://arxiv.org/abs/1907.11019).
-Proceedings of WINE 2019, 57--70.
-*Algorithm 1*.
 
 * Paul W Goldberg, Alexandros Hollender, Warut Suksompong (2019).
 ["Contiguous Cake Cutting: Hardness Results and Approximation Algorithms"](https://arxiv.org/abs/1911.05416).
@@ -88,3 +95,4 @@ Proceedings of SODA 2020.
 * Rediet Abebe, Richard Cole, Vasilis Gkatzelis, Jason D. Hartline (2019).
 ["A Truthful Cardinal Mechanism for One-Sided Matching"](https://arxiv.org/abs/1903.07797).
 *Uses Algorithm 1 from Cole et al (2013).*
+
