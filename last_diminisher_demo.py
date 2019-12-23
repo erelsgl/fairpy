@@ -14,7 +14,7 @@ import last_diminisher, logging, sys
 last_diminisher.logger.addHandler(logging.StreamHandler(sys.stdout))
 last_diminisher.logger.setLevel(logging.INFO)
 
-Alice = PiecewiseConstantAgent ([3,6,3], name="Alice")
+Alice = PiecewiseConstantAgent([3,6,3], name="Alice")
 George = PiecewiseConstantAgent([0,2,4,6], name="George")
 Abraham = PiecewiseConstantAgent([6,4,2,0], name="Abraham")
 Hanna = PiecewiseConstantAgent([3,3,3,3], name="Hanna")
