@@ -14,7 +14,20 @@ Proceedings of WINE 2019, 57--70.
 Games and Economic Behavior. 77 (1): 284–297. 
 *Mechanism 1 (in section 3), and the algorithm described in section 4*.
   * Programmer: Ofek Israel
- 
+
+* Yonatan Aumann, Yair Dombb, Avinatan Hassidim (2015).
+["Auctioning time: Truthful auctions of heterogeneous divisible goods"](https://dl.acm.org/citation.cfm?id=2833086)
+ACM Transactions on Economics and Computation, 4(1).
+*All algorithms.*
+  * Programmers: Yehonatan Lifschitz, Naama Hava Berman
+  
+* Yonatan Aumann, Yair Dombb, Avinatan Hassidim (2012).
+["Computing socially-efficient cake divisions"](https://arxiv.org/abs/1205.3982).
+Proceedings of AAMAS 2013, 343--350.
+*Algorithms 1 and 2*.
+  * Programmer: Yehonatan Diamant
+
+
 
 
 ## Future work
@@ -47,11 +60,6 @@ Proceedings of AAAI 2013.
 Proceedings of EC 2013. 251–-268.
 *Algorithms 1 and 3*. 
 
-* Yonatan Aumann, Yair Dombb, Avinatan Hassidim (2012).
-["Computing socially-efficient cake divisions"](https://arxiv.org/abs/1205.3982).
-Proceedings of AAMAS 2013, 343--350.
-*Algorithms 1 and 2*.
-
 * Agnes Cseh, Tamas Fleiner (2018):
 ["The complexity of cake cutting with unequal shares"](https://arxiv.org/abs/1709.03152)
 Proceedings of SAGT 2018, pages={19--30}.
@@ -69,11 +77,6 @@ Proceedings of AAAI 2020.
 ["Cake cutting algorithms for piecewise constant and piecewise uniform valuations"](https://arxiv.org/abs/1307.2908). 
 Proceedings of WINE 2014. 1--14.
 *All 5 algorithms.*
-
-* Yonatan Aumann, Yair Dombb, Avinatan Hassidim (2015).
-["Auctioning time: Truthful auctions of heterogeneous divisible goods"](https://dl.acm.org/citation.cfm?id=2833086)
-ACM Transactions on Economics and Computation, 4(1).
-*All algorithms.*
 
 * Haris Aziz, Simon MacKenzie (2017).
 ["A discrete and bounded envy-free cake cutting protocol for any number of agents"](https://arxiv.org/abs/1604.03655).
