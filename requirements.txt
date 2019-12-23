@@ -1,0 +1,3 @@
+networkx
+cvxpy
+git+git://github.com/trzemecki/dicttools.git
