@@ -7,6 +7,25 @@ Date : 27/12/19
 """
 from agents import *
 from allocations import *
+def findRemainIntervals(allocation :Allocation):
+    remain = []
+    return remain
+def checkWhile(agents: List[Agent],allocation :Allocation,remain,epsilon):
+    nSquared = len(agents)*len(agents)
+    for agent,i in zip(agents,range(len(agents))):
+        for interval in remain:
+            if (agent.eval(allocation[i][0][0],allocation[i][0][1]) <
+                    agent.eval(interval[0],interval[1]) - (epsilon/nSquared)):
+                return interval
+    return None
+def getC(agents: List[Agent],allocation :Allocation,epsilon,interval):
+    nSquared = len(agents) * len(agents)
+    newAgents = []
+    for agent, i in zip(agents, range(len(agents))):
+        if (agent.eval(allocation[i][0][0], allocation[i][0][1]) <
+                agent.eval(interval[0], interval[1]) - (epsilon / nSquared)):
+            newAgents.append(agent)
+    return newAgents
 
 def ALG(agents: List[Agent],epsilon)->Allocation:
     """
@@ -21,7 +40,11 @@ def ALG(agents: List[Agent],epsilon)->Allocation:
         <BLANKLINE>
     """
     allocation = Allocation(agents)
-    while():
+    interval = (checkWhile(agents,allocation,findRemainIntervals(allocation),epsilon))
+    while interval !=None:
+        for b in getC(agents,allocation,epsilon,interval):
+
+
 
 
 
