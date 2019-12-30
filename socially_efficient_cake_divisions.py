@@ -75,7 +75,7 @@ def get_players_valuation(agents: List[Agent], c):
         matrix.append(valuations)
     return matrix
 
-def aprox_v(s,t,k,matrix):
+def aprox_v(s,t,k,matrix: List[List[float]]):
     """
     this function calculates the value of the items from s to t according to the valuation
     of player k.
@@ -93,7 +93,7 @@ def aprox_v(s,t,k,matrix):
     return sum(valuations[s:t+1])
 
 
-def V(s,t, current_s, matrix):
+def V(s,t, current_s, matrix : List[List[float]]):
     """
      this function calculates the sum
     of values that the other players to which the items s through t are assigned obtain from these
@@ -103,6 +103,22 @@ def V(s,t, current_s, matrix):
     :param current_s: a list such that current_s[i] == which item {0,...,(num_of_items - 1)} holds player i
     :param matrix: all the valuations of the players
     :return: the sum presented above
+
+    example:
+    2 player, player 0 holds the 0, 1, 2 items, player 1 holds the 3, 4, 5 items
+    we are looking for the value of items 0, 1, 2 (the sum of 1+2+3)
+
+    >>> matrix = [[1,2,3,4,5,6], [4,5,1,2,3, 0]]
+    >>> V(0,2,[0,3], matrix)
+    6
+
+    2 player, player 0 holds the 0, 1, 2 items, player 1 holds the 3, 4, 5 items
+    we are looking for the value of items 1, 2, 3, 4 (the sum of 2+3+2+3)
+
+    >>> matrix = [[1,2,3,4,5,6], [4,5,1,2,3, 0]]
+    >>> V(1, 4, [0,3], matrix)
+    10
+
     """
     sum = 0
     for i in range(s,t + 1):
@@ -189,5 +205,6 @@ if __name__ == "__main__":
     print(aprox_v(0,5,0,matrix)) #all items
     print(aprox_v(0,0, 0, matrix))#just the first item
     print('\n')
-    print(V(1,4,[0,3], matrix)) #a holds 0, 1, 2 b holds 3, 4, 5 and we wamd the value of 1+2+3+4
+    matrix = [[1,2,3,4,5,6], [4,5,1,2,3, 0]]
+    print(V(0,2,[0,3], matrix)) #a holds 0, 1, 2 b holds 3, 4, 5 and we wamd the value of 1+2+3+4
     print('\n')
