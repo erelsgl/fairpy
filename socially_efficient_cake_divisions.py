@@ -99,7 +99,6 @@ def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items
     for t in range(num_of_items):
         maximum = maximize_expression(t, num_of_players, S, T)
         while maximum[0] >= 0:
-            maximum = maximize_expression(t, num_of_players, S, T)
             S[maximum[1]] = maximum[2]
             T[maximum[1]] = t
             for i in range(num_of_players):
@@ -109,6 +108,8 @@ def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items
             for i in range(num_of_players):
                 if (S[i] < maximum[2] and maximum[2] <= T[i]):
                     T[i] = maximum[2] - 1
+                    
+            maximum = maximize_expression(t, num_of_players, S, T)
 
     return [S,T]
 
