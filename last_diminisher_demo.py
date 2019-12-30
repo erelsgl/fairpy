@@ -29,3 +29,4 @@ print(last_diminisher.last_diminisher(all_agents))
 print("\n### Order: Hanna, Abraham, George, Alice")
 all_agents.reverse()
 print(last_diminisher.last_diminisher(all_agents))
+
