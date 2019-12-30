@@ -16,10 +16,11 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-# Get the list of requirements from requirements.txt
-with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
-    requirements = f.read().splitlines()
-    requirements = [r for r in requirements if "git+" not in r]
+# # Get the list of requirements from requirements.txt
+# with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
+#     requirements = f.read().splitlines()
+#     requirements = [r for r in requirements if "git+" not in r]
+requirements = ["numpy","cvxpy","networkx","matplotlib"]
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
 # Fields marked as "Optional" may be commented out.

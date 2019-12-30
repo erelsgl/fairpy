@@ -1,3 +1,5 @@
-networkx
+numpy
 cvxpy
+networkx
+matplotlib
 git+git://github.com/trzemecki/dicttools.git
