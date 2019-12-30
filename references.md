@@ -27,7 +27,11 @@ Proceedings of AAMAS 2013, 343--350.
 *Algorithms 1 and 2*.
   * Programmer: Yehonatan Diamant
 
-
+* Georgios Amanatidis,  George Christodoulou,  John Fearnley,  Evangelos Markakis,  Christos-Alexandros Psomas, Eftychia Vakaliou (2018).
+["An improved envy-free cake cutting protocol for four agents"](https://arxiv.org/abs/1807.00317)
+Proceedings of SAGT 2018, 87--99.
+*All algorithms.*
+  * Programmers: Amit Eliyahu and Tal Nakar 
 
 
 ## Future work
@@ -82,11 +86,6 @@ Proceedings of WINE 2014. 1--14.
 ["A discrete and bounded envy-free cake cutting protocol for any number of agents"](https://arxiv.org/abs/1604.03655).
 Proceedings of FOCS 2016. 
 *Algorithms 1 and 2 (up to page 10)*.
-
-* Georgios Amanatidis,  George Christodoulou,  John Fearnley,  Evangelos Markakis,  Christos-Alexandros Psomas, Eftychia Vakaliou (2018).
-["An improved envy-free cake cutting protocol for four agents"](https://arxiv.org/abs/1807.00317)
-Proceedings of SAGT 2018, 87--99.
-*All algorithms.*
 
 ## Future future work
 
