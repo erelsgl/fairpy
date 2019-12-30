@@ -7,7 +7,7 @@
 ["Fair and Efficient Cake Division with Connected Pieces"](https://arxiv.org/abs/1907.11019).
 Proceedings of WINE 2019, 57--70.
 *Algorithm 1*.
-  * Programmer: Uri Zitser
+  * Programmer: Uri Zitzer
 
 * Yiling Chen, John K. Lai, David C. Parkes, Ariel D. Procaccia (2013): 
 ["Truth, justice, and cake cutting"](http://procaccia.info/papers/justruth.geb.pdf). 
@@ -33,6 +33,12 @@ Proceedings of SAGT 2018, 87--99.
 *All algorithms.*
   * Programmers: Amit Eliyahu and Tal Nakar 
 
+* Xiaotie Deng, Qi Qi, Amin Saberi (2012).
+["Algorithmic solutions for envy-free cake cutting"](https://pubsonline.informs.org/doi/pdf/10.1287/opre.1120.1116).
+Operations Research 60(6),  1461--1476.
+*Algorithm 1*.
+  * Programmer: Dvir Fried
+
 
 ## Future work
 
@@ -41,11 +47,6 @@ Proceedings of SAGT 2018, 87--99.
 * Jeff Edmonds, Kirk Pruhs (2006).
 ["Balanced allocations of cake"](http://people.cs.pitt.edu/~kirk/papers/focs2006.pdf)
 Proceedings of FOCS 2006, 623--634.
-
-* Xiaotie Deng, Qi Qi, Amin Saberi (2012).
-["Algorithmic solutions for envy-free cake cutting"](https://pubsonline.informs.org/doi/pdf/10.1287/opre.1120.1116).
-Operations Research 60(6),  1461--1476.
-*Algorithm 1*.
 
 * Yuga J Cohler,  John K Lai, and David C Parkes, Ariel D Procaccia (2011).
 ["Optimal envy-free cake cutting"](https://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewPaper/3638).
