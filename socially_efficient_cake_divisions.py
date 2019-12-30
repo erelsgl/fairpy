@@ -11,7 +11,6 @@ Programmer: Jonathan Diamant
 Since: 2019-12
 """
 from agents import *
-import cvxpy as cp
 
 def discretization_procedure(agents: List[Agent], epsilone):
     """
@@ -42,6 +41,11 @@ def discretization_procedure(agents: List[Agent], epsilone):
         condition = [agent.eval(a, size_of_the_cake) > epsilone for agent in agents]
     C.append(size_of_the_cake)
     return C
+
+
+
+
+
 
 def aprox_v(s,t,k,matrix):
     valuations = matrix[k]
