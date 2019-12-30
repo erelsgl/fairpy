@@ -26,17 +26,22 @@ logger = logging.getLogger(__name__)
 def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     """
     Algorithm 1.
-    Compute an approximation algorithm of auction for uniform-size pieces.
+    Approximation algorithm of the optimal auction for uniform-size pieces.
 
     :param agents: A list of Agent objects.
     :param piece_size: Size of an equally sized piece.
-    :return: A proportional cake-allocation.
+    :return: A cake-allocation, not necessarily all the cake will be allocated.
 
     >>> Alice = PiecewiseConstantAgent([100, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([2, 90], "Bob")
     >>> equally_sized_pieces([Alice, Bob], 0.5)
-    > Alice gets (0,0.5) with value 100
-    > Bob gets (0.5, 1) with value 90
+    > Alice gets (0, 1) with value 100
+    > Bob gets (1, 2) with value 90
+
+    >>> Alice = PiecewiseConstantAgent([1, 1, 1, 1, 1], "Alice")
+    >>> Bob = PiecewiseConstantAgent([3, 3, 3, 1, 1], "Bob")
+    >>> equally_sized_pieces([Alice, Bob], 3 / 5)
+    > Bob gets (0, 2) with value 9
     """
     num_of_agents = len(agents)
     if num_of_agents == 0:
@@ -52,17 +57,17 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
 def discrete_setting(agents: List[Agent], pieces: List[tuple]) -> Allocation:
     """
     Algorithm 2.
-    Compute an approximation algorithm of auction for number of pieces with known sizes.
+    Approximation algorithm of the optimal auction for a discrete cake with known piece sizes.
 
     :param agents: A list of Agent objects.
     :param pieces: List of sized pieces.
-    :return: A proportional cake-allocation.
+    :return: A cake-allocation.
 
     >>> Alice = PiecewiseConstantAgent([100, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([2, 90], "Bob")
     >>> discrete_setting([Alice, Bob], [(0, 0.5), (0.5, 1)])
-    > Alice gets (0,0.5) with value 100
-    > Bob gets (0.5, 1) with value 90
+    > Alice gets (0, 1) with value 100
+    > Bob gets (1, 2) with value 90
     """
     pass
 
@@ -70,14 +75,14 @@ def discrete_setting(agents: List[Agent], pieces: List[tuple]) -> Allocation:
 def continuous_setting(agents: List[Agent]) -> Allocation:
     """
     Algorithm 3.
-    Compute an approximation algorithm of auction for a continuous cake.
+    Approximation algorithm of the optimal auction for a continuous cake.
 
     :param agents: A list of Agent objects.
-    :return: A proportional cake-allocation.
+    :return: A cake-allocation.
 
     >>> Alice1 = PiecewiseConstantAgent([100, 1], "Alice")
     >>> Alice2 = PiecewiseConstantAgent([100, 1], "Alice")
     >>> continuous_setting([Alice1, Alice2])
-    > Alice gets (0,1) with value 101
+    > Alice gets (0, 1) with value 101
     """
     pass
