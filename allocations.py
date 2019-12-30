@@ -19,6 +19,11 @@ class Allocation:
         self.agents = agents
         self.pieces = [None]*len(agents)
 
+    def get_piece(self,agent_index:int):
+        return self.pieces[agent_index]
+    def get_pieces(self):
+        return self.pieces
+
     def set_piece(self, agent_index:int, piece:List[tuple]):
         """
         Sets the piece of the given index.

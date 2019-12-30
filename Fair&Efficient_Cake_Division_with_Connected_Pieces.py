@@ -7,6 +7,10 @@ Date : 27/12/19
 """
 from agents import *
 from allocations import *
+import numpy as np
+import random
+
+
 def findRemainIntervals(allocation :Allocation):
     remain = []
     return remain
@@ -24,8 +28,53 @@ def getC(agents: List[Agent],allocation :Allocation,epsilon,interval):
     for agent, i in zip(agents, range(len(agents))):
         if (agent.eval(allocation[i][0][0], allocation[i][0][1]) <
                 agent.eval(interval[0], interval[1]) - (epsilon / nSquared)):
-            newAgents.append(agent)
+            newAgents.append((agent,i))
     return newAgents
+"""finish it"""
+def findRb(agent:Agent , allocation:Allocation,epsilon,index,interval,n):
+    currentPiece = allocation[index][0]
+    currentPieceEval = agent.eval(currentPiece[0],currentPiece[1])
+    Rb = (interval[1] + interval[0])/2
+    equation = currentPieceEval - epsilon/(n*n)
+    theta = Rb
+    while agent.eval(interval[0],Rb) != equation:
+        if(agent.eval(interval[0],Rb) > equation):
+            Rb = (Rb+interval[0])/2
+def findPiece(reamin:List[tuple],attr , leftOrRight):
+    for piece in reamin:
+        if piece[leftOrRight]==attr:
+            return piece
+    return None
+
+def setRemain(allocation:Allocation):
+    remain = findRemainIntervals(allocation)
+    choice = random.choice(('Left', 'Right'))
+    partialAlloc = allocation.get_pieces()
+    for pieces in partialAlloc:
+        right = pieces[0][1]
+        newPart = findPiece(remain, right,0)
+        if newPart == None : continue
+        pieces.append(newPart)
+        remain.remove(newPart)
+    if len(remain) == 1:
+        for pieces in partialAlloc:
+            if remain[0][1] == pieces[0][0]:
+                pieces.append(remain[0])
+                break
+    return partialAlloc
+def intervalUnionFromList(intervals:List(tuple)):
+    minimum = 1
+    maximum = 0
+    for interval in intervals:
+        if interval[0] < minimum: minimum = interval[0]
+        elif interval[1] > maximum: maximum = interval[1]
+    return (minimum,maximum)
+def allocationToOnePiece(alloction:List(List(tuple)),agents:List(Agent)):
+    I = Allocation(agents)
+    for pieces,i in  zip(alloction,range(len(alloction))):
+        I.set_piece(i,intervalUnionFromList(pieces))
+    return I
+
 
 def ALG(agents: List[Agent],epsilon)->Allocation:
     """
@@ -41,11 +90,19 @@ def ALG(agents: List[Agent],epsilon)->Allocation:
     """
     allocation = Allocation(agents)
     interval = (checkWhile(agents,allocation,findRemainIntervals(allocation),epsilon))
+    N = len(agents)
     while interval !=None:
-        for b in getC(agents,allocation,epsilon,interval):
-
-
-
+        Rb =np.array()
+        C = getC(agents,allocation,epsilon,interval)
+        for b in C:
+            agent = b[0]
+            index = b[1]
+            r = findRb(agent,allocation,epsilon,index,interval,N)
+            np.append(Rb,r)
+        a = C[np.argmin(Rb)]
+        allocation.set_piece(a[1] ,[(interval[0],Rb[np.argmin(Rb)])])
+        interval = (checkWhile(agents, allocation, findRemainIntervals(allocation), epsilon))
+    return allocationToOnePiece(setRemain(allocation),agents)
 
 
 if __name__ == "__main__":
