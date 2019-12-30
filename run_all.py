@@ -4,7 +4,7 @@
 import glob, importlib, os, sys
 
 for file in glob.iglob("*.py"):
-    if "run_all_tests" in file:
+    if "run_all" in file:
         continue
     print("\n\nProcessing "+file)
     command = '"'+sys.executable+'"'+" "+file+" quiet"
