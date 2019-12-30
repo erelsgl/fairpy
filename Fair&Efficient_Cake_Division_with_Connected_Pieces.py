@@ -33,9 +33,16 @@ def findRemainIntervals(allocation :Allocation):
     return remain
 def checkWhile(agents: List[Agent],allocation :Allocation,remain,epsilon):
     nSquared = len(agents)*len(agents)
+    pieces = allocation.get_pieces()
+    piecesList = []
+    # turn the pieces from list of lists of tuples into list of tuples
+    for list in pieces:
+        if list != None: piecesList += list
+    if len(piecesList)==0:
+        return (0,1)
     for agent,i in zip(agents,range(len(agents))):
         for interval in remain:
-            if (agent.eval(allocation[i][0][0],allocation[i][0][1]) <
+            if (agent.eval(allocation.get_piece(i)[0][0],allocation.get_piece(i)[0][1]) <
                     agent.eval(interval[0],interval[1]) - (epsilon/nSquared)):
                 return interval
     return None
@@ -133,8 +140,9 @@ if __name__ == "__main__":
     alloc.set_piece(1,[(0.2,0.3)])
     alloc.set_piece(2,[(0.4,0.7)])
     alloc.set_piece(3,[(0.8,1)])
-
-    print(findRemainIntervals(alloc))
+    remain = findRemainIntervals(alloc)
+    print(remain)
+    print(checkWhile(all_agents,alloc,remain,0.2))
     """import doctest
     (failures,tests) = doctest.testmod(report=True)
     print ("{} failures, {} tests".format(failures,tests))"""
