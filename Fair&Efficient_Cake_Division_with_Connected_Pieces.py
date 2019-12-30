@@ -13,6 +13,23 @@ import random
 
 def findRemainIntervals(allocation :Allocation):
     remain = []
+    pieces = allocation.get_pieces()
+    piecesList = []
+    #turn the pieces from list of lists of tuples into list of tuples
+    for list in pieces:
+        if list!= None :piecesList+=list
+    if len(piecesList)==0:return [(0,1)]
+    piecesList.sort(key=lambda ineterval: ineterval[0])
+    start = 0
+    if piecesList[0][0]==0:
+        start = piecesList[0][1]
+        piecesList.pop(0)
+    for interval in piecesList:
+        remain.append((start,interval[0]))
+        start=interval[1]
+    if start!=1:
+        remain.append((piecesList[-1][1],1))
+
     return remain
 def checkWhile(agents: List[Agent],allocation :Allocation,remain,epsilon):
     nSquared = len(agents)*len(agents)
@@ -62,14 +79,14 @@ def setRemain(allocation:Allocation):
                 pieces.append(remain[0])
                 break
     return partialAlloc
-def intervalUnionFromList(intervals:List(tuple)):
+def intervalUnionFromList(intervals:List[tuple]):
     minimum = 1
     maximum = 0
     for interval in intervals:
         if interval[0] < minimum: minimum = interval[0]
         elif interval[1] > maximum: maximum = interval[1]
     return (minimum,maximum)
-def allocationToOnePiece(alloction:List(List(tuple)),agents:List(Agent)):
+def allocationToOnePiece(alloction:List[List[tuple]],agents:List[Agent]):
     I = Allocation(agents)
     for pieces,i in  zip(alloction,range(len(alloction))):
         I.set_piece(i,intervalUnionFromList(pieces))
@@ -106,6 +123,18 @@ def ALG(agents: List[Agent],epsilon)->Allocation:
 
 
 if __name__ == "__main__":
-    import doctest
+    Alice = PiecewiseConstantAgent([3, 6, 3], name="Alice")
+    George = PiecewiseConstantAgent([0, 2, 4, 6], name="George")
+    Abraham = PiecewiseConstantAgent([6, 4, 2, 0], name="Abraham")
+    Hanna = PiecewiseConstantAgent([3, 3, 3, 3], name="Hanna")
+    all_agents = [Alice, George, Abraham, Hanna]
+    alloc = Allocation(all_agents)
+    alloc.set_piece(0,[(0,0.1)])
+    alloc.set_piece(1,[(0.2,0.3)])
+    alloc.set_piece(2,[(0.4,0.7)])
+    alloc.set_piece(3,[(0.8,1)])
+
+    print(findRemainIntervals(alloc))
+    """import doctest
     (failures,tests) = doctest.testmod(report=True)
-    print ("{} failures, {} tests".format(failures,tests))
+    print ("{} failures, {} tests".format(failures,tests))"""
