@@ -13,7 +13,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+    - name: Setup Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
     - name: Install tox
       run: pip install tox
     - name: Run tox
-      run: tox
+      run: python -m tox
