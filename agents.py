@@ -350,7 +350,69 @@ class PiecewiseUniformAgent(Agent):
         # Value is too high: return None
         return None
 
+class PiecewiseLinearAgent(Agent):
 
+    """
+    A PiecewiseLinearAgent is an Agent with a finite number of desired intervals, all of which have linear value-density (1).
+    
+    >>> a = PiecewiseLinearAgent([(x1,x2,a,b)]) #y=ax+b
+
+    
+    """
+
+
+
+    def __init__(self, desired_regions:List[tuple], name:str=None):
+        super().__init__(name)
+        self.desired_regions = desired_regions
+        self.desired_regions.sort(key=lambda region:region[0]) # sort desired regions from left to right
+        self.length = max([region[1] for region in desired_regions])
+        self.total_value_cache = sum([((region[1]+region[0])*region[2]+2*region[3]/2.0)*(region[1]-region[0]) for region in desired_regions])
+
+
+    def cake_value(self):
+        return self.total_value_cache
+
+    def cake_length(self):
+        return self.length
+
+    def eval(self, start:float, end:float):
+        if end <= start:
+            return 0.0  # special case not covered by loop below
+
+        val = 0.0
+        for (region_start, region_end, a, b) in self.desired_regions:
+            if region_end < start:
+                continue  # the entire region is to the left of the eval start point - ignore region.
+            if end < region_start:
+                continue  # the entire region is to the right of the eval start point - ignore region.
+
+            x1 = min(end, region_end)
+            x2 = max(start, region_start)
+            value_from_region = ((x1 + x2)*a + 2*b) / (2.0)
+            val += value_from_region
+
+    def mark(self, start:float, target_value:float):
+                # the cake to the left of 0 and to the right of length is considered worthless.
+        start = max(0, min(start, self.length))
+        if target_value < 0:
+            raise ValueError("sum out of range (should be positive): {}".format(sum))
+
+        start_floor = int(np.floor(start))
+        start_fraction = (start_floor + 1 - start)
+
+        value = self.values[start_floor]
+        if value * start_fraction >= target_value:
+            return start + (target_value / value)
+        target_value -= (value * start_fraction)
+        for i in range(start_floor + 1, self.length):
+            value = self.values[i]
+            if target_value <= value:
+                return i + (target_value / value)
+            target_value -= value
+
+        # Value is too high: return None
+        return None
 
 if __name__ == "__main__":
     import doctest
