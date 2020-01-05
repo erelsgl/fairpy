@@ -41,7 +41,7 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     >>> Alice = PiecewiseConstantAgent([1, 1, 1, 1, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([3, 3, 3, 1, 1], "Bob")
     >>> equally_sized_pieces([Alice, Bob], 3 / 5)
-    > Bob gets (0, 2) with value 9
+    > Bob gets (0, 3) with value 9
     """
     num_of_agents = len(agents)
     if num_of_agents == 0:
@@ -50,6 +50,16 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
         raise ValueError("Piece size must be between 0 and 1")
     delta = 1 - int(1 / piece_size) * piece_size
     allocation = Allocation(agents)
+
+    partition_0_l = create_partition(piece_size)
+    partition_delta_l = create_partition(piece_size, start=delta)
+
+    evaluations = {}
+    for piece in partition_0_l + partition_delta_l:
+        for agent in agents:
+            evaluations[(agent, piece)] = agent.eval(start=piece[0], end=piece[1])
+
+
 
     return allocation
 
@@ -86,3 +96,37 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
     > Alice gets (0, 1) with value 101
     """
     pass
+
+
+def create_partition(size:float, start: float=0) -> List[Tuple(float, float)]:
+    """
+
+    :param size:
+    :param start:
+    :return:
+    """
+    res = []
+    end = start + size
+    while end <= 1:
+        res.append((start, end))
+        start = end
+        end = start + size
+    return res
+
+
+def create_matching_graph(left: List[Agent], right: List[Tuple(float, float)],
+                          weights: Dict[Tuple(Agent, Tuple(float, float)), float])-> nx.Graph:
+    """
+    
+    :param left:
+    :param right:
+    :param weights:
+    :return:
+    """
+    g = nx.Graph()
+    g.add_nodes_from(left, bipartite=0)
+    g.add_nodes_from(right, bipartite=1)
+
+    for key, value in weights.items():
+        g.add_edge(key[0], key[1], weight=value)
+    return g
