@@ -17,6 +17,7 @@ from agents import *
 from allocations import *
 from typing import *
 from networkx import *
+from math import *
 
 import logging
 
@@ -35,13 +36,13 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     >>> Alice = PiecewiseConstantAgent([100, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([2, 90], "Bob")
     >>> equally_sized_pieces([Alice, Bob], 0.5)
-    > Alice gets (0, 1) with value 100
-    > Bob gets (1, 2) with value 90
+    > Alice gets [(0, 1)] with value 100.00
+    > Bob gets [(1, 2)] with value 90.00
 
     >>> Alice = PiecewiseConstantAgent([1, 1, 1, 1, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([3, 3, 3, 1, 1], "Bob")
     >>> equally_sized_pieces([Alice, Bob], 3 / 5)
-    > Bob gets (0, 3) with value 9
+    > Bob gets [(0, 3)] with value 9.00
     """
     num_of_agents = len(agents)
     if num_of_agents == 0:
@@ -53,13 +54,21 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
 
     partition_0_l = create_partition(piece_size)
     partition_delta_l = create_partition(piece_size, start=delta)
+    all_partitions = partition_0_l + partition_delta_l
+
+    length = max([a.cake_length() for a in agents])
+    normalize_partitions = [(int(p[0] * length), int(p[1] * length)) for p in all_partitions]
 
     evaluations = {}
-    for piece in partition_0_l + partition_delta_l:
+    for piece in normalize_partitions:
         for agent in agents:
             evaluations[(agent, piece)] = agent.eval(start=piece[0], end=piece[1])
 
+    g = create_matching_graph(agents, normalize_partitions, evaluations)
+    edges_set = max_weight_matching(g)
 
+    for edge in edges_set:
+        allocation.set_piece(agent_index=agents.index(edge[1]), piece=[edge[0]])
 
     return allocation
 
@@ -75,11 +84,50 @@ def discrete_setting(agents: List[Agent], pieces: List[tuple]) -> Allocation:
 
     >>> Alice = PiecewiseConstantAgent([100, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([2, 90], "Bob")
-    >>> discrete_setting([Alice, Bob], [(0, 0.5), (0.5, 1)])
-    > Alice gets (0, 1) with value 100
-    > Bob gets (1, 2) with value 90
+    >>> discrete_setting([Alice, Bob], [(0, 1), (1, 2)])
+    > Alice gets [(0, 1)] with value 100.00
+    > Bob gets [(1, 2)] with value 90.00
     """
-    pass
+    m = len(pieces)
+    r = int(log(m, 2))
+    allocation = Allocation(agents)
+
+    max_weight = 0
+    max_match = None
+    for t in range(0, r):
+        partition_i = change_partition(pieces, t)
+
+        evaluations = {}
+        for piece in partition_i:
+            for agent in agents:
+                evaluations[(agent, piece)] = agent.eval(start=piece[0], end=piece[1])
+
+        g_i = create_matching_graph(agents, partition_i, evaluations)
+        edges_set = max_weight_matching(g_i)
+        weight = calculate_weight(g_i, edges_set)
+
+        if weight > max_weight:
+            max_match = edges_set
+
+    for edge in max_match:
+        allocation.set_piece(agent_index=agents.index(edge[1]), piece=[edge[0]])
+
+    return allocation
+
+
+def change_partition(partition:List[tuple], t: int) -> List[tuple]:
+    ret = []
+    for start in range(0, len(partition) - 2 ** t + 1, 2 ** t):
+        end = start + 2 ** t - 1
+        ret.append((partition[start][0], partition[end][1]))
+    return ret
+
+
+def calculate_weight(g: Graph, edges_set) -> float:
+    ret = 0
+    for edge in edges_set:
+        ret += g.get_edge_data(edge[0], edge[1])['weight']
+    return ret
 
 
 def continuous_setting(agents: List[Agent]) -> Allocation:
@@ -98,7 +146,7 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
     pass
 
 
-def create_partition(size:float, start: float=0) -> List[Tuple(float, float)]:
+def create_partition(size:float, start: float=0) -> List[Tuple[float, float]]:
     """
 
     :param size:
@@ -114,10 +162,10 @@ def create_partition(size:float, start: float=0) -> List[Tuple(float, float)]:
     return res
 
 
-def create_matching_graph(left: List[Agent], right: List[Tuple(float, float)],
-                          weights: Dict[Tuple(Agent, Tuple(float, float)), float])-> nx.Graph:
+def create_matching_graph(left: List[Agent], right: List[Tuple[float, float]],
+                          weights: Dict[Tuple[Agent, Tuple[float, float]], float])-> nx.Graph:
     """
-    
+
     :param left:
     :param right:
     :param weights:
@@ -130,3 +178,10 @@ def create_matching_graph(left: List[Agent], right: List[Tuple(float, float)],
     for key, value in weights.items():
         g.add_edge(key[0], key[1], weight=value)
     return g
+
+
+if __name__ == '__main__':
+    Alice = PiecewiseConstantAgent([100, 1], "Alice")
+    Bob = PiecewiseConstantAgent([2, 90], "Bob")
+    print(discrete_setting([Alice, Bob], [(0, 1), (1, 2)]))
+    # print(equally_sized_pieces([Alice, Bob], 0.5))
