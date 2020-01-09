@@ -108,7 +108,17 @@ def V(s,t, current_s, current_t, matrix : List[List[float]], k):
     :param k: the player
     :return: the sum presented above
 
-
+    for example:
+    if the matrix is [[1,2,3,4,5,6], [4,5,1,2,3, 0]]
+    current_s is [0,3]
+    current_t is [2,5]
+    s is 0
+    t is 3
+    and k is 1
+    that means that agent 0 holds items 0,1,2 (and their values are 1,2,3)
+    agent 1 holds items 3,4,5 (and their values are 2,3,0)
+    so we want the value of items 0,1,2,3 without what player 1 holds
+    that means items 1,2,3 so the sum is 1+2+3 = 6
 
     """
 
@@ -200,7 +210,7 @@ if __name__ == "__main__":
     print(aprox_v(0,0, 0, matrix))#just the first item
     print('\n')
     matrix = [[1,2,3,4,5,6], [4,5,1,2,3, 0]]
-    print(V(0,2,[0,3], [2,5], matrix, 1)) #a holds 0, 1, 2 b holds 3, 4, 5 and we wamd the value of 1+2+3+4
+    print(V(0,3,[0,3], [2,5], matrix, 1)) #a holds 0, 1, 2 b holds 3, 4, 5 and we wamd the value of items 0,1,2,3 = 6
     print('\n')
     matrix = get_players_valuation(agents, c)
     print(c)
