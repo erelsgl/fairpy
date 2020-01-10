@@ -120,31 +120,6 @@ def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> 
     return allocation
 
 
-def fix_edges(edges_set):
-    ret = set()
-    for edge in edges_set:
-        if not isinstance(edge[0], Agent):
-            ret.add((edge[1], edge[0]))
-        else:
-            ret.add((edge[0], edge[1]))
-    return ret
-
-
-def change_partition(partition:List[tuple], t: int) -> List[tuple]:
-    ret = []
-    for start in range(0, len(partition) - 2 ** t + 1, 2 ** t):
-        end = start + 2 ** t - 1
-        ret.append((partition[start][0], partition[end][1]))
-    return ret
-
-
-def calculate_weight(g: Graph, edges_set) -> float:
-    ret = 0
-    for edge in edges_set:
-        ret += g.get_edge_data(edge[0], edge[1])['weight']
-    return ret
-
-
 def continuous_setting(agents: List[Agent]) -> Allocation:
     """
     Algorithm 3.
@@ -162,6 +137,7 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
     s = random.choices(agents, k=n//2)
     partitions = set()
     partitions.add(0)
+
     for a in agents:
         start = 0
         for i in range(0,2*n):
@@ -173,7 +149,6 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
             start = end
 
     partitions = list(partitions)
-
     partitions = sorted(partitions)
 
     start = partitions[0]
@@ -184,17 +159,17 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
         start = part
 
     agents = list(set(agents) - set(s))
-    print(partitions)
     res = discrete_setting(agents, pieces)
     return res
 
 
-def create_partition(size:float, start: float=0) -> List[Tuple[float, float]]:
+def create_partition(size: float, start: float=0) -> List[Tuple[float, float]]:
     """
-
-    :param size:
-    :param start:
-    :return:
+    Used in algorithm 1.
+    Creating a partition of [0, 1] with equally sized pieces of given size starting from a given start.
+    :param size: The size of the pieces.
+    :param start: The location the pieces will start from.
+    :return: A partition as described.
     """
     res = []
     end = start + size
@@ -205,14 +180,62 @@ def create_partition(size:float, start: float=0) -> List[Tuple[float, float]]:
     return res
 
 
+def fix_edges(edges_set: Set[Tuple[Agent, Tuple[float, float]]]) -> Set[Tuple[Agent, Tuple[float, float]]]:
+    """
+    Used in algorithm 1 and 2.
+    Fix the edge format, sometimes the edges are written backwards
+    since the matching algorithm does not care about the edge direction.
+    Each edge contains agent and a piece, this function will make sure the agent comes first in the edge.
+    :param edges_set: A set of edges to fix.
+    :return: A copy of the fixed set of edges.
+    """
+    ret = set()
+    for edge in edges_set:
+        if not isinstance(edge[0], Agent):
+            ret.add((edge[1], edge[0]))
+        else:
+            ret.add((edge[0], edge[1]))
+    return ret
+
+
+def change_partition(partition: List[tuple], t: int) -> List[tuple]:
+    """
+    Used in algorithm 2.
+    Create a partition from original partition where each 2 ^ t pieces are united.
+    :param partition: The original partition.
+    :param t: Defines the size of the new partition.
+    :return: A partition with pieces with 2 ^ t size.
+    """
+    ret = []
+    for start in range(0, len(partition) - 2 ** t + 1, 2 ** t):
+        end = start + 2 ** t - 1
+        ret.append((partition[start][0], partition[end][1]))
+    return ret
+
+
+def calculate_weight(g: Graph, edges_set: Set[Tuple[Agent, Tuple[float, float]]]) -> float:
+    """
+    Used in algorithm 2.
+    Calculates the weight of a match over a graph.
+    :param g: The graph with all the weights.
+    :param edges_set: The edges of the matching - for which we will sum the weight.
+    :return: A single number - the total weight.
+    """
+    ret = 0
+    for edge in edges_set:
+        ret += g.get_edge_data(edge[0], edge[1])['weight']
+    return ret
+
+
 def create_matching_graph(left: List[Agent], right: List[Tuple[float, float]],
                           weights: Dict[Tuple[Agent, Tuple[float, float]], float])-> nx.Graph:
     """
-
-    :param left:
-    :param right:
-    :param weights:
-    :return:
+    Used in algorithm 2 and 3.
+    Creating a weighted bi-partition graph that represents agents, cake pieces and values.
+    :param left: List of agents.
+    :param right: List of cake pieces.
+    :param weights: A dictionary from agents to pieces - represents the value of each agent to each piece.
+    :return: A graph object from the given parameters.
     """
     g = nx.DiGraph()
     g.add_nodes_from(left, bipartite=0)
