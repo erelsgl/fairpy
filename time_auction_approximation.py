@@ -12,6 +12,7 @@ References:
 Programmers: Naama Berman and Yonatan Lifshitz
 Since: 2019-12
 """
+import random
 
 from agents import *
 from allocations import *
@@ -50,7 +51,6 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     if not 0 < piece_size <= 1:
         raise ValueError("Piece size must be between 0 and 1")
     delta = 1 - int(1 / piece_size) * piece_size
-    allocation = Allocation(agents)
 
     partition_0_l = create_partition(piece_size)
     partition_delta_l = create_partition(piece_size, start=delta)
@@ -65,15 +65,17 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
             evaluations[(agent, piece)] = agent.eval(start=piece[0], end=piece[1])
 
     g = create_matching_graph(agents, normalize_partitions, evaluations)
-    edges_set = max_weight_matching(g)
+    edges_set = fix_edges(max_weight_matching(g))
 
+    chosen_agents = [edge[0] for edge in edges_set]
+    allocation = Allocation(chosen_agents)
     for edge in edges_set:
-        allocation.set_piece(agent_index=agents.index(edge[1]), piece=[edge[0]])
+        allocation.set_piece(agent_index=chosen_agents.index(edge[0]), piece=[edge[1]])
 
     return allocation
 
 
-def discrete_setting(agents: List[Agent], pieces: List[tuple]) -> Allocation:
+def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> Allocation:
     """
     Algorithm 2.
     Approximation algorithm of the optimal auction for a discrete cake with known piece sizes.
@@ -90,11 +92,10 @@ def discrete_setting(agents: List[Agent], pieces: List[tuple]) -> Allocation:
     """
     m = len(pieces)
     r = int(log(m, 2))
-    allocation = Allocation(agents)
 
     max_weight = 0
     max_match = None
-    for t in range(0, r):
+    for t in range(0, r + 1):
         partition_i = change_partition(pieces, t)
 
         evaluations = {}
@@ -104,15 +105,29 @@ def discrete_setting(agents: List[Agent], pieces: List[tuple]) -> Allocation:
 
         g_i = create_matching_graph(agents, partition_i, evaluations)
         edges_set = max_weight_matching(g_i)
+        edges_set = fix_edges(edges_set)
         weight = calculate_weight(g_i, edges_set)
 
         if weight > max_weight:
+            max_weight = weight
             max_match = edges_set
 
+    chosen_agents = [edge[0] for edge in max_match]
+    allocation = Allocation(chosen_agents)
     for edge in max_match:
-        allocation.set_piece(agent_index=agents.index(edge[1]), piece=[edge[0]])
+        allocation.set_piece(agent_index=chosen_agents.index(edge[0]), piece=[edge[1]])
 
     return allocation
+
+
+def fix_edges(edges_set):
+    ret = set()
+    for edge in edges_set:
+        if not isinstance(edge[0], Agent):
+            ret.add((edge[1], edge[0]))
+        else:
+            ret.add((edge[0], edge[1]))
+    return ret
 
 
 def change_partition(partition:List[tuple], t: int) -> List[tuple]:
@@ -141,9 +156,37 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
     >>> Alice1 = PiecewiseConstantAgent([100, 1], "Alice")
     >>> Alice2 = PiecewiseConstantAgent([100, 1], "Alice")
     >>> continuous_setting([Alice1, Alice2])
-    > Alice gets (0, 1) with value 101
+    > Alice gets [(0, 2)] with value 101.00
     """
-    pass
+    n = len(agents)
+    s = random.choices(agents, k=n//2)
+    partitions = set()
+    partitions.add(0)
+    for a in agents:
+        start = 0
+        for i in range(0,2*n):
+            end = a.mark(start, a.cake_value()/(2*n))
+            if end is None:
+                break
+            end = float("%.4f" % end)
+            partitions.add(end)
+            start = end
+
+    partitions = list(partitions)
+
+    partitions = sorted(partitions)
+
+    start = partitions[0]
+    pieces = []
+    for part in partitions[1:]:
+        p = (start, part)
+        pieces.append(p)
+        start = part
+
+    agents = list(set(agents) - set(s))
+    print(partitions)
+    res = discrete_setting(agents, pieces)
+    return res
 
 
 def create_partition(size:float, start: float=0) -> List[Tuple[float, float]]:
@@ -171,7 +214,7 @@ def create_matching_graph(left: List[Agent], right: List[Tuple[float, float]],
     :param weights:
     :return:
     """
-    g = nx.Graph()
+    g = nx.DiGraph()
     g.add_nodes_from(left, bipartite=0)
     g.add_nodes_from(right, bipartite=1)
 
@@ -183,5 +226,11 @@ def create_matching_graph(left: List[Agent], right: List[Tuple[float, float]],
 if __name__ == '__main__':
     Alice = PiecewiseConstantAgent([100, 1], "Alice")
     Bob = PiecewiseConstantAgent([2, 90], "Bob")
-    print(discrete_setting([Alice, Bob], [(0, 1), (1, 2)]))
-    # print(equally_sized_pieces([Alice, Bob], 0.5))
+    print(discrete_setting([Alice, Bob], [(0.0, 1.0), (1.0, 2.0)]))
+    print(equally_sized_pieces([Alice, Bob], 0.5))
+
+    Alice1 = PiecewiseConstantAgent([100, 1, 1], "Alice1")
+    Alice2 = PiecewiseConstantAgent([10, 7, 54], "Alice2")
+    #Alice3 = PiecewiseConstantAgent([56, 47, 90], "Alice3")
+
+    print(continuous_setting([Alice1, Alice2]))
