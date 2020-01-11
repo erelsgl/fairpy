@@ -391,6 +391,7 @@ class PiecewiseLinearAgent(Agent):
             x2 = max(start, region_start)
             value_from_region = ((x1 + x2)*a + 2*b) / (2.0)
             val += value_from_region
+        return val
 
     def mark(self, start:float, target_value:float):
                 # the cake to the left of 0 and to the right of length is considered worthless.

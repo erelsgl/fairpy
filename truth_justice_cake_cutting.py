@@ -10,36 +10,10 @@ Programmer: Ofec Israel
 import agents
 from agents import PiecewiseLinearAgent
 from agents import PiecewiseUniformAgent
+from allocations import *
 from random import shuffle
 import logging
 logger = logging.getLogger(__name__)
-
-
-
-def test():
-    print("test")
-    
-    a = PiecewiseUniformAgent([(0,0.39)], "a")
-    b = PiecewiseUniformAgent([(0,0.6)], "b")
-    c = PiecewiseUniformAgent([(0,0.1)], "c")
-
-    cake = [(0,1)]
-    agents = [a,b,c]
-    
-    allocations = algorithm1(agents, cake)
-    
-    print(allocations)
-    
-    
-    a = PiecewiseLinearAgent([(0,0.39, 1,1)], "a")
-    b = PiecewiseLinearAgent([(0,0.6, 1,1)], "b")
-    c = PiecewiseLinearAgent([(0,0.1, 1,1)], "c")
-    agents = [a,b,c]
-    
-    allocations = algorithm2(agents)
-    
-    print(allocations)
-
     
 
 
@@ -165,10 +139,13 @@ def algorithm2(agents):
     
     #random match
     shuffle(partitions)
-    results = []
-    for i in range(N):
-        results.append(('agent '+str(i), partitions[i]))
     
+    #print(partitions)
+    
+    results = Allocation(agents)
+    for i in range(N):
+        results.set_piece(i, partitions[i])
+        #results.append(('agent '+str(i), partitions[i]))
     return results
     
 """
@@ -318,7 +295,15 @@ def algorithm1(agents, cake, allocations = {}):
     
     #recurse
     algorithm1([item for item in agents if item not in minSubGroup], newCake, allocations)
-    return allocations
+    
+    #make Allocation object
+    result = Allocation(agents)
+    for agent in allocations:
+        if not agent in agents:
+            return None
+        result.set_piece(agents.index(agent), allocations[agent])
+
+    return result
     
 
 if __name__ == "__main__":
