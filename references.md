@@ -38,6 +38,13 @@ Proceedings of SAGT 2018, 87--99.
 Operations Research 60(6),  1461--1476.
 *Algorithm 1*.
   * Programmer: Dvir Fried
+  
+* Haris Aziz, Chun Ye (2013):
+["Cake cutting algorithms for piecewise constant and piecewise uniform valuations"](https://arxiv.org/abs/1307.2908). 
+Proceedings of WINE 2014. 1--14.
+*All 5 algorithms.*
+  * Programmers: Shalev Goldstein and Eyal Shahimov 
+
 
 
 ## Future work
@@ -77,11 +84,6 @@ Proceedings of AAAI 2020.
 
 
 ### For two programmers
-
-* Haris Aziz, Chun Ye (2013):
-["Cake cutting algorithms for piecewise constant and piecewise uniform valuations"](https://arxiv.org/abs/1307.2908). 
-Proceedings of WINE 2014. 1--14.
-*All 5 algorithms.*
 
 * Haris Aziz, Simon MacKenzie (2017).
 ["A discrete and bounded envy-free cake cutting protocol for any number of agents"](https://arxiv.org/abs/1604.03655).
