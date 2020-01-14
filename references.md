@@ -45,7 +45,12 @@ Proceedings of WINE 2014. 1--14.
 *All 5 algorithms.*
   * Programmers: Shalev Goldstein and Eyal Shahimov 
 
-
+* Yuga J Cohler,  John K Lai, and David C Parkes, Ariel D Procaccia (2011).
+["Optimal envy-free cake cutting"](https://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewPaper/3638).
+Proceedings of AAAI 2011.
+([alternative link](http://procaccia.info/papers/maxsw.aaai11.pdf)).
+*Algorithms 1 and 2*. 
+   * Programmer: Gal Politzer
 
 ## Future work
 
@@ -54,12 +59,6 @@ Proceedings of WINE 2014. 1--14.
 * Jeff Edmonds, Kirk Pruhs (2006).
 ["Balanced allocations of cake"](http://people.cs.pitt.edu/~kirk/papers/focs2006.pdf)
 Proceedings of FOCS 2006, 623--634.
-
-* Yuga J Cohler,  John K Lai, and David C Parkes, Ariel D Procaccia (2011).
-["Optimal envy-free cake cutting"](https://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewPaper/3638).
-Proceedings of AAAI 2011.
-([alternative link](http://procaccia.info/papers/maxsw.aaai11.pdf)).
-*Algorithms 1 and 2*. 
 
 *  David Kurokawa, John K. Lai, Ariel D Procaccia (2013). 
 ["How to Cut a Cake Before the Party Ends"](https://www.aaai.org/ocs/index.php/AAAI/AAAI13/paper/viewPaper/6365).
