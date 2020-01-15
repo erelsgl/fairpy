@@ -227,6 +227,9 @@ def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items
     the main loop.
     till t is less or equals to 3 everything is ok. where t equals 4 or more the maximize expression returns result
     smaller than 0.
+    when t is 4 or more, the values of player 0 are bigger than those of player 1.
+    when t is between 1 and 3 the values of player 1 are bigger than those of player 0.
+    when t equals 0 (the first item), the value of player 0 is bigger than the value of player 1,
     """
     for t in range(0, num_of_items):
         maximum = maximize_expression(t, num_of_players, S, T, matrix)
