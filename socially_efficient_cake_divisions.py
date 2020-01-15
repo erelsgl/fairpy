@@ -67,7 +67,17 @@ def get_players_valuation(agents: List[Agent], c):
     note: the i row in the matrix represents the valuations of player i
     len(matrix[i]) == number of items
     matrix[i][j] == the value of item j according to player i
-
+    #the partition:
+    >>> a = PiecewiseConstantAgent([0.25, 0.5, 0.25])
+    >>> b = PiecewiseConstantAgent([0.23, 0.7, 0.07])
+    >>> agents = [a, b]
+    >>> c = discretization_procedure(agents, 0.2)
+    >>> discretization_procedure(agents, 0.2)
+    [0, 0.8, 1.22, 1.5057142857142858, 1.7914285714285716, 2.3828571428571435, 3]
+    >>> get_players_valuation(agents, c)[0]
+    [0.2, 0.16000000000000003, 0.1428571428571429, 0.1428571428571429, 0.20000000000000007, 0.15428571428571414]
+    >>> get_players_valuation(agents, c)[1]
+    [0.18400000000000002, 0.20000000000000007, 0.2, 0.20000000000000004, 0.17279999999999993, 0.04319999999999996]
     """
     matrix = []
     for agent in agents:
@@ -88,6 +98,19 @@ def aprox_v(s,t,k,matrix: List[List[float]]):
     note: the valuation of player i is a list l.
     len(l) == number of items
     l[j] == the value of item j according to player i
+
+    >>> a = PiecewiseConstantAgent([0.25, 0.5, 0.25])
+    >>> b = PiecewiseConstantAgent([0.23, 0.7, 0.07])
+    >>> agents = [a, b]
+    >>> c = discretization_procedure(agents, 0.2)
+    >>> matrix = get_players_valuation(agents, c)
+    >>> aprox_v(0,5,0,matrix) #all the items according to player 0
+    1.0
+    >>> aprox_v(0,0,0,matrix) #the first item according to player 0
+    0.2
+    >>> aprox_v(0,1,1,matrix) #the first and the second items according to player 1 -> = 0.18400000000000002 + 0.20000000000000007
+    0.3840000000000001
+
     """
     if (s == -1):
         return 0
@@ -120,6 +143,20 @@ def V(s,t, current_s, current_t, matrix : List[List[float]], k):
     so we want the value of items 0,1,2,3 without what player 1 holds
     that means items 1,2,3 so the sum is 1+2+3 = 6
 
+    >>> matrix = [[1,2,3,4,5,6], [4,5,1,2,3, 0]]
+    >>> V(0,3,[0,3], [2,5], matrix, 1)
+    6
+
+
+    #2 items, 0 and 1, player 0 holds item 0, player 1 holds item 1 and we calculate the value of items 0 and 1 according to player 0
+    >>> a = PiecewiseConstantAgent([0.25, 0.5, 0.25])
+    >>> b = PiecewiseConstantAgent([0.23, 0.7, 0.07])
+    >>> agents = [a, b]
+    >>> c = discretization_procedure(agents, 0.2)
+    >>> matrix = get_players_valuation(agents, c)
+    >>> V(0,1,[0,1],[0,1],matrix,0) #2 items, 0 and 1, player 0 holds item 0, player 1 holds item 1 and we calculate the value of items
+    0.20000000000000007
+
     """
 
 
@@ -134,14 +171,30 @@ def V(s,t, current_s, current_t, matrix : List[List[float]], k):
 
 
 def maximize_expression(t, num_of_players, S, T, matrix):
+    """
+    ***I think that the problem might be here***
+    this function maximizes the expression:
+    aprox_v(s, t, k, matrix) - 2*(aprox_v(S[k], T[k], k, matrix) + V(s,t,S,matrix))
+
+    :param t: the last item
+    :param num_of_players: number of players
+    :param S: a list such that S[i] == which item {0,...,(num_of_items - 1)} is the first item of player i
+    :param T: a list such that T[i] == which item {0,...,(num_of_items - 1)} is the last item of player i
+    :param matrix: all the valuations of the players
+    :return: params k' and s' that maximize the expression
+
+    #I dont have doctest because I dont know what the output should be
+    """
     max = -sys.maxsize - 1
     k_tag = 0
     s_tag = 0
     for k in range(num_of_players):
         for s in range(t + 1):
+            #the value of items s to t according to player k
             v1 = aprox_v(s,t,k,matrix)
+            #the value of items player k currently own
             v2 = aprox_v(S[k], T[k], k, matrix)
-            #i think that this needs to be all the parts from s to t that other players than k obtain
+            #the value of  all the parts from s to t that other players than k obtain
             v3 = V(s,t,S,T,matrix, k)
             #value = aprox_v(s, t, k, matrix) - 2*(aprox_v(S[k], T[k], k, matrix) + V(s,t,S,matrix))
             value = v1 - 2 * (v2 + v3)
@@ -158,7 +211,9 @@ def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items
     :param matrix: row i is the valuations of player i of the items
     :param items: the cuts to create the items
     :param agents: list of the players
-    :return:
+    :return: [S,T] s.t.
+    S is a list such that S[i] == which item {0,...,(num_of_items - 1)} is the first item of player i
+    and T is a list such that current_t[i] == which item {0,...,(num_of_items - 1)} is the last item of player i
     """
     
     #we count the items from 0 so if there are 6 items, the first one is 0 and the last one is 5
@@ -167,6 +222,12 @@ def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items
     S = [-1] * num_of_players #i think that this is like current s in the i'th cell there is the start of player i's start
     T = [-1] * num_of_players
 
+
+    """
+    the main loop.
+    till t is less or equals to 3 everything is ok. where t equals 4 or more the maximize expression returns result
+    smaller than 0.
+    """
     for t in range(0, num_of_items):
         maximum = maximize_expression(t, num_of_players, S, T, matrix)
         while maximum[0] >= 0:
@@ -195,6 +256,15 @@ if __name__ == "__main__":
     import doctest
     (failures,tests) = doctest.testmod(report=True)
     print ("{} failures, {} tests".format(failures,tests))
+    """
+    my example. 
+    the items are [0, 0.8, 1.22, 1.5057142857142858, 1.7914285714285716, 2.3828571428571435, 3]
+    where 0 to 0.8 is item 0, 0.8 to 1.22 is item 1 and so on...
+    there are 6 items, from 0 to 5.
+    my code outputs [[0,1],[0,3]]
+    that means that player 0 holds item 0 and player 1 holds items 1,2,3
+    i think that the correct output is [[0,1],[0,5]]
+    """
     a = PiecewiseConstantAgent([0.25, 0.5, 0.25])
     b = PiecewiseConstantAgent([0.23, 0.7, 0.07])
     agents = [a, b]
@@ -202,35 +272,13 @@ if __name__ == "__main__":
     for i in range(6):
         print("part {}: {},{}: a {}, b {}\n".format(i, c[i], c[i + 1],a.eval(c[i], c[i + 1]), b.eval(c[i], c[i + 1])))
     matrix = get_players_valuation(agents, c)
-    #d = discretization_procedure([a], 0.2)
-    #print(d)
 
 
     print(c)
     print('\n')
-    print(aprox_v(0,5,0,matrix)) #all items
-    print(aprox_v(0,0, 0, matrix))#just the first item
-    print('\n')
-    matrix = [[1,2,3,4,5,6], [4,5,1,2,3, 0]]
-    print(V(0,3,[0,3], [2,5], matrix, 1)) #a holds 0, 1, 2 b holds 3, 4, 5 and we want the value of items 0,1,2,3 = 6
-    print('\n')
-    matrix = get_players_valuation(agents, c)
-    print(c)
+    #the problem is here
     x = discrete_utilitarian_welfare_approximation(matrix, c, agents)
     print(x)
     print(agents[0].eval(c[0], c[1]))
     print(agents[1].eval(c[1], c[4]))
 
-    #print('\n')
-    #a = PiecewiseConstantAgent([0.2, 0.3, 0.5])
-    #b = PiecewiseConstantAgent([0.3, 0.4, 0.3])
-    #agents = [a, b]
-    #c = discretization_procedure(agents, 0.2)
-    #for i in range(6):
-    #    print("part {}: {},{}: a {}, b {}\n".format(i, c[i], c[i + 1], a.eval(c[i], c[i + 1]), b.eval(c[i], c[i + 1])))
-
-    #print(c)
-
-    #a = PiecewiseConstantAgent([0.2, 0.4, 0.4])
-    #c = discretization_procedure([a], 0.2)
-    #print(c)
