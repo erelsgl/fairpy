@@ -172,13 +172,15 @@ def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items
         while maximum[0] >= 0:
             k_tag = maximum[1]
             s_tag = maximum[2]
-            S[k_tag] = s_tag
-            T[k_tag] = t
+            #S[k_tag] = s_tag
+            #T[k_tag] = t
             for i in range(num_of_players):
                 #if its equal it will put minus one in S[k_tag]
-                if(S[i] > s_tag):
+                if(S[i] >= s_tag):
                     S[i] = -1
                     T[i] = -1
+            S[k_tag] = s_tag
+            T[k_tag] = t
             for i in range(num_of_players):
                 if (S[i] < s_tag and s_tag <= T[i]):
                     T[i] = s_tag - 1
@@ -200,8 +202,8 @@ if __name__ == "__main__":
     for i in range(6):
         print("part {}: {},{}: a {}, b {}\n".format(i, c[i], c[i + 1],a.eval(c[i], c[i + 1]), b.eval(c[i], c[i + 1])))
     matrix = get_players_valuation(agents, c)
-    d = discretization_procedure([a], 0.2)
-    print(d)
+    #d = discretization_procedure([a], 0.2)
+    #print(d)
 
 
     print(c)
@@ -210,7 +212,7 @@ if __name__ == "__main__":
     print(aprox_v(0,0, 0, matrix))#just the first item
     print('\n')
     matrix = [[1,2,3,4,5,6], [4,5,1,2,3, 0]]
-    print(V(0,3,[0,3], [2,5], matrix, 1)) #a holds 0, 1, 2 b holds 3, 4, 5 and we wamd the value of items 0,1,2,3 = 6
+    print(V(0,3,[0,3], [2,5], matrix, 1)) #a holds 0, 1, 2 b holds 3, 4, 5 and we want the value of items 0,1,2,3 = 6
     print('\n')
     matrix = get_players_valuation(agents, c)
     print(c)
