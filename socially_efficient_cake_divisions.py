@@ -12,6 +12,8 @@ Since: 2019-12
 """
 from agents import *
 import sys
+import logging
+logging.getLogger().setLevel(logging.INFO)
 def discretization_procedure(agents: List[Agent], epsilon):
     """
     reduce the continuous cake into a sequence of discrete items.
@@ -201,6 +203,7 @@ def maximize_expression(t, num_of_players, S, T, matrix):
             v3 = V(s,t,S,T,matrix, k)
             #value = aprox_v(s, t, k, matrix) - 2*(aprox_v(S[k], T[k], k, matrix) + V(s,t,S,matrix))
             value = v1 - 2 * (v2 + v3)
+            logging.info("in maximize_expression: v1: %f, v2: %f, v3: %f, s: %f, t: %f, k: %f\n", v1, v2, v3, s, t, k)
             if (value > max):
                 max = value
                 k_tag = k
@@ -208,12 +211,11 @@ def maximize_expression(t, num_of_players, S, T, matrix):
     return [max, k_tag, s_tag]
 
 
-def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items, agents: List[Agent]):
+def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items):
 
     """
     :param matrix: row i is the valuations of player i of the items
     :param items: the cuts to create the items
-    :param agents: list of the players
     :return: [S,T] s.t.
     S is a list such that S[i] == which item {0,...,(num_of_items - 1)} is the first item of player i
     and T is a list such that current_t[i] == which item {0,...,(num_of_items - 1)} is the last item of player i
@@ -235,7 +237,9 @@ def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items
     when t equals 0 (the first item), the value of player 0 is bigger than the value of player 1,
     """
     for t in range(0, num_of_items):
+        logging.info("%d iteration",t)
         maximum = maximize_expression(t, num_of_players, S, T, matrix)
+        logging.info("maximize values: maximum: %f, k': %f, s': %f\n", maximum[0], maximum[1], maximum[2])
         while maximum[0] >= 0:
             k_tag = maximum[1]
             s_tag = maximum[2]
@@ -283,7 +287,7 @@ if __name__ == "__main__":
     print(c)
     print('\n')
     #the problem is here
-    x = discrete_utilitarian_welfare_approximation(matrix, c, agents)
+    x = discrete_utilitarian_welfare_approximation(matrix, c)
     print(x)
     print(agents[0].eval(c[0], c[1]))
     print(agents[1].eval(c[1], c[4]))
