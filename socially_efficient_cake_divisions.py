@@ -72,15 +72,18 @@ def get_players_valuation(agents: List[Agent], c):
     >>> b = PiecewiseConstantAgent([0.23, 0.7, 0.07])
     >>> agents = [a, b]
     >>> c = discretization_procedure(agents, 0.2)
-    >>> discretization_procedure(agents, 0.2)
-    [0, 0.8, 1.22, 1.5057142857142858, 1.7914285714285716, 2.3828571428571435, 3]
-    >>> get_players_valuation(agents, c)[0]
-    [0.2, 0.16000000000000003, 0.1428571428571429, 0.1428571428571429, 0.20000000000000007, 0.15428571428571414]
-    >>> get_players_valuation(agents, c)[1]
-    [0.18400000000000002, 0.20000000000000007, 0.2, 0.20000000000000004, 0.17279999999999993, 0.04319999999999996]
+    >>> [round(i,3) for i in discretization_procedure(agents, 0.2)]
+    [0, 0.8, 1.22, 1.506, 1.791, 2.383, 3]
+    >>> [round(i,3) for i in get_players_valuation(agents, c)[0]]
+    [0.2, 0.16, 0.143, 0.143, 0.2, 0.154]
+    >>> [round(i,3) for i in get_players_valuation(agents, c)[1]]
+    [0.184, 0.2, 0.2, 0.2, 0.173, 0.043]
     """
+
+
     matrix = []
     for agent in agents:
+        #found out that if I round agent.eval I get different outputs from the algorithm
         valuations = [agent.eval(c[i], c[i + 1]) for i in range(len(c) - 1)]
         matrix.append(valuations)
     return matrix
@@ -108,8 +111,8 @@ def aprox_v(s,t,k,matrix: List[List[float]]):
     1.0
     >>> aprox_v(0,0,0,matrix) #the first item according to player 0
     0.2
-    >>> aprox_v(0,1,1,matrix) #the first and the second items according to player 1 -> = 0.18400000000000002 + 0.20000000000000007
-    0.3840000000000001
+    >>> round(aprox_v(0,1,1,matrix),3) #the first and the second items according to player 1 -> = 0.18400000000000002 + 0.20000000000000007
+    0.384
 
     """
     if (s == -1):
@@ -154,8 +157,8 @@ def V(s,t, current_s, current_t, matrix : List[List[float]], k):
     >>> agents = [a, b]
     >>> c = discretization_procedure(agents, 0.2)
     >>> matrix = get_players_valuation(agents, c)
-    >>> V(0,1,[0,1],[0,1],matrix,0) #2 items, 0 and 1, player 0 holds item 0, player 1 holds item 1 and we calculate the value of items
-    0.20000000000000007
+    >>> round(V(0,1,[0,1],[0,1],matrix,0),3) #2 items, 0 and 1, player 0 holds item 0, player 1 holds item 1 and we calculate the value of items
+    0.2
 
     """
 
