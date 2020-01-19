@@ -2,8 +2,8 @@
 Article name : Fair and Efficient Cake Division with Connected Pieces
 Authors : Eshwar Ram Arunachaleswaran , Siddharth Barman , Rachitesh Kumar and Nidhi Rathi
 Algorithm #1 : ALG
-NAME : Ori Zitzer
-Date : 27/12/19
+Programmer: Ori Zitzer
+Since: 2019-12
 """
 from agents import *
 from allocations import *
@@ -276,7 +276,6 @@ def allocationToOnePiece(alloction:List[List[tuple]],agents:List[Agent]):
         I.set_piece(i,[intervalUnionFromList(pieces)])
     return I
 
-
 def ALG(agents: List[Agent],epsilon)->Allocation:
     """
         ALG: Algorithm that find Fair and Efficient Cake Division with Connected Pieces
@@ -332,8 +331,6 @@ def ALG(agents: List[Agent],epsilon)->Allocation:
         interval = (checkWhile(agents, allocation, findRemainIntervals(allocation), epsilon))
     logger.info("\nAssociate unassigned intervals")
     return allocationToOnePiece(setRemain(allocation,agents),agents)
-    #return allocationToOnePiece(allocation.get_pieces(),agents)
-
 
 def efCheck(allocation:Allocation, epsilon):
     """
@@ -390,4 +387,4 @@ if __name__ == "__main__":
     # print(checkWhile(agents, newAlloc, findRemainIntervals(newAlloc), 0.3))
     import doctest
     (failures,tests) = doctest.testmod(report=True)
-    print ("{} failures, {} tests".format(failures,tests))
+    print("{} failures, {} tests".format(failures,tests))

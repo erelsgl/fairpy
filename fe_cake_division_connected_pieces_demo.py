@@ -1,3 +1,13 @@
+#!python3
+
+"""
+Demonstration of the Fair and Efficient Cake Division with Connected Pieces protocol.
+
+Programmer: Ori Zitzer
+Since: 2020-1
+"""
+
+
 from agents import *
 from fe_cake_division_connected_pieces import ALG ,efCheck
 import fe_cake_division_connected_pieces ,logging, sys
