@@ -17,6 +17,19 @@ def findRemainIntervals(allocation :Allocation):
     Functoin that return the remain intervals from the allocation in (0,1)
     :param allocation: an Allocation
     :return: the remain intervals
+    >>> Alice = PiecewiseConstantAgent1Sgemant([33, 33], "Alice")
+    >>> George = PiecewiseConstantAgent1Sgemant([5,5],"George")
+    >>> Abraham = PiecewiseConstantAgent1Sgemant([6, 4, 2, 0], name="Abraham")
+    >>> Hanna = PiecewiseConstantAgent1Sgemant([3, 3, 3, 3], name="Hanna")
+    >>> print(findRemainIntervals(Allocation([Alice,George,Abraham,Hanna])))
+    [(0, 1)]
+    >>> alloc = Allocation([Alice,George,Abraham,Hanna])
+    >>> alloc.set_piece(1,[(0.2,0.3)])
+    >>> print(findRemainIntervals(alloc))
+    [(0, 0.2), (0.3, 1)]
+    >>> alloc.set_piece(3,[(0.4,0.73),(0.92,1)])
+    >>> print(findRemainIntervals(alloc))
+    [(0, 0.2), (0.3, 0.4), (0.73, 0.92)]
     """
     remain = []
     pieces = allocation.get_pieces()
@@ -37,6 +50,7 @@ def findRemainIntervals(allocation :Allocation):
         remain.append((start,1))
 
     return remain
+
 def checkWhile(agents: List[Agent],allocation :Allocation,remain,epsilon):
     """
     Check the while condition that in the algorithm
@@ -45,6 +59,45 @@ def checkWhile(agents: List[Agent],allocation :Allocation,remain,epsilon):
     :param remain: The remain Intervals of the alloction
     :param epsilon: An constant between 0 to 1/3
     :return: An interval that uphold the condition
+
+    >>> Alice = PiecewiseConstantAgent1Sgemant([33, 33], "Alice")
+    >>> George = PiecewiseConstantAgent1Sgemant([5,5],"George")
+    >>> Abraham = PiecewiseConstantAgent1Sgemant([6, 4, 2, 0], name="Abraham")
+    >>> Hanna = PiecewiseConstantAgent1Sgemant([3, 3, 3, 3], name="Hanna")
+    >>> alloc = Allocation([Alice,George,Abraham,Hanna])
+    >>> agents = [Alice,George,Abraham,Hanna]
+    >>> alloc.set_piece(1,[(0.2,0.3)])
+    >>> alloc.set_piece(3,[(0.4,0.73),(0.92,1)])
+    >>> print(checkWhile(agents,alloc,findRemainIntervals(alloc),0))
+    (0, 0.2)
+    >>> alloc.set_piece(0,[(0,0.2)])
+    >>> print(checkWhile(agents,alloc,findRemainIntervals(alloc),0))
+    (0.3, 0.4)
+    >>> alloc.set_piece(2, [(0.73, 0.92)])
+    >>> print(checkWhile(agents,alloc,findRemainIntervals(alloc),0))
+    (0.3, 0.4)
+    >>> newAlloc = Allocation(agents)
+    >>> newAlloc.set_piece(1, [(0.1, 0.3)])
+    >>> newAlloc.set_piece(3, [(0.3, 0.73)])
+    >>> print(checkWhile(agents, newAlloc, findRemainIntervals(newAlloc), 0.1))
+    (0.73, 1)
+    >>> newAlloc.set_piece(0, [(0.73, 0.8)])
+    >>> print(checkWhile(agents, newAlloc, findRemainIntervals(newAlloc), 0.1))
+    (0, 0.1)
+    >>> newAlloc.set_piece(2, [(0.01, 0.05)])
+    >>> print(checkWhile(agents, newAlloc, findRemainIntervals(newAlloc), 0.1))
+    (0.05, 0.1)
+    >>> newAlloc = Allocation(agents)
+    >>> newAlloc.set_piece(1, [(0.1, 0.3)])
+    >>> newAlloc.set_piece(3, [(0.3, 0.73)])
+    >>> print(checkWhile(agents, newAlloc, findRemainIntervals(newAlloc), 0.3))
+    (0.73, 1)
+    >>> newAlloc.set_piece(0, [(0.8,0.96)])
+    >>> print(checkWhile(agents, newAlloc, findRemainIntervals(newAlloc), 0.3))
+    None
+    >>> newAlloc.set_piece(2, [(0, 0.05)])
+    >>> print(checkWhile(agents, newAlloc, findRemainIntervals(newAlloc), 0.3))
+    None
     """
     nSquared = len(agents)*len(agents)
     pieces = allocation.get_pieces()
@@ -54,14 +107,15 @@ def checkWhile(agents: List[Agent],allocation :Allocation,remain,epsilon):
         if list != None: piecesList += list
     if len(piecesList)==0:
         return (0,1)
-    for agent,i in zip(agents,range(len(agents))):
-        for interval in remain:
+    for interval in remain:
+        for agent,i in zip(agents,range(len(agents))):
             if (allocation.pieces[i] == None):
                 continue
             if (agent.eval(allocation.get_piece(i)[0][0],allocation.get_piece(i)[0][1]) <
-                    agent.eval(interval[0],interval[1]) - (epsilon/nSquared)):
+                    (agent.eval(interval[0],interval[1]) - (epsilon/nSquared))):
                 return interval
     return None
+
 def getC(agents: List[Agent],allocation :Allocation,epsilon,interval):
     """
     Get the C group from the Algorithm
@@ -71,6 +125,22 @@ def getC(agents: List[Agent],allocation :Allocation,epsilon,interval):
     :param interval: The chosen interval out of the remain intervals
     :return: All the agents that their current evaluation to their piece is smaller than
                 the evaluation to the interval - (epsilon/n^2) when n is the number of agents
+
+    >>> Alice = PiecewiseConstantAgent1Sgemant([33, 33], "Alice")
+    >>> George = PiecewiseConstantAgent1Sgemant([5,5],"George")
+    >>> Abraham = PiecewiseConstantAgent1Sgemant([6, 4, 2, 0], name="Abraham")
+    >>> Hanna = PiecewiseConstantAgent1Sgemant([3, 3, 3, 3], name="Hanna")
+    >>> alloc = Allocation([Alice,George,Abraham,Hanna])
+    >>> agents = [Alice,George,Abraham,Hanna]
+    >>> alloc.set_piece(1,[(0.2,0.3)])
+    >>> alloc.set_piece(3,[(0.4,0.7)])
+    >>> interval = checkWhile(agents, alloc, findRemainIntervals(alloc), 0.2)
+    >>> print([agent[0].name() for agent in getC(agents,alloc,0.2,interval)])
+    ['Alice', 'George', 'Abraham']
+    >>> alloc.set_piece(0,[(0.75,1)])
+    >>> interval = checkWhile(agents, alloc, findRemainIntervals(alloc), 0)
+    >>> print([agent[0].name() for agent in getC(agents,alloc,0.2,interval)])
+    ['George', 'Abraham']
     """
     nSquared = len(agents) * len(agents)
     newAgents = []
@@ -82,6 +152,7 @@ def getC(agents: List[Agent],allocation :Allocation,epsilon,interval):
                 agent.eval(interval[0], interval[1]) - (epsilon / nSquared)):
             newAgents.append((agent,i))
     return newAgents
+
 def findRb(agent:Agent , allocation:Allocation,epsilon,index,interval,n):
     """
     Find the leftmost number:Rb that hold the equation of evaluation to the agent piece + (epsilon/n^2)
@@ -94,12 +165,21 @@ def findRb(agent:Agent , allocation:Allocation,epsilon,index,interval,n):
     :param n: The number of agents
     :return: The leftmost number:Rb that hold the equation of evaluation to the agent piece + (epsilon/n^2)
                 is equal to the evaluation to the [l,Rb] when l is the left of the interval
+
+    >>> Alice = PiecewiseConstantAgent1Sgemant([33, 33], "Alice")
+    >>> George = PiecewiseConstantAgent1Sgemant([5,5],"George")
+    >>> Abraham = PiecewiseConstantAgent1Sgemant([6, 4, 2, 0], name="Abraham")
+    >>> Hanna = PiecewiseConstantAgent1Sgemant([3, 3, 3, 3], name="Hanna")
+    >>> alloc = Allocation([Alice,George,Abraham,Hanna])
+    >>> print(findRb(Hanna,alloc,0.1,3,(0,1),4))
+    0.006250000000000001
     """
     currentPieceEval = 0
     if allocation.pieces[index]!=None:
         currentPiece = allocation.pieces[index][0]
         currentPieceEval = agent.eval(currentPiece[0],currentPiece[1])
     return agent.mark(interval[0],currentPieceEval + epsilon/(n*n))
+
 def findPiece(reamin:List[tuple],attr , leftOrRight):
     """
     Find the piece that her leftOrRight equal to attr
@@ -155,6 +235,7 @@ def setRemain(allocation:Allocation,agents: List[Agent]):
                 break
 
     return partialAlloc
+
 def intervalUnionFromList(intervals:List[tuple]):
     """
     Uniting a list of intervals into one
@@ -167,6 +248,7 @@ def intervalUnionFromList(intervals:List[tuple]):
         if interval[0] < minimum: minimum = interval[0]
         if interval[1] > maximum: maximum = interval[1]
     return (minimum,maximum)
+
 def allocationToOnePiece(alloction:List[List[tuple]],agents:List[Agent]):
     """
     Get a fully allocation of (0,1) that every agent have a list of adjacent pieces and return allocation
@@ -182,7 +264,6 @@ def allocationToOnePiece(alloction:List[List[tuple]],agents:List[Agent]):
         I.set_piece(i,[intervalUnionFromList(pieces)])
     return I
 
-
 def ALG(agents: List[Agent],epsilon)->Allocation:
     """
         ALG: Algorithm that find Fair and Efficient Cake Division with Connected Pieces
@@ -190,21 +271,22 @@ def ALG(agents: List[Agent],epsilon)->Allocation:
         :param agents: a list that must contain at least 2 Agent objects.
                 epsilon: constant between 0 to 1/3
         :return: a Fair and Efficient allocation.
-        >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
-        >>> print(ALG([Alice]))
-        > Alice gets [(0, 1)] with value 66.00
-        <BLANKLINE>
-        >>>Alice = PiecewiseConstantAgent([3, 6, 3], name="Alice")
-        >>>Abraham = PiecewiseConstantAgent([6, 4, 2, 0], name="Abraham")
-        >>>Hanna = PiecewiseConstantAgent([3, 3, 3, 3], name="Hanna")
-        >>>all_agents = [Alice,  Abraham, Hanna]
-        >>>alloc = Allocation(all_agents)
 
-        >>>remain = findRemainIntervals(alloc)
-        >>>print(ALG(all_agents,0.2))
-        > Alice gets [(0.670370370370371, 1)] with value 0.99
-        > Abraham gets [(0.35185185185185225, 0.670370370370371)] with value 1.91
-        > Hanna gets [(0, 0.35185185185185225)] with value 1.06
+        >>> Alice = PiecewiseConstantAgent1Sgemant([33,33], "Alice")
+        >>> print(ALG([Alice],0.2))
+        > Alice gets [(0, 1)] with value 1.0
+        <BLANKLINE>
+        >>> Alice = PiecewiseConstantAgent1Sgemant([3, 6, 3], name="Alice")
+        >>> Abraham = PiecewiseConstantAgent1Sgemant([6, 4, 2, 0], name="Abraham")
+        >>> Hanna = PiecewiseConstantAgent1Sgemant([3, 3, 3, 3], name="Hanna")
+        >>> all_agents = [Alice,  Abraham, Hanna]
+        >>> alloc = Allocation(all_agents)
+
+        >>> remain = findRemainIntervals(alloc)
+        >>> print(ALG(all_agents,0.2))
+        > Alice gets [(0.42916666666666653, 0.7773148148148148)] with value 0.4392361111111113
+        > Abraham gets [(0, 0.42916666666666653)] with value 0.7388888888888886
+        > Hanna gets [(0.7773148148148148, 1)] with value 0.2226851851851852
         <BLANKLINE>
     """
     logger.info(" Initialize partial allocation P = {P1, . . . , Pn} with empty interval")
@@ -221,6 +303,7 @@ def ALG(agents: List[Agent],epsilon)->Allocation:
             agent = b[0]
             names.append(agent.name())
             index = b[1]
+            findRb(agent, allocation, epsilon, index, interval, N)
             Rb.append(findRb(agent,allocation,epsilon,index,interval,N))
         str =""
         for name in names:
@@ -229,18 +312,62 @@ def ALG(agents: List[Agent],epsilon)->Allocation:
             else:
                 str+= " ,"+name
         logger.info("\nC = {%s}",str)
-
         a = C[np.argmin(np.asarray(Rb))]
-        logger.info("\n%s is the chosen one with the minimum Rb",a[1])
+        logger.info("\n%s is the chosen one with the minimum Rb",a[0])
         allocation.set_piece(a[1] ,[(interval[0],Rb[np.argmin(Rb)])])
         logger.info("\nUpdate partial allocation")
         interval = (checkWhile(agents, allocation, findRemainIntervals(allocation), epsilon))
     logger.info("\nAssociate unassigned intervals")
     return allocationToOnePiece(setRemain(allocation,agents),agents)
+    #return allocationToOnePiece(allocation.get_pieces(),agents)
 
+def checkAlloc( allocation:Allocation,epsilon):
+    agents = allocation.agents
+    o = (1/(3+(9*epsilon)/len(agents)))
+    for i,a in zip(range(len(agents)),agents):
+        aPiece = allocation.get_piece(i)[0]
+        for pieace in allocation.get_pieces():
+            if a.eval(aPiece[0],aPiece[1])<o*a.eval(pieace[0][0],pieace[0][1]):
+                return 0
+    return 1
 
 if __name__ == "__main__":
+    agents = []
+    agents.append(PiecewiseConstantAgent1Sgemant([8,10], "Alice"))
+    agents.append(PiecewiseConstantAgent1Sgemant([5,5],"George"))
+    agents.append(PiecewiseConstantAgent1Sgemant([3,3,3,3], name="Abraham"))
+    agents.append(PiecewiseConstantAgent1Sgemant([3,3,3,3], name="Hanna"))
+    print(checkAlloc(ALG(agents,0.1),0.1))
 
-    import doctest
-    (failures,tests) = doctest.testmod(report=True)
-    print ("{} failures, {} tests".format(failures,tests))
+    # Alice = PiecewiseConstantAgent1Sgemant([33, 33], "Alice")
+    # George = PiecewiseConstantAgent1Sgemant([5, 5], "George")
+    # Abraham = PiecewiseConstantAgent1Sgemant([6, 4, 2, 0], name="Abraham")
+    # Hanna = PiecewiseConstantAgent1Sgemant([3, 3, 3, 3], name="Hanna")
+    # alloc = Allocation([Alice, George, Abraham, Hanna])
+    # agents = [Alice, George, Abraham, Hanna]
+    # alloc.set_piece(1, [(0.2, 0.3)])
+    # alloc.set_piece(3, [(0.4, 0.73), (0.92, 1)])
+    # print(checkWhile(agents, alloc, findRemainIntervals(alloc), 0))
+
+    # agents = [Alice,George,Abraham,Hanna]
+    # alloc.set_piece(1,[(0.2,0.3)])
+    # alloc.set_piece(3,[(0.4,0.7)])
+    # interval = checkWhile(agents, alloc, findRemainIntervals(alloc), 0.2)
+    # print([agent[0].name() for agent in getC(agents,alloc,0.2,interval)])
+    # alloc.set_piece(0,[(0.75,1)])
+    # interval = checkWhile(agents, alloc, findRemainIntervals(alloc), 0)
+    # print([agent[0].name() for agent in getC(agents,alloc,0.2,interval)])
+
+
+    # newAlloc = Allocation(agents)
+    # newAlloc.set_piece(1, [(0.1, 0.3)])
+    # newAlloc.set_piece(3, [(0.3, 0.73)])
+    # print(checkWhile(agents, newAlloc, findRemainIntervals(newAlloc), 0.3))
+    # newAlloc.set_piece(0, [(0.8,0.96)])
+    # print(checkWhile(agents, newAlloc, findRemainIntervals(newAlloc), 0.3))
+    # newAlloc.set_piece(2, [(0, 0.05)])
+    # print(checkWhile(agents, newAlloc, findRemainIntervals(newAlloc), 0.3))
+
+    # import doctest
+    # (failures,tests) = doctest.testmod(report=True)
+    # print ("{} failures, {} tests".format(failures,tests))

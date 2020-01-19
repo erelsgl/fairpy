@@ -39,7 +39,7 @@ class Allocation:
         for i in range(len(self.pieces)):
             agent = self.agents[i]
             piece = self.pieces[i]
-            s += "> {} gets {} with value {:.2f}\n".format(agent.name(), self.pieces[i], agent.piece_value(piece))
+            s += "> {} gets {} with value {:}\n".format(agent.name(), self.pieces[i], agent.piece_value(piece))
         return s
 
 class OnePieceAllocation(Allocation):
