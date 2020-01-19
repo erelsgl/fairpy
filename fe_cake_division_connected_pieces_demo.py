@@ -38,7 +38,6 @@ print("-"*90)
 Bob = PiecewiseConstantAgent1Sgemant([9,81,10,9], name="Bob")
 Yoav = PiecewiseConstantAgent1Sgemant([3,7,5,1], name="Yoav")
 Sam = PiecewiseConstantAgent1Sgemant([20,12,15,10], name="Sam")
-
 Alice = PiecewiseConstantAgent1Sgemant([13,8,10], name="Alice")
 George = PiecewiseConstantAgent1Sgemant([13,5,14,6], name="George")
 Abraham = PiecewiseConstantAgent1Sgemant([14,4,12,6], name="Abraham")
