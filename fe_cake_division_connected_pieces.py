@@ -242,7 +242,6 @@ def setRemain(allocation:Allocation,agents: List[Agent]):
 
     return partialAlloc
 
-
 def intervalUnionFromList(intervals:List[tuple]):
     """
     Uniting a list of intervals into one
