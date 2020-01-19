@@ -336,6 +336,12 @@ def ALG(agents: List[Agent],epsilon)->Allocation:
 
 
 def efCheck(allocation:Allocation, epsilon):
+    """
+    Check if tha allocation is (3 + o(1))-approximately envy-free allocation.
+    :param allocation:the alloction we check
+    :param epsilon:a constant between 0 to 1/3
+    :return: A string that tell if the allocation is (3 + o(1))-approximately envy-free allocation.
+    """
     agents = allocation.agents
     o = (1/(3+(9*epsilon)/len(agents)))
     for i,a in zip(range(len(agents)),agents):
