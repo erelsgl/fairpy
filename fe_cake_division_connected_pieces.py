@@ -12,6 +12,7 @@ import random
 import logging
 logger = logging.getLogger(__name__)
 
+
 def findRemainIntervals(allocation :Allocation):
     """
     Functoin that return the remain intervals from the allocation in (0,1)
@@ -50,6 +51,7 @@ def findRemainIntervals(allocation :Allocation):
         remain.append((start,1))
 
     return remain
+
 
 def checkWhile(agents: List[Agent],allocation :Allocation,remain,epsilon):
     """
@@ -116,6 +118,7 @@ def checkWhile(agents: List[Agent],allocation :Allocation,remain,epsilon):
                 return interval
     return None
 
+
 def getC(agents: List[Agent],allocation :Allocation,epsilon,interval):
     """
     Get the C group from the Algorithm
@@ -153,6 +156,7 @@ def getC(agents: List[Agent],allocation :Allocation,epsilon,interval):
             newAgents.append((agent,i))
     return newAgents
 
+
 def findRb(agent:Agent , allocation:Allocation,epsilon,index,interval,n):
     """
     Find the leftmost number:Rb that hold the equation of evaluation to the agent piece + (epsilon/n^2)
@@ -180,6 +184,7 @@ def findRb(agent:Agent , allocation:Allocation,epsilon,index,interval,n):
         currentPieceEval = agent.eval(currentPiece[0],currentPiece[1])
     return agent.mark(interval[0],currentPieceEval + epsilon/(n*n))
 
+
 def findPiece(reamin:List[tuple],attr , leftOrRight):
     """
     Find the piece that her leftOrRight equal to attr
@@ -192,6 +197,7 @@ def findPiece(reamin:List[tuple],attr , leftOrRight):
         if piece[leftOrRight]==attr:
             return piece
     return None
+
 
 def setRemain(allocation:Allocation,agents: List[Agent]):
     """
@@ -236,11 +242,16 @@ def setRemain(allocation:Allocation,agents: List[Agent]):
 
     return partialAlloc
 
+
 def intervalUnionFromList(intervals:List[tuple]):
     """
     Uniting a list of intervals into one
     :param intervals: A list of adjacent intervals
     :return:A union of the intervals
+    >>> print(intervalUnionFromList([(0.3,0.4),(0.4,0.7)]))
+    (0.3, 0.7)
+    >>> print(intervalUnionFromList([(0.3,0.4),(0.6,0.7),(0.4,0.7)]))
+    (0.3, 0.7)
     """
     minimum = 1
     maximum = 0
@@ -248,6 +259,7 @@ def intervalUnionFromList(intervals:List[tuple]):
         if interval[0] < minimum: minimum = interval[0]
         if interval[1] > maximum: maximum = interval[1]
     return (minimum,maximum)
+
 
 def allocationToOnePiece(alloction:List[List[tuple]],agents:List[Agent]):
     """
@@ -263,6 +275,7 @@ def allocationToOnePiece(alloction:List[List[tuple]],agents:List[Agent]):
             continue
         I.set_piece(i,[intervalUnionFromList(pieces)])
     return I
+
 
 def ALG(agents: List[Agent],epsilon)->Allocation:
     """
@@ -321,23 +334,25 @@ def ALG(agents: List[Agent],epsilon)->Allocation:
     return allocationToOnePiece(setRemain(allocation,agents),agents)
     #return allocationToOnePiece(allocation.get_pieces(),agents)
 
-def checkAlloc( allocation:Allocation,epsilon):
+
+def efCheck(allocation:Allocation, epsilon):
     agents = allocation.agents
     o = (1/(3+(9*epsilon)/len(agents)))
     for i,a in zip(range(len(agents)),agents):
         aPiece = allocation.get_piece(i)[0]
         for pieace in allocation.get_pieces():
             if a.eval(aPiece[0],aPiece[1])<o*a.eval(pieace[0][0],pieace[0][1]):
-                return 0
-    return 1
+                return "The Allcation isn't (3 + 9ε/n)approximately envy-free allocation"
+    return "The Allcation is (3 + 9ε/n)approximately envy-free allocation"
+
 
 if __name__ == "__main__":
-    agents = []
-    agents.append(PiecewiseConstantAgent1Sgemant([8,10], "Alice"))
-    agents.append(PiecewiseConstantAgent1Sgemant([5,5],"George"))
-    agents.append(PiecewiseConstantAgent1Sgemant([3,3,3,3], name="Abraham"))
-    agents.append(PiecewiseConstantAgent1Sgemant([3,3,3,3], name="Hanna"))
-    print(checkAlloc(ALG(agents,0.1),0.1))
+    #agents = []
+    # agents.append(PiecewiseConstantAgent1Sgemant([8,10], "Alice"))
+    # agents.append(PiecewiseConstantAgent1Sgemant([5,5],"George"))
+    # agents.append(PiecewiseConstantAgent1Sgemant([3,3,3,3], name="Abraham"))
+    # agents.append(PiecewiseConstantAgent1Sgemant([3,3,3,3], name="Hanna"))
+    # print(checkAlloc(ALG(agents,0.1),0.1))
 
     # Alice = PiecewiseConstantAgent1Sgemant([33, 33], "Alice")
     # George = PiecewiseConstantAgent1Sgemant([5, 5], "George")
@@ -367,7 +382,6 @@ if __name__ == "__main__":
     # print(checkWhile(agents, newAlloc, findRemainIntervals(newAlloc), 0.3))
     # newAlloc.set_piece(2, [(0, 0.05)])
     # print(checkWhile(agents, newAlloc, findRemainIntervals(newAlloc), 0.3))
-
-    # import doctest
-    # (failures,tests) = doctest.testmod(report=True)
-    # print ("{} failures, {} tests".format(failures,tests))
+    import doctest
+    (failures,tests) = doctest.testmod(report=True)
+    print ("{} failures, {} tests".format(failures,tests))
