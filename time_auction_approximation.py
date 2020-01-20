@@ -126,15 +126,22 @@ def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> 
 
     max_weight = 0
     max_match = None
+
+    logger.info("For every t = 0,...,r create the 2 ^ t-partition, partition sequence of 2 ^ t items.")
+    logger.info("Denote the t-th partition by Pt.")
     for t in range(0, r + 1):
+        logger.info(f"Iteration t = {t}")
         partition_i = change_partition(pieces, t)
 
+        logger.info("For each piece and agent: compute the agent's value of the piece.")
         evaluations = {}
         for piece in partition_i:
             for agent in agents:
                 evaluations[(agent, piece)] = agent.eval(start=piece[0], end=piece[1])
 
+        logger.info(f"create the partition graph G - Pt={t}")
         g_i = create_matching_graph(agents, partition_i, evaluations)
+        logger.info("Compute a maximum weight matching Mt in the graph GPt")
         edges_set = max_weight_matching(g_i)
         edges_set = fix_edges(edges_set)
         weight = calculate_weight(g_i, edges_set)
@@ -165,6 +172,7 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
     > Alice gets [(0, 2)] with value 101.00
     """
     n = len(agents)
+    logger.info("Choose n/2 agents at random. Denote this set by S.")
     s = random.choices(agents, k=n//2)
     partitions = set()
     partitions.add(0)
