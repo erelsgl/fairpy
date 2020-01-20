@@ -77,24 +77,29 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
         # For every piece get evaluation for every agent
         for agent in agents:
             evaluations[(agent, piece)] = agent.eval(start=piece[0], end=piece[1])
-    # Create the matching graph. One side is the agents, the other side is the partitions and the weights
-
+    # Create the matching graph
+    # One side is the agents, the other side is the partitions and the weights are the evaluations
     logger.info("Create the partition graphs G - P0 and G - Pd")
     g_0_l = create_matching_graph(agents, normalize_partitions_0_l, evaluations)
     g_delta_l = create_matching_graph(agents, normalize_partitions_delta_l, evaluations)
 
+    # Set the edges to be in order, (Agent, partition)
     logger.info("Compute maximum weight matchings for each graph respectively")
     edges_set_0_l = fix_edges(max_weight_matching(g_0_l))
     edges_set_delta_l = fix_edges(max_weight_matching(g_delta_l))
 
     logger.info("Choose the heavier among the matchings")
+    # Check which matching is heavier and choose it
     if calculate_weight(g_delta_l, edges_set_delta_l) > calculate_weight(g_0_l, edges_set_0_l):
         edges_set = edges_set_delta_l
     else:
         edges_set = edges_set_0_l
 
+    # Find the agents that are in the allocation that was chosen
     chosen_agents = [edge[0] for edge in edges_set]
+    # Create allocation
     allocation = Allocation(chosen_agents)
+    # Add the edges to the allocation
     for edge in edges_set:
         allocation.set_piece(agent_index=chosen_agents.index(edge[0]), piece=[edge[1]])
 
@@ -216,11 +221,15 @@ def fix_edges(edges_set: Set[Tuple[Agent, Tuple[float, float]]]) -> Set[Tuple[Ag
     :return: A copy of the fixed set of edges.
     """
     ret = set()
+    # Go over all the edges and check if they are in the right order
     for edge in edges_set:
+        # If the partition is first we swap the sides of the edge
         if not isinstance(edge[0], Agent):
             ret.add((edge[1], edge[0]))
         else:
+            # The Agent is first and we leave it like that
             ret.add((edge[0], edge[1]))
+    # we return the set of edges when all the edges are in the right order of (Agent, partition)
     return ret
 
 
