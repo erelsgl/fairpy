@@ -33,12 +33,25 @@ class Simplex_Solver:
         self.N = n/x
         self.agents = agents
 
-    def color(self, index_of_agent, partition):
+    def color(self, index_of_agent, triplet):
+        # checking for validity of input
+        if sum(triplet) != self.N or len(triplet) != 3 or index_of_agent < 0 or index_of_agent > 2:
+            raise ValueError("Invalid triplet")
+        # in order to get the right values and partition, the triplet is converted back to the right proportion
+        partition = [i * self.epsilon for i in range(len(triplet))]
         return np.argmax(self.agents[index_of_agent].partition_values(partition))
 
     def label(self, triplet):
+        # checking for validity of input
+        if sum(triplet) != self.N or len(triplet) != 3:
+            raise ValueError("Invalid triplet")
         return sum([i * triplet[i] for i in range(len(triplet))]) % 3
 
+    def color_at_label(self, triplet):
+        if sum(triplet) != self.N or len(triplet) != 3:
+            raise ValueError("Invalid triplet")
+        right_agent_index = self.label(triplet)
+        return self.color(right_agent_index, triplet)
 
 def robust_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
     """
