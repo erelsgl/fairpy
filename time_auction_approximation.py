@@ -177,6 +177,7 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
     partitions = set()
     partitions.add(0)
 
+    logger.info("For every agent i in S, ask i to divide [0, 1] into 2n intervals of equal worth")
     for a in agents:
         start = 0
         for i in range(0,2*n):
@@ -190,6 +191,7 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
     partitions = list(partitions)
     partitions = sorted(partitions)
 
+    logger.info("Generate a partition J by taking the union of all boundary points reported by the agents of S.")
     start = partitions[0]
     pieces = []
     for part in partitions[1:]:
@@ -197,6 +199,7 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
         pieces.append(p)
         start = part
 
+    logger.info("Invoke Algorithm 2 on the rest of the agents and on the sequence of items in J")
     agents = list(set(agents) - set(s))
     res = discrete_setting(agents, pieces)
     return res
