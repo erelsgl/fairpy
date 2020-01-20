@@ -78,9 +78,7 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
         for agent in agents:
             evaluations[(agent, piece)] = agent.eval(start=piece[0], end=piece[1])
     # Create the matching graph. One side is the agents, the other side is the partitions and the weights
-    g = create_matching_graph(agents, normalize_partitions, evaluations)
-    edges_set = fix_edges(max_weight_matching(g))
-
+   
     logger.info("Create the partition graphs G - P0 and G - Pd")
     g_0_l = create_matching_graph(agents, normalize_partitions_0_l, evaluations)
     edges_set_0_l = fix_edges(max_weight_matching(g_0_l))
