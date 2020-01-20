@@ -53,6 +53,34 @@ class Simplex_Solver:
         right_agent_index = self.label(triplet)
         return self.color(right_agent_index, triplet)
 
+    def index(self, quartet):
+        return 0
+
+    def recursive_algorithm1(self, i1, i2, k1, k2):
+        if i2 - i1 == 1 and k2 - k1 == 1:
+            print("end of recursive call, let's finally find a proper partition")
+            vertex1_color = self.color_at_label(i1, self.N - i1 - k1, k1)
+            vertex2_color = self.color_at_label(i1, self.N - i1 - k1 - 1, k1 + 1)
+            vertex3_color = self.color_at_label(i1 + 1, self.N - i1 - k1 - 1, k1)
+            if vertex1_color != vertex2_color and vertex2_color != vertex3_color and vertex3_color != vertex1_color:
+                return i1, self.N - i1 - k1, k1
+            else:
+                return i1 + 1, self.N - i1 - k1 - 2, k1 + 1
+        else:
+            if i2 - i1 >= k2 - k1:
+                i3 = int((i2 - i1) / 2)
+                if self.index(i1, i3, k1, k2) != 0:
+                    self.recursive_algorithm1(i1, i3, k1, k2)
+                else:
+                    self.recursive_algorithm1(i3, i2, k1, k2)
+            else:
+                k3 = int((k2 - k1) / 2)
+                if self.index(i1, i2, k1, k3) != 0:
+                    self.recursive_algorithm1(i1, i2, k1, k3)
+                else:
+                    self.recursive_algorithm1(i1, i2, k3, k2)
+
+
 def robust_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
     """
     according to the algorithm in theirs essay, the algorithm will create class that gonna solve with simplex
