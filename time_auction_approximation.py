@@ -52,18 +52,25 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
         raise ValueError("Piece size must be between 0 and 1")
     delta = 1 - int(1 / piece_size) * piece_size
 
+    # Creating the partition of the pieces that start from 0
     partition_0_l = create_partition(piece_size)
+    # Creating the partition of the pieces that start from delta
     partition_delta_l = create_partition(piece_size, start=delta)
+    # Merging the partitions to one partition
     all_partitions = partition_0_l + partition_delta_l
 
     length = max([a.cake_length() for a in agents])
+    # Normalizing the partitions to match the form of the pieces allocation of the Agents
     normalize_partitions = [(int(p[0] * length), int(p[1] * length)) for p in all_partitions]
 
+    # Evaluating the pieces of the partition for every agent there is
     evaluations = {}
+    # Get evaluation for every piece
     for piece in normalize_partitions:
+        # For every piece get evaluation for every agent
         for agent in agents:
             evaluations[(agent, piece)] = agent.eval(start=piece[0], end=piece[1])
-
+    # Create the matching graph. One side is the agents, the other side is the partitions and the weights 
     g = create_matching_graph(agents, normalize_partitions, evaluations)
     edges_set = fix_edges(max_weight_matching(g))
 
