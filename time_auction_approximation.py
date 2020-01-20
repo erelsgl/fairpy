@@ -30,6 +30,11 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     Algorithm 1.
     Approximation algorithm of the optimal auction for uniform-size pieces.
 
+    Complexity and approximation:
+    - Requires only 2 / l values from each agent.
+    - Runs in time polynomial in n + 1 / l.
+    - Approximates the optimal welfare by a factor of 2.
+
     :param agents: A list of Agent objects.
     :param piece_size: Size of an equally sized piece.
     :return: A cake-allocation, not necessarily all the cake will be allocated.
@@ -111,6 +116,11 @@ def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> 
     Algorithm 2.
     Approximation algorithm of the optimal auction for a discrete cake with known piece sizes.
 
+    Complexity and approximation:
+    - Requires at most 2m values from each agent.
+    - Runs in time polynomial in n + log m.
+    - Approximates the optimal welfare by a factor of log m + 1.
+
     :param agents: A list of Agent objects.
     :param pieces: List of sized pieces.
     :return: A cake-allocation.
@@ -162,6 +172,11 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
     """
     Algorithm 3.
     Approximation algorithm of the optimal auction for a continuous cake.
+
+    Complexity and approximation:
+    - Requires at most 2n2 values from each agent.
+    - Runs in time polynomial in n.
+    - Approximates the optimal welfare by a factor of O(log n).
 
     :param agents: A list of Agent objects.
     :return: A cake-allocation.
@@ -290,16 +305,3 @@ def create_matching_graph(left: List[Agent], right: List[Tuple[float, float]],
     for key, value in weights.items():
         g.add_edge(key[0], key[1], weight=value)
     return g
-
-
-if __name__ == '__main__':
-    Alice = PiecewiseConstantAgent([100, 1], "Alice")
-    Bob = PiecewiseConstantAgent([2, 90], "Bob")
-    print(discrete_setting([Alice, Bob], [(0.0, 1.0), (1.0, 2.0)]))
-    print(equally_sized_pieces([Alice, Bob], 0.5))
-
-    Alice1 = PiecewiseConstantAgent([100, 1, 1], "Alice1")
-    Alice2 = PiecewiseConstantAgent([10, 7, 54], "Alice2")
-    #Alice3 = PiecewiseConstantAgent([56, 47, 90], "Alice3")
-
-    print(continuous_setting([Alice1, Alice2]))
