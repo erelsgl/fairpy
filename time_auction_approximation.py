@@ -216,11 +216,15 @@ def fix_edges(edges_set: Set[Tuple[Agent, Tuple[float, float]]]) -> Set[Tuple[Ag
     :return: A copy of the fixed set of edges.
     """
     ret = set()
+    # Go over all the edges and check if they are in the right order
     for edge in edges_set:
+        # If the partition is first we swap the sides of the edge
         if not isinstance(edge[0], Agent):
             ret.add((edge[1], edge[0]))
         else:
+            # The Agent is first and we leave it like that
             ret.add((edge[0], edge[1]))
+    # we return the set of edges when all the edges are in the right order of (Agent, partition)
     return ret
 
 
