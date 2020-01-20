@@ -35,8 +35,8 @@ def discretization_procedure(agents: List[Agent], epsilon):
     >>> a = PiecewiseConstantAgent([0.2, 0.3, 0.5])
     >>> b = PiecewiseConstantAgent([0.3, 0.4, 0.3])
     >>> list = [a,b]
-    >>> discretization_procedure(list, 0.2)
-    [0, 0.6666666666666667, 1.25, 1.75, 2.25, 2.65, 3]
+    >>> [round(i,3) for i in discretization_procedure(list, 0.2)]
+    [0, 0.667, 1.25, 1.75, 2.25, 2.65, 3]
     """
 
     size_of_the_cake = max([agent.cake_length() for agent in agents])
@@ -73,19 +73,24 @@ def get_players_valuation(agents: List[Agent], c):
     >>> a = PiecewiseConstantAgent([0.25, 0.5, 0.25])
     >>> b = PiecewiseConstantAgent([0.23, 0.7, 0.07])
     >>> agents = [a, b]
-    >>> c = discretization_procedure(agents, 0.2)
-    >>> [round(i,3) for i in discretization_procedure(agents, 0.2)]
-    [0, 0.8, 1.22, 1.506, 1.791, 2.383, 3]
+    >>> c = [0, 0.8, 1.22, 1.506, 1.791, 2.383, 3]
     >>> [round(i,3) for i in get_players_valuation(agents, c)[0]]
-    [0.2, 0.16, 0.143, 0.143, 0.2, 0.154]
+    [0.2, 0.16, 0.143, 0.142, 0.2, 0.154]
     >>> [round(i,3) for i in get_players_valuation(agents, c)[1]]
-    [0.184, 0.2, 0.2, 0.2, 0.173, 0.043]
+    [0.184, 0.2, 0.2, 0.199, 0.173, 0.043]
+
+    >>> a = PiecewiseConstantAgent([0.25, 0.5, 0.25])
+    >>> b = PiecewiseConstantAgent([0.3, 0.5, 0.2])
+    >>> c = [0,1,2,3]
+    >>> get_players_valuation(agents, c)[0]
+    [0.25, 0.5, 0.25]
+    >>> get_players_valuation(agents, c)[1]
+    [0.23, 0.7, 0.07]
     """
 
 
     matrix = []
     for agent in agents:
-        #found out that if I round agent.eval I get different outputs from the algorithm
         valuations = [agent.eval(c[i], c[i + 1]) for i in range(len(c) - 1)]
         matrix.append(valuations)
     return matrix
@@ -107,7 +112,7 @@ def aprox_v(s,t,k,matrix: List[List[float]]):
     >>> a = PiecewiseConstantAgent([0.25, 0.5, 0.25])
     >>> b = PiecewiseConstantAgent([0.23, 0.7, 0.07])
     >>> agents = [a, b]
-    >>> c = discretization_procedure(agents, 0.2)
+    >>> c = [0, 0.8, 1.22, 1.506, 1.791, 2.383, 3]
     >>> matrix = get_players_valuation(agents, c)
     >>> aprox_v(0,5,0,matrix) #all the items according to player 0
     1.0
@@ -116,6 +121,15 @@ def aprox_v(s,t,k,matrix: List[List[float]]):
     >>> round(aprox_v(0,1,1,matrix),3) #the first and the second items according to player 1 -> = 0.18400000000000002 + 0.20000000000000007
     0.384
 
+
+
+    >>> matrix = [[1,2,3,4,5,6], [4,5,1,2,3, 0]]
+    >>> aprox_v(0,6,0,matrix) #all the items according to player 0 -> = 1+2+3+4+5+6 = 21
+    21
+    >>> aprox_v(0,0,1,matrix) #the first item according to player 1 -> 4
+    4
+    >>> aprox_v(0,1,1,matrix) #the first and the second items according to player 1 -> 4+5 = 9
+    9
     """
     if (s == -1):
         return 0
@@ -123,11 +137,11 @@ def aprox_v(s,t,k,matrix: List[List[float]]):
     return sum(valuations[s:t+1])
 
 
-def V(s,t, current_s, current_t, matrix : List[List[float]], k):
+def V_without_k(s,t, current_s, current_t, matrix : List[List[float]], k):
     """
      this function calculates the sum
-    of values that the other players to which the items s through t are assigned obtain from these
-    items
+     of values that the other players to which the items s through t are assigned obtain from these
+     items
     :param s: the first item in the sequence
     :param t: the last item in the sequence
     :param current_s: a list such that current_s[i] == which item {0,...,(num_of_items - 1)} is the first item of player i
@@ -146,10 +160,10 @@ def V(s,t, current_s, current_t, matrix : List[List[float]], k):
     that means that agent 0 holds items 0,1,2 (and their values are 1,2,3)
     agent 1 holds items 3,4,5 (and their values are 2,3,0)
     so we want the value of items 0,1,2,3 without what player 1 holds
-    that means items 1,2,3 so the sum is 1+2+3 = 6
+    that means items 0,1,2 so the sum is 1+2+3 = 6
 
     >>> matrix = [[1,2,3,4,5,6], [4,5,1,2,3, 0]]
-    >>> V(0,3,[0,3], [2,5], matrix, 1)
+    >>> V_without_k(0,3, [0,3], [2,5], matrix, k=1)
     6
 
 
@@ -157,9 +171,9 @@ def V(s,t, current_s, current_t, matrix : List[List[float]], k):
     >>> a = PiecewiseConstantAgent([0.25, 0.5, 0.25])
     >>> b = PiecewiseConstantAgent([0.23, 0.7, 0.07])
     >>> agents = [a, b]
-    >>> c = discretization_procedure(agents, 0.2)
+    >>> c = [0, 0.8, 1.22, 1.506, 1.791, 2.383, 3]
     >>> matrix = get_players_valuation(agents, c)
-    >>> round(V(0,1,[0,1],[0,1],matrix,0),3) #2 items, 0 and 1, player 0 holds item 0, player 1 holds item 1 and we calculate the value of items
+    >>> round(V_without_k(0,1,[0,1],[0,1],matrix,0),3) #2 items, 0 and 1, player 0 holds item 0, player 1 holds item 1 and we calculate the value of the items
     0.2
 
     """
@@ -177,7 +191,7 @@ def V(s,t, current_s, current_t, matrix : List[List[float]], k):
 
 def maximize_expression(t, num_of_players, S, T, matrix):
     """
-    ***I think that the problem might be here***
+    because of the factor 2, the algorithm gives only approximation
     this function maximizes the expression:
     aprox_v(s, t, k, matrix) - 2*(aprox_v(S[k], T[k], k, matrix) + V(s,t,S,matrix))
 
@@ -188,7 +202,6 @@ def maximize_expression(t, num_of_players, S, T, matrix):
     :param matrix: all the valuations of the players
     :return: params k' and s' that maximize the expression
 
-    #I dont have doctest because I dont know what the output should be
     """
     max = -sys.maxsize - 1
     k_tag = 0
@@ -197,15 +210,18 @@ def maximize_expression(t, num_of_players, S, T, matrix):
         for s in range(t + 1):
             #the value of items s to t according to player k
             v1 = aprox_v(s,t,k,matrix)
+            logging.info("The value of items {} to {} according to player {} = {}".format(s,t,k,v1))
             #the value of items player k currently own
             v2 = aprox_v(S[k], T[k], k, matrix)
+            logging.info("The value of items player {} currently own = {}".format(k,v2))
             #the value of  all the parts from s to t that other players than k obtain
-            v3 = V(s,t,S,T,matrix, k)
+            v3 = V_without_k(s,t,S,T,matrix, k)
+            logging.info("the value of  all the parts from {} to {} that other players than {} obtain = {}".format(s,t,k,v3))
             #value = aprox_v(s, t, k, matrix) - 2*(aprox_v(S[k], T[k], k, matrix) + V(s,t,S,matrix))
-            value = v1 - 2 * (v2 + v3)
-            logging.info("in maximize_expression: v1: %f, v2: %f, v3: %f, s: %f, t: %f, k: %f\n", v1, v2, v3, s, t, k)
-            if (value > max):
-                max = value
+            net_value = v1 - 2 * (v2 + v3)
+            logging.info("Value minus twice the cost = {}".format(net_value))
+            if (net_value > max):
+                max = net_value
                 k_tag = k
                 s_tag = s
     return [max, k_tag, s_tag]
@@ -224,29 +240,18 @@ def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items
     #we count the items from 0 so if there are 6 items, the first one is 0 and the last one is 5
     num_of_players = len(matrix)
     num_of_items = len(items) - 1
-    S = [-1] * num_of_players #i think that this is like current s in the i'th cell there is the start of player i's start
+    S = [-1] * num_of_players
     T = [-1] * num_of_players
 
-
-    """
-    the main loop.
-    till t is less or equals to 3 everything is ok. where t equals 4 or more the maximize expression returns result
-    smaller than 0.
-    when t is 4 or more, the values of player 0 are bigger than those of player 1.
-    when t is between 1 and 3 the values of player 1 are bigger than those of player 0.
-    when t equals 0 (the first item), the value of player 0 is bigger than the value of player 1,
-    """
+    #the main loop of the algorithm
     for t in range(0, num_of_items):
-        logging.info("%d iteration",t)
+        logging.info("------%d iteration------",t)
         maximum = maximize_expression(t, num_of_players, S, T, matrix)
-        logging.info("maximize values: maximum: %f, k': %f, s': %f\n", maximum[0], maximum[1], maximum[2])
+        logging.info("------maximize values: maximum: %f, k': %f, s': %f------\n", maximum[0], maximum[1], maximum[2])
         while maximum[0] >= 0:
             k_tag = maximum[1]
             s_tag = maximum[2]
-            #S[k_tag] = s_tag
-            #T[k_tag] = t
             for i in range(num_of_players):
-                #if its equal it will put minus one in S[k_tag]
                 if(S[i] >= s_tag):
                     S[i] = -1
                     T[i] = -1
@@ -266,29 +271,5 @@ if __name__ == "__main__":
     import doctest
     (failures,tests) = doctest.testmod(report=True)
     print ("{} failures, {} tests".format(failures,tests))
-    """
-    my example. 
-    the items are [0, 0.8, 1.22, 1.5057142857142858, 1.7914285714285716, 2.3828571428571435, 3]
-    where 0 to 0.8 is item 0, 0.8 to 1.22 is item 1 and so on...
-    there are 6 items, from 0 to 5.
-    my code outputs [[0,1],[0,3]]
-    that means that player 0 holds item 0 and player 1 holds items 1,2,3
-    i think that the correct output is [[0,1],[0,5]]
-    """
-    a = PiecewiseConstantAgent([0.25, 0.5, 0.25])
-    b = PiecewiseConstantAgent([0.23, 0.7, 0.07])
-    agents = [a, b]
-    c = discretization_procedure(agents, 0.2)
-    for i in range(6):
-        print("part {}: {},{}: a {}, b {}\n".format(i, c[i], c[i + 1],a.eval(c[i], c[i + 1]), b.eval(c[i], c[i + 1])))
-    matrix = get_players_valuation(agents, c)
 
-
-    print(c)
-    print('\n')
-    #the problem is here
-    x = discrete_utilitarian_welfare_approximation(matrix, c)
-    print(x)
-    print(agents[0].eval(c[0], c[1]))
-    print(agents[1].eval(c[1], c[4]))
 
