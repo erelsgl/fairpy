@@ -45,13 +45,17 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     >>> equally_sized_pieces([Alice, Bob], 3 / 5)
     > Bob gets [(0, 3)] with value 9.00
     """
+    # Initializing variables and asserting conditions
     num_of_agents = len(agents)
     if num_of_agents == 0:
         raise ValueError("There must be at least one agent")
     if not 0 < piece_size <= 1:
         raise ValueError("Piece size must be between 0 and 1")
+
+    logger.info("Setting delta to 1 - [1 / l] * l.")
     delta = 1 - int(1 / piece_size) * piece_size
 
+    logger.info("Create the partitions P0 = 0-l and Pd = delta-l.")
     # Creating the partition of the pieces that start from 0
     partition_0_l = create_partition(piece_size)
     # Creating the partition of the pieces that start from delta
@@ -62,17 +66,32 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     length = max([a.cake_length() for a in agents])
     # Normalizing the partitions to match the form of the pieces allocation of the Agents
     normalize_partitions = [(int(p[0] * length), int(p[1] * length)) for p in all_partitions]
+    normalize_partitions_0_l = [(int(p[0] * length), int(p[1] * length)) for p in partition_0_l]
+    normalize_partitions_delta_l = [(int(p[0] * length), int(p[1] * length)) for p in partition_delta_l]
 
     # Evaluating the pieces of the partition for every agent there is
+    logger.info("For each piece (in both partitions) and agent: compute the agent's value of the piece.")
     evaluations = {}
     # Get evaluation for every piece
     for piece in normalize_partitions:
         # For every piece get evaluation for every agent
         for agent in agents:
             evaluations[(agent, piece)] = agent.eval(start=piece[0], end=piece[1])
-    # Create the matching graph. One side is the agents, the other side is the partitions and the weights 
+    # Create the matching graph. One side is the agents, the other side is the partitions and the weights
     g = create_matching_graph(agents, normalize_partitions, evaluations)
     edges_set = fix_edges(max_weight_matching(g))
+
+    logger.info("Create the partition graphs G - P0 and G - Pd")
+    g_0_l = create_matching_graph(agents, normalize_partitions_0_l, evaluations)
+    edges_set_0_l = fix_edges(max_weight_matching(g_0_l))
+
+    g_delta_l = create_matching_graph(agents, normalize_partitions_delta_l, evaluations)
+    edges_set_delta_l = fix_edges(max_weight_matching(g_delta_l))
+
+    if calculate_weight(g_delta_l, edges_set_delta_l) > calculate_weight(g_0_l, edges_set_0_l):
+        edges_set = edges_set_delta_l
+    else:
+        edges_set = edges_set_0_l
 
     chosen_agents = [edge[0] for edge in edges_set]
     allocation = Allocation(chosen_agents)
