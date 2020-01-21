@@ -213,31 +213,40 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
     partitions.add(0)
 
     logger.info("For every agent i in S, ask i to divide [0, 1] into 2n intervals of equal worth")
-    ############ a ? s
+    # Go over all the agents that were chosen
     for a in s:
         start = 0
+        # Get pieces with value of 2n
         for i in range(0,2*n):
             end = a.mark(start, a.cake_value()/(2*n))
+            # if the piece is out of boundaries we don't add it to the partition
             if end is None:
                 break
             end = float("%.4f" % end)
+            # Add the piece to the partition
             partitions.add(end)
             start = end
 
     partitions = list(partitions)
+    # Sort the pieces
     partitions = sorted(partitions)
 
     logger.info("Generate a partition J by taking the union of all boundary points reported by the agents of S.")
+    # Turn the list of the pieces into one partition
     start = partitions[0]
     pieces = []
+    # Go over all the parts of the partitions and turn it to one partition
     for part in partitions[1:]:
         p = (start, part)
         pieces.append(p)
         start = part
 
     logger.info("Invoke Algorithm 2 on the rest of the agents and on the sequence of items in J")
+    # Get the agents that were nor chosen
     agents = list(set(agents) - set(s))
+    # Find the best allocation for those agents with the partition we generated and use Algo 2 to do that
     res = discrete_setting(agents, pieces)
+    # Return the allocation
     return res
 
 
@@ -334,3 +343,5 @@ def create_matching_graph(left: List[Agent], right: List[Tuple[float, float]],
     for key, value in weights.items():
         g.add_edge(key[0], key[1], weight=value)
     return g
+
+
