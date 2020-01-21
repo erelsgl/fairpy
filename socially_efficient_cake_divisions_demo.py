@@ -58,3 +58,8 @@ x = discrete_utilitarian_welfare_approximation(matrix, items)
 print(x)
 print_result(x,items,agents)
 print('\n')
+
+print("------simplify:------")
+a = PiecewiseConstantAgent([0.25, 0.5, 0.25], name = "Alice")
+b = PiecewiseConstantAgent([0.23, 0.7, 0.07], name= "Bob")
+print(divide([a,b], 0.2))

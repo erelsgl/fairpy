@@ -11,6 +11,7 @@ Programmer: Jonathan Diamant
 Since: 2019-12
 """
 from agents import *
+from allocations import *
 import sys
 import logging
 logging.getLogger().setLevel(logging.INFO)
@@ -58,7 +59,7 @@ def discretization_procedure(agents: List[Agent], epsilon:float):
 
 
 
-def get_players_valuation(agents: List[Agent], c):
+def get_players_valuation(agents: List[Agent], c : List[float]):
     """
     this function calculates for each player its valuation of a discrete cut of the cake.
     for each player, it calulates the valuation of each item.
@@ -95,7 +96,7 @@ def get_players_valuation(agents: List[Agent], c):
         matrix.append(valuations)
     return matrix
 
-def aprox_v(s,t,k,matrix: List[List[float]]):
+def aprox_v(s:int ,t:int ,k:int,matrix: List[List[float]]):
     """
     this function calculates the value of the items from s to t according to the valuation
     of player k.
@@ -137,7 +138,7 @@ def aprox_v(s,t,k,matrix: List[List[float]]):
     return sum(valuations[s:t+1])
 
 
-def V_without_k(s,t, current_s, current_t, matrix : List[List[float]], k):
+def V_without_k(s:int ,t:int , current_s:List[int] , current_t:List[int], matrix : List[List[float]], k:int):
     """
      this function calculates the sum
      of values that the other players to which the items s through t are assigned obtain from these
@@ -189,7 +190,7 @@ def V_without_k(s,t, current_s, current_t, matrix : List[List[float]], k):
     return sum
 
 
-def maximize_expression(t, num_of_players, S, T, matrix):
+def maximize_expression(t:int , num_of_players:int , S:List[int], T:List[int], matrix:List[List[float]]):
     """
     because of the factor 2, the algorithm gives only approximation
     this function maximizes the expression:
@@ -227,7 +228,7 @@ def maximize_expression(t, num_of_players, S, T, matrix):
     return [max, k_tag, s_tag]
 
 
-def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items):
+def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items:List[float]):
 
     """
     :param matrix: row i is the valuations of player i of the items
@@ -271,21 +272,28 @@ def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items
 
     return [S,T]
 
-def divide(agents: List[Agent], epsilon:float):
+def divide(agents: List[Agent], epsilon:float) -> Allocation:
     """
     this function gets a list of agents and epsilon and returns an approximation of the division
     :param agents: the players
     :param epsilon: a float
     :return: starting points and end points of the cuts
 
-    >>> a = PiecewiseConstantAgent([0.25, 0.5, 0.25])
-    >>> b = PiecewiseConstantAgent([0.23, 0.7, 0.07])
+    >>> a = PiecewiseConstantAgent([0.25, 0.5, 0.25], name="Alice")
+    >>> b = PiecewiseConstantAgent([0.23, 0.7, 0.07], name="Bob")
     >>> divide([a,b], 0.2)
-    [[0, 1], [0, 3]]
+    > Alice gets [(0, 0.8)] with value 0.20
+    > Bob gets [(0.8, 1.7914285714285716)] with value 0.60
+    <BLANKLINE>
     """
     items = discretization_procedure(agents, epsilon)
     matrix = get_players_valuation(agents, items)
-    return discrete_utilitarian_welfare_approximation(matrix, items)
+    result = discrete_utilitarian_welfare_approximation(matrix, items)
+    allocation = Allocation(agents)
+    num_of_players = len(result[0])
+    for j in range(num_of_players):
+        allocation.set_piece(j, [(items[result[0][j]], items[result[1][j] + 1])])
+    return allocation
 
 if __name__ == "__main__":
     import doctest
