@@ -14,7 +14,7 @@ from agents import *
 import sys
 import logging
 logging.getLogger().setLevel(logging.INFO)
-def discretization_procedure(agents: List[Agent], epsilon):
+def discretization_procedure(agents: List[Agent], epsilon:float):
     """
     reduce the continuous cake into a sequence of discrete items.
     the algorithm below receives a list of agents and a parameter epsilon,
@@ -235,6 +235,12 @@ def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items
     :return: [S,T] s.t.
     S is a list such that S[i] == which item {0,...,(num_of_items - 1)} is the first item of player i
     and T is a list such that current_t[i] == which item {0,...,(num_of_items - 1)} is the last item of player i
+
+    >>> discrete_utilitarian_welfare_approximation([[0.25, 0.25, 0.25, 0.25]], [0, 1.0, 1.5, 2.0, 3])
+    [[0], [3]]
+
+    >>> discrete_utilitarian_welfare_approximation([[0.125, 0.125, 0.25, 0.25, 0.25], [0.25, 0.25, 0.2, 0.2, 0.1]], [0, 0.5, 1.0, 1.5, 2.0, 3])
+    [[1, 0], [4, 0]]
     """
     
     #we count the items from 0 so if there are 6 items, the first one is 0 and the last one is 5
@@ -265,7 +271,21 @@ def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items
 
     return [S,T]
 
+def divide(agents: List[Agent], epsilon:float):
+    """
+    this function gets a list of agents and epsilon and returns an approximation of the division
+    :param agents: the players
+    :param epsilon: a float
+    :return: starting points and end points of the cuts
 
+    >>> a = PiecewiseConstantAgent([0.25, 0.5, 0.25])
+    >>> b = PiecewiseConstantAgent([0.23, 0.7, 0.07])
+    >>> divide([a,b], 0.2)
+    [[0, 1], [0, 3]]
+    """
+    items = discretization_procedure(agents, epsilon)
+    matrix = get_players_valuation(agents, items)
+    return discrete_utilitarian_welfare_approximation(matrix, items)
 
 if __name__ == "__main__":
     import doctest
