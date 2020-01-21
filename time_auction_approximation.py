@@ -131,7 +131,9 @@ def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> 
     > Alice gets [(0, 1)] with value 100.00
     > Bob gets [(1, 2)] with value 90.00
     """
+    # Set m to be the number of pieces in the given partition
     m = len(pieces)
+    # Set r to be log of the number of pieces
     r = int(log(m, 2))
 
     max_weight = 0
@@ -139,29 +141,43 @@ def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> 
 
     logger.info("For every t = 0,...,r create the 2 ^ t-partition, partition sequence of 2 ^ t items.")
     logger.info("Denote the t-th partition by Pt.")
+    # Go over the partition by powers of 2
     for t in range(0, r + 1):
         logger.info(f"Iteration t = {t}")
+        # Change the partition to be a partition with 2^t size of every piece
         partition_i = change_partition(pieces, t)
 
         logger.info("For each piece and agent: compute the agent's value of the piece.")
+        # Evaluate every piece in the new partition
         evaluations = {}
+        # Go over every piece in the partition
         for piece in partition_i:
+            # Go over each Agent
             for agent in agents:
+                # Evaluate the piece according to the Agent
                 evaluations[(agent, piece)] = agent.eval(start=piece[0], end=piece[1])
 
         logger.info(f"create the partition graph G - Pt={t}")
+        # Create the matching graph according to the new partition
         g_i = create_matching_graph(agents, partition_i, evaluations)
         logger.info("Compute a maximum weight matching Mt in the graph GPt")
+        # Find the max weight matching of the graph and get the set of edges of the matching
         edges_set = max_weight_matching(g_i)
+        # Set the edges to be in order, (Agent, partition)
         edges_set = fix_edges(edges_set)
+        # Calculate the sum of the weights in the edges set
         weight = calculate_weight(g_i, edges_set)
-
+        # Check for the max weight
         if weight > max_weight:
             max_weight = weight
+            # Keep the edges set of the max weight
             max_match = edges_set
 
+    # Get the agents that are part of the edges of the max weight
     chosen_agents = [edge[0] for edge in max_match]
+    # Create the allocation
     allocation = Allocation(chosen_agents)
+    # Add the edges to the allocation
     for edge in max_match:
         allocation.set_piece(agent_index=chosen_agents.index(edge[0]), piece=[edge[1]])
 
@@ -186,13 +202,18 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
     >>> continuous_setting([Alice1, Alice2])
     > Alice gets [(0, 2)] with value 101.00
     """
+    # set n to be the number of agents
     n = len(agents)
     logger.info("Choose n/2 agents at random. Denote this set by S.")
+    # Choose randomly half of the agents
     s = random.choices(agents, k=n//2)
+    # Create a new partition
     partitions = set()
+    # Add the start to the partition
     partitions.add(0)
 
     logger.info("For every agent i in S, ask i to divide [0, 1] into 2n intervals of equal worth")
+    ############ a ? s
     for a in agents:
         start = 0
         for i in range(0,2*n):
@@ -230,7 +251,9 @@ def create_partition(size: float, start: float=0) -> List[Tuple[float, float]]:
     """
     res = []
     end = start + size
+    # Iterate until we divide all the cake into pieces
     while end <= 1:
+        # add the piece to the list
         res.append((start, end))
         start = end
         end = start + size
@@ -268,8 +291,10 @@ def change_partition(partition: List[tuple], t: int) -> List[tuple]:
     :return: A partition with pieces with 2 ^ t size.
     """
     ret = []
+    # Go over all the original partitions with 2^t jumps
     for start in range(0, len(partition) - 2 ** t + 1, 2 ** t):
         end = start + 2 ** t - 1
+        # Add the new joined partition to the list
         ret.append((partition[start][0], partition[end][1]))
     return ret
 
@@ -283,6 +308,7 @@ def calculate_weight(g: Graph, edges_set: Set[Tuple[Agent, Tuple[float, float]]]
     :return: A single number - the total weight.
     """
     ret = 0
+    # Go over all the weights of the edges and sum the weights
     for edge in edges_set:
         ret += g.get_edge_data(edge[0], edge[1])['weight']
     return ret
@@ -298,10 +324,13 @@ def create_matching_graph(left: List[Agent], right: List[Tuple[float, float]],
     :param weights: A dictionary from agents to pieces - represents the value of each agent to each piece.
     :return: A graph object from the given parameters.
     """
+    # Create the graph
     g = nx.DiGraph()
+    # Set the left side of the graph to be the Agents
     g.add_nodes_from(left, bipartite=0)
+    # Set the right side of the graph to be the partitions
     g.add_nodes_from(right, bipartite=1)
-
+    # Set the edges of the graph with their weights
     for key, value in weights.items():
         g.add_edge(key[0], key[1], weight=value)
     return g
