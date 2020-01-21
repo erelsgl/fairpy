@@ -17,6 +17,7 @@ def print_result(result, items, agents):
 
 from socially_efficient_cake_divisions import *
 print("------first example------")
+print("2 players and a part of the cake (2 items) remains unallocated")
 #the players
 a = PiecewiseConstantAgent([0.25, 0.5, 0.25], name = "Alice")
 b = PiecewiseConstantAgent([0.23, 0.7, 0.07], name= "Bob")
@@ -41,6 +42,7 @@ print_result(x,items,agents)
 print('\n')
 
 print("------second example------")
+print("1 player and a part of the cake (1 item) remains unallocated")
 #the player
 a = PiecewiseConstantAgent([0.2, 0.4, 0.4], name="Alice")
 print("the player:")
