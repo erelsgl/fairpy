@@ -78,8 +78,14 @@ print(socially_efficient_cake_divisions.divide([Alice, Bob], epsilon=0.01))
 
 print("\nNew agents")
 
-Alice = PiecewiseConstantAgent([0.2, 0.2, 0.2, 0.2, 0.2], name = "Alice")
-Bob = PiecewiseConstantAgent([0.1, 0.2, 0.3, 0.4], name= "Bob")
+Alice = PiecewiseConstantAgent([1/4, 1/4, 1/4, 1/4], name = "Alice")
+Bob = PiecewiseConstantAgent([1/8, 1/8, 3/8, 1/2], name= "Bob")
 print(Alice, "\n", Bob)
-print(socially_efficient_cake_divisions.divide([Alice, Bob], epsilon=0.2))
-print(socially_efficient_cake_divisions.divide([Bob, Alice], epsilon=0.2))
+print("\nOrder Alice-Bob")
+print(socially_efficient_cake_divisions.divide([Alice, Bob], epsilon=1/8))
+print("\nOrder Bob-Alice")
+print(socially_efficient_cake_divisions.divide([Bob, Alice], epsilon=1/8))
+
+print("\nDebug mode")
+socially_efficient_cake_divisions.logger.setLevel(logging.DEBUG)
+print(socially_efficient_cake_divisions.divide([Bob, Alice], epsilon=1/4))

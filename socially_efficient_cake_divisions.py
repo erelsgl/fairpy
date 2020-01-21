@@ -212,18 +212,14 @@ def maximize_expression(t:int , num_of_players:int , S:List[int], T:List[int], m
     s_tag = 0
     for k in range(num_of_players):
         for s in range(t + 1):
-            #the value of items s to t according to player k
-            v1 = aprox_v(s,t,k,matrix)
-            logger.debug("The value of items {} to {} according to player {} = {}".format(s,t,k,v1))
-            #the value of items player k currently own
-            v2 = aprox_v(S[k], T[k], k, matrix)
-            logger.debug("The value of items player {} currently own = {}".format(k,v2))
-            #the value of  all the parts from s to t that other players than k obtain
-            v3 = V_without_k(s,t,S,T,matrix, k)
-            logger.debug("the value of  all the parts from {} to {} that other players than {} obtain = {}".format(s,t,k,v3))
-            #value = aprox_v(s, t, k, matrix) - 2*(aprox_v(S[k], T[k], k, matrix) + V(s,t,S,matrix))
-            net_value = v1 - 2 * (v2 + v3)
-            logger.debug("Value minus twice the cost = {}".format(net_value))
+            v1 = aprox_v(s,t,k,matrix)  #the value of items s to t according to player k
+            v2 = aprox_v(S[k], T[k], k, matrix)   #the value of items player k currently own
+            v3 = V_without_k(s,t,S,T,matrix, k)   #the value of  all the parts from s to t that other players than k obtain
+            net_value = v1 - 2 * (v2 + v3)   #value = aprox_v(s, t, k, matrix) - 2*(aprox_v(S[k], T[k], k, matrix) + V(s,t,S,matrix))
+            logger.debug("Moving items %d..%d to player %d gains %f but loses %f+%f. Value-2cost=%f", s,t,k, v1,v2,v3,net_value)
+            # logger.debug("The value of items player {} currently own = {}".format(k,v2))
+            # logger.debug("the value of  all the parts from {} to {} that other players than {} obtain = {}".format(s,t,k,v3))
+            # logger.debug("Value minus twice the cost = {}".format(net_value))
             if (net_value > max):
                 max = net_value
                 k_tag = k
@@ -255,9 +251,9 @@ def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items
 
     #the main loop of the algorithm
     for t in range(0, num_of_items):
-        logger.debug("------%d iteration------",t)
+        logger.debug("------Iteration %d------",t)
         maximum = maximize_expression(t, num_of_players, S, T, matrix)
-        logger.debug("------maximize values: maximum: %f, k': %f, s': %f------\n", maximum[0], maximum[1], maximum[2])
+        logger.debug("Max net value is %f, for player k'=%d, s'=%f.\n", maximum[0], maximum[1], maximum[2])
         while maximum[0] >= 0:
             k_tag = maximum[1]
             s_tag = maximum[2]

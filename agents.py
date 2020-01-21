@@ -201,11 +201,17 @@ class PiecewiseConstantAgent(Agent):
         1.0
         """
         # the cake to the left of 0 and to the right of length is considered worthless.
-        start = max(0, min(start, self.length))
+        start = max(0, start)
+        if start >= self.length:
+            return None  # value is too high
+
         if target_value < 0:
             raise ValueError("sum out of range (should be positive): {}".format(sum))
 
         start_floor = int(np.floor(start))
+        if start_floor >= len(self.values):
+            raise ValueError("mark({},{}): start_floor ({}) is >= length of values ({})".format(start, target_value, start_floor, self.values))
+
         start_fraction = (start_floor + 1 - start)
 
         value = self.values[start_floor]
