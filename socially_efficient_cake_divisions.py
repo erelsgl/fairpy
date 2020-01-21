@@ -10,11 +10,14 @@ Reference:
 Programmer: Jonathan Diamant
 Since: 2019-12
 """
+
 from agents import *
 from allocations import *
 import sys
+
 import logging
-logging.getLogger().setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+
 def discretization_procedure(agents: List[Agent], epsilon:float):
     """
     reduce the continuous cake into a sequence of discrete items.
@@ -211,16 +214,16 @@ def maximize_expression(t:int , num_of_players:int , S:List[int], T:List[int], m
         for s in range(t + 1):
             #the value of items s to t according to player k
             v1 = aprox_v(s,t,k,matrix)
-            logging.info("The value of items {} to {} according to player {} = {}".format(s,t,k,v1))
+            logger.info("The value of items {} to {} according to player {} = {}".format(s,t,k,v1))
             #the value of items player k currently own
             v2 = aprox_v(S[k], T[k], k, matrix)
-            logging.info("The value of items player {} currently own = {}".format(k,v2))
+            logger.info("The value of items player {} currently own = {}".format(k,v2))
             #the value of  all the parts from s to t that other players than k obtain
             v3 = V_without_k(s,t,S,T,matrix, k)
-            logging.info("the value of  all the parts from {} to {} that other players than {} obtain = {}".format(s,t,k,v3))
+            logger.info("the value of  all the parts from {} to {} that other players than {} obtain = {}".format(s,t,k,v3))
             #value = aprox_v(s, t, k, matrix) - 2*(aprox_v(S[k], T[k], k, matrix) + V(s,t,S,matrix))
             net_value = v1 - 2 * (v2 + v3)
-            logging.info("Value minus twice the cost = {}".format(net_value))
+            logger.info("Value minus twice the cost = {}".format(net_value))
             if (net_value > max):
                 max = net_value
                 k_tag = k
@@ -252,9 +255,9 @@ def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items
 
     #the main loop of the algorithm
     for t in range(0, num_of_items):
-        logging.info("------%d iteration------",t)
+        logger.info("------%d iteration------",t)
         maximum = maximize_expression(t, num_of_players, S, T, matrix)
-        logging.info("------maximize values: maximum: %f, k': %f, s': %f------\n", maximum[0], maximum[1], maximum[2])
+        logger.info("------maximize values: maximum: %f, k': %f, s': %f------\n", maximum[0], maximum[1], maximum[2])
         while maximum[0] >= 0:
             k_tag = maximum[1]
             s_tag = maximum[2]

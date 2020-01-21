@@ -14,21 +14,21 @@ def print_result(result, items, agents):
     for j in range(num_of_players):
         print("player {}'s value of his item is {}".format(j, agents[j].eval(items[result[0][j]], items[result[1][j] + 1])))
 
-
+import socially_efficient_cake_divisions, logging, sys
+socially_efficient_cake_divisions.logger.addHandler(logging.StreamHandler(sys.stdout))
+socially_efficient_cake_divisions.logger.setLevel(logging.INFO)
 from socially_efficient_cake_divisions import *
+
+
+
 print("------first example------")
 print("2 players and a part of the cake (2 items) remains unallocated")
-#the players
 a = PiecewiseConstantAgent([0.25, 0.5, 0.25], name = "Alice")
 b = PiecewiseConstantAgent([0.23, 0.7, 0.07], name= "Bob")
-print("the players:")
-print(a)
-print(b)
-agents = [a, b]
-#get the items
-items = discretization_procedure(agents, 0.2)
-print("the items:")
-print(items)
+agents = [a,b]
+print("the players:", a, b)
+items = discretization_procedure([a, b], 0.2)
+print("the items:", items)
 #each player's values to the items
 for i in range(6):
     print("item {}: from {}, to {}: a's value {}, b's value {}\n".format(i, items[i], items[i + 1],a.eval(items[i], items[i + 1]), b.eval(items[i], items[i + 1])))
