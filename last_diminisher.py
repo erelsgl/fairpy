@@ -19,7 +19,6 @@ from typing import *
 import logging
 logger = logging.getLogger(__name__)
 
-
 def last_diminisher(agents: List[Agent])->Allocation:
     """
     :param agents: a list of Agent objects.
