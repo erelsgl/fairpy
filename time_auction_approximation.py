@@ -214,7 +214,7 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
 
     logger.info("For every agent i in S, ask i to divide [0, 1] into 2n intervals of equal worth")
     ############ a ? s
-    for a in agents:
+    for a in s:
         start = 0
         for i in range(0,2*n):
             end = a.mark(start, a.cake_value()/(2*n))
