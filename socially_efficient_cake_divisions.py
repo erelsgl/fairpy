@@ -214,16 +214,16 @@ def maximize_expression(t:int , num_of_players:int , S:List[int], T:List[int], m
         for s in range(t + 1):
             #the value of items s to t according to player k
             v1 = aprox_v(s,t,k,matrix)
-            logger.info("The value of items {} to {} according to player {} = {}".format(s,t,k,v1))
+            logger.debug("The value of items {} to {} according to player {} = {}".format(s,t,k,v1))
             #the value of items player k currently own
             v2 = aprox_v(S[k], T[k], k, matrix)
-            logger.info("The value of items player {} currently own = {}".format(k,v2))
+            logger.debug("The value of items player {} currently own = {}".format(k,v2))
             #the value of  all the parts from s to t that other players than k obtain
             v3 = V_without_k(s,t,S,T,matrix, k)
-            logger.info("the value of  all the parts from {} to {} that other players than {} obtain = {}".format(s,t,k,v3))
+            logger.debug("the value of  all the parts from {} to {} that other players than {} obtain = {}".format(s,t,k,v3))
             #value = aprox_v(s, t, k, matrix) - 2*(aprox_v(S[k], T[k], k, matrix) + V(s,t,S,matrix))
             net_value = v1 - 2 * (v2 + v3)
-            logger.info("Value minus twice the cost = {}".format(net_value))
+            logger.debug("Value minus twice the cost = {}".format(net_value))
             if (net_value > max):
                 max = net_value
                 k_tag = k
@@ -255,9 +255,9 @@ def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items
 
     #the main loop of the algorithm
     for t in range(0, num_of_items):
-        logger.info("------%d iteration------",t)
+        logger.debug("------%d iteration------",t)
         maximum = maximize_expression(t, num_of_players, S, T, matrix)
-        logger.info("------maximize values: maximum: %f, k': %f, s': %f------\n", maximum[0], maximum[1], maximum[2])
+        logger.debug("------maximize values: maximum: %f, k': %f, s': %f------\n", maximum[0], maximum[1], maximum[2])
         while maximum[0] >= 0:
             k_tag = maximum[1]
             s_tag = maximum[2]
@@ -289,9 +289,20 @@ def divide(agents: List[Agent], epsilon:float) -> Allocation:
     > Bob gets [(0.8, 1.7914285714285716)] with value 0.60
     <BLANKLINE>
     """
+    logger.info("\nStep 1: Discretizing the cake to parts with value at most epsilon=%f",epsilon)
     items = discretization_procedure(agents, epsilon)
+    logger.info("  Discretized cake: ")
+    logger.info(items)
+
+    logger.info("\nStep 2: Evaluation")
     matrix = get_players_valuation(agents, items)
+    logger.info("  Agents' values: ")
+    for line in matrix:
+        logger.info(line)
+
+    logger.info("\nStep 3: Discrete allocation")
     result = discrete_utilitarian_welfare_approximation(matrix, items)
+
     allocation = Allocation(agents)
     num_of_players = len(result[0])
     for j in range(num_of_players):
