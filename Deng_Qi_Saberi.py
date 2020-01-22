@@ -46,14 +46,14 @@ class Simplex_Solver:
             raise ValueError("Invalid triplet")
 
         # in order to get the right values and partition, the triplet is converted back to the right proportion
-
-        # reversing the indices to a proper partition
         partition = []
         counter = 0
         for i in range(len(triplet)):
-            partition[i] = self.epsilon * (triplet[i] + counter)
+            partition.append(self.epsilon * (triplet[i] + counter))
             counter += triplet[i]
-        return np.argmax(self.agents[index_of_agent].partition_values(partition))
+        result = np.argmax(self.agents[index_of_agent].partition_values(partition))
+        logger.info("agent %s picked piece num %d, in partition", self.agents[index_of_agent].name(), result, triplet)
+        return result
 
     def label(self, triplet):
         """
@@ -65,9 +65,18 @@ class Simplex_Solver:
         if sum(triplet) != self.N or len(triplet) != 3:
             raise ValueError("Invalid triplet")
         # according to the formula, sum up the product of i * Xi(the i'th element in a triplet), and then return mod 3
-        return sum([i * triplet[i] for i in range(len(triplet))]) % 3
+        label = sum([i * triplet[i] for i in range(len(triplet))]) % 3
+        logger.info("the vertex(%d,%d,%d) is labeled for agent %s", triplet[0], triplet[1], triplet[2], self.agents[label].name())
+        return label
 
     def color_at_label(self, triplet):
+        """
+        function that gets a triplet representing a vertex in the simplex, and returns the color it gets from
+        the right agent, the one's who has the same label.
+        :param triplet: triplet of integers, represent a partition of the cake.
+        :return: a color, an integer between the group {0,1,2}, which represent the cake piece number
+        """
+
         if sum(triplet) != self.N or len(triplet) != 3:
             raise ValueError("Invalid triplet")
         right_agent_index = self.label(triplet)
@@ -86,10 +95,10 @@ class Simplex_Solver:
         """
 
         # find the all valid x's inside the boundaries of the polygon
-        iterate = [x for x in range(self.N) if self.N - i1 - k1 >= x >= self.N - i2 - k2]
+        iterate = [x for x in range(self.N - i1 - k1) if x >= self.N - i2 - k2]
 
-        for x in iterate:
-            self.color_at_label(i1, x, self.N - x - i1)
+        # for x in iterate:
+        # color = self.color_at_label(i1, x, self.N - x - i1) if self.N - x - i1 < k2 else continue
 
 
         return 0
@@ -111,19 +120,22 @@ class Simplex_Solver:
 
         # if the indices we still check define a group of 4 vertices, find a proper triangle and return its
         if i2 - i1 == 1 and k2 - k1 == 1:
-            print("end of recursive call, let's finally find a proper partition")
+            logger.info("end of recursive call, let's finally find a proper partition")
             vertex1_color = self.color_at_label([i1, self.N - i1 - k1, k1])
             vertex2_color = self.color_at_label([i1, self.N - i1 - k1 - 1, k1 + 1])
             vertex3_color = self.color_at_label([i1 + 1, self.N - i1 - k1 - 1, k1])
             # there is no need to develop the last vertex
             # if the triangle is the wrong triangle and two vertices is in same color, return vertex4 indices
             if vertex1_color == vertex2_color or vertex2_color == vertex3_color or vertex3_color == vertex1_color:
+                logger.info("we found a division that is envy-free-approximation")
                 return [i1 + 1, self.N - i1 - k1 - 2, k1 + 1]
             # if its the right triangle, return one of its vertices
             else:
+                logger.info("we found a division that is envy-free-approximation")
                 return [i1 + 1, self.N - i1 - k1 - 1, k1]
         else:
             # pick the max between the two, so we can cut by half the input size
+            logger.info("we are checking for the next polygon to recurse on it")
             if i2 - i1 >= k2 - k1:
                 i3 = int((i2 - i1) / 2)
                 # compute the amount of swaps in the halved polygon, and if it has non-zero index then recurse on it
@@ -165,10 +177,11 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
     # solver returns a vertex, which represent a proper partition of the segment
     triplet = solver.recursive_algorithm1(0, solver.N, 0, solver.N)
     # reversing the indices to a proper partition
+    logger.info("we found a triplet of indices that represent a proper envy-free-approximation partition")
     or_indices = []
     counter = 0
     for i in range(len(triplet)):
-        or_indices[i] = solver.epsilon * (triplet[i] + counter)
+        or_indices.append(solver.epsilon * (triplet[i] + counter))
         counter += triplet[i]
     first_index = solver.label(triplet)
     second_index = (first_index + 1) % 3
@@ -178,7 +191,7 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
     if first_color_index == 0:
         # then allocate to him his choice
         allocation.set_piece(first_index, [(0, or_indices[0])])
-
+        logger.info("%s gets the the piece [%f,%f].", solver.agents[first_index].name(), 0, or_indices[0])
         # find which of the next two has more envious between the leftovers pieces, and let him be second
         options = [(or_indices[0], or_indices[1]), (or_indices[1], n)]
         sec_dif = agents[second_index].eval(or_indices[0], or_indices[1]) - agents[second_index].eval(or_indices[1], n)
@@ -188,15 +201,19 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
 
         # define which option goes to the second as first priority
         max_option = options[np.argmax(agents[second].eval(start, end) for (start, end) in options)]
+
         min_option = options[np.argmin(agents[second].eval(start, end) for (start, end) in options)]
 
         # allocate both players
         allocation.set_piece(second, options[max_option])
+        logger.info("%s gets the the piece [%f,%f].", solver.agents[second].name(), max_option[0], max_option[1])
         allocation.set_piece(third, options[min_option])
+        logger.info("%s gets the the piece [%f,%f].", solver.agents[third].name(), min_option[0], min_option[1])
 
     elif first_color_index == 1:
         # same things happens, just for another option
         allocation.set_piece(first_index, [(or_indices[0], or_indices[1])])
+        logger.info("%s gets the the piece [%f,%f].", solver.agents[first_index].name(), or_indices[0], or_indices[1])
 
         # find which of the next two has more envious between the leftovers pieces, and let him be second
         options = [(0, or_indices[0]), (or_indices[1], n)]
@@ -211,10 +228,13 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
 
         # allocate both players
         allocation.set_piece(second, options[max_option])
+        logger.info("%s gets the the piece [%f,%f].", solver.agents[second].name(), max_option[0], max_option[1])
         allocation.set_piece(third, options[min_option])
+        logger.info("%s gets the the piece [%f,%f].", solver.agents[third].name(), min_option[0], min_option[1])
     else:
         # same things happens, just for another option
         allocation.set_piece(first_index, [(or_indices[1], n)])
+        logger.info("%s gets the the piece [%f,%f].", solver.agents[first_index].name(), or_indices[1], n)
 
         # find which of the next two has more envious between the leftovers pieces, and let him be second
         options = [(0, or_indices[0]), (or_indices[0], or_indices[1])]
@@ -229,5 +249,7 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
 
         # allocate both players
         allocation.set_piece(second, options[max_option])
+        logger.info("%s gets the the piece [%f,%f].", solver.agents[second].name(), max_option[0], max_option[1])
         allocation.set_piece(third, options[min_option])
+        logger.info("%s gets the the piece [%f,%f].", solver.agents[third].name(), min_option[0], min_option[1])
     return allocation
