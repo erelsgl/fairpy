@@ -32,6 +32,7 @@ class Simplex_Solver:
         # reshape the size of base cell to be 1, and therefore the size is the cake size divide to the new epsilon
         self.N = n/x
         self.agents = agents
+        logger.info("finish initializing the simplex solver")
 
     def color(self, index_of_agent, triplet):
         """
@@ -45,8 +46,13 @@ class Simplex_Solver:
             raise ValueError("Invalid triplet")
 
         # in order to get the right values and partition, the triplet is converted back to the right proportion
-        partition = [i * self.epsilon for i in range(len(triplet))]
 
+        # reversing the indices to a proper partition
+        partition = []
+        counter = 0
+        for i in range(len(triplet)):
+            partition[i] = self.epsilon * (triplet[i] + counter)
+            counter += triplet[i]
         return np.argmax(self.agents[index_of_agent].partition_values(partition))
 
     def label(self, triplet):
@@ -67,7 +73,25 @@ class Simplex_Solver:
         right_agent_index = self.label(triplet)
         return self.color(right_agent_index, triplet)
 
-    def index(self, quartet):
+    def index(self, i1, i2, k1, k2):
+        """
+        this function calculate how much swaps there is from color num. 0 to color num. 1, and return 0 if its
+        sums to zero, and 1 otherwise.
+
+        :param i1: the lower boundary of the first index polygon.
+        :param i2: the upper boundary of the first index polygon.
+        :param k1: the lower boundary of the second index polygon.
+        :param k2: the upper boundary of the second index polygon.
+        :return: 1 if it has non-zero index, and 0 if it has zero index
+        """
+
+        # find the all valid x's inside the boundaries of the polygon
+        iterate = [x for x in range(self.N) if self.N - i1 - k1 >= x >= self.N - i2 - k2]
+
+        for x in iterate:
+            self.color_at_label(i1, x, self.N - x - i1)
+
+
         return 0
 
     def recursive_algorithm1(self, i1, i2, k1, k2):
@@ -138,18 +162,24 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
     # init the solver with simplex, with the approximation value, cake length and agents's list
     solver = Simplex_Solver(epsilon, n, agents)
 
-    # solver returns a partition of the segment
+    # solver returns a vertex, which represent a proper partition of the segment
     triplet = solver.recursive_algorithm1(0, solver.N, 0, solver.N)
-    or_indices = [solver.epsilon * index for index in triplet]
+    # reversing the indices to a proper partition
+    or_indices = []
+    counter = 0
+    for i in range(len(triplet)):
+        or_indices[i] = solver.epsilon * (triplet[i] + counter)
+        counter += triplet[i]
     first_index = solver.label(triplet)
     second_index = (first_index + 1) % 3
     third_index = (first_index + 2) % 3
     first_color_index = solver.color(first_index, triplet)
+
     if first_color_index == 0:
         # then allocate to him his choice
         allocation.set_piece(first_index, [(0, or_indices[0])])
 
-        # find which of the next two has more enviness between the leftovers pieces, and let him be second
+        # find which of the next two has more envious between the leftovers pieces, and let him be second
         options = [(or_indices[0], or_indices[1]), (or_indices[1], n)]
         sec_dif = agents[second_index].eval(or_indices[0], or_indices[1]) - agents[second_index].eval(or_indices[1], n)
         thr_dif = agents[third_index].eval(or_indices[0], or_indices[1]) - agents[third_index].eval(or_indices[1], n)
@@ -157,7 +187,7 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
         third = second_index if abs(sec_dif) <= abs(thr_dif) else third_index
 
         # define which option goes to the second as first priority
-        max_option = options[np.argmax(agents[second].eval(start, end) for (start,end) in options)]
+        max_option = options[np.argmax(agents[second].eval(start, end) for (start, end) in options)]
         min_option = options[np.argmin(agents[second].eval(start, end) for (start, end) in options)]
 
         # allocate both players
@@ -168,7 +198,7 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
         # same things happens, just for another option
         allocation.set_piece(first_index, [(or_indices[0], or_indices[1])])
 
-        # find which of the next two has more enviness between the leftovers pieces, and let him be second
+        # find which of the next two has more envious between the leftovers pieces, and let him be second
         options = [(0, or_indices[0]), (or_indices[1], n)]
         sec_dif = agents[second_index].eval(0, or_indices[0]) - agents[second_index].eval(or_indices[1], n)
         thr_dif = agents[third_index].eval(0, or_indices[0]) - agents[third_index].eval(or_indices[1], n)
@@ -186,7 +216,7 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
         # same things happens, just for another option
         allocation.set_piece(first_index, [(or_indices[1], n)])
 
-        # find which of the next two has more enviness between the leftovers pieces, and let him be second
+        # find which of the next two has more envious between the leftovers pieces, and let him be second
         options = [(0, or_indices[0]), (or_indices[0], or_indices[1])]
         sec_dif = agents[second_index].eval(0, or_indices[0]) - agents[second_index].eval(or_indices[0], or_indices[1])
         thr_dif = agents[third_index].eval(0, or_indices[0]) - agents[third_index].eval(or_indices[0], or_indices[1])
