@@ -94,14 +94,27 @@ class Simplex_Solver:
         :return: 1 if it has non-zero index, and 0 if it has zero index
         """
 
-        # find the all valid x's inside the boundaries of the polygon
-        iterate = [x for x in range(self.N - i1 - k1) if x >= self.N - i2 - k2]
+        # as the essay says, we listing an array with proper j, which related to the segment we going to iterate over
+        proper_js = [j for j in range(self.N - i1 - k1 + 1) if j >= self.N - i2 - k2]
+        proper_js.sort()
+        counter = 0
+        for j in proper_js:
+            # if this j can't fit into the segment, skip it
+            if self.N - i1 - j > k2 or self.N - i1 - j < k1:
+                continue
+            # if its the first element in the segment, just update the lats_color and don't check
+            if j == np.argmin(proper_js):
+                last_color = self.color_at_label(i1, j, self.N - i1 - j)
+                continue
+            else:
+                # check the next vertex in the segment, and update the counter according to changes of colors
+                check_color = self.color_at_label(i1, j, self.N - i1 - j)
+                if last_color == 0 and check_color == 1:
+                    counter += 1
+                elif last_color == 1 and check_color == 0:
+                    counter -= 1
 
-        # for x in iterate:
-        # color = self.color_at_label(i1, x, self.N - x - i1) if self.N - x - i1 < k2 else continue
-
-
-        return 0
+        return 0 if counter == 0 else 1
 
     def recursive_algorithm1(self, i1, i2, k1, k2):
         """
