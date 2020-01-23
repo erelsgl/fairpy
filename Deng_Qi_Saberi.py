@@ -175,11 +175,26 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
     :param epsilon: the approximation parameter
     :return: a proportional and envy-free-approximation allocation.
 
+    >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
+    >>> George = PiecewiseConstantAgent([11,55], "George")
+    >>> elaborate_simplex_solution([George, Alice], 0.3)
+    >
+
+    <BLANKLINE>
+    >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
+    >>> George = PiecewiseConstantAgent([11,55], "George")
+    >>> Abraham = PiecewiseConstantAgent([4,1,1], "Abraham")
+    >>> elaborate_simplex_solution([Abraham, George, Alice], 0)
+
+    >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
+    >>> George = PiecewiseConstantAgent([11,55], "George")
+    >>> Abraham = PiecewiseConstantAgent([4,1,1], "Abraham")
+    >>> elaborate_simplex_solution([Abraham, George, Alice], 0.5)
     """
     # checking parameters validity
     num_of_agents = len(agents)
-    if num_of_agents != 3:
-        raise ValueError("This simplex solution works only for three agents")
+    if num_of_agents != 3 or epsilon == 0:
+        raise ValueError("This simplex solution works only for 3 agents, with approximation epsilon greater than 0")
 
     allocation = Allocation(agents)
     n = max(agent.cake_length() for agent in agents)
@@ -266,3 +281,5 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
         allocation.set_piece(third, options[min_option])
         logger.info("%s gets the the piece [%f,%f].", solver.agents[third].name(), min_option[0], min_option[1])
     return allocation
+
+# if __name__ == '__main__':
