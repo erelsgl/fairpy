@@ -178,13 +178,14 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
     >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
     >>> George = PiecewiseConstantAgent([11,55], "George")
     >>> elaborate_simplex_solution([George, Alice], 0.3)
-    >
+    ValueError: This simplex solution works only for 3 agents, with approximation epsilon greater than 0
 
     <BLANKLINE>
     >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
     >>> George = PiecewiseConstantAgent([11,55], "George")
     >>> Abraham = PiecewiseConstantAgent([4,1,1], "Abraham")
     >>> elaborate_simplex_solution([Abraham, George, Alice], 0)
+    ValueError: This simplex solution works only for 3 agents, with approximation epsilon greater than 0
 
     >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
     >>> George = PiecewiseConstantAgent([11,55], "George")
@@ -197,7 +198,7 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
         raise ValueError("This simplex solution works only for 3 agents, with approximation epsilon greater than 0")
 
     allocation = Allocation(agents)
-    n = max(agent.cake_length() for agent in agents)
+    n = max([agent.cake_length() for agent in agents])
 
     # init the solver with simplex, with the approximation value, cake length and agents's list
     solver = Simplex_Solver(epsilon, n, agents)
@@ -282,4 +283,8 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
         logger.info("%s gets the the piece [%f,%f].", solver.agents[third].name(), min_option[0], min_option[1])
     return allocation
 
-# if __name__ == '__main__':
+
+if __name__ == '__main__':
+    import doctest
+    (failures, tests) = doctest.testmod(report=True)
+    print("{} failures, {} tests".format(failures, tests))
