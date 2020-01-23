@@ -96,12 +96,17 @@ class Agent(ABC):
         values.append(self.eval(partition[-1], self.cake_length()))
         return values
 
-class PiecewiseConstantAgent1Sgemant(Agent):
+class PiecewiseConstantAgent1Sgement(Agent):
     def __init__(self, values:list, name:str=None):
         super().__init__(name)
         self.values = np.array(values)
         self.length = len(values)
         self.total_value_cache = sum(values)
+    def __init__(self, agent:Agent):
+        super().__init__(agent.name())
+        self.values = np.array(agent.values)
+        self.length = len(agent.values)
+        self.total_value_cache = sum(agent.values)
 
     def __repr__(self):
         return "{} is a piecewise-constant agent with values {} and total value={}".format(self.my_name,
@@ -203,7 +208,6 @@ class PiecewiseConstantAgent1Sgemant(Agent):
 
         # Value is too high: return None
         return None
-
 
 class PiecewiseConstantAgent(Agent):
     """
@@ -462,7 +466,7 @@ class PiecewiseUniformAgent(Agent):
 
 
 if __name__ == "__main__":
-    a =PiecewiseConstantAgent1Sgemant([10,87])
+    a =PiecewiseConstantAgent1Sgement([10, 87])
     print(a.mark(0.25,0.7))
     #import doctest
     #(failures,tests) = doctest.testmod(report=True)
