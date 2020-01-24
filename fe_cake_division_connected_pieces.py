@@ -13,7 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def findRemainIntervals(allocation :Allocation):
+def findRemainIntervals(allocation :Allocation)->List[tuple]:
     """
     Functoin that return the remain intervals from the allocation in (0,1)
     :param allocation: an Allocation
@@ -53,7 +53,7 @@ def findRemainIntervals(allocation :Allocation):
     return remain
 
 
-def checkWhile(agents: List[Agent],allocation :Allocation,remain,epsilon):
+def checkWhile(agents: List[Agent],allocation :Allocation,remain:List[tuple],epsilon:float)->tuple:
     """
     Check the while condition that in the algorithm
     :param agents: A list of agents
@@ -120,7 +120,7 @@ def checkWhile(agents: List[Agent],allocation :Allocation,remain,epsilon):
     return None
 
 
-def getC(agents: List[Agent],allocation :Allocation,epsilon,interval):
+def getC(agents: List[Agent],allocation :Allocation,epsilon:float,interval:tuple)->List[Agent]:
     """
     Get the C group from the Algorithm
     :param agents: A list of agents
@@ -159,7 +159,7 @@ def getC(agents: List[Agent],allocation :Allocation,epsilon,interval):
     return newAgents
 
 
-def findRb(agent:Agent , allocation:Allocation,epsilon:float,index,interval:tuple,n)->float:
+def findRb(agent:Agent , allocation:Allocation,epsilon:float,index:int,interval:tuple,n:int)->float:
     """
     Find the leftmost number:Rb that hold the equation of evaluation to the agent piece + (epsilon/n^2)
               is equal to the evaluation to the [l,Rb] when l is the left of the interval
@@ -187,13 +187,20 @@ def findRb(agent:Agent , allocation:Allocation,epsilon:float,index,interval:tupl
     return agent.mark(interval[0],currentPieceEval + epsilon/(n*n))
 
 
-def findPiece(reamin:List[tuple],attr , leftOrRight):
+def findPiece(reamin:List[tuple],attr:float , leftOrRight:int)->tuple:
     """
     Find the piece that her leftOrRight equal to attr
     :param reamin:The reamin intervals in (0,1)
-    :param attr:
+    :param attr: the float we search
     :param leftOrRight: left or right
     :return:piece that her leftOrRight equal to attr
+    >>> remain = [(0.1,0.2),(0.3,0.7),(0.9,1)]
+    >>> print(findPiece(remain , 0.1,0))
+    (0.1, 0.2)
+    >>> print(findPiece(remain , 0.7,1))
+    (0.3, 0.7)
+    >>> print(findPiece(remain,0,0))
+    None
     """
     for piece in reamin:
         if piece[leftOrRight]==attr:
@@ -201,12 +208,28 @@ def findPiece(reamin:List[tuple],attr , leftOrRight):
     return None
 
 
-def setRemain(allocation:Allocation,agents: List[Agent]):
+def setRemain(allocation:Allocation,agents: List[Agent])->List[List[tuple]]:
     """
     Set the remain intervals to the agents
     :param allocation: An partial allocation of (0,1)
     :param agents: A list of agents
     :return: A fully allocation of (0,1)
+    >>> Alice = PiecewiseConstantAgent([33, 33], "Alice")
+    >>> George = PiecewiseConstantAgent([5, 5], "George")
+    >>> alloc = Allocation([Alice, George])
+    >>> agents = [Alice, George]
+    >>> alloc.set_piece(1, [(0.2, 0.3)])
+    >>> alloc.set_piece(0, [(0.4, 0.73)])
+    >>> print(alloc)
+    > Alice gets [(0.4, 0.73)] with value 10.890
+    > George gets [(0.2, 0.3)] with value 0.500
+    <BLANKLINE>
+    >>> setRemain(alloc,agents)
+    [[(0.4, 0.73), (0.73, 1)], [(0.2, 0.3), (0.3, 0.4), (0, 0.2)]]
+    >>> print(alloc)
+    > Alice gets [(0.4, 0.73), (0.73, 1)] with value 19.800
+    > George gets [(0.2, 0.3), (0.3, 0.4), (0, 0.2)] with value 2.000
+    <BLANKLINE>
     """
     remain = findRemainIntervals(allocation)
     choice = random.choice(('Left', 'Right'))
@@ -244,7 +267,7 @@ def setRemain(allocation:Allocation,agents: List[Agent]):
 
     return partialAlloc
 
-def intervalUnionFromList(intervals:List[tuple]):
+def intervalUnionFromList(intervals:List[tuple])->tuple:
     """
     Uniting a list of intervals into one
     :param intervals: A list of adjacent intervals
@@ -262,13 +285,26 @@ def intervalUnionFromList(intervals:List[tuple]):
     return (minimum,maximum)
 
 
-def allocationToOnePiece(alloction:List[List[tuple]],agents:List[Agent]):
+def allocationToOnePiece(alloction:List[List[tuple]],agents:List[Agent])->Allocation:
     """
     Get a fully allocation of (0,1) that every agent have a list of adjacent pieces and return allocation
         of the union of each list
     :param alloction: An fully allocation of (0,1)
     :param agents: A list of agents
     :return: New alloction of (0,1)
+    >>> Alice = PiecewiseConstantAgent([33, 33], "Alice")
+    >>> George = PiecewiseConstantAgent([5, 5], "George")
+    >>> alloc = Allocation([Alice, George])
+    >>> agents = [Alice, George]
+    >>> alloc.set_piece(1, [(0.2, 0.3)])
+    >>> alloc.set_piece(0, [(0.4, 0.73)])
+    >>> print(alloc)
+    > Alice gets [(0.4, 0.73)] with value 10.890
+    > George gets [(0.2, 0.3)] with value 0.500
+    <BLANKLINE>
+    >>> print(setRemain(alloc,agents),agents)
+    [[(0.4, 0.73), (0.73, 1)], [(0.2, 0.3), (0.3, 0.4), (0, 0.2)]] [Alice is a piecewise-constant agent with values [33 33] and total value=66, George is a piecewise-constant agent with values [5 5] and total value=10]
+
     """
     I = Allocation(agents)
     for pieces,i in  zip(alloction,range(len(alloction))):
@@ -277,7 +313,7 @@ def allocationToOnePiece(alloction:List[List[tuple]],agents:List[Agent]):
         I.set_piece(i,[intervalUnionFromList(pieces)])
     return I
 
-def agentNormalize(agents: List[Agent]):
+def agentNormalize(agents: List[Agent])->List[Agent]:
     """
     replace all the agents with PiecewiseConstantAgent1Sgement that normalize to (0,1) segment
     :param agents: a list of agents that need to be normalized
@@ -288,7 +324,7 @@ def agentNormalize(agents: List[Agent]):
     return agents
 
 
-def ALG(agents: List[Agent],epsilon)->Allocation:
+def ALG(agents: List[Agent],epsilon:float)->Allocation:
     """
         ALG: Algorithm that find Fair and Efficient Cake Division with Connected Pieces
 
@@ -346,7 +382,7 @@ def ALG(agents: List[Agent],epsilon)->Allocation:
     logger.info("Associate unassigned intervals")
     return allocationToOnePiece(setRemain(allocation,agents),agents)
 
-def efCheck(allocation:Allocation, epsilon):
+def efCheck(allocation:Allocation, epsilon:float)->str:
     """
     Check if tha allocation is (3 + o(1))-approximately envy-free allocation.
     :param allocation:the alloction we check
