@@ -4,9 +4,6 @@ Programmer: Ofec Israel
 
 """
 
-
-
-
 import agents
 from agents import PiecewiseLinearAgent
 from agents import PiecewiseUniformAgent
@@ -18,7 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 
-
+"""
+Get the intersection of two intervals
+"""
 def intervals_intersection(a,b):
     intervals = []
     for i in a:
@@ -29,9 +28,15 @@ def intervals_intersection(a,b):
                 
     return intervals
 
+"""
+Get first element
+"""
 def first_element(i):
     return i[0]
 
+"""
+Net implementation
+"""
 class Edge(object):
   def __init__(self, u, v, w):
     self.source = u
@@ -103,9 +108,11 @@ def algorithm2(agents):
     
     >>> print(allocations)
     
-    [('agent 0', [(0.0, 0.15000000000000002), (1.0500000000000003, 1.2000000000000002), (0.1, 0.535), (3.1450000000000005, 3.5800000000000005), (0.39, 0.705), (2.5949999999999998, 2.9099999999999997)]), ('agent 1', [(0.30000000000000004, 0.45000000000000007), (0.7500000000000001, 0.9000000000000001), (0.9700000000000001, 1.4050000000000002), (2.2750000000000004, 2.7100000000000004), (1.02, 1.335), (1.9649999999999999, 2.28)]), ('agent 2', [(0.15000000000000002, 0.30000000000000004), (0.9000000000000001, 1.0500000000000003), (0.535, 0.9700000000000001), (2.7100000000000004, 3.1450000000000005), (0.705, 1.02), (2.28, 2.5949999999999998)])]
-    
+    algorithm2
+    > a gets [(0.0, 0.2), (1.0, 1.2000000000000002), (0.2, 0.3), (0.7, 0.7999999999999998)] with value 2.30
+    > b gets [(0.2, 0.4), (0.8, 1.0), (0.3, 0.39999999999999997), (0.5999999999999999, 0.7)] with value 2.55
     """
+    print("algorithm2")
     N = len(agents)
     logger.info("N is: %d", N)
     
@@ -147,25 +154,15 @@ def algorithm2(agents):
         results.set_piece(i, partitions[i])
         #results.append(('agent '+str(i), partitions[i]))
     return results
-    
+
 """
 agents: list of PiecewiseUniformAgent
 cake: list of intervals
 allocations: should be empty
+
+called by algorithm1
 """
-def algorithm1(agents, cake, allocations = {}):
-    """"
-    >>> a = PiecewiseUniformAgent([(0,0.39)], "a")
-    >>> b = PiecewiseUniformAgent([(0,0.6)], "b")
-    >>> c = PiecewiseUniformAgent([(0,0.1)], "c")
-    >>> cake = [(0,1)]
-    >>> agents = [a,b,c] 
-    >>> allocations = algorithm1(agents, cake)
-    >>> print(allocations)
-    {c is a piecewise-uniform agent with desired regions [(0, 0.1)] and total value=0.1: [(0, 0.1)], a is a piecewise-uniform agent with desired regions [(0, 0.39)] and total value=0.39: [(0.1, 0.35)], b is a piecewise-uniform agent with desired regions [(0, 0.6)] and total value=0.6: [(0.35, 0.39), (0.39, 0.6)]}
-    
-    """
-    print("algorithm1")
+def algorithm1_recursive(agents, cake, allocations = {}):
     # all agents got their cake
     if not agents:
         logger.info("Done")
@@ -270,7 +267,6 @@ def algorithm1(agents, cake, allocations = {}):
         points.append((i[1], 'end', 'cake'))
     
     points = sorted(points, key = first_element)
-    print(points)
     newCake = []
     lastStartCake = None
     inAgentsInterval = 0
@@ -294,7 +290,7 @@ def algorithm1(agents, cake, allocations = {}):
                     lastStartCake = p[0]
     
     #recurse
-    algorithm1([item for item in agents if item not in minSubGroup], newCake, allocations)
+    algorithm1_recursive([item for item in agents if item not in minSubGroup], newCake, allocations)
     
     #make Allocation object
     result = Allocation(agents)
@@ -304,8 +300,41 @@ def algorithm1(agents, cake, allocations = {}):
         result.set_piece(agents.index(agent), allocations[agent])
 
     return result
-    
 
-if __name__ == "__main__":
-    #test()
-    print("main")
+
+def algorithm1(agents):
+    """"
+    >>> a = PiecewiseUniformAgent([(0,0.39)], "a")
+    >>> b = PiecewiseUniformAgent([(0,0.6)], "b")
+    >>> c = PiecewiseUniformAgent([(0,0.1)], "c")
+    >>> cake = [(0,1)]
+    >>> agents = [a,b,c] 
+    >>> allocations = algorithm1(agents, cake)
+    >>> print(allocations)
+    
+    algorithm1
+    > a gets [(0.1, 0.35)] with value 0.25
+    > b gets [(0.35, 0.39), (0.39, 0.6)] with value 0.25
+    > c gets [(0, 0.1)] with value 0.10
+    
+    """
+    print("algorithm1")
+    #get the cake
+    min_cake = None
+    max_cake = None
+    for agent in agents:
+        for region in agent.desired_regions:
+            if min_cake == None:
+                min_cake = region[0]
+                max_cake = region[1]
+                
+            if min_cake > region[0]:
+                min_cake = region[0]
+            if max_cake < region[1]:
+                max_cake = region[1]
+        
+    
+    allocations = {}
+    cake = [(min_cake,max_cake)]
+    return algorithm1_recursive(agents, cake, allocations)
+    

@@ -24,14 +24,14 @@ def test():
     cake = [(0,1)]
     agents = [a,b,c]
     
-    allocations = algorithm1(agents, cake)
+    allocations = algorithm1(agents)
     
     print(allocations)
 
     
     a = PiecewiseLinearAgent([(0,0.2, 1,1)], "a")
     b = PiecewiseLinearAgent([(0.2,0.3, 1,1)], "b")
-    agents = [a,b,c]
+    agents = [a,b]
     
     allocations = algorithm2(agents)
     
@@ -39,5 +39,5 @@ def test():
     
 
 if __name__ == "__main__":
-    test()
     print("main")
+    test()
