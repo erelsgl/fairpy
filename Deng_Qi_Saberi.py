@@ -29,7 +29,7 @@ class Simplex_Solver:
         while x > epsilon:
             x /= 2
         self.epsilon = x
-        # reshape the size of base cell to be 1, and therefore the size is the cake size divide to the new epsilon
+        # reshape the size of base cell to be 1, and therefore the size is the cake size divide by the new epsilon
         self.N = n/x
         self.agents = agents
         logger.info("finish initializing the simplex solver")
