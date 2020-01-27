@@ -24,6 +24,13 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def stringify_agent_piece_graph(g: Graph):
+    """ Convert an agent-piece graph into a string, for display and testing """
+    return str([(agent.name(), piece, data) for (agent,piece,data) in g.edges(data=True)])
+
+def stringify_edge_set(s: set):
+    """ Convert an agent-piece graph into a string, for display and testing """
+    return str(sorted([(agent.name(), piece) for (agent,piece) in s]))
 
 def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     """
@@ -36,7 +43,7 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     - Approximates the optimal welfare by a factor of 2.
 
     :param agents: A list of Agent objects.
-    :param piece_size: Size of an equally sized piece.
+    :param piece_size: Size of an equally sized piece (in the paper: l).
     :return: A cake-allocation, not necessarily all the cake will be allocated.
 
     The doctest will work when the set of edges will return according lexicographic order
@@ -51,8 +58,8 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     >>> Alice = PiecewiseConstantAgent([1, 1, 1, 1, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([3, 3, 3, 1, 1], "Bob")
     >>> equally_sized_pieces([Alice, Bob], 3 / 5)
-    > Bob gets [(0, 3)] with value 9.00
     > Alice gets [(2, 5)] with value 3.00
+    > Bob gets [(0, 3)] with value 9.00
     <BLANKLINE>
     """
     # > Bob gets [(0, 3)] with value 9.00
@@ -64,14 +71,17 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     if not 0 < piece_size <= 1:
         raise ValueError("Piece size must be between 0 and 1")
 
-    logger.info("Setting delta to 1 - [1 / l] * l.")
+    logger.info("Piece size (l) = %f", piece_size)
     delta = 1 - int(1 / piece_size) * piece_size
+    logger.info("Delta := 1 - floor(1 / l) * l = %f", delta)
 
-    logger.info("Create the partitions P0 = 0-l and Pd = delta-l.")
+    logger.info("Create the partitions P_0_l and P_d_l")
     # Creating the partition of the pieces that start from 0
     partition_0_l = create_partition(piece_size)
+    logger.info("  The partition P_0_l (l-sized pieces starting at 0) = %s", partition_0_l)
     # Creating the partition of the pieces that start from delta
     partition_delta_l = create_partition(piece_size, start=delta)
+    logger.info("  The partition P_d_l (l-sized pieces starting at delta) = %s", partition_delta_l)
     # Merging the partitions to one partition
     all_partitions = partition_0_l + partition_delta_l
 
@@ -91,14 +101,18 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
             evaluations[(agent, piece)] = agent.eval(start=piece[0], end=piece[1])
     # Create the matching graph
     # One side is the agents, the other side is the partitions and the weights are the evaluations
-    logger.info("Create the partition graphs G - P0 and G - Pd")
+    logger.info("Create the partition graphs G_0_l and G_d_l")
     g_0_l = create_matching_graph(agents, normalize_partitions_0_l, evaluations)
+    logger.info("  The graph G_0_l = %s", stringify_agent_piece_graph(g_0_l))
     g_delta_l = create_matching_graph(agents, normalize_partitions_delta_l, evaluations)
+    logger.info("  The graph G_d_l = %s", stringify_agent_piece_graph(g_delta_l))
 
     # Set the edges to be in order, (Agent, partition)
     logger.info("Compute maximum weight matchings for each graph respectively")
     edges_set_0_l = fix_edges(max_weight_matching(g_0_l))
+    logger.info("  The edges in G_0_l = %s", stringify_edge_set(edges_set_0_l))
     edges_set_delta_l = fix_edges(max_weight_matching(g_delta_l))
+    logger.info("  The edges in G_d_l = %s", stringify_edge_set(edges_set_delta_l))
 
     logger.info("Choose the heavier among the matchings")
     # Check which matching is heavier and choose it
@@ -108,7 +122,8 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
         edges_set = edges_set_0_l
 
     # Find the agents that are in the allocation that was chosen
-    chosen_agents = [edge[0] for edge in edges_set]
+    chosen_agents = [agent for (agent,piece) in edges_set]
+    chosen_agents.sort(key=lambda agent:agent.name())
     # Create allocation
     allocation = Allocation(chosen_agents)
     # Add the edges to the allocation
