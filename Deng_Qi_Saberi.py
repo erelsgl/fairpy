@@ -103,6 +103,13 @@ class SimplexSolver:
         >>> solver = SimplexSolver(1/31, 4, agents)
         >>> solver.color_at_label([19, 29, 80])
         2
+        >>> George = PiecewiseConstantAgent([0, 2, 4, 6], name="George")
+        >>> Abraham = PiecewiseConstantAgent([6, 4, 2, 0], name="Abraham")
+        >>> Hanna = PiecewiseConstantAgent([3, 3, 3, 3], name="Hanna")
+        >>> agents = [George, Abraham, Hanna]
+        >>> solver = SimplexSolver(1/2, 4, agents)
+        >>> solver.color_at_label([0,8,0])
+        1
 
         """
 
@@ -128,20 +135,20 @@ class SimplexSolver:
         >>> agents = [George, Abraham, Hanna]
         >>> solver = SimplexSolver(1/2, 4, agents)
         >>> solver.index(0, 4, 0, 8)
-        0
+        1
 
         """
 
         # as the essay says, we listing an array with proper j, which related to the segment we going to iterate over
-        proper_js = [j for j in range(self.N - i1 - k1 + 1) if j >= self.N - i2 - k2]
+        proper_js = [j for j in range(self.N - i1 - k1) if j >= self.N - i2 - k2]
         proper_js.sort(reverse=True)
         counter = 0
         # making sure to iterate on the smaller segment
         if i2 - i1 <= k2 - k1:
-            last_color = self.color_at_label([self.N - np.argmax(proper_js) - k1, np.argmax(proper_js), k1])
+            last_color = self.color_at_label([self.N - max(proper_js) - k1, max(proper_js), k1])
             for j in proper_js:
                 # if this j can't fit into the segment, skip it. also, don't check again the first element
-                if self.N - i1 - j > k2 or self.N - i1 - j < k1 or j == np.argmax(proper_js):
+                if self.N - i1 - j > k2 or self.N - i1 - j < k1 or j == max(proper_js):
                     continue
                 else:
                     # check the next vertex in the segment, and update the counter according to changes of colors
@@ -152,10 +159,10 @@ class SimplexSolver:
                         counter -= 1
                     last_color = check_color
         else:
-            last_color = self.color_at_label([i1, np.argmax(proper_js), self.N - i1 - np.argmax(proper_js)])
+            last_color = self.color_at_label([i1, max(proper_js), self.N - i1 - max(proper_js)])
             for j in proper_js:
                 # if this j can't fit into the segment, skip it. also, don't check again the first element
-                if self.N - k1 - j > i2 or self.N - k1 - j < i1 or j == np.argmax(proper_js):
+                if self.N - k1 - j > i2 or self.N - k1 - j < i1 or j == max(proper_js):
                     continue
                 # if its the first element in the segment, just update the last_color and don't check
                 else:
@@ -181,6 +188,14 @@ class SimplexSolver:
         :param k1: the lower bound of the third index.
         :param k2: the upper bound of the third index.
         :return: a triplet, which represent a vertex that has a proper approximation for an envy-free cake cutting
+
+        >>> George = PiecewiseConstantAgent([4, 6], name="George")
+        >>> Abraham = PiecewiseConstantAgent([6, 4], name="Abraham")
+        >>> Hanna = PiecewiseConstantAgent([3, 3], name="Hanna")
+        >>> agents = [George, Abraham, Hanna]
+        >>> solver = SimplexSolver(1/2, 2, agents)
+        >>> solver.recursive_algorithm1(0, solver.N, 0, solver.N)
+
         """
 
         # if the indices we still check define a group of 4 vertices, find a proper triangle and return its
@@ -202,7 +217,7 @@ class SimplexSolver:
             # pick the max between the two, so we can cut by half the input size
             logger.info("we are checking for the next polygon to recurse on it")
             if i2 - i1 >= k2 - k1:
-                i3 = int((i2 - i1) / 2)
+                i3 = int((i2 + i1) / 2)
                 # compute the amount of swaps in the halved polygon, and if it has non-zero index then recurse on it
                 if self.index(i1, i3, k1, k2) != 0:
                     self.recursive_algorithm1(i1, i3, k1, k2)
@@ -211,7 +226,7 @@ class SimplexSolver:
                     self.recursive_algorithm1(i3, i2, k1, k2)
             # the same routine, but with the third third index of the vertex.
             else:
-                k3 = int((k2 - k1) / 2)
+                k3 = int((k2 + k1) / 2)
                 if self.index(i1, i2, k1, k3) != 0:
                     self.recursive_algorithm1(i1, i2, k1, k3)
                 else:
@@ -322,6 +337,12 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
 
 
 if __name__ == '__main__':
-    import doctest
-    (failures, tests) = doctest.testmod(report=True)
-    print("{} failures, {} tests".format(failures, tests))
+    # import doctest
+    # (failures, tests) = doctest.testmod(report=True)
+    # print("{} failures, {} tests".format(failures, tests))
+    George = PiecewiseConstantAgent([4, 6], name="George")
+    Abraham = PiecewiseConstantAgent([6, 4], name="Abraham")
+    Hanna = PiecewiseConstantAgent([3, 3], name="Hanna")
+    agents = [George, Abraham, Hanna]
+    solver = SimplexSolver(1/2, 2, agents)
+    solver.recursive_algorithm1(0, solver.N, 0, solver.N)
