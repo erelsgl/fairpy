@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 class Simplex_Solver:
     def __init__(self, epsilon, n, agents):
         # finding a bit better approximation s.t its negative power of two
-        x = 1/2
+        x = 0.5
         while x > epsilon:
             x /= 2
         self.epsilon = x
@@ -98,22 +98,36 @@ class Simplex_Solver:
         proper_js = [j for j in range(self.N - i1 - k1 + 1) if j >= self.N - i2 - k2]
         proper_js.sort()
         counter = 0
-        for j in proper_js:
-            # if this j can't fit into the segment, skip it
-            if self.N - i1 - j > k2 or self.N - i1 - j < k1:
-                continue
-            # if its the first element in the segment, just update the lats_color and don't check
-            if j == np.argmin(proper_js):
-                last_color = self.color_at_label(i1, j, self.N - i1 - j)
-                continue
-            else:
-                # check the next vertex in the segment, and update the counter according to changes of colors
-                check_color = self.color_at_label(i1, j, self.N - i1 - j)
-                if last_color == 0 and check_color == 1:
-                    counter += 1
-                elif last_color == 1 and check_color == 0:
-                    counter -= 1
-
+        # making sure to iterate on the smaller segment
+        if i2 - i1 <= k2 - k1:
+            last_color = self.color_at_label([i1, np.argmin(proper_js), self.N - i1 - np.argmin(proper_js)])
+            for j in proper_js:
+                # if this j can't fit into the segment, skip it
+                if self.N - i1 - j > k2 or self.N - i1 - j < k1:
+                    continue
+                else:
+                    # check the next vertex in the segment, and update the counter according to changes of colors
+                    check_color = self.color_at_label([i1, j, self.N - i1 - j])
+                    if last_color == 0 and check_color == 1:
+                        counter += 1
+                    elif last_color == 1 and check_color == 0:
+                        counter -= 1
+                    last_color = check_color
+        else:
+            last_color = self.color_at_label([i1, np.argmin(proper_js), self.N - i1 - np.argmin(proper_js)])
+            for j in proper_js:
+                # if this j can't fit into the segment, skip it
+                if self.N - k1 - j > i2 or self.N - k1 - j < i1:
+                    continue
+                # if its the first element in the segment, just update the last_color and don't check
+                else:
+                    # check the next vertex in the segment, and update the counter according to changes of colors
+                    check_color = self.color_at_label([self.N - k1 - j, j, k1])
+                    if last_color == 0 and check_color == 1:
+                        counter += 1
+                    elif last_color == 1 and check_color == 0:
+                        counter -= 1
+                    last_color = check_color
         return 0 if counter == 0 else 1
 
     def recursive_algorithm1(self, i1, i2, k1, k2):
