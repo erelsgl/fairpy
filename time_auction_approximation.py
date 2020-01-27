@@ -266,7 +266,12 @@ def create_partition(size: float, start: float=0) -> List[Tuple[float, float]]:
     :param size: The size of the pieces.
     :param start: The location the pieces will start from.
     :return: A partition as described.
+
+    >>> create_partition(0.5, 0)
+    [(0, 0.5), (0.5, 1.0)]
+
     """
+    #print("create_partition: size- ", size, "start- ", start)
     res = []
     end = start + size
     # Iterate until we divide all the cake into pieces
@@ -275,6 +280,7 @@ def create_partition(size: float, start: float=0) -> List[Tuple[float, float]]:
         res.append((start, end))
         start = end
         end = start + size
+    #print("create_partition: return value- ", res)
     return res
 
 
@@ -286,6 +292,13 @@ def fix_edges(edges_set: Set[Tuple[Agent, Tuple[float, float]]]) -> Set[Tuple[Ag
     Each edge contains agent and a piece, this function will make sure the agent comes first in the edge.
     :param edges_set: A set of edges to fix.
     :return: A copy of the fixed set of edges.
+
+    >>> Alice = PiecewiseConstantAgent([100, 1], "Alice")
+    >>> Bob = PiecewiseConstantAgent([2, 90], "Bob")
+    >>> partitions = [(0, 1), (1, 2)]
+    >>> edges_set = {(Alice, (0, 1.4889))}
+    >>> fix_edges(edges_set)
+    {(Alice is a piecewise-constant agent with values [100   1] and total value=101, (0, 1.4889))}
     """
     ret = set()
     # Go over all the edges and check if they are in the right order
@@ -297,6 +310,7 @@ def fix_edges(edges_set: Set[Tuple[Agent, Tuple[float, float]]]) -> Set[Tuple[Ag
             # The Agent is first and we leave it like that
             ret.add((edge[0], edge[1]))
     # we return the set of edges when all the edges are in the right order of (Agent, partition)
+
     return ret
 
 
@@ -307,8 +321,11 @@ def change_partition(partition: List[tuple], t: int) -> List[tuple]:
     :param partition: The original partition.
     :param t: Defines the size of the new partition.
     :return: A partition with pieces with 2 ^ t size.
+
+    >>> change_partition([(0.0, 1.0), (1.0, 2.0)], 1)
+    [(0.0, 2.0)]
+
     """
-    #print("change partition: partition = ", partition, "t = ", t)
 
     ret = []
     # Go over all the original partitions with 2^t jumps
@@ -316,7 +333,6 @@ def change_partition(partition: List[tuple], t: int) -> List[tuple]:
         end = start + 2 ** t - 1
         # Add the new joined partition to the list
         ret.append((partition[start][0], partition[end][1]))
-    #print("change partition: return partition: ", ret)
     return ret
 
 
@@ -327,13 +343,19 @@ def calculate_weight(g: Graph, edges_set: Set[Tuple[Agent, Tuple[float, float]]]
     :param g: The graph with all the weights.
     :param edges_set: The edges of the matching - for which we will sum the weight.
     :return: A single number - the total weight.
+
+    >>> Alice = PiecewiseConstantAgent([100, 1], "Alice")
+    >>> Bob = PiecewiseConstantAgent([2, 90], "Bob")
+    >>> partitions = [(0, 1), (1, 2)]
+    >>> g = create_matching_graph([Alice, Bob], partitions, {(Alice, (0, 1)): 100.0, (Bob, (0, 1)): 2.0, (Alice, (1, 2)): 1.0, (Bob, (1, 2)): 90.0})
+    >>> calculate_weight(g, {(Bob,(1,2)), (Alice, (0,1))})
+    190.0
+
     """
-    #print("calculate weights: graph = ", g, "edges = ", edges_set)
     ret = 0
     # Go over all the weights of the edges and sum the weights
     for edge in edges_set:
         ret += g.get_edge_data(edge[0], edge[1])['weight']
-    #print("calculate weights return sum weights: ", ret)
     return ret
 
 
