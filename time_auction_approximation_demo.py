@@ -13,6 +13,8 @@ import time_auction_approximation, logging, sys
 
 logger = logging.getLogger(__name__)
 
+time_auction_approximation.logger.addHandler(logging.StreamHandler(sys.stdout))
+time_auction_approximation.logger.setLevel(logging.INFO)
 
 # Alice has 2 desired intervals: 0..1 with value 100, 1..2 with value 1.
 Alice = PiecewiseConstantAgent([100, 1], "Alice")

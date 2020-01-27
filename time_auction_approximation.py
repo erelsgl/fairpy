@@ -39,6 +39,7 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     :param piece_size: Size of an equally sized piece.
     :return: A cake-allocation, not necessarily all the cake will be allocated.
 
+    The doctest will work when the set of edges will return according lexicographic order
     >>> Alice = PiecewiseConstantAgent([100, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([2, 90], "Bob")
     >>> equally_sized_pieces([Alice, Bob], 0.5)
@@ -46,7 +47,7 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     > Bob gets [(1, 2)] with value 90.00
     <BLANKLINE>
 
-
+    The doctest will work when the set of edges will return according lexicographic order
     >>> Alice = PiecewiseConstantAgent([1, 1, 1, 1, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([3, 3, 3, 1, 1], "Bob")
     >>> equally_sized_pieces([Alice, Bob], 3 / 5)
@@ -54,7 +55,7 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     > Alice gets [(2, 5)] with value 3.00
     <BLANKLINE>
     """
-    #> Bob gets [(0, 3)] with value 9.00
+    # > Bob gets [(0, 3)] with value 9.00
 
     # Initializing variables and asserting conditions
     num_of_agents = len(agents)
@@ -131,6 +132,7 @@ def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> 
     :param pieces: List of sized pieces.
     :return: A cake-allocation.
 
+    The doctest will work when the set of edges will return according lexicographic order
     >>> Alice = PiecewiseConstantAgent([100, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([2, 90], "Bob")
     >>> discrete_setting([Alice, Bob], [(0, 1), (1, 2)])
