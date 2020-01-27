@@ -22,15 +22,16 @@ logger = logging.getLogger(__name__)
 
 # naming for function: FPTAS for 3 agents. this function is about being recursive one.
 
-class Simplex_Solver:
+
+class SimplexSolver:
     def __init__(self, epsilon, n, agents):
         # finding a bit better approximation s.t its negative power of two
         x = 0.5
         while x > epsilon:
-            x /= 2
+            x *= 0.5
         self.epsilon = x
         # reshape the size of base cell to be 1, and therefore the size is the cake size divide by the new epsilon
-        self.N = n/x
+        self.N = int(n/x)
         self.agents = agents
         logger.info("finish initializing the simplex solver")
 
@@ -40,6 +41,16 @@ class Simplex_Solver:
         :param index_of_agent: the agent's index, who need to 'color' (decide) the portion he prefer the most
         :param triplet: a triplet if indices, represent a vertex in the simplex, which is a partition of segment
         :return: a 'color', an integer between the group {0,1,2}, which part the agent prefer the most
+
+        >>> George = PiecewiseConstantAgent([0, 2, 4, 6], name="George")
+        >>> Abraham = PiecewiseConstantAgent([6, 4, 2, 0], name="Abraham")
+        >>> Hanna = PiecewiseConstantAgent([3, 3, 3, 3], name="Hanna")
+        >>> agents = [George, Abraham, Hanna]
+        >>> solver = SimplexSolver(1/31, 4, agents)
+        >>> right_index = solver.label([19, 29, 80])
+        >>> solver.color(right_index, [19,29,80])
+        2
+
         """
         # checking for validity of input
         if sum(triplet) != self.N or len(triplet) != 3 or index_of_agent < 0 or index_of_agent > 2:
@@ -60,6 +71,15 @@ class Simplex_Solver:
         function that compute for a vertex who is the agent that who suppose to assign its color
         :param triplet: a triplet if indices, represent a vertex in the simplex, which is a partition of segment
         :return: a label, an integer between the group {0,1,2}, which represent the agents index
+
+        >>> George = PiecewiseConstantAgent([0, 2, 4, 6], name="George")
+        >>> Abraham = PiecewiseConstantAgent([6, 4, 2, 0], name="Abraham")
+        >>> Hanna = PiecewiseConstantAgent([3, 3, 3, 3], name="Hanna")
+        >>> agents = [George, Abraham, Hanna]
+        >>> solver = SimplexSolver(1/31, 4, agents)
+        >>> solver.label([19, 29, 80])
+        0
+
         """
         # checking for validity of input
         if sum(triplet) != self.N or len(triplet) != 3:
@@ -75,6 +95,15 @@ class Simplex_Solver:
         the right agent, the one's who has the same label.
         :param triplet: triplet of integers, represent a partition of the cake.
         :return: a color, an integer between the group {0,1,2}, which represent the cake piece number
+
+        >>> George = PiecewiseConstantAgent([0, 2, 4, 6], name="George")
+        >>> Abraham = PiecewiseConstantAgent([6, 4, 2, 0], name="Abraham")
+        >>> Hanna = PiecewiseConstantAgent([3, 3, 3, 3], name="Hanna")
+        >>> agents = [George, Abraham, Hanna]
+        >>> solver = SimplexSolver(1/31, 4, agents)
+        >>> solver.color_at_label([19, 29, 80])
+        2
+
         """
 
         if sum(triplet) != self.N or len(triplet) != 3:
@@ -89,40 +118,49 @@ class Simplex_Solver:
 
         :param i1: the lower boundary of the first index polygon.
         :param i2: the upper boundary of the first index polygon.
-        :param k1: the lower boundary of the second index polygon.
-        :param k2: the upper boundary of the second index polygon.
+        :param k1: the lower boundary of the third index polygon.
+        :param k2: the upper boundary of the third index polygon.
         :return: 1 if it has non-zero index, and 0 if it has zero index
+
+        >>> George = PiecewiseConstantAgent([0, 2, 4, 6], name="George")
+        >>> Abraham = PiecewiseConstantAgent([6, 4, 2, 0], name="Abraham")
+        >>> Hanna = PiecewiseConstantAgent([3, 3, 3, 3], name="Hanna")
+        >>> agents = [George, Abraham, Hanna]
+        >>> solver = SimplexSolver(1/2, 4, agents)
+        >>> solver.index(0, 4, 0, 8)
+        0
+
         """
 
         # as the essay says, we listing an array with proper j, which related to the segment we going to iterate over
         proper_js = [j for j in range(self.N - i1 - k1 + 1) if j >= self.N - i2 - k2]
-        proper_js.sort()
+        proper_js.sort(reverse=True)
         counter = 0
         # making sure to iterate on the smaller segment
         if i2 - i1 <= k2 - k1:
-            last_color = self.color_at_label([i1, np.argmin(proper_js), self.N - i1 - np.argmin(proper_js)])
+            last_color = self.color_at_label([self.N - np.argmax(proper_js) - k1, np.argmax(proper_js), k1])
             for j in proper_js:
-                # if this j can't fit into the segment, skip it
-                if self.N - i1 - j > k2 or self.N - i1 - j < k1:
+                # if this j can't fit into the segment, skip it. also, don't check again the first element
+                if self.N - i1 - j > k2 or self.N - i1 - j < k1 or j == np.argmax(proper_js):
                     continue
                 else:
                     # check the next vertex in the segment, and update the counter according to changes of colors
-                    check_color = self.color_at_label([i1, j, self.N - i1 - j])
+                    check_color = self.color_at_label([self.N - j - k1, j, k1])
                     if last_color == 0 and check_color == 1:
                         counter += 1
                     elif last_color == 1 and check_color == 0:
                         counter -= 1
                     last_color = check_color
         else:
-            last_color = self.color_at_label([i1, np.argmin(proper_js), self.N - i1 - np.argmin(proper_js)])
+            last_color = self.color_at_label([i1, np.argmax(proper_js), self.N - i1 - np.argmax(proper_js)])
             for j in proper_js:
-                # if this j can't fit into the segment, skip it
-                if self.N - k1 - j > i2 or self.N - k1 - j < i1:
+                # if this j can't fit into the segment, skip it. also, don't check again the first element
+                if self.N - k1 - j > i2 or self.N - k1 - j < i1 or j == np.argmax(proper_js):
                     continue
                 # if its the first element in the segment, just update the last_color and don't check
                 else:
                     # check the next vertex in the segment, and update the counter according to changes of colors
-                    check_color = self.color_at_label([self.N - k1 - j, j, k1])
+                    check_color = self.color_at_label([i1, j, self.N - j - i1])
                     if last_color == 0 and check_color == 1:
                         counter += 1
                     elif last_color == 1 and check_color == 0:
@@ -189,22 +227,7 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
     :param epsilon: the approximation parameter
     :return: a proportional and envy-free-approximation allocation.
 
-    >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
-    >>> George = PiecewiseConstantAgent([11,55], "George")
-    >>> elaborate_simplex_solution([George, Alice], 0.3)
-    ValueError: This simplex solution works only for 3 agents, with approximation epsilon greater than 0
 
-    <BLANKLINE>
-    >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
-    >>> George = PiecewiseConstantAgent([11,55], "George")
-    >>> Abraham = PiecewiseConstantAgent([4,1,1], "Abraham")
-    >>> elaborate_simplex_solution([Abraham, George, Alice], 0)
-    ValueError: This simplex solution works only for 3 agents, with approximation epsilon greater than 0
-
-    >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
-    >>> George = PiecewiseConstantAgent([11,55], "George")
-    >>> Abraham = PiecewiseConstantAgent([4,1,1], "Abraham")
-    >>> elaborate_simplex_solution([Abraham, George, Alice], 0.5)
     """
     # checking parameters validity
     num_of_agents = len(agents)
@@ -215,7 +238,7 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
     n = max([agent.cake_length() for agent in agents])
 
     # init the solver with simplex, with the approximation value, cake length and agents's list
-    solver = Simplex_Solver(epsilon, n, agents)
+    solver = SimplexSolver(epsilon, n, agents)
 
     # solver returns a vertex, which represent a proper partition of the segment
     triplet = solver.recursive_algorithm1(0, solver.N, 0, solver.N)
