@@ -1,5 +1,9 @@
 # fairpy
-An open-source library of [fair division algorithms](references.md) in Python. 
+An open-source library of [fair division algorithms](references.md) in Python.
+To install:
+
+    sudo python3 setup.py install
+ 
 For each algorithm in file `x.py` there is a demo program `x_demo.py`. For example, try:
 
     python3 cut_and_choose_demo.py

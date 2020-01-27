@@ -153,7 +153,7 @@ def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> 
     logger.info("Denote the t-th partition by Pt.")
     # Go over the partition by powers of 2
     for t in range(0, r + 1):
-        logger.info(f"Iteration t = {t}")
+        logger.info("Iteration t = %d", t)
         # Change the partition to be a partition with 2^t size of every piece
         partition_i = change_partition(pieces, t)
 
@@ -167,7 +167,7 @@ def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> 
                 # Evaluate the piece according to the Agent
                 evaluations[(agent, piece)] = agent.eval(start=piece[0], end=piece[1])
 
-        logger.info(f"create the partition graph G - Pt={t}")
+        logger.info("create the partition graph G - Pt=%d", t)
         # Create the matching graph according to the new partition
         g_i = create_matching_graph(agents, partition_i, evaluations)
         logger.info("Compute a maximum weight matching Mt in the graph GPt")
