@@ -44,12 +44,18 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     >>> equally_sized_pieces([Alice, Bob], 0.5)
     > Alice gets [(0, 1)] with value 100.00
     > Bob gets [(1, 2)] with value 90.00
+    <BLANKLINE>
+
 
     >>> Alice = PiecewiseConstantAgent([1, 1, 1, 1, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([3, 3, 3, 1, 1], "Bob")
     >>> equally_sized_pieces([Alice, Bob], 3 / 5)
     > Bob gets [(0, 3)] with value 9.00
+    > Alice gets [(2, 5)] with value 3.00
+    <BLANKLINE>
     """
+    #> Bob gets [(0, 3)] with value 9.00
+
     # Initializing variables and asserting conditions
     num_of_agents = len(agents)
     if num_of_agents == 0:
@@ -130,6 +136,8 @@ def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> 
     >>> discrete_setting([Alice, Bob], [(0, 1), (1, 2)])
     > Alice gets [(0, 1)] with value 100.00
     > Bob gets [(1, 2)] with value 90.00
+    <BLANKLINE>
+
     """
     # Set m to be the number of pieces in the given partition
     m = len(pieces)
@@ -200,7 +208,8 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
     >>> Alice1 = PiecewiseConstantAgent([100, 1], "Alice")
     >>> Alice2 = PiecewiseConstantAgent([100, 1], "Alice")
     >>> continuous_setting([Alice1, Alice2])
-    > Alice gets [(0, 2)] with value 101.00
+    > Alice gets [(0, 2.0)] with value 101.00
+    <BLANKLINE>
     """
     # set n to be the number of agents
     n = len(agents)
@@ -299,12 +308,15 @@ def change_partition(partition: List[tuple], t: int) -> List[tuple]:
     :param t: Defines the size of the new partition.
     :return: A partition with pieces with 2 ^ t size.
     """
+    #print("change partition: partition = ", partition, "t = ", t)
+
     ret = []
     # Go over all the original partitions with 2^t jumps
     for start in range(0, len(partition) - 2 ** t + 1, 2 ** t):
         end = start + 2 ** t - 1
         # Add the new joined partition to the list
         ret.append((partition[start][0], partition[end][1]))
+    #print("change partition: return partition: ", ret)
     return ret
 
 
@@ -316,10 +328,12 @@ def calculate_weight(g: Graph, edges_set: Set[Tuple[Agent, Tuple[float, float]]]
     :param edges_set: The edges of the matching - for which we will sum the weight.
     :return: A single number - the total weight.
     """
+    #print("calculate weights: graph = ", g, "edges = ", edges_set)
     ret = 0
     # Go over all the weights of the edges and sum the weights
     for edge in edges_set:
         ret += g.get_edge_data(edge[0], edge[1])['weight']
+    #print("calculate weights return sum weights: ", ret)
     return ret
 
 
@@ -332,9 +346,19 @@ def create_matching_graph(left: List[Agent], right: List[Tuple[float, float]],
     :param right: List of cake pieces.
     :param weights: A dictionary from agents to pieces - represents the value of each agent to each piece.
     :return: A graph object from the given parameters.
+
+    >>> Alice = PiecewiseConstantAgent([100, 1], "Alice")
+    >>> Bob = PiecewiseConstantAgent([2, 90], "Bob")
+    >>> partitions = [(0, 1), (1, 2)]
+    >>> g = create_matching_graph([Alice, Bob], partitions, {(Alice, (0, 1)): 100.0, (Bob, (0, 1)): 2.0, (Alice, (1, 2)): 1.0, (Bob, (1, 2)): 90.0})
+    >>> list(g.edges(data=True))
+    [(Alice is a piecewise-constant agent with values [100   1] and total value=101, (0, 1), {'weight': 100.0}), (Alice is a piecewise-constant agent with values [100   1] and total value=101, (1, 2), {'weight': 1.0}), (Bob is a piecewise-constant agent with values [ 2 90] and total value=92, (0, 1), {'weight': 2.0}), (Bob is a piecewise-constant agent with values [ 2 90] and total value=92, (1, 2), {'weight': 90.0})]
+
     """
+
     # Create the graph
     g = nx.DiGraph()
+    # g.edges(data = True)
     # Set the left side of the graph to be the Agents
     g.add_nodes_from(left, bipartite=0)
     # Set the right side of the graph to be the partitions
@@ -345,3 +369,7 @@ def create_matching_graph(left: List[Agent], right: List[Tuple[float, float]],
     return g
 
 
+if __name__ == "__main__":
+    import doctest
+    (failures,tests) = doctest.testmod(report=True)
+    print ("{} failures, {} tests".format(failures,tests))
