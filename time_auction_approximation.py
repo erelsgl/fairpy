@@ -200,6 +200,7 @@ def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> 
 
     # Get the agents that are part of the edges of the max weight
     chosen_agents = [edge[0] for edge in max_match]
+    chosen_agents.sort(key=lambda agent:agent.name())
     # Create the allocation
     allocation = Allocation(chosen_agents)
     # Add the edges to the allocation
