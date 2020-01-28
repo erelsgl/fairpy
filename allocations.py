@@ -19,6 +19,11 @@ class Allocation:
         self.agents = agents
         self.pieces = [None]*len(agents)
 
+    def get_piece(self,agent_index:int):
+        return self.pieces[agent_index]
+    def get_pieces(self):
+        return self.pieces
+
     def set_piece(self, agent_index:int, piece:List[tuple]):
         """
         Sets the piece of the given index.
@@ -28,11 +33,25 @@ class Allocation:
         """
         self.pieces[agent_index] = piece
 
+
     def __repr__(self):
         s = ""
         for i in range(len(self.pieces)):
             agent = self.agents[i]
             piece = self.pieces[i]
-            s += "> {} gets {} with value {:.2f}\n".format(agent.name(), self.pieces[i], agent.piece_value(piece))
+            s += "> {} gets {} with value {:.3f}\n".format(agent.name(), self.pieces[i], agent.piece_value(piece))
         return s
 
+class OnePieceAllocation(Allocation):
+    def __init__(self, agents: List[Agent]):
+        super().__init__(agents)
+    def set_piece(self, agent_index:int, piece:tuple):
+        """
+        Sets the piece of the given index.
+
+        :param agent_index: index of the agent.
+        :param piece: a list of intervals.
+        """
+        self.pieces[agent_index] = piece
+    def get_piece(self,agent_index:int):
+        return self.pieces[agent_index]

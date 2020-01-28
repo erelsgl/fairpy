@@ -72,6 +72,8 @@ class Agent(ABC):
         :param piece: a list of tuples [(start1,end1), (start2,end2),...]
         :return:
         """
+        if(piece==None):
+            return 0
         return sum([self.eval(*interval) for interval in piece])
 
     def partition_values(self, partition:List[float]):
@@ -94,6 +96,118 @@ class Agent(ABC):
         values.append(self.eval(partition[-1], self.cake_length()))
         return values
 
+class PiecewiseConstantAgent1Sgement(Agent):
+    def __init__(self, values:list, name:str=None):
+        super().__init__(name)
+        self.values = np.array(values)
+        self.length = len(values)
+        self.total_value_cache = sum(values)
+    def __init__(self, agent:Agent):
+        super().__init__(agent.name())
+        self.values = np.array(agent.values)
+        self.length = len(agent.values)
+        self.total_value_cache = sum(agent.values)
+
+    def __repr__(self):
+        return "{} is a piecewise-constant agent with values {} and total value={}".format(self.my_name,
+                                                                                               self.values,
+                                                                                               self.total_value_cache)
+    def cake_value(self):
+        return self.total_value_cache
+
+    def cake_length(self):
+        return self.length
+
+    def eval(self, start: float, end: float):
+        """
+        Answer an Eval query: return the value of the interval [start,end].
+
+        :param start: Location on cake where the calculation starts.
+        :param end:   Location on cake where the calculation ends.
+        :return: Value of [start,end]
+
+        >>> a = PiecewiseConstantAgent([11,22,33,44])
+        >>> a.eval(1,3)
+        55.0
+        >>> a.eval(1.5,3)
+        44.0
+        >>> a.eval(1,3.25)
+        66.0
+        >>> a.eval(1.5,3.25)
+        55.0
+        >>> a.eval(3,3)
+        0.0
+        >>> a.eval(3,7)
+        44.0
+        >>> a.eval(-1,7)
+        110.0
+        """
+        start = start*self.cake_length()
+        end = end*self.cake_length()
+        # the cake to the left of 0 and to the right of length is considered worthless.
+        start = max(0, min(start, self.length))
+        end = max(0, min(end, self.length))
+        if end <= start:
+            return 0.0  # special case not covered by loop below
+
+        fromFloor = int(np.floor(start))
+        fromFraction = (fromFloor + 1 - start)
+        toCeiling = int(np.ceil(end))
+        toCeilingRemovedFraction = (toCeiling - end)
+
+        val = 0.0
+        val += (self.values[fromFloor] * fromFraction)
+        val += self.values[fromFloor + 1:toCeiling].sum()
+        val -= (self.values[toCeiling - 1] * toCeilingRemovedFraction)
+
+        return val/self.cake_value()
+
+    def mark(self, start: float, target_value: float):
+        """
+        Answer a Mark query: return "end" such that the value of the interval [start,end] is target_value.
+
+        :param start: Location on cake where the calculation starts.
+        :param targetValue: required value for the piece [start,end]
+        :return: the end of an interval with a value of target_value.
+        If the value is too high - returns None.
+
+        >>> a = PiecewiseConstantAgent([11,22,33,44])
+        >>> a.mark(1, 55)
+        3.0
+        >>> a.mark(1.5, 44)
+        3.0
+        >>> a.mark(1, 66)
+        3.25
+        >>> a.mark(1.5, 55)
+        3.25
+        >>> a.mark(1, 99)
+        4.0
+        >>> a.mark(1, 100)
+        >>> a.mark(1, 0)
+        1.0
+        """
+        start = start*self.cake_length()
+        target_value = target_value*self.cake_value()
+        # the cake to the left of 0 and to the right of length is considered worthless.
+        start = max(0, min(start, self.length))
+        if target_value < 0:
+            raise ValueError("sum out of range (should be positive): {}".format(sum))
+
+        start_floor = int(np.floor(start))
+        start_fraction = (start_floor + 1 - start)
+
+        value = self.values[start_floor]
+        if value * start_fraction >= target_value:
+            return (start + (target_value / value))/self.cake_length()
+        target_value -= (value * start_fraction)
+        for i in range(start_floor + 1, self.length):
+            value = self.values[i]
+            if target_value <= value:
+                return (i + (target_value / value))/self.cake_length()
+            target_value -= value
+
+        # Value is too high: return None
+        return None
 
 class PiecewiseConstantAgent(Agent):
     """
@@ -228,7 +342,6 @@ class PiecewiseConstantAgent(Agent):
         return None
 
 
-
 class PiecewiseUniformAgent(Agent):
     """
     A PiecewiseUniformAgent is an Agent with a finite number of desired intervals, all of which have the same value-density (1).
@@ -359,6 +472,8 @@ class PiecewiseUniformAgent(Agent):
 
 
 if __name__ == "__main__":
-    import doctest
-    (failures,tests) = doctest.testmod(report=True)
-    print ("{} failures, {} tests".format(failures,tests))
+    a =PiecewiseConstantAgent1Sgement([10, 87])
+    print(a.mark(0.25,0.7))
+    #import doctest
+    #(failures,tests) = doctest.testmod(report=True)
+    #print ("{} failures, {} tests".format(failures,tests))
