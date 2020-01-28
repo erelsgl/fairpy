@@ -50,16 +50,16 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     >>> Alice = PiecewiseConstantAgent([100, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([2, 90], "Bob")
     >>> equally_sized_pieces([Alice, Bob], 0.5)
-    > Alice gets [(0, 1)] with value 100.00
-    > Bob gets [(1, 2)] with value 90.00
+    > Alice gets [(0, 1)] with value 100.0
+    > Bob gets [(1, 2)] with value 90.0
     <BLANKLINE>
 
     The doctest will work when the set of edges will return according lexicographic order
     >>> Alice = PiecewiseConstantAgent([1, 1, 1, 1, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([3, 3, 3, 1, 1], "Bob")
     >>> equally_sized_pieces([Alice, Bob], 3 / 5)
-    > Alice gets [(2, 5)] with value 3.00
-    > Bob gets [(0, 3)] with value 9.00
+    > Alice gets [(2, 5)] with value 3.0
+    > Bob gets [(0, 3)] with value 9.0
     <BLANKLINE>
     """
     # > Bob gets [(0, 3)] with value 9.00
@@ -151,8 +151,8 @@ def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> 
     >>> Alice = PiecewiseConstantAgent([100, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([2, 90], "Bob")
     >>> discrete_setting([Alice, Bob], [(0, 1), (1, 2)])
-    > Alice gets [(0, 1)] with value 100.00
-    > Bob gets [(1, 2)] with value 90.00
+    > Alice gets [(0, 1)] with value 100.0
+    > Bob gets [(1, 2)] with value 90.0
     <BLANKLINE>
 
     """
@@ -226,7 +226,7 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
     >>> Alice1 = PiecewiseConstantAgent([100, 1], "Alice")
     >>> Alice2 = PiecewiseConstantAgent([100, 1], "Alice")
     >>> continuous_setting([Alice1, Alice2])
-    > Alice gets [(0, 2.0)] with value 101.00
+    > Alice gets [(0, 2.0)] with value 101.0
     <BLANKLINE>
     """
     # set n to be the number of agents

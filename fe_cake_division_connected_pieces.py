@@ -221,14 +221,14 @@ def setRemain(allocation:Allocation,agents: List[Agent])->List[List[tuple]]:
     >>> alloc.set_piece(1, [(0.2, 0.3)])
     >>> alloc.set_piece(0, [(0.4, 0.73)])
     >>> print(alloc)
-    > Alice gets [(0.4, 0.73)] with value 10.890
-    > George gets [(0.2, 0.3)] with value 0.500
+    > Alice gets [(0.4, 0.73)] with value 10.89
+    > George gets [(0.2, 0.3)] with value 0.5
     <BLANKLINE>
     >>> setRemain(alloc,agents)
     [[(0.4, 0.73), (0.73, 1)], [(0.2, 0.3), (0.3, 0.4), (0, 0.2)]]
     >>> print(alloc)
-    > Alice gets [(0.4, 0.73), (0.73, 1)] with value 19.800
-    > George gets [(0.2, 0.3), (0.3, 0.4), (0, 0.2)] with value 2.000
+    > Alice gets [(0.4, 0.73), (0.73, 1)] with value 19.8
+    > George gets [(0.2, 0.3), (0.3, 0.4), (0, 0.2)] with value 2.0
     <BLANKLINE>
     """
     remain = findRemainIntervals(allocation)
@@ -300,8 +300,8 @@ def allocationToOnePiece(alloction:List[List[tuple]],agents:List[Agent])->Alloca
     >>> alloc.set_piece(1, [(0.2, 0.3)])
     >>> alloc.set_piece(0, [(0.4, 0.73)])
     >>> print(alloc)
-    > Alice gets [(0.4, 0.73)] with value 10.890
-    > George gets [(0.2, 0.3)] with value 0.500
+    > Alice gets [(0.4, 0.73)] with value 10.89
+    > George gets [(0.2, 0.3)] with value 0.5
     <BLANKLINE>
     >>> print(setRemain(alloc,agents),agents)
     [[(0.4, 0.73), (0.73, 1)], [(0.2, 0.3), (0.3, 0.4), (0, 0.2)]] [Alice is a piecewise-constant agent with values [33 33] and total value=66, George is a piecewise-constant agent with values [5 5] and total value=10]
@@ -348,7 +348,7 @@ def ALG(agents: List[Agent], epsilon:float)->Allocation:
 
         >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
         >>> print(ALG([Alice],0.2))
-        > Alice gets [(0, 1)] with value 1.000
+        > Alice gets [(0, 1)] with value 1.0
         <BLANKLINE>
         >>> Alice = PiecewiseConstantAgent([3, 6, 3], name="Alice")
         >>> Abraham = PiecewiseConstantAgent([6, 4, 2, 0], name="Abraham")
@@ -358,9 +358,9 @@ def ALG(agents: List[Agent], epsilon:float)->Allocation:
 
         >>> remain = findRemainIntervals(alloc)
         >>> print(ALG(all_agents,0.2))
-        > Alice gets [(0.42916666666666653, 0.7773148148148148)] with value 0.439
-        > Abraham gets [(0, 0.42916666666666653)] with value 0.739
-        > Hanna gets [(0.7773148148148148, 1)] with value 0.223
+        > Alice gets [(0.429, 0.777)] with value 0.439
+        > Abraham gets [(0, 0.429)] with value 0.739
+        > Hanna gets [(0.777, 1)] with value 0.223
         <BLANKLINE>
     """
     logger.info(" Initialize partial allocation P = {P1, . . . , Pn} with empty interval")
@@ -412,11 +412,11 @@ def efCheck(allocation:Allocation, epsilon:float)->str:
     >>> alloc.set_piece(0,[(0,0.9)])
     >>> alloc.set_piece(1,[(0.9,1)])
     >>> print(efCheck(alloc, 0.1))
-    The Allcation isn't (3 + 9ε/n)approximately envy-free allocation
+    The Allocation isn't (3 + 9ε/n)approximately envy-free allocation
     >>> epsilon = 0.1
     >>> alloc = ALG(all_agents, epsilon)
     >>> print(efCheck(alloc, epsilon) )
-    The Allcation is (3 + 9ε/n)approximately envy-free allocation
+    The Allocation is (3 + 9ε/n)approximately envy-free allocation
 
     """
     agents = allocation.agents
@@ -424,14 +424,13 @@ def efCheck(allocation:Allocation, epsilon:float)->str:
     for i,a in zip(range(len(agents)),agents):
         x = allocation.get_piece(i)
         aPiece = allocation.get_piece(i)[0]
-        for pieace in allocation.get_pieces():
-            if a.eval(aPiece[0],aPiece[1])<o*a.eval(pieace[0][0],pieace[0][1]):
-                return "The Allcation isn't (3 + 9ε/n)approximately envy-free allocation"
-    return "The Allcation is (3 + 9ε/n)approximately envy-free allocation"
+        for piece in allocation.get_pieces():
+            if a.eval(aPiece[0],aPiece[1])<o*a.eval(piece[0][0],piece[0][1]):
+                return "The Allocation isn't (3 + 9ε/n)approximately envy-free allocation"
+    return "The Allocation is (3 + 9ε/n)approximately envy-free allocation"
 
 
 if __name__ == "__main__":
-
     import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures,tests))

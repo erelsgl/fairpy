@@ -28,22 +28,22 @@ def asymmetric_protocol(agents: List[Agent])->Allocation:
     >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
     >>> George = PiecewiseConstantAgent([11,55], "George")
     >>> asymmetric_protocol([Alice, George])
-    > Alice gets [(0, 1.0)] with value 33.00
-    > George gets [(1.0, 2)] with value 55.00
+    > Alice gets [(0, 1.0)] with value 33.0
+    > George gets [(1.0, 2)] with value 55.0
     <BLANKLINE>
     >>> asymmetric_protocol([George, Alice])
-    > George gets [(1.4, 2)] with value 33.00
-    > Alice gets [(0, 1.4)] with value 46.20
+    > George gets [(1.4, 2)] with value 33.0
+    > Alice gets [(0, 1.4)] with value 46.2
     <BLANKLINE>
 
     >>> Alice = PiecewiseConstantAgent([33,33,33], "Alice")
     >>> asymmetric_protocol([Alice, George])
-    > Alice gets [(1.5, 3)] with value 49.50
-    > George gets [(0, 1.5)] with value 38.50
+    > Alice gets [(1.5, 3)] with value 49.5
+    > George gets [(0, 1.5)] with value 38.5
     <BLANKLINE>
     >>> asymmetric_protocol([George, Alice])
-    > George gets [(0, 1.4)] with value 33.00
-    > Alice gets [(1.4, 3)] with value 52.80
+    > George gets [(0, 1.4)] with value 33.0
+    > Alice gets [(1.4, 3)] with value 52.8
     <BLANKLINE>
     """
 
@@ -79,12 +79,12 @@ def symmetric_protocol(agents: List[Agent])->Allocation:
     >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
     >>> George = PiecewiseConstantAgent([11,55], "George")
     >>> symmetric_protocol([Alice, George])
-    > Alice gets [(0, 1.2)] with value 39.60
-    > George gets [(1.2, 2)] with value 44.00
+    > Alice gets [(0, 1.2)] with value 39.6
+    > George gets [(1.2, 2)] with value 44.0
     <BLANKLINE>
     >>> symmetric_protocol([George, Alice])
-    > George gets [(1.2, 2)] with value 44.00
-    > Alice gets [(0, 1.2)] with value 39.60
+    > George gets [(1.2, 2)] with value 44.0
+    > Alice gets [(0, 1.2)] with value 39.6
     <BLANKLINE>
 
     >>> Alice = PiecewiseConstantAgent([33,33,33], "Alice")

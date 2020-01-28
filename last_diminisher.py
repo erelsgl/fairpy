@@ -26,22 +26,22 @@ def last_diminisher(agents: List[Agent])->Allocation:
 
     >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
     >>> last_diminisher([Alice])
-    > Alice gets [(0, 2)] with value 66.00
+    > Alice gets [(0, 2)] with value 66.0
     <BLANKLINE>
     >>> George = PiecewiseConstantAgent([11,55], "George")
     >>> last_diminisher([Alice, George])
-    > Alice gets [(0, 1.0)] with value 33.00
-    > George gets [(1.0, 2)] with value 55.00
+    > Alice gets [(0, 1.0)] with value 33.0
+    > George gets [(1.0, 2)] with value 55.0
     <BLANKLINE>
     >>> last_diminisher([George, Alice])
-    > George gets [(1.0, 2)] with value 55.00
-    > Alice gets [(0, 1.0)] with value 33.00
+    > George gets [(1.0, 2)] with value 55.0
+    > Alice gets [(0, 1.0)] with value 33.0
     <BLANKLINE>
     >>> Abraham = PiecewiseConstantAgent([4,1,1], "Abraham")
     >>> last_diminisher([Abraham, George, Alice])
-    > Abraham gets [(0, 0.5)] with value 2.00
-    > George gets [(1.1666666666666667, 2)] with value 45.83
-    > Alice gets [(0.5, 1.1666666666666667)] with value 22.00
+    > Abraham gets [(0, 0.5)] with value 2.0
+    > George gets [(1.167, 2)] with value 45.833
+    > Alice gets [(0.5, 1.167)] with value 22.0
     <BLANKLINE>
     """
     num_of_agents = len(agents)

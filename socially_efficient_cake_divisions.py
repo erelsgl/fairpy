@@ -281,8 +281,8 @@ def divide(agents: List[Agent], epsilon:float) -> Allocation:
     >>> a = PiecewiseConstantAgent([0.25, 0.5, 0.25], name="Alice")
     >>> b = PiecewiseConstantAgent([0.23, 0.7, 0.07], name="Bob")
     >>> divide([a,b], 0.2)
-    > Alice gets [(0, 0.8)] with value 0.20
-    > Bob gets [(0.8, 1.7914285714285716)] with value 0.60
+    > Alice gets [(0, 0.8)] with value 0.2
+    > Bob gets [(0.8, 1.791)] with value 0.6
     <BLANKLINE>
     """
     logger.info("\nStep 1: Discretizing the cake to parts with value at most epsilon=%f",epsilon)

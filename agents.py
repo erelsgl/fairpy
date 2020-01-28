@@ -472,8 +472,6 @@ class PiecewiseUniformAgent(Agent):
 
 
 if __name__ == "__main__":
-    a =PiecewiseConstantAgent1Sgement([10, 87])
-    print(a.mark(0.25,0.7))
-    #import doctest
-    #(failures,tests) = doctest.testmod(report=True)
-    #print ("{} failures, {} tests".format(failures,tests))
+    import doctest
+    (failures,tests) = doctest.testmod(report=True)
+    print ("{} failures, {} tests".format(failures,tests))
