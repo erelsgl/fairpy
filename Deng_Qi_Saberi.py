@@ -288,6 +288,12 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
     :param epsilon: the approximation parameter
     :return: a proportional and envy-free-approximation allocation.
 
+    >>> George = PiecewiseConstantAgent([4, 6], name="George")
+    >>> Abraham = PiecewiseConstantAgent([6, 4], name="Abraham")
+    >>> Hanna = PiecewiseConstantAgent([3, 3], name="Hanna")
+    >>> agents = [George, Abraham, Hanna]
+    >>> solver = SimplexSolver(1/2, 2, agents)
+    >>> solver.recursive_algorithm1(0, solver.N, 0, solver.N)
 
     """
     # checking parameters validity
@@ -383,12 +389,7 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
 
 
 if __name__ == '__main__':
-    # import doctest
-    # (failures, tests) = doctest.testmod(report=True)
-    # print("{} failures, {} tests".format(failures, tests))
-    George = PiecewiseConstantAgent([4, 6], name="George")
-    Abraham = PiecewiseConstantAgent([6, 4], name="Abraham")
-    Hanna = PiecewiseConstantAgent([3, 3], name="Hanna")
-    agents = [George, Abraham, Hanna]
-    solver = SimplexSolver(1/2, 2, agents)
-    solver.recursive_algorithm1(0, solver.N, 0, solver.N)
+    import doctest
+    (failures, tests) = doctest.testmod(report=True)
+    print("{} failures, {} tests".format(failures, tests))
+
