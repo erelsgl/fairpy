@@ -267,6 +267,7 @@ def setRemain(allocation:Allocation,agents: List[Agent])->List[List[tuple]]:
 
     return partialAlloc
 
+
 def intervalUnionFromList(intervals:List[tuple])->tuple:
     """
     Uniting a list of intervals into one
@@ -313,18 +314,31 @@ def allocationToOnePiece(alloction:List[List[tuple]],agents:List[Agent])->Alloca
         I.set_piece(i,[intervalUnionFromList(pieces)])
     return I
 
+
 def agentNormalize(agents: List[Agent])->List[Agent]:
     """
     replace all the agents with PiecewiseConstantAgent1Sgement that normalize to (0,1) segment
     :param agents: a list of agents that need to be normalized
     :return: a list of normalized agents
+
+
+    >>> Alice = PiecewiseConstantAgent([3, 6, 3], name="Alice")
+    >>> Hanna = PiecewiseConstantAgent([3, 3, 3, 3], name="Hanna")
+    >>> agents = [Alice, Hanna]
+    >>> print("{} is {}".format(agents[0].name(), type(agents[0])))
+    Alice is <class 'agents.PiecewiseConstantAgent'>
+    >>> agents = agentNormalize(agents)
+    >>> print("{} is {}".format(agents[0].name(), type(agents[0])))
+    Alice is <class 'agents.PiecewiseConstantAgent1Sgement'>
+
+
     """
     for agent,i in zip(agents,range(len(agents))):
         agents[i] = PiecewiseConstantAgent1Sgement(agent)
     return agents
 
 
-def ALG(agents: List[Agent],epsilon:float)->Allocation:
+def ALG(agents: List[Agent], epsilon:float)->Allocation:
     """
         ALG: Algorithm that find Fair and Efficient Cake Division with Connected Pieces
 
@@ -382,16 +396,33 @@ def ALG(agents: List[Agent],epsilon:float)->Allocation:
     logger.info("Associate unassigned intervals")
     return allocationToOnePiece(setRemain(allocation,agents),agents)
 
+
 def efCheck(allocation:Allocation, epsilon:float)->str:
     """
     Check if tha allocation is (3 + o(1))-approximately envy-free allocation.
     :param allocation:the alloction we check
     :param epsilon:a constant between 0 to 1/3
     :return: A string that tell if the allocation is (3 + o(1))-approximately envy-free allocation.
+
+    >>> Alice = PiecewiseConstantAgent([3, 6, 3], name="Alice")
+    >>> Hanna = PiecewiseConstantAgent([3, 3, 3, 3], name="Hanna")
+    >>> epsilon  =0.1
+    >>> all_agents = [Alice, Hanna]
+    >>> alloc = Allocation(all_agents)
+    >>> alloc.set_piece(0,[(0,0.9)])
+    >>> alloc.set_piece(1,[(0.9,1)])
+    >>> print(efCheck(alloc, 0.1))
+    The Allcation isn't (3 + 9ε/n)approximately envy-free allocation
+    >>> epsilon = 0.1
+    >>> alloc = ALG(all_agents, epsilon)
+    >>> print(efCheck(alloc, epsilon) )
+    The Allcation is (3 + 9ε/n)approximately envy-free allocation
+
     """
     agents = allocation.agents
     o = (1/(3+(9*epsilon)/len(agents)))
     for i,a in zip(range(len(agents)),agents):
+        x = allocation.get_piece(i)
         aPiece = allocation.get_piece(i)[0]
         for pieace in allocation.get_pieces():
             if a.eval(aPiece[0],aPiece[1])<o*a.eval(pieace[0][0],pieace[0][1]):
@@ -400,6 +431,7 @@ def efCheck(allocation:Allocation, epsilon:float)->str:
 
 
 if __name__ == "__main__":
+
     import doctest
-    (failures,tests) = doctest.testmod(report=True)
+    (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures,tests))
