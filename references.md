@@ -7,20 +7,19 @@ Proceedings of AAMAS 2013, 343--350.
 *Algorithms 1 and 2*.
   * [socially_efficient_cake_divisions.py](socially_efficient_cake_divisions.py), by Jonathan Diamant
 
-
 * Yonatan Aumann, Yair Dombb, Avinatan Hassidim (2015).
 ["Auctioning time: Truthful auctions of heterogeneous divisible goods"](https://dl.acm.org/citation.cfm?id=2833086)
 ACM Transactions on Economics and Computation, 4(1).
 *All algorithms.*
   * [time_auction_approximation.py](time_auction_approximation.py) by Yonatan Lifshitz and Naama Hava Berman
 
-## In construction
-
 * Eshwar Ram Arunachaleswaran, Siddharth Barman, Rachitesh Kumar, Nidhi Rathi (2019). 
 ["Fair and Efficient Cake Division with Connected Pieces"](https://arxiv.org/abs/1907.11019).
 Proceedings of WINE 2019, 57--70.
 *Algorithm 1*.
-  * Programmer: Uri Zitzer
+  * [fe_cake_division_connected_pieces.py](fe_cake_division_connected_pieces.py) bu Uri Zitzer
+
+## In construction
 
 * Yiling Chen, John K. Lai, David C. Parkes, Ariel D. Procaccia (2013): 
 ["Truth, justice, and cake cutting"](http://procaccia.info/papers/justruth.geb.pdf). 
