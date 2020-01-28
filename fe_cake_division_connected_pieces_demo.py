@@ -30,8 +30,6 @@ for epsilon in [0.1,0.2,0.3]:
     print(alloc)
     print(efCheck(alloc, epsilon) + "\n")
 
-exit(1)
-
 print("-"*90)
 Alice = PiecewiseConstantAgent([3, 8, 10], name="Alice")
 George = PiecewiseConstantAgent([10, 5, 14, 6], name="George")
