@@ -118,7 +118,7 @@ class SimplexSolver:
         right_agent_index = self.label(triplet)
         return self.color(right_agent_index, triplet)
 
-    def index(self, i1, i2, k1, k2):
+    def index(self, i1, i2, k1, k2, flag):
         """
         this function calculate how much swaps there is from color num. 0 to color num. 1, and return 0 if its
         sums to zero, and 1 otherwise.
@@ -127,6 +127,7 @@ class SimplexSolver:
         :param i2: the upper boundary of the first index polygon.
         :param k1: the lower boundary of the third index polygon.
         :param k2: the upper boundary of the third index polygon.
+        :param flag: to be able to know if we running over i's or k's
         :return: 1 if it has non-zero index, and 0 if it has zero index
 
         >>> George = PiecewiseConstantAgent([0, 2, 4, 6], name="George")
@@ -134,21 +135,25 @@ class SimplexSolver:
         >>> Hanna = PiecewiseConstantAgent([3, 3, 3, 3], name="Hanna")
         >>> agents = [George, Abraham, Hanna]
         >>> solver = SimplexSolver(1/2, 4, agents)
-        >>> solver.index(0, 4, 0, 8)
+        >>> solver.index(0, 4, 0, 8, 0)
         1
 
         """
 
-        # as the essay says, we listing an array with proper j, which related to the segment we going to iterate over
-        proper_js = [j for j in range(self.N - i1 - k1) if j >= self.N - i2 - k2]
-        proper_js.sort(reverse=True)
+        # as the essay says, listing an array with proper j, which related to the segment we going to iterate over
+        if flag == 0:
+            proper_js = [j for j in range(self.N - i1 - k1 + 1) if j >= self.N - i1 - k2]
+            proper_js.sort(reverse=True)
+        else:
+            proper_js = [j for j in range(self.N - i1 - k1 + 1) if j >= self.N - i2 - k1]
+            proper_js.sort(reverse=True)
         counter = 0
         # making sure to iterate on the smaller segment
-        if i2 - i1 <= k2 - k1:
+        if flag == 0:
             last_color = self.color_at_label([self.N - max(proper_js) - k1, max(proper_js), k1])
             for j in proper_js:
                 # if this j can't fit into the segment, skip it. also, don't check again the first element
-                if self.N - i1 - j > k2 or self.N - i1 - j < k1 or j == max(proper_js):
+                if self.N - i1 - j > k2 or self.N - i1 - j < k2 or j == max(proper_js):
                     continue
                 else:
                     # check the next vertex in the segment, and update the counter according to changes of colors
@@ -162,7 +167,7 @@ class SimplexSolver:
             last_color = self.color_at_label([i1, max(proper_js), self.N - i1 - max(proper_js)])
             for j in proper_js:
                 # if this j can't fit into the segment, skip it. also, don't check again the first element
-                if self.N - k1 - j > i2 or self.N - k1 - j < i1 or j == max(proper_js):
+                if self.N - k1 - j > i2 or self.N - k1 - j < i2 or j == max(proper_js):
                     continue
                 # if its the first element in the segment, just update the last_color and don't check
                 else:
@@ -219,7 +224,7 @@ class SimplexSolver:
             if i2 - i1 >= k2 - k1:
                 i3 = int((i2 + i1) / 2)
                 # compute the amount of swaps in the halved polygon, and if it has non-zero index then recurse on it
-                if self.index(i1, i3, k1, k2) != 0:
+                if self.index(i1, i3, k1, k2, 0) != 0:
                     self.recursive_algorithm1(i1, i3, k1, k2)
                 # due to the induction in the essay, at least one of them is, and therefore, recurse on the second one
                 else:
@@ -227,7 +232,7 @@ class SimplexSolver:
             # the same routine, but with the third third index of the vertex.
             else:
                 k3 = int((k2 + k1) / 2)
-                if self.index(i1, i2, k1, k3) != 0:
+                if self.index(i1, i2, k1, k3, 1) != 0:
                     self.recursive_algorithm1(i1, i2, k1, k3)
                 else:
                     self.recursive_algorithm1(i1, i2, k3, k2)
