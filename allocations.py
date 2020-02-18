@@ -92,9 +92,7 @@ class Allocation:
         :return: True is the allocation is envy free, otherwise False.
 
         >>> Alice = PiecewiseUniformAgent([(2,3)], "Alice");George = PiecewiseUniformAgent([(0,10)], "George")
-        >>> A = Allocation([Alice, George]);A.setPieces([[(1,2)],[(4,5)]]);
-        >>> B = Allocation([George, Alice]);B.setPieces([[(0,1)],[(2,3)]]);
-        >>> A.merge(B);print(A)
+        >>> A = Allocation([Alice, George]);A.setPieces([[(1,2),(2,3)],[(4,5),(0,1)]]);
         >>> A.isEnvyFree(2)
         True
         """
