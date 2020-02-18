@@ -58,6 +58,14 @@ class Allocation:
         merges this allocation with another allocation in place.
 
         :param other: the other allocation to merge with.
+
+        >>> Alice = PiecewiseUniformAgent([(2,3)], "Alice");George = PiecewiseUniformAgent([(0,10)], "George")
+        >>> A = Allocation([Alice, George]);A.setPieces([[(1,2)],[(4,5)]]);
+        >>> B = Allocation([George, Alice]);B.setPieces([[(0,1)],[(2,3)]]);
+        >>> A.merge(B);print(A)
+        > Alice gets [(1, 2), (2, 3)] with value 1.0
+        > George gets [(4, 5), (0, 1)] with value 2.0
+        <BLANKLINE>
         """
 
         for i in range(len(self.pieces)):
@@ -82,6 +90,13 @@ class Allocation:
 
         :param roundAcc: the accuracy in digits of the envy free check.
         :return: True is the allocation is envy free, otherwise False.
+
+        >>> Alice = PiecewiseUniformAgent([(2,3)], "Alice");George = PiecewiseUniformAgent([(0,10)], "George")
+        >>> A = Allocation([Alice, George]);A.setPieces([[(1,2)],[(4,5)]]);
+        >>> B = Allocation([George, Alice]);B.setPieces([[(0,1)],[(2,3)]]);
+        >>> A.merge(B);print(A)
+        >>> A.isEnvyFree(2)
+        True
         """
         for i in range(len(self.agents)):
             selfVal = 0

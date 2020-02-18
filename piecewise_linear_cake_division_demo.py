@@ -13,7 +13,7 @@ piecewise_linear_cake_division.logger.addHandler(logging.StreamHandler(sys.stdou
 piecewise_linear_cake_division.logger.setLevel(logging.INFO)
 
 Alice = PiecewiseUniformAgent([(2,3)], "Alice")
-George = PiecewiseUniformAgent([(0,10)], "George")
+George = PiecewiseUniformAgent([(4,7)], "George")
 Benny = PiecewiseUniformAgent([(0,10)], "Benny")
 Margaret = PiecewiseUniformAgent([(0,10)], "Margaret")
 
@@ -26,3 +26,9 @@ print(piecewise_linear_cake_division.Cover(0, 10, [Alice, George, Benny, Margare
 
 print("\n### Envy free allocation:")
 print(piecewise_linear_cake_division.EFAllocate([Alice, George, Benny, Margaret]))
+
+#showing the effect of a very high rounding paramater which leads to wierd results, do not use normally.
+"""
+print("\n### Very high round paramater:")
+print(piecewise_linear_cake_division.EFAllocate([Alice, George, Benny, Margaret], roundAcc=50))
+"""

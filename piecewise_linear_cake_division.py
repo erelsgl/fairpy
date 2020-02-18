@@ -41,7 +41,7 @@ def Cover(a: float, b: float, agents: List[Agent], roundAcc = 6)->List:
     :param a: the start of the given interval.
     :param b: the end of the given interval.
     :param agents: a list of agents.
-    :param roundAcc: the rounding accuracy of the algorithm
+    :param roundAcc: the rounding accuracy of the algorithm in decimal digits.
     :return: a cover of [a,b].
 
     >>> Alice = PiecewiseUniformAgent([(0.5,0.7)], "Alice")
@@ -109,7 +109,7 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
     in a polynomial time complexity.
 
     :param agents: a list of agents.
-    :param roundAcc: the rounding accuracy of the algorithm
+    :param roundAcc: the rounding accuracy of the algorithm in decimal digits.
     :return: an envy-free allocation.
 
     >>> Alice = PiecewiseUniformAgent([(5,7)], "Alice")
@@ -175,7 +175,7 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
         #1
         numAgents = len(agents)
         ret = Allocation(agents)
-        cover = Cover(a,b,agents)
+        cover = Cover(a,b,agents,roundAcc=roundAcc)
 
         #2
         for inter in cover:
@@ -193,6 +193,7 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
         for interval in cover:
             points.append(interval[1])
         points.sort()
+        ret = Allocation(agents)
         for i in range(1, len(points)):
             logger.info("creating allocation from %f to %f:", points[i-1], points[i])
             alloc = EFAllocateRec(points[i-1], points[i])
