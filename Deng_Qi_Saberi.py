@@ -153,14 +153,16 @@ class SimplexSolver:
         # as the essay says, listing an array with proper j, which related to the segment we going to iterate over
         # this is where we deciding over which i's side to go, so the k1 gonna be fixed and the i's gonna change
 
+        # when k1 is fixed
         proper_js_k1 = [j for j in range(self.N - i1 - k1 + 1) if j >= self.N - i2 - k2 and self.N - j - k1 <= i2]
-        # proper_js_k1 = [j for j in proper_js_k1 if self.N - j - k1 >= i1]
         proper_js_k1.sort(reverse=True)
-        proper_js_i2 = [j for j in range(self.N - i2 + 1) if self.N - i2 - k1 >= j >= self.N - i2 - k2]
+        # when i2 is fixed
+        proper_js_i2 = [j for j in range(self.N - i2 - k1 + 1) if j >= self.N - i2 - k2]
         proper_js_i2.sort(reverse=True)
-        # proper_js_i2.remove(max(proper_js_i2))
-        proper_js_k2 = [j for j in range(self.N - k2 + 1) if j >= self.N - k2 - i1]
+        # when
+        proper_js_k2 = [j for j in range(self.N - k2 - i1 + 1) if j >= self.N - k2 - i2]
         proper_js_k2.sort()
+        # when i1 is fixed
         proper_js_i1 = [j for j in range(self.N - i1 - k1 + 1) if j >= self.N - i1 - k2]
         proper_js_i1.sort()
 
