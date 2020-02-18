@@ -129,23 +129,23 @@ class SimplexSolver:
         :param i2: the upper boundary of the first index polygon.
         :param k1: the lower boundary of the third index polygon.
         :param k2: the upper boundary of the third index polygon.
-        :param flag: to be able to know if we running over i's or k's
         :return: 1 if it has non-zero index, and 0 if it has zero index
-
-        #>>> George = PiecewiseConstantAgent([0, 2, 4, 6], name="George")
-        #>>> Abraham = PiecewiseConstantAgent([6, 4, 2, 0], name="Abraham")
-        #>>> Hanna = PiecewiseConstantAgent([3, 3, 3, 3], name="Hanna")
-        #>>> agents = [George, Abraham, Hanna]
-        #>>> solver = SimplexSolver(1/2, 4, agents)
-        #>>> solver.index(0, 4, 0, 8)
 
         >>> George = PiecewiseConstantAgent([4, 6], name="George")
         >>> Abraham = PiecewiseConstantAgent([6, 4], name="Abraham")
         >>> Hanna = PiecewiseConstantAgent([3, 3], name="Hanna")
         >>> agents = [George, Abraham, Hanna]
         >>> solver = SimplexSolver(1/2, 2, agents)
-        >>> solver.recursive_algorithm1(0, solver.N, 0, solver.N)
+        >>> solver.index(0, solver.N, 0, solver.N)
         1
+
+        >>> George = PiecewiseConstantAgent([4, 6], name="George")
+        >>> Abraham = PiecewiseConstantAgent([6, 4], name="Abraham")
+        >>> Hanna = PiecewiseConstantAgent([3, 3], name="Hanna")
+        >>> agents = [George, Abraham, Hanna]
+        >>> solver = SimplexSolver(1/2, 2, agents)
+        >>> solver.index(0, 2, 0, 1)
+        0
 
         """
 
@@ -159,7 +159,7 @@ class SimplexSolver:
         # when i2 is fixed
         proper_js_i2 = [j for j in range(self.N - i2 - k1 + 1) if j >= self.N - i2 - k2]
         proper_js_i2.sort(reverse=True)
-        # when
+        # when k2 is fixed
         proper_js_k2 = [j for j in range(self.N - k2 - i1 + 1) if j >= self.N - k2 - i2]
         proper_js_k2.sort()
         # when i1 is fixed
@@ -210,25 +210,6 @@ class SimplexSolver:
                 counter -= 1
             last_color = check_color
 
-        # else:
-        #     # this is where we deciding over which k's side to go, so the i1 gonna be fixed and the k's gonna change
-        #     proper_js = [j for j in range(self.N - i1 - k1 + 1) if j >= self.N - i1 - k2]
-        #     proper_js = [j for j in proper_js if self.N - j - i1 >= k1]
-        #     proper_js.sort(reverse=True)
-        #     last_color = self.color_at_label([i1, max(proper_js), self.N - max(proper_js) - i1])
-        #     for j in proper_js:
-        #         # if this j can't fit into the segment, skip it. also, don't check again the first element
-        #         if j == max(proper_js):
-        #             continue
-        #         else:
-        #             # check the next vertex in the segment, and update the counter according to changes of colors
-        #             check_color = self.color_at_label([i1, j, self.N - j - i1])
-        #             if last_color == 0 and check_color == 1:
-        #                 counter += 1
-        #             elif last_color == 1 and check_color == 0:
-        #                 counter -= 1
-        #             last_color = check_color
-
         return 0 if counter == 0 else 1
 
     def recursive_algorithm1(self, i1, i2, k1, k2):
@@ -251,6 +232,7 @@ class SimplexSolver:
         >>> agents = [George, Abraham, Hanna]
         >>> solver = SimplexSolver(1/2, 2, agents)
         >>> solver.recursive_algorithm1(0, solver.N, 0, solver.N)
+        [2, 1, 1]
 
         """
 
@@ -264,11 +246,13 @@ class SimplexSolver:
             # if the triangle is the wrong triangle and two vertices is in same color, return vertex4 indices
             if vertex1_color == vertex2_color or vertex2_color == vertex3_color or vertex3_color == vertex1_color:
                 logger.info("we found a division that is envy-free-approximation")
-                return [i1 + 1, self.N - i1 - k1 - 2, k1 + 1]
+                arr = [i1 + 1, self.N - i1 - k1 - 2, k1 + 1]
+                return arr
             # if its the right triangle, return one of its vertices
             else:
                 logger.info("we found a division that is envy-free-approximation")
-                return [i1 + 1, self.N - i1 - k1 - 1, k1]
+                arr = [i1 + 1, self.N - i1 - k1 - 1, k1]
+                return arr
         else:
             # pick the max between the two, so we can cut by half the input size
             logger.info("we are checking for the next polygon to recurse on it")
@@ -276,17 +260,17 @@ class SimplexSolver:
                 i3 = int((i2 + i1) / 2)
                 # compute the amount of swaps in the halved polygon, and if it has non-zero index then recurse on it
                 if self.index(i1, i3, k1, k2) != 0:
-                    self.recursive_algorithm1(i1, i3, k1, k2)
+                    return self.recursive_algorithm1(i1, i3, k1, k2)
                 # due to the induction in the essay, at least one of them is, and therefore, recurse on the second one
                 else:
-                    self.recursive_algorithm1(i3, i2, k1, k2)
+                    return self.recursive_algorithm1(i3, i2, k1, k2)
             # the same routine, but with the third third index of the vertex.
             else:
                 k3 = int((k2 + k1) / 2)
                 if self.index(i1, i2, k1, k3) != 0:
-                    self.recursive_algorithm1(i1, i2, k1, k3)
+                    return self.recursive_algorithm1(i1, i2, k1, k3)
                 else:
-                    self.recursive_algorithm1(i1, i2, k3, k2)
+                    return self.recursive_algorithm1(i1, i2, k3, k2)
 
 
 def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
@@ -302,9 +286,11 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
     >>> Abraham = PiecewiseConstantAgent([6, 4], name="Abraham")
     >>> Hanna = PiecewiseConstantAgent([3, 3], name="Hanna")
     >>> agents = [George, Abraham, Hanna]
-    >>> solver = SimplexSolver(1/2, 2, agents)
-    >>> solver.recursive_algorithm1(0, solver.N, 0, solver.N)
-
+    >>> elaborate_simplex_solution(agents, 1/2)
+    > George gets [(0, 1.0)] with value 4.00
+    > Abraham gets [(1.0, 1.5)] with value 2.00
+    > Hanna gets [(1.0, 1.5)] with value 1.50
+    <BLANKLINE>
     """
     # checking parameters validity
     num_of_agents = len(agents)
@@ -340,7 +326,7 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
         sec_dif = agents[second_index].eval(or_indices[0], or_indices[1]) - agents[second_index].eval(or_indices[1], n)
         thr_dif = agents[third_index].eval(or_indices[0], or_indices[1]) - agents[third_index].eval(or_indices[1], n)
         second = second_index if abs(sec_dif) >= abs(thr_dif) else third_index
-        third = second_index if abs(sec_dif) <= abs(thr_dif) else third_index
+        third = second_index if abs(sec_dif) < abs(thr_dif) else third_index
 
         # define which option goes to the second as first priority
         max_option = options[np.argmax(agents[second].eval(start, end) for (start, end) in options)]
@@ -348,9 +334,10 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
         min_option = options[np.argmin(agents[second].eval(start, end) for (start, end) in options)]
 
         # allocate both players
-        allocation.set_piece(second, options[max_option])
+
+        allocation.set_piece(second, [max_option])
         logger.info("%s gets the the piece [%f,%f].", solver.agents[second].name(), max_option[0], max_option[1])
-        allocation.set_piece(third, options[min_option])
+        allocation.set_piece(third, [min_option])
         logger.info("%s gets the the piece [%f,%f].", solver.agents[third].name(), min_option[0], min_option[1])
 
     elif first_color_index == 1:
@@ -370,9 +357,10 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
         min_option = options[np.argmin(agents[second].eval(start, end) for (start, end) in options)]
 
         # allocate both players
-        allocation.set_piece(second, options[max_option])
+
+        allocation.set_piece(second, [max_option])
         logger.info("%s gets the the piece [%f,%f].", solver.agents[second].name(), max_option[0], max_option[1])
-        allocation.set_piece(third, options[min_option])
+        allocation.set_piece(third, [min_option])
         logger.info("%s gets the the piece [%f,%f].", solver.agents[third].name(), min_option[0], min_option[1])
     else:
         # same things happens, just for another option
@@ -391,9 +379,9 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
         min_option = options[np.argmin(agents[second].eval(start, end) for (start, end) in options)]
 
         # allocate both players
-        allocation.set_piece(second, options[max_option])
+        allocation.set_piece(second, [max_option])
         logger.info("%s gets the the piece [%f,%f].", solver.agents[second].name(), max_option[0], max_option[1])
-        allocation.set_piece(third, options[min_option])
+        allocation.set_piece(third, [min_option])
         logger.info("%s gets the the piece [%f,%f].", solver.agents[third].name(), min_option[0], min_option[1])
     return allocation
 
@@ -403,3 +391,4 @@ if __name__ == '__main__':
 
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
+
