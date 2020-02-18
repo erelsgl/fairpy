@@ -18,6 +18,18 @@ from itertools import permutations
 import logging
 logger = logging.getLogger(__name__)
 
+"""
+important note:
+these algorithms are susceptible to python floating point math errors.
+In Python, for instance, 0.1+0.2>0.3. This creates a situation where, for instance,
+a cut that should be envy free is not seen as one to calculation errors when
+creating it.
+
+Therefore, both algorithms use a paramater called roundAcc to round values
+in order to prevent fragmentation caused due to these errors. Furthermore,
+it is recommended that when using these algorithms the cake will be in a large
+size, in order to prevent calculation errors as much as possible.
+"""
 
 def Cover(a: float, b: float, agents: List[Agent], roundAcc = 6)->List:
     """
@@ -29,6 +41,7 @@ def Cover(a: float, b: float, agents: List[Agent], roundAcc = 6)->List:
     :param a: the start of the given interval.
     :param b: the end of the given interval.
     :param agents: a list of agents.
+    :param roundAcc: the rounding accuracy of the algorithm
     :return: a cover of [a,b].
 
     >>> Alice = PiecewiseUniformAgent([(0.5,0.7)], "Alice")
@@ -55,7 +68,7 @@ def Cover(a: float, b: float, agents: List[Agent], roundAcc = 6)->List:
                 continue
             tmp = round(tmp, roundAcc)
             #logger.info("end point from %s is %f", agent.name(), tmp)
-            if tmp != None and tmp > start and tmp <= b and tmp < end:
+            if tmp > start and tmp <= b and tmp < end:
                 end = tmp
 
         #2b
@@ -96,55 +109,22 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
     in a polynomial time complexity.
 
     :param agents: a list of agents.
+    :param roundAcc: the rounding accuracy of the algorithm
     :return: an envy-free allocation.
 
-    >>> Alice = PiecewiseUniformAgent([(0.5,0.7)], "Alice")
-    >>> George = PiecewiseUniformAgent([(0.4,0.9)], "George")
+    >>> Alice = PiecewiseUniformAgent([(5,7)], "Alice")
+    >>> George = PiecewiseUniformAgent([(4,9)], "George")
     >>> print(str(EFAllocate([Alice,George])))
-    > George gets [(0.6, 0.7)] with value 0.1
-    > Alice gets [(0.0, 0.3), (0.3, 0.6), (0.7, 0.85), (0.85, 1.0)] with value 0.1
+    > Alice gets [(0, 6.0)] with value 1.0
+    > George gets [(6.0, 7.5), (7.5, 9.0)] with value 3.0
+    <BLANKLINE>
+    >>> Alice = PiecewiseUniformAgent([(2,3), (9,10)], "Alice")
+    >>> George = PiecewiseUniformAgent([(1,2), (6,7)], "George")
+    >>> print(str(EFAllocate([Alice,George])))
+    > George gets [(0, 2.0)] with value 1.0
+    > Alice gets [(2.0, 6.0), (6.0, 10.0)] with value 2.0
     <BLANKLINE>
     """
-
-    class MergableAllocation(Allocation):
-        """
-        an allocation with some extra helper methods, most notably:
-        the ability to merge with other allocations,
-        the ability to set all agents and pieces
-        and the ability to check if it is envy free.
-        """
-
-        def merge(self, other):
-            for i in range(len(self.pieces)):
-                if(self.pieces[i] == None):
-                    self.pieces[i] = []
-                for j in range(len(other.pieces)):
-                    if(other.agents[j].name() == self.agents[i].name()):
-                        if(other.pieces[j] == None):
-                            other.pieces[j] = []
-                        self.pieces[i].extend(other.pieces[j])
-
-        def setAgents(self, agents):
-            self.agents = agents
-
-        def setPieces(self, pieces):
-            self.pieces = pieces
-
-        def isEnvyFree(self):
-            for i in range(len(self.agents)):
-                selfVal = 0
-                for piece in self.pieces[i]:
-                    selfVal += self.agents[i].eval(piece[0], piece[1])
-                for j in range(len(self.pieces)):
-                    otherVal = 0
-                    for otherPiece in self.pieces[j]:
-                        otherVal += self.agents[i].eval(otherPiece[0], otherPiece[1])
-                    if round(otherVal-selfVal, roundAcc) > 0:
-                        #logger.info("allocation not envy free because %s prefers %d over %d", self.agents[i].name(), j, i)
-                        #logger.info(self)
-                        return False
-            return True
-
 
     def sandwichAllocation(a, b, alpha, beta, n):
         """
@@ -155,17 +135,28 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
         :param beta: end point of the internal interval.
         :param n: the amount of agents in the allocation.
         :return: a list of lists of intervals mathching the sandwich allocation.
+
+        >>>sandwichAllocation(0,1,0.4,0.6,2)
+        [[(0.4, 0.6)], [(0,0.2), (0.2, 0.4), (0.6, 0.8), (0.8, 1)]]
         """
         gamma = round((alpha - a)/(2*(n-1)), roundAcc)
         delta = round((b - beta)/(2*(n-1)), roundAcc)
-        ret = [[(alpha, beta)]]
+        tmp = [[(alpha, beta)]]
         for j in range(1, n):
             toAdd = []
             toAdd.append((round(a + (j-1)*gamma, roundAcc), round(a + j*gamma, roundAcc)))
             toAdd.append((round(alpha - (j)*gamma, roundAcc), round(alpha - (j-1)*gamma, roundAcc)))
             toAdd.append((round(beta + (j-1)*delta, roundAcc), round(beta + j*delta, roundAcc)))
             toAdd.append((round(b - (j)*delta, roundAcc), round(b - (j-1)*delta, roundAcc)))
-            ret.append(toAdd)
+            tmp.append(toAdd)
+
+        #clear useless points where the start equals to the end
+        ret = []
+        for piece in tmp:
+            ret.append([])
+            for inter in piece:
+                if round(inter[1]-inter[0], roundAcc) > 0.0:
+                    ret[-1].append(inter)
         return ret
 
     def EFAllocateRec(a: float, b: float)->Allocation:
@@ -179,11 +170,11 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
         """
 
         if round(a, roundAcc) == round(b, roundAcc):
-            return MergableAllocation(agents)
+            return Allocation(agents)
 
         #1
         numAgents = len(agents)
-        ret = MergableAllocation(agents)
+        ret = Allocation(agents)
         cover = Cover(a,b,agents)
 
         #2
@@ -191,7 +182,7 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
             ret.setPieces(sandwichAllocation(a,b,inter[0],inter[1],numAgents))
             for perm in permutations(agents):
                 ret.setAgents(perm)
-                if ret.isEnvyFree():
+                if ret.isEnvyFree(roundAcc):
                     logger.info("allocation from %f to %f completed with sandwich allocation.",a,b)
                     return ret
 
