@@ -290,7 +290,7 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
     >>> elaborate_simplex_solution(agents, 1/2)
     > George gets [(0, 1.0)] with value 4.0
     > Abraham gets [(1.0, 1.5)] with value 2.0
-    > Hanna gets [(1.0, 1.5)] with value 1.5
+    > Hanna gets [(1.5, 2)] with value 1.5
     <BLANKLINE>
     """
     # checking parameters validity
