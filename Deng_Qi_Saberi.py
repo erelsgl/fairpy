@@ -64,7 +64,8 @@ class SimplexSolver:
             partition.append(self.epsilon * (triplet[i] + counter))
             counter += triplet[i]
         result = np.argmax(self.agents[index_of_agent].partition_values(partition))
-        logger.info("agent %s picked piece num %d, in partition", self.agents[index_of_agent].name(), result, triplet)
+        logger.info("agent %s picked piece num %d, in partition (%d, %d, %d)", self.agents[index_of_agent].name(),
+                    result, triplet[0], triplet[1], triplet[2])
         return result
 
     def label(self, triplet):
@@ -287,9 +288,9 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
     >>> Hanna = PiecewiseConstantAgent([3, 3], name="Hanna")
     >>> agents = [George, Abraham, Hanna]
     >>> elaborate_simplex_solution(agents, 1/2)
-    > George gets [(0, 1.0)] with value 4.00
-    > Abraham gets [(1.0, 1.5)] with value 2.00
-    > Hanna gets [(1.0, 1.5)] with value 1.50
+    > George gets [(0, 1.0)] with value 4.0
+    > Abraham gets [(1.0, 1.5)] with value 2.0
+    > Hanna gets [(1.0, 1.5)] with value 1.5
     <BLANKLINE>
     """
     # checking parameters validity
