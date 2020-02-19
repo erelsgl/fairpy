@@ -331,7 +331,7 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
 
         # define which option goes to the second as first priority
         max_option = options[np.argmax(agents[second].eval(start, end) for (start, end) in options)]
-
+        options.remove(max_option)
         min_option = options[np.argmin(agents[second].eval(start, end) for (start, end) in options)]
 
         # allocate both players
@@ -355,6 +355,7 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
 
         # define which option goes to the second as first priority
         max_option = options[np.argmax(agents[second].eval(start, end) for (start, end) in options)]
+        options.remove(max_option)
         min_option = options[np.argmin(agents[second].eval(start, end) for (start, end) in options)]
 
         # allocate both players
@@ -377,6 +378,7 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
 
         # define which option goes to the second as first priority
         max_option = options[np.argmax(agents[second].eval(start, end) for (start, end) in options)]
+        options.remove(max_option)
         min_option = options[np.argmin(agents[second].eval(start, end) for (start, end) in options)]
 
         # allocate both players
