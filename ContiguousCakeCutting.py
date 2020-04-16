@@ -17,10 +17,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-#import sys
-#logger.addHandler(logging.StreamHandler(sys.stdout))
-#logger.setLevel(logging.INFO)
-
 # line 5. 'some agent in N values [`, 1] at least 1/3'
 # agentN - indexes of all existing agents
 # agentL - all agents
@@ -143,12 +139,8 @@ def algor1(AgentList):
         Mlist[j][1] = 1.0
     logger.info("")
 
-    #tempprint = ""
+    # for printing the results
     rStemp = reprSegement(AgentList,Mlist)
-    #for i, allocation in enumerate(Mlist):
-        #print("> Agent " + str(i) + " gets the segment: " + str(allocation))
-        #logger.info("> Agent %s gets the segment: %s", AgentList[i].name(), str(allocation))
-        #tempprint += "> Agent "+ AgentList[i].name() +" gets the segment: "+ str(allocation) + "\n"
 
     return rStemp
 
