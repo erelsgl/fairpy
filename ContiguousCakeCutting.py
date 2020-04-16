@@ -10,10 +10,16 @@ from typing import Optional, Any
 
 import numpy as np
 from typing import *
+from allocations import *
+from agents import *
 
 import logging
 logger = logging.getLogger(__name__)
 
+
+#import sys
+#logger.addHandler(logging.StreamHandler(sys.stdout))
+#logger.setLevel(logging.INFO)
 
 # line 5. 'some agent in N values [`, 1] at least 1/3'
 # agentN - indexes of all existing agents
@@ -31,11 +37,11 @@ def hasBiggerThanThird(left, agentN, agentL):
     >>> c1 = PiecewiseConstantAgentNormalized([2, 8, 2])
     >>> c2 = PiecewiseConstantAgentNormalized([4, 2, 6])
     >>> lsC = [c1,c2]
-    >>> hasBiggerThanThird(0,2,lsC)
+    >>> hasBiggerThanThird(0.0,[0,1],lsC)
     True
-    >>> hasBiggerThanThird(0.85,2,lsC)
+    >>> hasBiggerThanThird(0.85,[0,1],lsC)
     False
-    >>> hasBiggerThanThird(0.6,2,lsC)
+    >>> hasBiggerThanThird(0.6,[1],lsC)
     True
 
     """
@@ -66,6 +72,7 @@ def algor1(AgentList):
     >>> algor1(lstba)
     > Agent aa gets the segment: [0.3333333333333333, 1.0]
     > Agent bb gets the segment: [0.0, 0.3333333333333333]
+    <BLANKLINE>
 
     >>> a0 = PiecewiseConstantAgentNormalized([4, 10, 20], name="a0")
     >>> a1 = PiecewiseConstantAgentNormalized([14, 42, 9, 17], name="a1")
@@ -75,6 +82,7 @@ def algor1(AgentList):
     > Agent a0 gets the segment: [0.3824514991181658, 1.0]
     > Agent a1 gets the segment: [0.15925925925925924, 0.3824514991181658]
     > Agent a2 gets the segment: [0.0, 0.15925925925925924]
+    <BLANKLINE>
 
     """
     l = 0.00
@@ -134,8 +142,18 @@ def algor1(AgentList):
         # [a, l] unite with [l, 1] => [a, 1]
         Mlist[j][1] = 1.0
     logger.info("")
-    for i, allocation in enumerate(Mlist):
+
+    #tempprint = ""
+    rStemp = reprSegement(AgentList,Mlist)
+    #for i, allocation in enumerate(Mlist):
         #print("> Agent " + str(i) + " gets the segment: " + str(allocation))
-        logger.info("> Agent %s gets the segment: %s", AgentList[i].name(), str(allocation))
+        #logger.info("> Agent %s gets the segment: %s", AgentList[i].name(), str(allocation))
+        #tempprint += "> Agent "+ AgentList[i].name() +" gets the segment: "+ str(allocation) + "\n"
+
+    return rStemp
 
 
+if __name__ == "__main__":
+    import doctest
+    (failures,tests) = doctest.testmod(report=True)
+    print ("{} failures, {} tests".format(failures,tests))

@@ -24,8 +24,8 @@ print(Erel)
 print(Shalev)
 print()
 
-ContiguousCakeCutting.algor1(lstES)
-print()
+print(ContiguousCakeCutting.algor1(lstES))
+
 
 
 #################################################################################################
@@ -43,7 +43,7 @@ print(CHARLIE)
 print(DANY)
 print()
 
-ContiguousCakeCutting.algor1(lstABCD)
+print(ContiguousCakeCutting.algor1(lstABCD))
 
 
 # the cake for example 2
@@ -63,7 +63,7 @@ ContiguousCakeCutting.algor1(lstABCD)
 
 ####################################################################################################
 
-print()
+
 print("\n### Example 3: \n")
 
 BEN = PiecewiseConstantAgentNormalized([4, 10, 20], name="BEN")
@@ -76,4 +76,4 @@ print(GUR)
 print(ION)
 print()
 
-ContiguousCakeCutting.algor1(lstaaa)
+print(ContiguousCakeCutting.algor1(lstaaa))

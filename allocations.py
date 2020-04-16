@@ -39,6 +39,10 @@ class Allocation:
         self.agents = agents
         self.pieces = [None]*len(agents)
 
+    def __init__(self, agents:List[Agent],piecess:List[tuple]):
+        self.agents = agents
+        self.pieces = piecess
+
     def get_piece(self,agent_index:int):
         return self.pieces[agent_index]
     def get_pieces(self):
@@ -131,6 +135,33 @@ class OnePieceAllocation(Allocation):
         self.pieces[agent_index] = piece
     def get_piece(self,agent_index:int):
         return self.pieces[agent_index]
+
+class reprSegement(Allocation):
+    def __init__(self, agents: List[Agent]):
+        super().__init__(agents)
+
+    def __init__(self, agents:List[Agent],piecess:List[tuple]):
+        self.agents = agents
+        self.pieces = piecess
+
+    def set_piece(self, agent_index:int, piece:tuple):
+        """
+        Sets the piece of the given index.
+
+        :param agent_index: index of the agent.
+        :param piece: a list of intervals.
+        """
+        self.pieces[agent_index] = piece
+    def get_piece(self,agent_index:int):
+        return self.pieces[agent_index]
+
+    def __repr__(self):
+        s = ""
+        for i in range(len(self.pieces)):
+            agent = self.agents[i]
+            piece = self.pieces[i]
+            s += "> Agent {} gets the segment: {}\n".format(agent.name(), str(piece))
+        return s
 
 
 if __name__ == "__main__":
