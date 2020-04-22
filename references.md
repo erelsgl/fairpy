@@ -34,34 +34,36 @@ Operations Research 60(6),  1461--1476.
 
 ## In construction
 
+* Paul W Goldberg, Alexandros Hollender, Warut Suksompong (2019).
+["Contiguous Cake Cutting: Hardness Results and Approximation Algorithms"](https://arxiv.org/abs/1911.05416).
+Proceedings of AAAI 2020.
+*Algorithms 1 and 2*.
+  * Programmer: Shalev Goldstein
+
+## Future work
+
+### For one programmer
+
 * Yiling Chen, John K. Lai, David C. Parkes, Ariel D. Procaccia (2013): 
 ["Truth, justice, and cake cutting"](http://procaccia.info/papers/justruth.geb.pdf). 
 Games and Economic Behavior. 77 (1): 284–297. 
 *Mechanism 1 (in section 3), and the algorithm described in section 4*.
-  * Programmer: Ofec Israel.
   
 * Georgios Amanatidis,  George Christodoulou,  John Fearnley,  Evangelos Markakis,  Christos-Alexandros Psomas, Eftychia Vakaliou (2018).
 ["An improved envy-free cake cutting protocol for four agents"](https://arxiv.org/abs/1807.00317)
 Proceedings of SAGT 2018, 87--99.
 *All algorithms.*
-  * Programmers: Amit Eliyahu and Tal Nakar. 
   
 * Haris Aziz, Chun Ye (2013):
 ["Cake cutting algorithms for piecewise constant and piecewise uniform valuations"](https://arxiv.org/abs/1307.2908). 
 Proceedings of WINE 2014. 1--14.
 *All 5 algorithms.*
-  * Programmers: Shalev Goldstein and Eyal Shahimov.
 
 * Yuga J Cohler,  John K Lai, and David C Parkes, Ariel D Procaccia (2011).
 ["Optimal envy-free cake cutting"](https://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewPaper/3638).
 Proceedings of AAAI 2011.
 ([alternative link](http://procaccia.info/papers/maxsw.aaai11.pdf)).
 *Algorithms 1 and 2*. 
-   * Programmer: Gal Politzer.
-
-## Future work
-
-### For one programmer
 
 * Jeff Edmonds, Kirk Pruhs (2006).
 ["Balanced allocations of cake"](http://people.cs.pitt.edu/~kirk/papers/focs2006.pdf)
@@ -77,11 +79,6 @@ Proceedings of EC 2013. 251–-268.
 Proceedings of SAGT 2018, pages={19--30}.
 *Sections 4 and 7*.
 
-* Paul W Goldberg, Alexandros Hollender, Warut Suksompong (2019).
-["Contiguous Cake Cutting: Hardness Results and Approximation Algorithms"](https://arxiv.org/abs/1911.05416).
-Proceedings of AAAI 2020.
-*Algorithms 1 and 2*.
-
 
 ### For two programmers
 
@@ -89,6 +86,7 @@ Proceedings of AAAI 2020.
 ["A discrete and bounded envy-free cake cutting protocol for any number of agents"](https://arxiv.org/abs/1604.03655).
 Proceedings of FOCS 2016. 
 *Algorithms 1 and 2 (up to page 10)*.
+
 
 ## Future future work
 
