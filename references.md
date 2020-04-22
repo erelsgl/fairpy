@@ -18,7 +18,7 @@ Proceedings of WINE 2019, 57--70.
 *Algorithm 1*.
   * [fe_cake_division_connected_pieces.py](fe_cake_division_connected_pieces.py) by Uri Zitzer.
 
-*  David Kurokawa, John K. Lai, Ariel D Procaccia (2013). 
+* David Kurokawa, John K. Lai, Ariel D Procaccia (2013). 
 ["How to Cut a Cake Before the Party Ends"](https://www.aaai.org/ocs/index.php/AAAI/AAAI13/paper/viewPaper/6365).
 Proceedings of AAAI 2013. 
 ([alternative link](http://procaccia.info/papers/unicake.aaai13.pdf)). 
@@ -48,7 +48,7 @@ Proceedings of AAAI 2020.
 ["Truth, justice, and cake cutting"](http://procaccia.info/papers/justruth.geb.pdf). 
 Games and Economic Behavior. 77 (1): 284–297. 
 *Mechanism 1 (in section 3), and the algorithm described in section 4*.
-  
+
 * Georgios Amanatidis,  George Christodoulou,  John Fearnley,  Evangelos Markakis,  Christos-Alexandros Psomas, Eftychia Vakaliou (2018).
 ["An improved envy-free cake cutting protocol for four agents"](https://arxiv.org/abs/1807.00317)
 Proceedings of SAGT 2018, 87--99.
