@@ -53,7 +53,7 @@ def hasBiggerThanThird(left, agentN, agentL):
 
 # Algorithm 1 1/3-Envy-Free Algorithm
 # AgentList is all agents
-def algor1(AgentList):
+def algor1(AgentList)->Allocation:
     """
     Answer a Mark query: return "end" such that the value of the interval [start,end] is target_value  {[(NORMALIZED)]}.
 
@@ -140,10 +140,11 @@ def algor1(AgentList):
     logger.info("")
 
     # for printing the results
-    rStemp = reprSegement(AgentList,Mlist)
 
-    return rStemp
 
+    allc = Allocation(AgentList, Mlist)
+
+    return allc
 
 if __name__ == "__main__":
     import doctest
