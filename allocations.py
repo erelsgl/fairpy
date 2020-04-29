@@ -39,9 +39,6 @@ class Allocation:
         self.agents = agents
         self.pieces = [None]*len(agents)
 
-    def __init__(self, agents:List[Agent],piecess:List[tuple]):
-        self.agents = agents
-        self.pieces = piecess
 
     def get_piece(self,agent_index:int):
         return self.pieces[agent_index]
@@ -120,7 +117,7 @@ class Allocation:
             agent = self.agents[i]
             piece = self.pieces[i]
 
-            s += "> Agent {} gets the segment: {}\n".format(agent.name(), str(piece))
+            s += "> {} gets {} with value {:.2f}\n".format(agent.name(), self.pieces[i], agent.piece_value(piece))
 
         return s
 
