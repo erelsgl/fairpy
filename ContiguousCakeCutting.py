@@ -66,8 +66,8 @@ def algor1(AgentList)->Allocation:
     >>> bb = PiecewiseConstantAgentNormalized([4, 2, 6], name="bb")
     >>> lstba = [aa,bb]
     >>> algor1(lstba)
-    > aa gets [(0.3333333333333333, 1.0)] with value 0.83
-    > bb gets [(0.0, 0.3333333333333333)] with value 0.33
+    > aa gets [(0.333, 1.0)] with value 0.833
+    > bb gets [(0.0, 0.333)] with value 0.333
     <BLANKLINE>
 
     >>> a0 = PiecewiseConstantAgentNormalized([4, 10, 20], name="a0")
@@ -75,9 +75,9 @@ def algor1(AgentList)->Allocation:
     >>> a2 = PiecewiseConstantAgentNormalized([30, 1, 12], name="a2")
     >>> lstaaa = [a0,a1,a2]
     >>> algor1(lstaaa)
-    > a0 gets [(0.3824514991181658, 1.0)] with value 0.84
-    > a1 gets [(0.15925925925925924, 0.3824514991181658)] with value 0.33
-    > a2 gets [(0.0, 0.15925925925925924)] with value 0.33
+    > a0 gets [(0.382, 1.0)] with value 0.839
+    > a1 gets [(0.159, 0.382)] with value 0.333
+    > a2 gets [(0.0, 0.159)] with value 0.333
     <BLANKLINE>
 
     """

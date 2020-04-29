@@ -117,8 +117,8 @@ class Allocation:
             agent = self.agents[i]
             piece = self.pieces[i]
 
-            s += "> {} gets {} with value {:.2f}\n".format(agent.name(), self.pieces[i], agent.piece_value(piece))
-            #s += "> {} gets {} with value {}\n".format(agent.name(), round_piece(self.pieces[i], digits=3),round(agent.piece_value(piece), 3))
+            #s += "> {} gets {} with value {:.2f}\n".format(agent.name(), self.pieces[i], agent.piece_value(piece))
+            s += "> {} gets {} with value {}\n".format(agent.name(), round_piece(self.pieces[i], digits=3),round(agent.piece_value(piece), 3))
         return s
 
 class OnePieceAllocation(Allocation):
