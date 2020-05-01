@@ -2,6 +2,7 @@
 Defines agents with various kinds of valuation functions.
 
 Programmer: Erel Segal-Halevi
+and         Shalev Goldshtein for PiecewiseConstantAgentNormalized
 Since: 2019-11
 """
 
@@ -469,6 +470,128 @@ class PiecewiseUniformAgent(Agent):
         # Value is too high: return None
         return None
 
+class PiecewiseConstantAgentNormalized(Agent):
+
+
+    # the init of the agent
+    def __init__(self, values: list, name: str = None):
+        super().__init__(name)
+
+        # the len of the values list
+        self.length = len(values)
+        self.total_value_cache = sum(values)
+        # self.values = np.array(values)
+        ls = [None] * len(values)
+        # normalize the cake to values between 0.0 and 1.0
+        # by dividing the values by there sum
+        for i in range(len(values)):
+            ls[i] = values[i] / self.total_value_cache
+
+        # the list of the values
+        self.values = np.array(ls)
+
+        self.normal = 1 / self.total_value_cache
+
+    def __repr__(self):
+        return "{} is a piecewise-constant agent with values {} (((NORMALIZED)))".format(self.my_name, self.values)
+
+    def cake_value(self):
+        return self.total_value_cache
+
+    def cake_length(self):
+        return self.length
+
+    # the evaluation of the agents
+    def eval(self, start: float, end: float):
+        """
+        Answer an Eval query: return the value of the interval [start,end] {{{[(NORMALIZED)]}}}.
+
+        :param start: Location on cake where the calculation starts.
+        :param end:   Location on cake where the calculation ends.
+        :return: Value of [start,end]
+
+        >>> a = PiecewiseConstantAgentNormalized([11,22,33,44])
+        >>> a.eval(0.5,1)
+        0.7
+        >>> a.eval(0.25,1)
+        0.9
+        >>> a.eval(0,0.25)
+        0.1
+        >>> a.eval(0,0.375)
+        0.2
+
+        """
+        # the cake to the left of 0 and to the right of length is considered worthless.
+        start = max(0, min(start * self.length, self.length))
+        end = max(0, min(end * self.length, self.length))
+        if end <= start:
+            return 0.0  # special case not covered by loop below
+
+        fromFloor = int(np.floor(start))
+        fromFraction = (fromFloor + 1 - start)
+        toCeiling = int(np.ceil(end))
+        toCeilingRemovedFraction = (toCeiling - end)
+
+        val = 0.0
+        val += (self.values[fromFloor] * fromFraction)
+        val += self.values[fromFloor + 1:toCeiling].sum()
+        val -= (self.values[toCeiling - 1] * toCeilingRemovedFraction)
+
+        return val
+
+    # the mark is for finding the point where it's equals to  the target value
+    def mark(self, start: float, target_value: float):
+        """
+        Answer a Mark query: return "end" such that the value of the interval [start,end] is target_value  {[(NORMALIZED)]}.
+
+        :param start: Location on cake where the calculation starts.
+        :param targetValue: required value for the piece [start,end]
+        :return: the end of an interval with a value of target_value.
+        If the value is too high - returns None.
+
+        >>> a = PiecewiseConstantAgentNormalized([11,22,33,44])
+        >>> a.mark(0.5, 0.7)
+        1
+        >>> a.mark(0.375, 0.1)
+        0.5
+        >>> a.mark(0, 0.2)
+        0.375
+        >>> a.mark(0.25, 0.2)
+        0.5
+        >>> a.mark(0, 0.9)
+        0.9375
+
+        """
+        # the cake to the left of 0 and to the right of length is considered worthless.
+        start = max(0, start * self.length)
+        if start >= self.length:
+            return None  # value is too high
+
+        if target_value < 0:
+            raise ValueError("sum out of range (should be positive): {}".format(sum))
+
+        start_floor = int(np.floor(start))
+        if start_floor >= len(self.values):
+            raise ValueError(
+                "mark({},{}): start_floor ({}) is >= length of values ({})".format(start, target_value, start_floor,
+                                                                                   self.values))
+
+        start_fraction = (start_floor + 1 - start)
+
+        value = self.values[start_floor]
+        if value * start_fraction >= target_value:
+            # i added the division by self.length for normalzing
+            return ((start + (target_value / value)) / self.length)
+        target_value -= (value * start_fraction)
+        for i in range(start_floor + 1, self.length):
+            value = self.values[i]
+            if target_value <= value:
+                # i added the division by self.length for normalzing
+                return ((i + (target_value / value)) / self.length)
+            target_value -= value
+
+        # Value is too high: return None
+        return None
 
 
 if __name__ == "__main__":

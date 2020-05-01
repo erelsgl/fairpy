@@ -39,6 +39,7 @@ class Allocation:
         self.agents = agents
         self.pieces = [None]*len(agents)
 
+
     def get_piece(self,agent_index:int):
         return self.pieces[agent_index]
     def get_pieces(self):
@@ -115,7 +116,9 @@ class Allocation:
         for i in range(len(self.pieces)):
             agent = self.agents[i]
             piece = self.pieces[i]
-            s += "> {} gets {} with value {}\n".format(agent.name(), round_piece(self.pieces[i], digits=3), round(agent.piece_value(piece),3))
+
+            #s += "> {} gets {} with value {:.2f}\n".format(agent.name(), self.pieces[i], agent.piece_value(piece))
+            s += "> {} gets {} with value {}\n".format(agent.name(), round_piece(self.pieces[i], digits=3),round(agent.piece_value(piece), 3))
         return s
 
 class OnePieceAllocation(Allocation):
