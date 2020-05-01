@@ -557,7 +557,7 @@ class PiecewiseConstantAgentNormalized(Agent):
 
         >>> a = PiecewiseConstantAgentNormalized([11,22,33,44])
         >>> a.mark(0.5, 0.7)
-        1
+        1.0
         >>> a.mark(0.375, 0.1)
         0.5
         >>> a.mark(0, 0.2)
@@ -643,11 +643,11 @@ class PiecewiseConstantAgentNormalized(Agent):
         >>> a = PiecewiseConstantAgentNormalized([11,22,33,44])
         >>> a.eval(0.5,1)
         0.7
-        >>> a.eval(0.25,1)
+        >>> np.round(a.eval(0.25,1), decimals=1)
         0.9
         >>> a.eval(0,0.25)
         0.1
-        >>> a.eval(0,0.375)
+        >>> np.round(a.eval(0,0.375), decimals=1)
         0.2
 
         """
@@ -681,7 +681,7 @@ class PiecewiseConstantAgentNormalized(Agent):
 
         >>> a = PiecewiseConstantAgentNormalized([11,22,33,44])
         >>> a.mark(0.5, 0.7)
-        1
+        1.0
         >>> a.mark(0.375, 0.1)
         0.5
         >>> a.mark(0, 0.2)
