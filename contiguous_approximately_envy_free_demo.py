@@ -11,10 +11,10 @@ Since: 2020-03
 from agents import *
 
 
-import ContiguousCakeCutting, logging, sys
+import contiguous_approximately_envy_free, logging, sys
 
-ContiguousCakeCutting.logger.addHandler(logging.StreamHandler(sys.stdout))
-ContiguousCakeCutting.logger.setLevel(logging.INFO)
+contiguous_approximately_envy_free.logger.addHandler(logging.StreamHandler(sys.stdout))
+contiguous_approximately_envy_free.logger.setLevel(logging.INFO)
 
 
 print("\n### Example 1: \n")
@@ -25,7 +25,7 @@ print(Erel)
 print(Shalev)
 print()
 
-print(ContiguousCakeCutting.algor1(lstES))
+print(contiguous_approximately_envy_free.algor1(lstES))
 
 
 
@@ -44,7 +44,7 @@ print(CHARLIE)
 print(DANY)
 print()
 
-print(ContiguousCakeCutting.algor1(lstABCD))
+print(contiguous_approximately_envy_free.algor1(lstABCD))
 
 
 # the cake for example 2
@@ -77,4 +77,4 @@ print(GUR)
 print(ION)
 print()
 
-print(ContiguousCakeCutting.algor1(lstaaa))
+print(contiguous_approximately_envy_free.algor1(lstaaa))

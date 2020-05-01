@@ -31,14 +31,12 @@ Operations Research 60(6),  1461--1476.
 *Algorithm 1*.
   * [Deng_Qi_Saberi.py](Deng_Qi_Saberi.py) by Dvir Fried.
 
-
-## In construction
-
 * Paul W Goldberg, Alexandros Hollender, Warut Suksompong (2019).
 ["Contiguous Cake Cutting: Hardness Results and Approximation Algorithms"](https://arxiv.org/abs/1911.05416).
 Proceedings of AAAI 2020.
-*Algorithms 1 and 2*.
-  * Programmer: Shalev Goldstein
+*Algorithms 1*.
+  * [contiguous_approximately_envy_free.py](contiguous_approximately_envy_free.py) by Shalev Goldshtein.
+
 
 ## Future work
 
@@ -79,13 +77,22 @@ Proceedings of EC 2013. 251–-268.
 Proceedings of SAGT 2018, pages={19--30}.
 *Sections 4 and 7*.
 
+* Paul W Goldberg, Alexandros Hollender, Warut Suksompong (2019).
+["Contiguous Cake Cutting: Hardness Results and Approximation Algorithms"](https://arxiv.org/abs/1911.05416).
+Proceedings of AAAI 2020.
+*Algorithm 2*.
+
 
 ### For two programmers
 
 * Haris Aziz, Simon MacKenzie (2017).
 ["A discrete and bounded envy-free cake cutting protocol for any number of agents"](https://arxiv.org/abs/1604.03655).
 Proceedings of FOCS 2016. 
-*Algorithms 1 and 2 (up to page 10)*.
+* Algorithms 1 and 2 (up to page 10)*.
+
+* Xiaohui Bei and Warut Suksompong (2019).
+["Dividing a Graphical Cake"](https://arxiv.org/abs/1910.14129).
+* All algorithms.
 
 
 ## Future future work

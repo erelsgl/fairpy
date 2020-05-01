@@ -11,11 +11,6 @@ Programmer: Shalev Goldshtein (Algorithm 1)
 Since: 2020-03
 """
 
-from abc import ABC, abstractmethod
-from typing import Optional, Any
-
-import numpy as np
-from typing import *
 from allocations import *
 from agents import *
 
