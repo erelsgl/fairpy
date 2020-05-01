@@ -19,6 +19,8 @@ def round_piece(piece:list, digits:int):
     """
     return [(round(interval[0],digits),round(interval[1],digits)) for interval in piece]
 
+
+
 class Allocation:
     """
     An allocation of a cake among agents.
@@ -39,8 +41,9 @@ class Allocation:
         self.agents = agents
         self.pieces = [None]*len(agents)
 
-    def get_piece(self,agent_index:int):
+    def get_piece(self, agent_index:int):
         return self.pieces[agent_index]
+
     def get_pieces(self):
         return self.pieces
 
@@ -105,8 +108,6 @@ class Allocation:
                 for otherPiece in self.pieces[j]:
                     otherVal += self.agents[i].eval(otherPiece[0], otherPiece[1])
                 if round(otherVal-selfVal, roundAcc) > 0:
-                    #logger.info("allocation not envy free because %s prefers %d over %d", self.agents[i].name(), j, i)
-                    #logger.info(self)
                     return False
         return True
 
@@ -115,12 +116,16 @@ class Allocation:
         for i in range(len(self.pieces)):
             agent = self.agents[i]
             piece = self.pieces[i]
-            s += "> {} gets {} with value {}\n".format(agent.name(), round_piece(self.pieces[i], digits=3), round(agent.piece_value(piece),3))
+            s += "> {} gets {} with value {}\n".format(agent.name(), round_piece(piece, digits=3), round(agent.piece_value(piece),3))
         return s
 
+
+
 class OnePieceAllocation(Allocation):
+
     def __init__(self, agents: List[Agent]):
         super().__init__(agents)
+
     def set_piece(self, agent_index:int, piece:tuple):
         """
         Sets the piece of the given index.
@@ -129,6 +134,7 @@ class OnePieceAllocation(Allocation):
         :param piece: a list of intervals.
         """
         self.pieces[agent_index] = piece
+
     def get_piece(self,agent_index:int):
         return self.pieces[agent_index]
 

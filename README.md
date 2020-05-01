@@ -1,6 +1,6 @@
 # fairpy
 An open-source library of [fair division algorithms](references.md) in Python.
-To install:
+To install, clone the repository and run the following in the main folder:
 
     sudo python3 setup.py install
  
