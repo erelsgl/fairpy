@@ -1,7 +1,7 @@
 cmake
-osqp
 numpy
+osqp
 cvxpy
 networkx
 matplotlib
-git+git://github.com/trzemecki/dicttools.git
+pytest
