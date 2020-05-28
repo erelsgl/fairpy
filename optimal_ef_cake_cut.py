@@ -11,11 +11,11 @@ Since: 2020-05
 
 from agents import *
 from allocations import *
-import itertools as itertools
+import itertools as it
 import logging
 from queue import PriorityQueue
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +31,9 @@ def opt_piecewise_constant(agents: List[Agent], values: List[List]) -> Allocatio
     >>> BOB = PiecewiseUniformAgent([(0.1, 0.8)], "BOB")
     >>> _values = [[0.5, 0.5], [1]]
     >>> print(str(opt_piecewise_constant([ALICE,BOB], _values)))
-    > ALICE gets [(0, 0.1), (0.7, 0.9)] with value 0.6
-    > BOB gets [(0.1, 0.7)] with value 0.9
+    > ALICE gets [(0, 1), (3, 4), (4, 5)] with value 0.6
+    > BOB gets [(1, 2), (2, 3)] with value 0.857
+    <BLANKLINE>
     """
     num_of_agents = len(agents)
 
