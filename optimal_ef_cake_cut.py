@@ -8,171 +8,144 @@ Algorithm #2 : opt_piecewise_linear
 Programmer: Tom Goldenberg
 Since: 2020-05
 """
-
 from agents import *
 from allocations import *
-import itertools as it
 import logging
-from queue import PriorityQueue
+import cvxpy
+import numpy as np
 
 # logging.basicConfig(level=logging.DEBUG)
-
 logger = logging.getLogger(__name__)
 
 
-def opt_piecewise_constant(agents: List[Agent], values: List[List]) -> Allocation:
+def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
     """
     algorithm for finding an optimal EF allocation when agents have piecewise constant valuations.
     :param agents: a list of agents
     :param values: a list of lists holding the values for each interval
     :return: an optimal envy-free allocation
 
-    >>> ALICE = PiecewiseUniformAgent([(0, 0.5), (0.7, 0.9)], "ALICE")
-    >>> BOB = PiecewiseUniformAgent([(0.1, 0.8)], "BOB")
-    >>> _values = [[0.5, 0.5], [1]]
-    >>> print(str(opt_piecewise_constant([ALICE,BOB], _values)))
-    > ALICE gets [(0, 1), (3, 4), (4, 5)] with value 0.6
-    > BOB gets [(1, 2), (2, 3)] with value 0.857
+    >>> alice = PiecewiseConstantAgent([15,15,0,30,30], name='alice')
+    >>> bob = PiecewiseConstantAgent([0,30,30,30,0], name='bob')
+    >>> gin = PiecewiseConstantAgent([10,0,30,0,60], name='gin')
+    >>> print(str(opt_piecewise_constant([alice,bob,gin])))
+    > alice gets [(0.0, 1.0), (3.0, 4.0)] with value 45.0
+    > bob gets [(1.0, 2.0), (2.0, 3.0)] with value 60.0
+    > gin gets [(4.0, 5.0)] with value 60.0
+    <BLANKLINE>
+    >>> print(str(opt_piecewise_constant([alice,bob])))
+    > alice gets [(0.0, 1.0), (3.0, 3.75), (4.0, 5.0)] with value 67.5
+    > bob gets [(1.0, 2.0), (2.0, 3.0), (3.75, 4.0)] with value 67.5
+    <BLANKLINE>
+    >>> print(str(opt_piecewise_constant([alice,gin])))
+    > alice gets [(0.0, 1.0), (1.0, 2.0), (3.0, 4.0)] with value 60.0
+    > gin gets [(2.0, 3.0), (4.0, 5.0)] with value 90.0
+    <BLANKLINE>
+    >>> print(str(opt_piecewise_constant([gin,bob])))
+    > gin gets [(0.0, 1.0), (2.0, 2.33), (4.0, 5.0)] with value 79.9
+    > bob gets [(1.0, 2.0), (2.33, 3.0), (3.0, 4.0)] with value 80.1
     <BLANKLINE>
     """
-    num_of_agents = len(agents)
+    value_matrix = [list(agent.values) for agent in agents]
+    num_of_agents = len(value_matrix)
+    num_of_pieces = len(value_matrix[0])
 
     # Check for correct number of agents
     if num_of_agents < 2:
         raise ValueError(f'Optimal EF Cake Cutting works only for two agents or more')
-
     logging.debug(f'Valid Number of agents: {num_of_agents}')
 
-    # Check for correct amount of values
-    if num_of_agents != len(values):
-        raise ValueError(f'Number of agents not equal to number of values')
+    # XiI[i][I] represents the fraction of interval I given to agent i. Should be in {0,1}.
+    XiI = [[cvxpy.Variable(name=f'{agents[agent_index].name()} fraction from piece {piece_index}', integer=False)
+            for piece_index in range(num_of_pieces)]
+           for agent_index in range(num_of_agents)]
 
-    logging.debug(f'Valid Number of agents values: {len(values)}\n')
+    constraints = feasibility_constraints(XiI)
 
-    # Check for each agent's region there is a matching value
-    for agent, agent_values in zip(agents, values):
-        logging.debug(f'Validating Agent {agent.name()}')
-        if len(agent.desired_regions) != len(agent_values):
-            raise ValueError(f'Missing values for agent {agent} intervals')
-        logging.debug(f'Valid {len(agent_values)} values and {len(agent.desired_regions)} regions')
+    # agents_w = []
+    # for i in range(num_of_agents):
+    #     value_of_i = sum([XiI[i][g] * value_matrix[i][g] for g in range(num_of_pieces)])
+    #     agents_w.append(cvxpy.log(value_of_i))
+    #     threshold = agents[i].cake_value() / 2
+    #     constraints.append(threshold <= value_of_i)
 
-        # Check agents cake boundaries are valid and normalized
-        for start, end in agent.desired_regions:
-            if start < 0 or start > end or end > 1:
-                raise ValueError(f'Agent {agent.name} cake boundaries are invalid ({start},{end})')
-        logging.debug(f'Valid regions {agent.desired_regions}')
+    agents_w = [cvxpy.Variable(name=f'agent {_}') for _ in range(num_of_agents)]
+    for i in range(num_of_agents):
+        value_of_i = sum([XiI[i][g] * value_matrix[i][g] for g in range(num_of_pieces)])
+        constraints.append(agents_w[i] <= cvxpy.log(value_of_i))
 
-        # Check agents cake total value lower or equal to 1, if not normalize
-        agent_cake_value = sum(agent_values)
-        if agent_cake_value > 1 or agent_cake_value < 0:
-            raise ValueError(f'Agent {agent.name()} cake total value is invalid: {agent_cake_value}')
-        logging.debug(f'Valid cake total value: {agent_cake_value}')
-        logging.debug(f'{agent.name()} in a valid Agent\n')
+    objective = sum(agents_w)
 
-    # "Mark the boundaries of the reported intervals of all agents"
-    # Create cake intervals boudaries
-    boundaries = [cut for agent in agents for piece in agent.desired_regions for cut in piece]
-    boundaries.sort()
-    logging.debug(f'Cake boundaries are {boundaries}')
+    prob = cvxpy.Problem(cvxpy.Maximize(objective), constraints)
+    prob.solve()
 
-    # Create cake pieces intervals
-    pieces = [(p_start, p_end) for p_start, p_end in zip(boundaries[:-1], boundaries[1:])]
-    logging.debug(f'Cake pieces are {pieces}')
+    pieces_allocation = get_pieces_allocations(num_of_pieces, XiI)
+    a = Allocation(agents)
+    a.setPieces(pieces_allocation)
+    # print('envy free ?', a.isEnvyFree(2))
 
-    piecewise_constant_agents = create_piecewise_constant_agents(agents=agents, values=values, pieces=pieces)
-    norm_pieces = [(start, start + 1) for start in range(len(pieces))]
-    possible_allocations = create_cake_allocation_options(piecewise_constant_agents=piecewise_constant_agents,
-                                                          pieces=norm_pieces)
-
-    while not possible_allocations.empty():
-        val, alloc = possible_allocations.get()
-        logging.debug(f'Allocation {alloc} with value:{-1 * val}')
-
-        allocation_list = create_allocation_list(piecewise_constant_agents, alloc, norm_pieces)
-        a = Allocation(piecewise_constant_agents)
-
-        a.setPieces(allocation_list)
-        if a.isEnvyFree(2):
-            logging.debug(f'Allocation {allocation_list} is optimal and EF')
-            return a
-    logging.debug(f'Optimal EF allocation was not found')
-    return False
+    if a.isEnvyFree(2):
+        # print(a)
+        return a
+    else:
+        return
 
 
-def opt_piecewise_linear(agents: List[Agent], values: List[List], slopes: List[List]) -> Allocation:
+def feasibility_constraints(XiI: list) -> list:
     """
-     algorithm for finding an optimal EF allocation when agents have piecewise linear valuations.
-    :param agents: a list of agents
-    :param values: a list of lists holding the values for each interval (start of the interval)
-    :param slopes: a list of lists holding the slope for each interval
-    :return: an optimal envy-free allocation
-    >>> ALICE = PiecewiseUniformAgent([(0, 0.5), (0.7, 0.9)], "ALICE")
-    >>> BOB = PiecewiseUniformAgent([(0.1, 0.8)], "BOB")
-    >>> values = [[1, 2], [1]]
-    >>> _slopes = [[1, -2], [2]]
-    >>> print(str(opt_piecewise_constant([ALICE,BOB], values)))
-    > ALICE gets [(0, 0.1), (0.7, 0.9)] with value 0.6
-    > BOB gets [(0.1, 0.7)] with value 0.9
+    Generate the feasibility constraints of the given matrix, namely:
+    * Each XiI is between 0 and 1;
+    * For each g, the sum of XiI is 1.
+    :param XiI: a list of lists of variables: XiI[i,g] is the amount of interval g given to agent i.
+    :return: a list of constraints.
     """
-    pass
+    constraints = []
+    num_of_agents = len(XiI)
+    num_of_items = len(XiI[0])
+    for g in range(num_of_items):
+        constraints.append(1 == sum([XiI[i][g] for i in range(num_of_agents)]))
+        for i in range(num_of_agents):
+            constraints += [XiI[i][g] >= 0, XiI[i][g] <= 1]
+    return constraints
 
 
-def create_allocation_list(piecewise_constant_agents, alloc, norm_pieces):
-    allocation_list = []
-    for agent in piecewise_constant_agents:
-        agent_pieces = [piece for assignment, piece in zip(alloc, norm_pieces) if assignment == agent.name()]
-        allocation_list.append(agent_pieces)
-    return allocation_list
+def get_pieces_allocations(num_of_pieces: int, XiI: list) -> list:
+    """
+    Generate a list of interval allocation per agent
+    :param num_of_pieces: number of intervals
+    :param XiI: a list of lists of variables: XiI[i,g] is the amount of interval g given to agent i.
+    :return: list of interval allocation per agent
+    """
+    piece_help = [0.0 for _ in range(num_of_pieces)]
+    piece_alloc = []
+    for fraction_list in XiI:
+        agent_alloc = []
+        for i in range(len(fraction_list)):
+            fraction = np.round(fraction_list[i].value, 2)
+            if fraction > 0:
+                int_start = piece_help[i] + i
+                agent_alloc.append((int_start, int_start + fraction))
+                piece_help[i] += fraction
+        piece_alloc.append(agent_alloc)
+    return piece_alloc
 
 
-def create_cake_allocation_options(piecewise_constant_agents, pieces):
-    cake_option = []
-    value_dict = []
-    for piece_index in range(len(pieces)):
-        piece_options = []
-        piece_values = {}
-        for agent in piecewise_constant_agents:
-            if agent.values[piece_index] > 0:
-                piece_options.append(agent.name())
-                piece_values[agent.name()] = agent.values[piece_index]
-        cake_option.append(piece_options)
-        value_dict.append(piece_values)
-    logging.debug(f'Cake options are: {cake_option}')
-    logging.debug(f'Values dict: {value_dict}')
-
-    allocation_options = list(it.product(*cake_option))
-    logging.debug(f'Allocation options are: {allocation_options}')
-
-    q = PriorityQueue()
-    for allocation_option in allocation_options:
-        val = sum([value_dict[index].get(agent) for index, agent in enumerate(allocation_option)])
-        q.put((-1 * val, allocation_option))
-    return q
-
-
-def create_piecewise_constant_agents(agents, values, pieces):
-    new_agents = []
-    for agent,value in zip(agents, values):
-        logging.debug(f'Creating piecewise constant agent for {agent.name()}')
-        agent_new_pieces_values = [None]*len(pieces)
-        piece_index = 0
-        for piece_start, piece_end in pieces:
-            logging.debug(f'Creating new value for piece ({piece_start},{piece_end})')
-            for region, piece_value in zip(agent.desired_regions, value):
-                logging.debug(f'Checking region: {region} with value of {piece_value}')
-                if piece_start >= region[0] and piece_end <= region[1] and agent_new_pieces_values[piece_index] is None:
-                    piece_fraction = (piece_end - piece_start)/(region[1] - region[0])
-                    agent_new_pieces_values[piece_index] = (piece_value * piece_fraction)
-                    logging.debug(f'Added value of {piece_value * piece_fraction} to new piece values list')
-            if agent_new_pieces_values[piece_index] is None:
-                agent_new_pieces_values[piece_index] = 0
-                logging.debug(f'Added value of 0 to new piece values list')
-            piece_index += 1
-        new_agents.append(PiecewiseConstantAgent(agent_new_pieces_values, agent.name()))
-    return new_agents
+# def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
+#     """
+#      algorithm for finding an optimal EF allocation when agents have piecewise linear valuations.
+#     :param agents: a list of agents
+#     :return: an optimal envy-free allocation
+#     >>> ALICE = PiecewiseUniformAgent([(0, 0.5), (0.7, 0.9)], "ALICE")
+#     >>> BOB = PiecewiseUniformAgent([(0.1, 0.8)], "BOB")
+#     >>> print(str(opt_piecewise_linear([ALICE,BOB])))
+#     > ALICE gets [(0, 0.1), (0.7, 0.9)] with value 0.6
+#     > BOB gets [(0.1, 0.7)] with value 0.9
+#     """
+#     pass
 
 
 if __name__ == "__main__":
     import doctest
+
     (failures, tests) = doctest.testmod(report=True)
-    print("{} failures, {} tests".format(failures,tests))
+    print("{} failures, {} tests".format(failures, tests))
