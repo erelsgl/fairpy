@@ -8,21 +8,21 @@ Algorithm #2 : opt_piecewise_linear
 Programmer: Tom Goldenberg
 Since: 2020-05
 """
+from logging import Logger
+
 from agents import *
 from allocations import *
 import logging
 import cvxpy
 import numpy as np
 
-# logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+logger: Logger = logging.getLogger(__name__)
 
 
 def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
     """
     algorithm for finding an optimal EF allocation when agents have piecewise constant valuations.
-    :param agents: a list of agents
-    :param values: a list of lists holding the values for each interval
+    :param agents: a list of PiecewiseConstantAgent agents
     :return: an optimal envy-free allocation
 
     >>> alice = PiecewiseConstantAgent([15,15,0,30,30], name='alice')
@@ -53,42 +53,43 @@ def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
     # Check for correct number of agents
     if num_of_agents < 2:
         raise ValueError(f'Optimal EF Cake Cutting works only for two agents or more')
-    logging.debug(f'Valid Number of agents: {num_of_agents}')
+    logger.info(f'Received {num_of_agents} agents')
+
+    if not all([agent.cake_length() == agents[0].cake_length() for agent in agents]):
+        raise ValueError(f'Agents cake lengths are not equal')
+    logger.info(f'Each agent cake length is {agents[0].cake_length()}')
 
     # XiI[i][I] represents the fraction of interval I given to agent i. Should be in {0,1}.
-    XiI = [[cvxpy.Variable(name=f'{agents[agent_index].name()} fraction from piece {piece_index}', integer=False)
+    XiI = [[cvxpy.Variable(name=f'{agents[agent_index].name()} interval {piece_index} fraction', integer=False)
             for piece_index in range(num_of_pieces)]
            for agent_index in range(num_of_agents)]
+    logger.info(f'Fraction matrix has {len(XiI)} rows (agents) and {len(XiI[0])} columns (intervals)')
 
     constraints = feasibility_constraints(XiI)
 
-    # agents_w = []
-    # for i in range(num_of_agents):
-    #     value_of_i = sum([XiI[i][g] * value_matrix[i][g] for g in range(num_of_pieces)])
-    #     agents_w.append(cvxpy.log(value_of_i))
-    #     threshold = agents[i].cake_value() / 2
-    #     constraints.append(threshold <= value_of_i)
-
-    agents_w = [cvxpy.Variable(name=f'agent {_}') for _ in range(num_of_agents)]
+    agents_w = []
     for i in range(num_of_agents):
         value_of_i = sum([XiI[i][g] * value_matrix[i][g] for g in range(num_of_pieces)])
-        constraints.append(agents_w[i] <= cvxpy.log(value_of_i))
+        agents_w.append(cvxpy.log(value_of_i))
+        value_of_j = sum([XiI[j][g] * value_matrix[i][g]
+                          for g in range(num_of_pieces)
+                          for j in range(num_of_agents) if j != i])
+        logger.info(f'Adding Envy-Free constraint for agent: {agents[i].name()},\n{value_of_j} <= {value_of_i}')
+        constraints.append(value_of_j <= value_of_i)
 
     objective = sum(agents_w)
+    logger.info(f'Objective function to maximize is {objective}')
 
     prob = cvxpy.Problem(cvxpy.Maximize(objective), constraints)
     prob.solve()
+    logger.info(f'Problem status: {prob.status}')
 
     pieces_allocation = get_pieces_allocations(num_of_pieces, XiI)
     a = Allocation(agents)
     a.setPieces(pieces_allocation)
-    # print('envy free ?', a.isEnvyFree(2))
+    logger.info(f'Allocation is envy-free {a.isEnvyFree(3)}')
 
-    if a.isEnvyFree(2):
-        # print(a)
-        return a
-    else:
-        return
+    return a
 
 
 def feasibility_constraints(XiI: list) -> list:
@@ -103,9 +104,13 @@ def feasibility_constraints(XiI: list) -> list:
     num_of_agents = len(XiI)
     num_of_items = len(XiI[0])
     for g in range(num_of_items):
-        constraints.append(1 == sum([XiI[i][g] for i in range(num_of_agents)]))
+        sum_of_fractions = 1 == sum([XiI[i][g] for i in range(num_of_agents)])
+        logger.info(f'Adding interval {g+1} "sum of fractions" constraint {sum_of_fractions}')
+        constraints.append(sum_of_fractions)
         for i in range(num_of_agents):
-            constraints += [XiI[i][g] >= 0, XiI[i][g] <= 1]
+            bound_fraction = [XiI[i][g] >= 0, XiI[i][g] <= 1]
+            logger.info(f'Adding agent {i + 1} fraction constraint for piece {g + 1} {sum_of_fractions}')
+            constraints += bound_fraction
     return constraints
 
 
@@ -127,6 +132,7 @@ def get_pieces_allocations(num_of_pieces: int, XiI: list) -> list:
                 agent_alloc.append((int_start, int_start + fraction))
                 piece_help[i] += fraction
         piece_alloc.append(agent_alloc)
+        logger.info(f'Agent {len(piece_alloc)} pieces are {agent_alloc}')
     return piece_alloc
 
 
