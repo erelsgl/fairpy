@@ -10,7 +10,7 @@ Since: 2020-05
 """
 import operator
 from logging import Logger
-
+from PiecewiseLinearAgent import *
 from agents import *
 from allocations import *
 import logging
@@ -19,6 +19,7 @@ import numpy as np
 
 logger: Logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
 
 def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
     """
@@ -30,27 +31,21 @@ def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
     >>> bob = PiecewiseConstantAgent([0,30,30,30,0], name='bob')
     >>> gin = PiecewiseConstantAgent([10,0,30,0,60], name='gin')
     >>> print(str(opt_piecewise_constant([alice,bob,gin])))
-    > alice gets [(0.0, 1.0), (3.0, 4.0)] with value 45.0
-    > bob gets [(1.0, 2.0), (2.0, 3.0)] with value 60.0
-    > gin gets [(4.0, 5.0)] with value 60.0
+    > alice gets [(0.0, 1.0), (3.0, 3.73)] with value 36.9
+    > bob gets [(1.0, 2.0), (2.0, 2.37), (3.73, 4.0)] with value 49.2
+    > gin gets [(2.37, 3.0), (4.0, 5.0)] with value 78.9
     <BLANKLINE>
     >>> print(str(opt_piecewise_constant([alice,bob])))
-    > alice gets [(0.0, 1.0), (3.0, 3.75), (4.0, 5.0)] with value 67.5
-    > bob gets [(1.0, 2.0), (2.0, 3.0), (3.75, 4.0)] with value 67.5
+    > alice gets [(0.0, 1.0), (3.0, 3.59), (4.0, 5.0)] with value 62.7
+    > bob gets [(1.0, 2.0), (2.0, 3.0), (3.59, 4.0)] with value 72.3
     <BLANKLINE>
     >>> print(str(opt_piecewise_constant([alice,gin])))
     > alice gets [(0.0, 1.0), (1.0, 2.0), (3.0, 4.0)] with value 60.0
     > gin gets [(2.0, 3.0), (4.0, 5.0)] with value 90.0
     <BLANKLINE>
     >>> print(str(opt_piecewise_constant([gin,bob])))
-    > gin gets [(0.0, 1.0), (2.0, 2.33), (4.0, 5.0)] with value 79.9
-    > bob gets [(1.0, 2.0), (2.33, 3.0), (3.0, 4.0)] with value 80.1
-    <BLANKLINE>
-    >>> alice = PiecewiseConstantAgent([10,20,5,0], name='alice')
-    >>> bob = PiecewiseConstantAgent([0,20,10,5], name='bob')
-    >>> print(str(opt_piecewise_constant([alice,bob])))
-    > alice gets [(0.0, 1.0), (1.0, 1.57)] with value 21.4
-    > bob gets [(1.57, 2.0), (2.0, 3.0), (3.0, 4.0)] with value 23.6
+    > gin gets [(0.0, 1.0), (2.0, 2.7), (4.0, 5.0)] with value 91.0
+    > bob gets [(1.0, 2.0), (2.7, 3.0), (3.0, 4.0)] with value 69.0
     <BLANKLINE>
     """
     # > alice gets [(0.0, 1.0), (1.0, 1.5)] with value 20.0
@@ -81,28 +76,24 @@ def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
     for i in range(num_of_agents):
         value_of_i = sum([XiI[i][g] * value_matrix[i][g] for g in range(num_of_pieces)])
         agents_w.append(value_of_i)
-        value_of_j = sum([XiI[j][g] * value_matrix[i][g]
-                          for g in range(num_of_pieces)
-                          for j in range(num_of_agents) if j != i])
-        logger.info(f'Adding Envy-Free constraint for agent: {agents[i].name()},\n{value_of_j} <= {value_of_i}')
-        constraints.append(value_of_j <= value_of_i)
+        for j in range(num_of_agents):
+            if j != i:
+                value_of_j = sum([XiI[j][g] * value_matrix[i][g] for g in range(num_of_pieces)])
+                logger.info(f'Adding Envy-Free constraint for agent: {agents[i].name()},\n{value_of_j} <= {value_of_i}')
+                constraints.append(value_of_j <= value_of_i)
 
     objective = sum(agents_w)
     logger.info(f'Objective function to maximize is {objective}')
 
     prob = cvxpy.Problem(cvxpy.Maximize(objective), constraints)
     prob.solve()
+
     logger.info(f'Problem status: {prob.status}')
 
     pieces_allocation = get_pieces_allocations(num_of_pieces, XiI)
     a = Allocation(agents)
     a.setPieces(pieces_allocation)
     logger.info(f'Allocation is envy-free {a.isEnvyFree(3)}')
-    for agent_index in range(len(agents)):
-        logger.info(f'Agent {agents[agent_index].name()} details after allocation\n'
-                    f'total cake value {agents[agent_index].cake_value()}\n'
-                    f'total allocation value {agents[agent_index].piece_value(a.get_piece(agent_index))}\n'
-                    f'received pieces {a.get_piece(agent_index)}')
 
     return a
 
@@ -156,37 +147,75 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
      algorithm for finding an optimal EF allocation when agents have piecewise linear valuations.
     :param agents: a list of agents
     :return: an optimal envy-free allocation
-    >>> ALICE = PiecewiseUniformAgent([(0, 0.5), (0.7, 0.9)], "ALICE")
-    >>> BOB = PiecewiseUniformAgent([(0.1, 0.8)], "BOB")
-    >>> print(str(opt_piecewise_linear([ALICE,BOB])))
-    > ALICE gets [(0, 0.1), (0.7, 0.9)] with value 0.6
-    > BOB gets [(0.1, 0.7)] with value 0.9
+    >>> alice = PiecewiseLinearAgent([11,22,33,44],[1,0,3,-2],name="alice")
+    >>> bob = PiecewiseLinearAgent([11,22,33,44],[-1,0,-3,2],name="bob")
+    >>> print(str(opt_piecewise_linear([alice,bob])))
+    > alice gets [(0.5, 1), (2.5, 3), (3, 3.5), (1, 1.466)] with value 55.0
+    > bob gets [(0, 0.5), (2, 2.5), (3.5, 4), (1.466, 2)] with value 55.0
+    <BLANKLINE>
     """
 
-    def Y(i, op, j, intervals):
+    def Y(i, op, j, intervals) -> list:
+        """
+        returns all pieces that  s.t Y(i op j) = {x ∈ [0, 1] : vi(x) op vj (x)}
+        :param i: agent index
+        :param op: operator to apply
+        :param j: ajent index
+        :param intervals: (x's) to apply function and from pieces will be returned
+        :return: list of intervals
+        """
         return [(start, end) for start, end in intervals if op(agents[i].eval(start, end), agents[j].eval(start, end))]
 
-    def isIntersect(poly_1, poly_2):
+    def isIntersect(poly_1: np.poly1d, poly_2: np.poly1d) -> float:
+        """
+        checks for polynomials intersection
+        :param poly_1: np.poly1d
+        :param poly_2: np.poly1d
+        :return: corresponding x or 0 if none exist
+        """
         logger.info(f'isIntersect: poly_1={poly_1}, poly_2={poly_2}')
         m_1, c_1 = poly_1.c if len(poly_1.c) > 1 else [0, poly_1.c[0]]
         m_2, c_2 = poly_2.c if len(poly_2.c) > 1 else [0, poly_2.c[0]]
         logger.info(f'isIntersect: m_1={m_1} c_1={c_1}, m_2={m_2} c_2={c_2}')
         return ((c_2 - c_1) / (m_1 - m_2)) if (m_1 - m_2) != 0 else 0.0
 
-    def R(x):
+    def R(x: tuple) -> float:
+        """
+        R(x) = v1(x)/v2(x)
+        :param x: interval
+        :return: ratio
+        """
         if agents[1].eval(x[0], x[1]) > 0:
             return agents[0].eval(x[0], x[1]) / agents[1].eval(x[0], x[1])
         return 0
 
     def V_l(agent_index, inter_list):
+        """
+        sums agent's value along intervals from inter_list
+        :param agent_index: agent index 0 or 1
+        :param inter_list: list of intervals
+        :return: sum of intervals for agent
+        """
         logger.info(f'V_list(agent_index={agent_index}, inter_list={inter_list})')
         return sum([V(agent_index, start, end) for start, end in inter_list])
 
-    def V(agent_index, start, end):
+    def V(agent_index: int, start: float, end: float):
+        """
+        agent value of interval from start to end
+        :param agent_index: agent index 0 or 1
+        :param start: interval starting point
+        :param end: interval ending point
+        :return: value of interval for agent
+        """
         logger.info(f'V(agent_index={agent_index},start={start},end={end})')
         return agents[agent_index].eval(start, end)
 
     def get_optimal_allocation():
+        """
+        Creates maximum total value allocation
+        :return: optimal allocation for 2 agents list[list[tuple], list[tuple]] and list of new intervals
+        """
+        logger.info(f'length: {agents[0].cake_length()}')
         intervals = [(start, start + 1) for start in range(agents[0].cake_length())]
         logger.info(f'getting optimal allocation for initial intervals: {intervals}')
         new_intervals = []
@@ -210,6 +239,13 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
         return allocs, new_intervals
 
     def Y_op_r(intervals, op, r):
+        """
+        Y op r = {x : (v1(x) < v2(x)) ∧ (R(x) op r)}
+        :param intervals: intervals to test condition
+        :param op: operator.le, operator.lt, operator.gt, operator.ge etc.
+        :param r: ratio
+        :return: list of valid intervals
+        """
         result = []
         for start, end in intervals:
             if agents[0].eval(start, end) < agents[1].eval(start, end) and op(R((start, end)), r):
@@ -266,6 +302,5 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
 
 if __name__ == "__main__":
     import doctest
-
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))

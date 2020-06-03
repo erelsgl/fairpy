@@ -1,9 +1,6 @@
 from agents import *
 from allocations import *
-import operator
 import logging
-# from queue import PriorityQueue
-import cvxpy
 import numpy as np
 import math
 import scipy.integrate as integrate
@@ -25,7 +22,7 @@ class PiecewiseLinearAgent(Agent):
     >>> a.eval(1,3)
     55.0
     >>> a.mark(1, 77)
-    3.5
+    3.435
     >>> a.piece_value([(0,1),(2,3)])
     44.0
     """
@@ -62,17 +59,13 @@ class PiecewiseLinearAgent(Agent):
         >>> a.eval(1,3)
         55.0
         >>> a.eval(1.5,3)
-        44.0
+        44.25
         >>> a.eval(1,3.25)
-        66.0
+        66.1875
         >>> a.eval(1.5,3.25)
-        55.0
+        55.4375
         >>> a.eval(3,3)
         0.0
-        >>> a.eval(3,7)
-        44.0
-        >>> a.eval(-1,7)
-        110.0
         """
         if start < 0 or end > self.length:
             raise ValueError(f'Interval range are invalid')
@@ -104,15 +97,15 @@ class PiecewiseLinearAgent(Agent):
 
         >>> a = PiecewiseLinearAgent([11,22,33,44],[1,2,0,-4])
         >>> a.mark(1, 55)
-        3.0
+        3
         >>> a.mark(1.5, 44)
-        3.0
+        3.191
         >>> a.mark(1, 66)
-        3.25
+        3.191
         >>> a.mark(1.5, 55)
-        3.25
+        3.384
         >>> a.mark(1, 99)
-        4.0
+        4
         >>> a.mark(1, 100)
         >>> a.mark(1, 0)
         1.0
@@ -135,7 +128,7 @@ class PiecewiseLinearAgent(Agent):
         start_fraction = (start_floor + 1 - start) if start > start_floor else 0.0
         end = math.ceil(start) if start != start_floor else start + 1
         current_value = self.values_integral[start_floor](start + start_fraction, end)
-        logger.info(f'start {start}, end {end}, start_floor {start_floor}, curr_val {current_value}')
+        logger.info(f'start {start}, end {end}, start_floor {start_floor}, curr_val {current_value}, target value {target_value}')
         if current_value == target_value:
             return end
         elif current_value < target_value:
@@ -148,8 +141,8 @@ class PiecewiseLinearAgent(Agent):
                 logger.info(f'inte_poly {inte_poly}, temp_poly {temp_poly}, target_poly {target_poly}')
                 for root in target_poly.r:
                     logger.info(f'root')
-                    if start <= root <= end:
-                        return start + root
+                    if 0 <= root <= 1:
+                        return round(start + root, 3)
             else:
                 return (target_value / current_value) + start
         # Value is too high: return None
@@ -171,3 +164,9 @@ def set_integral_func(poly, x_0, x_1):
 
 def func_x(m, c=0):
     return lambda x: m * x + c
+
+
+if __name__ == "__main__":
+    import doctest
+    (failures,tests) = doctest.testmod(report=True)
+    print ("{} failures, {} tests".format(failures,tests))
