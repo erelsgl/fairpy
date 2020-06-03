@@ -36,7 +36,6 @@ class PiecewiseLinearAgent(Agent):
         super().__init__(name)
         self.piece_poly = [set_poly_func(values[i], slopes[i], i, i + 1) for i in range(len(values))]
         self.values_integral = [set_integral_func(self.piece_poly[i], i, i + 1) for i in range(len(values))]
-        #         self.values_integral = [set_integral_func(values[i], slopes[i], i, i+1) for i in range(len(values))]
         self.values = np.array(values)
         self.length = len(values)
         self.total_value_cache = sum(values)
@@ -78,13 +77,6 @@ class PiecewiseLinearAgent(Agent):
         if start < 0 or end > self.length:
             raise ValueError(f'Interval range are invalid')
 
-        #         start_frac = start % 1
-        #         end_frac = end % 1
-        # #         end_frac += 0.0 if end_frac > 0.0 else 1
-        # #         start //= 1
-        #         start = int(start)
-        #         end = int(end)
-        #         end += 1
         if end <= start:
             return 0.0  # special case not covered by loop below
 
@@ -97,19 +89,8 @@ class PiecewiseLinearAgent(Agent):
         for func_i in range(fromFloor, toCeiling):
             interval_start = func_i + fromFraction  # if func_i != start else func_i + start_frac
             interval_end = func_i + 1 if (func_i + 1) != toCeiling else func_i + 1 - toCeilingRemovedFraction
-            #             interval_start = func_i if func_i != start else func_i + start_frac
-            #             interval_end = func_i + 1 if (func_i + 1) != end else func_i + end_frac
-            #             v = self.values_integral[func_i](interval_start, interval_end)
-            #             val += v
             val += self.values_integral[func_i](interval_start, interval_end)
             fromFraction = 0
-
-        #         for func_i in range(start,end):
-        #             interval_start = func_i if func_i != start else func_i + start_frac
-        #             interval_end = func_i + 1 if (func_i + 1) != end else func_i + end_frac
-        #             v = self.values_integral[func_i](interval_start, interval_end)
-        #             val += v
-        #             start_frac = 0
         return val
 
     def mark(self, start: float, target_value: float):
@@ -117,11 +98,11 @@ class PiecewiseLinearAgent(Agent):
         Answer a Mark query: return "end" such that the value of the interval [start,end] is target_value.
 
         :param start: Location on cake where the calculation starts.
-        :param targetValue: required value for the piece [start,end]
+        :param target_value: required value for the piece [start,end]
         :return: the end of an interval with a value of target_value.
         If the value is too high - returns None.
 
-        >>> a = PiecewiseConstantAgent([11,22,33,44])
+        >>> a = PiecewiseLinearAgent([11,22,33,44],[1,2,0,-4])
         >>> a.mark(1, 55)
         3.0
         >>> a.mark(1.5, 44)
@@ -167,7 +148,7 @@ class PiecewiseLinearAgent(Agent):
                 logger.info(f'inte_poly {inte_poly}, temp_poly {temp_poly}, target_poly {target_poly}')
                 for root in target_poly.r:
                     logger.info(f'root')
-                    if root >= start and root <= end:
+                    if start <= root <= end:
                         return start + root
             else:
                 return (target_value / current_value) + start
@@ -180,6 +161,7 @@ def set_poly_func(value, slope, x_0, x_1):
     const = (value - value_0)/(x_1 - x_0)
     logger.info(f'set_poly_func: Creating poly1d with [{slope},{const}]')
     return np.poly1d([slope, const])
+
 
 def set_integral_func(poly, x_0, x_1):
     integ = poly.integ()

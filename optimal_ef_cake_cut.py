@@ -81,7 +81,6 @@ def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
     for i in range(num_of_agents):
         value_of_i = sum([XiI[i][g] * value_matrix[i][g] for g in range(num_of_pieces)])
         agents_w.append(value_of_i)
-        # agents_w.append(cvxpy.log(value_of_i))
         value_of_j = sum([XiI[j][g] * value_matrix[i][g]
                           for g in range(num_of_pieces)
                           for j in range(num_of_agents) if j != i])
@@ -121,13 +120,6 @@ def feasibility_constraints(XiI: list) -> list:
     num_of_items = len(XiI[0])
     for g in range(num_of_items):
         sum_of_fractions = 1 == sum([XiI[i][g] for i in range(num_of_agents)])
-        # testttt = []
-        # for i in range(num_of_agents):
-        #     logger.info(f'[i][g]=[{i}][{g}] XiI[i][g]={XiI[i][g]}')
-        #     testttt.append(XiI[i][g])
-        # logger.info(f'testttt= {testttt}')
-        # logger.info(f'sum testttt= {sum(testttt)}')
-        # logger.info(f'sum testttt= {cvxpy.sum(testttt, keepdims=True)}')
         logger.info(f'Adding interval {g+1} "sum of fractions == 1" constraint: {sum_of_fractions}')
         constraints.append(sum_of_fractions)
         for i in range(num_of_agents):
@@ -179,7 +171,7 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
         m_1, c_1 = poly_1.c if len(poly_1.c) > 1 else [0, poly_1.c[0]]
         m_2, c_2 = poly_2.c if len(poly_2.c) > 1 else [0, poly_2.c[0]]
         logger.info(f'isIntersect: m_1={m_1} c_1={c_1}, m_2={m_2} c_2={c_2}')
-        return (((c_2 - c_1) / (m_1 - m_2)) if (m_1 - m_2) != 0 else 0.0)
+        return ((c_2 - c_1) / (m_1 - m_2)) if (m_1 - m_2) != 0 else 0.0
 
     def R(x):
         if agents[1].eval(x[0], x[1]) > 0:
@@ -189,13 +181,12 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
     def V_l(agent_index, inter_list):
         logger.info(f'V_list(agent_index={agent_index}, inter_list={inter_list})')
         return sum([V(agent_index, start, end) for start, end in inter_list])
-    #     return sum([agents[agent_index].eval(start,end) for start,end in inter_list])
 
     def V(agent_index, start, end):
         logger.info(f'V(agent_index={agent_index},start={start},end={end})')
         return agents[agent_index].eval(start, end)
 
-    def get_optimal_allocation(agents):
+    def get_optimal_allocation():
         intervals = [(start, start + 1) for start in range(agents[0].cake_length())]
         logger.info(f'getting optimal allocation for initial intervals: {intervals}')
         new_intervals = []
@@ -218,14 +209,14 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
             new_intervals.append((start, end))
         return allocs, new_intervals
 
-    def Y_op_r(pieces, op, r):
+    def Y_op_r(intervals, op, r):
         result = []
-        for start, end in pieces:
+        for start, end in intervals:
             if agents[0].eval(start, end) < agents[1].eval(start, end) and op(R((start, end)), r):
                 result.append((start, end))
         return result
 
-    allocation, pieces = get_optimal_allocation(agents)
+    allocation, pieces = get_optimal_allocation()
 
     a = Allocation(agents)
     a.setPieces(allocation)
@@ -244,8 +235,7 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
 
     if (V_l(0, y_0_ge_1) >= (agents[0].cake_value() / 2) and
         V_l(1, y_1_ge_0) >= (agents[1].cake_value() / 2)):
-
-        if (V_l(0, y_0_gt_1) >= (agents[0].cake_value() / 2)):
+        if V_l(0, y_0_gt_1) >= (agents[0].cake_value() / 2):
             a.setPieces([y_0_gt_1, y_1_ge_0])
         else:
             missing_value = (agents[0].cake_value() / 2) - V_l(0, y_0_gt_1)
