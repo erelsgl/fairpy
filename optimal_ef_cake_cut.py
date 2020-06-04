@@ -18,7 +18,7 @@ import cvxpy
 import numpy as np
 
 logger: Logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 
 def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
@@ -288,16 +288,51 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
             logger.info(f'agent 0 pieces {y_0_gt_1}')
             logger.info(f'agent 1 pieces {y_1_gt_0}')
             a.setPieces([y_0_gt_1, y_1_gt_0])
-            return a
+        return a
 
     if V_l(0, y_0_ge_1) < (agents[0].cake_value() / 2):
+        # Create V1(Y(1≥2) ∪ Y(≥r)) ≥ 1/2
         ratio_dict = {x: R(x) for x in y_0_lt_1}
         y_le_r_dict = {r: Y_op_r(y_0_lt_1, operator.ge, r) for inter, r in ratio_dict.items()}
         valid_r_dict = {}
+        r_star = {0: None}
         for r, val in y_le_r_dict.items():
-            temp_list = y_0_gt_1 + val
-            if V_l(0, temp_list) >= (agents[0].cake_length() / 2):
+            if V_l(0, y_0_gt_1 + val) >= (agents[0].cake_length() / 2):
+                highest_value, interval_dict = r_star.popitem()
+                temp_dict = {r: val}
+
+                if V_l(0, y_0_gt_1 + val) > highest_value:
+                    highest_value = V_l(0, y_0_gt_1 + val)
+                    interval_dict = temp_dict
+
                 valid_r_dict[r] = val
+                r_star[highest_value] = interval_dict
+
+        logger.info(f'Valid Y(≥r) s.t. V1(Y(1≥2 U Y(≥r))) is {valid_r_dict}')
+        logger.info(f'Y(≥r*) is {r_star}')
+
+        # Give Y>r∗ to agent 1
+        max_value, (r_max, inter_r_max) = r_star.popitem()
+        agent_0_allocation = y_0_gt_1 + Y_op_r(inter_r_max, operator.gt, r_max)
+        agent_1_allocation = y_0_lt_1
+
+        # divide Y=r∗ so that agent 1 receives exactly value 1
+        missing_value = (agents[0].cake_value() / 2) - V_l(0, agent_0_allocation)
+        y_eq_r = Y_op_r(inter_r_max, operator.eq, r_max)
+        for start, end in y_eq_r:
+            mid = agents[0].mark(start, missing_value)
+            logger.info(f'start {start}, end {end}, mid {mid}, missing value {missing_value}')
+            if mid <= end:
+                agent_0_allocation.append((start, mid))
+                agent_1_allocation.append((mid, end))
+            else:
+                agent_1_allocation.append((start, end))
+
+        logger.info(f'agent 0 pieces {agent_0_allocation}')
+        logger.info(f'agent 1 pieces {agent_1_allocation}')
+        a.setPieces([agent_0_allocation, agent_1_allocation])
+        logger.info(f'Is allocation {agent_0_allocation, agent_1_allocation}, Envy Free ? {a.isEnvyFree(3)}')
+    return a
 
 
 if __name__ == "__main__":

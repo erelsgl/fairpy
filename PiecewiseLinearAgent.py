@@ -5,7 +5,7 @@ import numpy as np
 import math
 import scipy.integrate as integrate
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
