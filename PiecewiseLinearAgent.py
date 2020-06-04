@@ -1,4 +1,8 @@
-from agents import *
+#!python3
+
+"""
+Programmer: Tom Goldenberg
+"""
 from allocations import *
 import logging
 import numpy as np
