@@ -47,9 +47,33 @@ def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
     > gin gets [(0.0, 1.0), (2.0, 2.7), (4.0, 5.0)] with value 91.0
     > bob gets [(1.0, 2.0), (2.7, 3.0), (3.0, 4.0)] with value 69.0
     <BLANKLINE>
-    """
-    # > alice gets [(0.0, 1.0), (1.0, 1.5)] with value 20.0
-    # > bob gets [(1.5, 2.0), (2.0, 3.0), (3.0, 4.0)] with value 25.0
+    >>> alice = PiecewiseConstantAgent([5], name='alice')
+    >>> bob = PiecewiseConstantAgent([5], name='bob')
+    >>> print(str(opt_piecewise_constant([alice,bob])))
+    > alice gets [(0.0, 0.5)] with value 2.5
+    > bob gets [(0.5, 1.0)] with value 2.5
+    <BLANKLINE>
+    >>> alice = PiecewiseConstantAgent([3], name='alice')
+    >>> bob = PiecewiseConstantAgent([5], name='bob')
+    >>> print(str(opt_piecewise_constant([alice,bob])))
+    > alice gets [(0.0, 0.5)] with value 1.5
+    > bob gets [(0.5, 1.0)] with value 2.5
+    <BLANKLINE>
+    >>> alice = PiecewiseConstantAgent([0,1,0,2,0,3], name='alice')
+    >>> bob = PiecewiseConstantAgent([1,0,2,0,3,0], name='bob')
+    >>> print(str(opt_piecewise_constant([alice,bob])))
+    > alice gets [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)] with value 6.0
+    > bob gets [(0.0, 1.0), (2.0, 3.0), (4.0, 5.0)] with value 6.0
+    <BLANKLINE>
+    >>> alice = PiecewiseConstantAgent([0,1,0,2,0,3], name='alice')
+    >>> bob = PiecewiseConstantAgent([1,0,2,0,3,0], name='bob')
+    >>> gin = PiecewiseConstantAgent([1,1,2,2,3,3], name='gin')
+    >>> print(str(opt_piecewise_constant([alice,bob,gin])))
+    > alice gets [(1.0, 1.53), (3.0, 3.55), (5.0, 5.58)] with value 3.37
+    > bob gets [(0.0, 0.53), (2.0, 2.55), (4.0, 4.58)] with value 3.37
+    > gin gets [(0.53, 1.0), (1.53, 2.0), (2.55, 3.0), (3.55, 4.0), (4.58, 5.0), (5.58, 6.0)] with value 5.26
+    <BLANKLINE>
+   """
 
     value_matrix = [list(agent.values) for agent in agents]
     num_of_agents = len(value_matrix)
@@ -150,8 +174,32 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
     >>> alice = PiecewiseLinearAgent([11,22,33,44],[1,0,3,-2],name="alice")
     >>> bob = PiecewiseLinearAgent([11,22,33,44],[-1,0,-3,2],name="bob")
     >>> print(str(opt_piecewise_linear([alice,bob])))
-    > alice gets [(0.5, 1), (2.5, 3), (3, 3.5), (1, 1.466)] with value 55.0
-    > bob gets [(0, 0.5), (2, 2.5), (3.5, 4), (1.466, 2)] with value 55.0
+    > alice gets [(0.5, 1), (2.5, 3), (3, 3.5), (1, 1.466)] with value 55.002
+    > bob gets [(0, 0.5), (2, 2.5), (3.5, 4), (1.466, 2)] with value 55.002
+    <BLANKLINE>
+    >>> alice = PiecewiseLinearAgent([5], [0], name='alice')
+    >>> bob = PiecewiseLinearAgent([5], [0], name='bob')
+    >>> print(str(opt_piecewise_linear([alice,bob])))
+    > alice gets [(0, 0.5)] with value 2.5
+    > bob gets [(0.5, 1)] with value 2.5
+    <BLANKLINE>
+    >>> alice = PiecewiseLinearAgent([5], [-1], name='alice')
+    >>> bob = PiecewiseLinearAgent([5], [0], name='bob')
+    >>> print(str(opt_piecewise_linear([alice,bob])))
+    > alice gets [(0, 0.5)] with value 2.625
+    > bob gets [(0.5, 1)] with value 2.5
+    <BLANKLINE>
+    >>> alice = PiecewiseLinearAgent([5], [-1], name='alice')
+    >>> bob = PiecewiseLinearAgent([5], [-1], name='bob')
+    >>> print(str(opt_piecewise_linear([alice,bob])))
+    > alice gets [(0, 0.475)] with value 2.5
+    > bob gets [(0.475, 1)] with value 2.25
+    <BLANKLINE>
+    >>> alice = PiecewiseLinearAgent([0,1,0,2,0,3], [0,0,0,0,0,0], name='alice')
+    >>> bob = PiecewiseLinearAgent([1,0,2,0,3,0], [0,0,0,0,0,0],name='bob')
+    >>> print(str(opt_piecewise_linear([alice,bob])))
+    > alice gets [(1, 2), (3, 4), (5, 6)] with value 6.0
+    > bob gets [(0, 1), (2, 3), (4, 5)] with value 6.0
     <BLANKLINE>
     """
 
@@ -173,7 +221,7 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
         :param poly_2: np.poly1d
         :return: corresponding x or 0 if none exist
         """
-        logger.info(f'isIntersect: poly_1={poly_1}, poly_2={poly_2}')
+        logger.info(f'isIntersect: {poly_1}=poly_1,{poly_2}=poly_2')
         m_1, c_1 = poly_1.c if len(poly_1.c) > 1 else [0, poly_1.c[0]]
         m_2, c_2 = poly_2.c if len(poly_2.c) > 1 else [0, poly_2.c[0]]
         logger.info(f'isIntersect: m_1={m_1} c_1={c_1}, m_2={m_2} c_2={c_2}')
@@ -223,14 +271,14 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
         for piece, (start, end) in enumerate(intervals):
             logger.info(f'get_optimal_allocation: piece={piece}, start={start}, end={end}')
             mid = isIntersect(agents[0].piece_poly[piece], agents[1].piece_poly[piece])
-            if mid > 0:
+            if 0 < mid < 1:
                 logger.info(f'mid={mid}')
-                new_intervals.append((start, mid))
-                if V(0, start, mid) > V(1, start, mid):
-                    allocs[0].append((start, mid))
+                new_intervals.append((start, start + mid))
+                if V(0, start, start + mid) > V(1, start, start + mid):
+                    allocs[0].append((start, start + mid))
                 else:
-                    allocs[1].append((start, mid))
-                start = mid
+                    allocs[1].append((start, start + mid))
+                start += mid
             if V(0, start, end) > V(1, start, end):
                 allocs[0].append((start, end))
             else:
@@ -253,7 +301,7 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
         return result
 
     allocation, pieces = get_optimal_allocation()
-
+    logger.info(f'get_optimal_allocation returned:\nallocation: {allocation}\npieces: {pieces}')
     a = Allocation(agents)
     a.setPieces(allocation)
 
@@ -312,14 +360,22 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
         logger.info(f'Y(≥r*) is {r_star}')
 
         # Give Y>r∗ to agent 1
-        max_value, (r_max, inter_r_max) = r_star.popitem()
+        max_value, r_max_dict = r_star.popitem()
+
+        if not r_max_dict:
+            logger.info(f'Y > r* returned empty, returning')
+            return a
+
+        r_max, inter_r_max = r_max_dict.popitem()
         agent_0_allocation = y_0_gt_1 + Y_op_r(inter_r_max, operator.gt, r_max)
         agent_1_allocation = y_0_lt_1
 
         # divide Y=r∗ so that agent 1 receives exactly value 1
         missing_value = (agents[0].cake_value() / 2) - V_l(0, agent_0_allocation)
         y_eq_r = Y_op_r(inter_r_max, operator.eq, r_max)
+        logger.info(f'Y(=r*) is {y_eq_r}')
         for start, end in y_eq_r:
+            agent_1_allocation.remove((start, end))
             mid = agents[0].mark(start, missing_value)
             logger.info(f'start {start}, end {end}, mid {mid}, missing value {missing_value}')
             if mid <= end:

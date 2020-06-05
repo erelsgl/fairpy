@@ -6,7 +6,6 @@ Programmer: Tom Goldenberg
 from allocations import *
 import logging
 import numpy as np
-import math
 import scipy.integrate as integrate
 
 # logging.basicConfig(level=logging.INFO)
@@ -25,8 +24,6 @@ class PiecewiseLinearAgent(Agent):
     4
     >>> a.eval(1,3)
     55.0
-    >>> a.mark(1, 77)
-    3.435
     >>> a.piece_value([(0,1),(2,3)])
     44.0
     """
@@ -35,8 +32,8 @@ class PiecewiseLinearAgent(Agent):
         if len(values) != len(slopes):
             raise ValueError(f'Values amount: {len(values)} not equal to slopes: {len(slopes)} ')
         super().__init__(name)
-        self.piece_poly = [set_poly_func(values[i], slopes[i], i, i + 1) for i in range(len(values))]
-        self.values_integral = [set_integral_func(self.piece_poly[i], i, i + 1) for i in range(len(values))]
+        self.piece_poly = [set_poly_func(values[i], slopes[i], 0, 1) for i in range(len(values))]
+        self.values_integral = [set_integral_func(self.piece_poly[i], 0, 1) for i in range(len(values))]
         self.values = np.array(values)
         self.length = len(values)
         self.total_value_cache = sum(values)
@@ -72,7 +69,7 @@ class PiecewiseLinearAgent(Agent):
         0.0
         """
         if start < 0 or end > self.length:
-            raise ValueError(f'Interval range are invalid')
+            raise ValueError(f'Interval range are invalid start={start}, end={end}, length={self.length}')
 
         if end <= start:
             return 0.0  # special case not covered by loop below
@@ -84,8 +81,8 @@ class PiecewiseLinearAgent(Agent):
 
         val = 0.0
         for func_i in range(fromFloor, toCeiling):
-            interval_start = func_i + fromFraction  # if func_i != start else func_i + start_frac
-            interval_end = func_i + 1 if (func_i + 1) != toCeiling else func_i + 1 - toCeilingRemovedFraction
+            interval_start = fromFraction
+            interval_end = 1 if (func_i + 1) != toCeiling else 1 - toCeilingRemovedFraction
             val += self.values_integral[func_i](interval_start, interval_end)
             fromFraction = 0
         return val
@@ -103,11 +100,11 @@ class PiecewiseLinearAgent(Agent):
         >>> a.mark(1, 55)
         3
         >>> a.mark(1.5, 44)
-        3.191
+        2.992
         >>> a.mark(1, 66)
-        3.191
+        3.242
         >>> a.mark(1.5, 55)
-        3.384
+        3.236
         >>> a.mark(1, 99)
         4
         >>> a.mark(1, 100)
@@ -130,25 +127,24 @@ class PiecewiseLinearAgent(Agent):
                                                                                    self.values))
 
         start_fraction = (start_floor + 1 - start) if start > start_floor else 0.0
-        end = math.ceil(start) if start != start_floor else start + 1
-        current_value = self.values_integral[start_floor](start + start_fraction, end)
-        logger.info(f'start {start}, end {end}, start_floor {start_floor}, curr_val {current_value}, target value {target_value}')
+        current_value = self.values_integral[start_floor](start_fraction, 1)
+        logger.info(f'start {start}, start_floor {start_floor}, curr_val {current_value}, target value {target_value}')
         if current_value == target_value:
-            return end
+            return start_floor + 1
         elif current_value < target_value:
-            return self.mark(end, target_value - current_value)
+            return self.mark(start_floor + 1, target_value - current_value)
         else:
             inte_poly = np.polyint(self.piece_poly[start_floor])
             if inte_poly.order > 1:
                 temp_poly = np.poly1d([target_value])
                 target_poly = inte_poly - temp_poly
-                logger.info(f'inte_poly {inte_poly}, temp_poly {temp_poly}, target_poly {target_poly}')
+                logger.info(f'mark function polynomials\n{inte_poly}=inte_poly, {temp_poly}=temp_poly,{target_poly}=target_poly')
                 for root in target_poly.r:
                     logger.info(f'root')
                     if 0 <= root <= 1:
-                        return round(start + root, 3)
+                        return round(start_floor + root, 3)
             else:
-                return (target_value / current_value) + start
+                return round((target_value / current_value) + start_floor, 3)
         # Value is too high: return None
         return None
 
