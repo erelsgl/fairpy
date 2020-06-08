@@ -55,16 +55,6 @@ class CakeSlice(object):
         """
         Gets the start position of this slice, along the entire cake.
         :return: start position
-
-        >>> s = CakeSlice(0, 2)
-        >>> s.start
-        0
-        >>> s = CakeSlice(1, 2)
-        >>> s.start
-        1
-        >>> s = CakeSlice(1.5, 2)
-        >>> s.start
-        1.5
         """
         return self._start
 
@@ -73,16 +63,6 @@ class CakeSlice(object):
         """
         Gets the end position of this slice, along the entire cake.
         :return: end position
-
-        >>> s = CakeSlice(0, 2)
-        >>> s.end
-        2
-        >>> s = CakeSlice(0, 1)
-        >>> s.end
-        1
-        >>> s = CakeSlice(1.5, 2.65)
-        >>> s.end
-        2.65
         """
         return self._end
 
@@ -91,16 +71,6 @@ class CakeSlice(object):
         """
         Gets the size of this slice. Can be described as `slice.end` - `slice.start`.
         :return: size of this slice
-
-        >>> s = CakeSlice(0, 2)
-        >>> s.size
-        2
-        >>> s = CakeSlice(0, 1)
-        >>> s.size
-        1
-        >>> s = CakeSlice(1.5, 2.65)
-        >>> s.size
-        1.15
         """
         return self._end - self._start
 

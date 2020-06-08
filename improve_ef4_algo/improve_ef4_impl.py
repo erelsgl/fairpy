@@ -1,25 +1,23 @@
 import logging
-
-from improve_ef4.allocation import CakeAllocation
-from improve_ef4.cake import CakeSlice, full_cake_slice, slice_equally
-from improve_ef4.domination import get_most_satisfied_agent, get_least_satisfied_agent, \
-    is_dominated_by_all
-from improve_ef4.gain import allocation_with_lowest_gain, get_agent_gain
-from improve_ef4.marking import mark_by_preferences, marked_slices_by_agents, \
-    allocate_by_rightmost_to_agent, allocate_all_partials_by_marks
-from improve_ef4.preference import find_favorite_slice, get_preferences_for_agents
-from improve_ef4.util import exclude_from_list
-from agents import PiecewiseConstantAgent, Agent
-
 from typing import *
 
-logger = logging.getLogger(__name__)
+from agents import PiecewiseConstantAgent, Agent
+from improve_ef4_algo.allocation import CakeAllocation
+from improve_ef4_algo.cake import CakeSlice, full_cake_slice, slice_equally
+from improve_ef4_algo.domination import get_most_satisfied_agent, get_least_satisfied_agent, \
+    is_dominated_by_all
+from improve_ef4_algo.gain import allocation_with_lowest_gain, get_agent_gain
+from improve_ef4_algo.marking import mark_by_preferences, marked_slices_by_agents, \
+    allocate_by_rightmost_to_agent, allocate_all_partials_by_marks
+from improve_ef4_algo.preference import find_favorite_slice, get_preferences_for_agents
+from improve_ef4_algo.util import exclude_from_list
 
 
 class Algorithm(object):
 
-    def __init__(self, agents: List[Agent]):
+    def __init__(self, agents: List[Agent], logger: logging.Logger):
         self._agents = agents
+        self._logger = logger
 
     def main(self) -> CakeAllocation:
         """
@@ -54,14 +52,14 @@ class Algorithm(object):
         :return: a `CakeAllocation` object with the allocation of the cake to the agents.
         """
         # full cake allocation
-        residue = [full_cake_slice(self._agents)]
-        total_allocation = CakeAllocation(residue)
+        cake = [full_cake_slice(self._agents)]
+        total_allocation = CakeAllocation(cake)
 
-        logger.info("Starting allocation on cake {} for agents {}".format(str(residue),
-                                                                          ', '.join([agent.name() for agent in
-                                                                                     self._agents])))
+        self._logger.info("Starting allocation on cake {} for agents {}".format(str(cake),
+                                                                                ', '.join([agent.name() for agent in
+                                                                                           self._agents])))
 
-        logger.info("Starting phase1")
+        self._logger.info("Starting phase1")
         # PHASE ONE
         active_agents = self._agents
         cutter = self._agents[0]
@@ -74,7 +72,7 @@ class Algorithm(object):
             total_allocation.combine(allocation)
 
             if len(total_allocation.unallocated_slices) == 0:
-                logger.info("All slices allocated, finished")
+                self._logger.info("All slices allocated, finished")
                 return total_allocation
 
         agents_with_insignificant = list(filter(None, [
@@ -82,7 +80,7 @@ class Algorithm(object):
             for allocation in all_allocations
         ]))
         if len(set(agents_with_insignificant)) == 1 and len(agents_with_insignificant) == 4:
-            logger.info("{} received insignificant slice for 4 runs".format(agents_with_insignificant[0]))
+            self._logger.info("{} received insignificant slice for 4 runs".format(agents_with_insignificant[0]))
             # same agent (agents_with_insignificant[0]) has insignificant slice
             # x(i) -> allocated slices for agent[i]
             # gain = sum of values of allocated slices to agent
@@ -90,16 +88,16 @@ class Algorithm(object):
             # gain(i) = (value of slice for agent i) - (value of slices other got)
             # find sub-allocation where the gain of agents (excluding cutter) is smallest
             low_gain_allocation = allocation_with_lowest_gain(self._agents[1:3], all_allocations)
-            logger.info("allocation with lowest gain {}, running correction"
-                        .format(all_allocations.index(low_gain_allocation)))
+            self._logger.info("allocation with lowest gain {}, running correction"
+                              .format(all_allocations.index(low_gain_allocation)))
             self._correction(cutter, low_gain_allocation, total_allocation)
 
-        logger.info("running core again")
+        self._logger.info("running core again")
         allocation = self._core(cutter, total_allocation.unallocated_slices, active_agents)
         total_allocation.combine(allocation)
 
         if len(total_allocation.unallocated_slices) == 0:
-            logger.info("All slices allocated, finished")
+            self._logger.info("All slices allocated, finished")
             return total_allocation
 
         # dominated by === less satisfied than
@@ -113,22 +111,22 @@ class Algorithm(object):
         most_satisfied_agent = get_most_satisfied_agent(self._agents, total_allocation)
         if most_satisfied_agent != cutter:
             agent_e = most_satisfied_agent
-            logger.info("most satisfied agent ({}) != agent1, running core".format(agent_e.name()))
+            self._logger.info("most satisfied agent ({}) != agent1, running core".format(agent_e.name()))
             allocation = self._core(agent_e, total_allocation.unallocated_slices,
                                     active_agents, exclude_from_competition=cutter)
             total_allocation.combine(allocation)
 
             if len(total_allocation.unallocated_slices) == 0:
-                logger.info("All slices allocated, finished")
+                self._logger.info("All slices allocated, finished")
                 return total_allocation
         # else
         #   run "Selfridge-Conway protocol" (?) on residue for agents 2, 3, 4, and terminate
         else:
-            logger.info("agent1 dominates, running selfridge_conway for other agents")
+            self._logger.info("agent1 dominates, running selfridge_conway for other agents")
             allocation = self._selfridge_conway(self._agents[1:], total_allocation.unallocated_slices)
             total_allocation.combine(allocation)
 
-            logger.info("finished, returning")
+            self._logger.info("finished, returning")
             return total_allocation
 
         # PHASE TWO
@@ -139,7 +137,7 @@ class Algorithm(object):
         agent_c = others[1]
         agent_d = others[2]
 
-        logger.info("Starting phase2")
+        self._logger.info("Starting phase2")
 
         all_allocations.clear()
         # line  11
@@ -155,37 +153,43 @@ class Algorithm(object):
             total_allocation.combine(allocation)
 
             if len(total_allocation.unallocated_slices) == 0:
-                logger.info("All slices allocated, finished")
+                self._logger.info("All slices allocated, finished")
                 return total_allocation
 
         # if not (A and D are more satisfied than B, C)
         if not is_dominated_by_all(agent_b, [agent_a, agent_d], total_allocation) or \
                 not is_dominated_by_all(agent_c, [agent_a, agent_d], total_allocation):
-            logger.info("A and D not dominated both B and C")
+            self._logger.info("A and D not dominated both B and C")
             # if B,C not dominated by A,D
             # F is one of {B,C} which received the insignificant slice during runs in line 11
             # out of the two allocations in line 11, find the who where the gain of F is smaller
             # run correction on said allocation
-            agent_f = total_allocation.try_get_agent_with_insignificant_slice()
+            agents_with_insignificant = list(filter(None, [
+                allocation.try_get_agent_with_insignificant_slice()
+                for allocation in all_allocations
+            ]))
+            if set(agents_with_insignificant) != 1:
+                raise ValueError("multiple agents with insignificant slice")
+            agent_f = agents_with_insignificant[0]
             if agent_f not in [agent_b, agent_c]:
                 raise ValueError("B,C should have insignificant")
 
-            logger.info("{} has insignificant slice from last 2 runs".format(agent_f.name()))
+            self._logger.info("{} has insignificant slice from last 2 runs".format(agent_f.name()))
             low_gain_allocation = min(all_allocations,
                                       key=lambda alloc: get_agent_gain(agent_f,
                                                                        exclude_from_list(self._agents, [agent_f]),
                                                                        alloc))
-            logger.info("allocation with lowest gain {}, running correction"
-                        .format(all_allocations.index(low_gain_allocation)))
+            self._logger.info("allocation with lowest gain {}, running correction"
+                              .format(all_allocations.index(low_gain_allocation)))
             self._correction(agent_d, low_gain_allocation, total_allocation)
 
         # PHASE THREE
         # run CUT_AND_CHOOSE on residue for B,C
-        logger.info("running cut and choose on {}, {}".format(agent_b.name(), agent_c.name()))
+        self._logger.info("running cut and choose on {}, {}".format(agent_b.name(), agent_c.name()))
         allocation = self._cut_and_choose(agent_b, agent_c, total_allocation.unallocated_slices)
         total_allocation.combine(allocation)
 
-        logger.info("finished")
+        self._logger.info("finished")
         return total_allocation
 
     def _core(self, cutter: Agent, residue: List[CakeSlice], agents: List[Agent],
@@ -202,7 +206,8 @@ class Algorithm(object):
         For each of the non-cutter agents, we compare preferences.
         Agent who:
             - has not competition on the second preference, or
-            - has 1 competition on the second preference, the competing agent also considers the slice as their second preference, and both have 1 competition for their first preference
+            - has 1 competition on the second preference, the competing agent also considers the slice as their second
+            preference, and both have 1 competition for their first preference
 
         will make a "2-mark" on the first preference, which is a mark that makes the left part of the slice
         equal in value to the second preference.
@@ -236,7 +241,7 @@ class Algorithm(object):
         >>> a3 = PiecewiseConstantAgent([10, 10, 10], "test3")
         >>> a4 = PiecewiseConstantAgent([10, 10, 10], "test4")
         >>> s = CakeSlice(0, 3)
-        >>> algo = Algorithm([a, a2, a3, a4])
+        >>> algo = Algorithm([a, a2, a3, a4], logging.getLogger("test"))
         >>> alloc = algo._core(a, [s], [a2, a3, a4])
         >>> alloc.unallocated_slices
         []
@@ -247,7 +252,7 @@ class Algorithm(object):
         """
         active_agents = exclude_from_list(agents, [cutter])
 
-        logger.info("Starting core with cutter {} and agents {} on residue {}".format(
+        self._logger.info("Starting core with cutter {} and agents {} on residue {}".format(
             cutter.name(),
             ', '.join([agent.name() for agent in active_agents]),
             str(residue)
@@ -256,7 +261,7 @@ class Algorithm(object):
         # residue may not be a complete slice
         # cutter slices into 4
         slices = slice_equally(cutter, 4, residue)
-        logger.info("Residue sliced into {}".format(str(slices)))
+        self._logger.info("Residue sliced into {}".format(str(slices)))
 
         preferences = get_preferences_for_agents(active_agents, slices)
         allocation = CakeAllocation(slices)
@@ -276,20 +281,20 @@ class Algorithm(object):
             if conflicts_for_primary.primary_count == 0:
                 allocation.allocate_slice(agent, favorite)
                 satisfied_agents.append(agent)
-                logger.info("{} has preference {} with no conflicts, allocating".format(agent.name(), favorite))
+                self._logger.info("{} has preference {} with no conflicts, allocating".format(agent.name(), favorite))
             else:
-                logger.info("{} has preference {} with conflicts, not allocating".format(agent.name(), favorite))
+                self._logger.info("{} has preference {} with conflicts, not allocating".format(agent.name(), favorite))
 
         for agent in satisfied_agents:
             active_agents.remove(agent)
 
         if len(active_agents) == 0:
-            logger.info(
+            self._logger.info(
                 "all agents satisfied, allocating {} to cutter {}".format(str(allocation.free_complete_slices[0]),
                                                                           cutter.name()))
             allocation.allocate_slice(cutter, allocation.free_complete_slices[0])
 
-            logger.info("core finished with {}".format(
+            self._logger.info("core finished with {}".format(
                 ', '.join("{}: {}".format(agent.name(), str(allocation.get_allocation_for_agent(agent)))
                           for agent in allocation.agents_with_allocations)
             ))
@@ -300,16 +305,16 @@ class Algorithm(object):
         # do marking
         exclude = list(satisfied_agents)
         exclude.append(exclude_from_competition)
-        logger.info("Starting conflict handling, excluding {}".format(', '.join(
+        self._logger.info("Starting conflict handling, excluding {}".format(', '.join(
             [agent.name() for agent in filter(None, exclude)])))
 
         for agent in exclude_from_list(active_agents, [exclude_from_competition]):
             mark = mark_by_preferences(agent, preferences, allocation.marking, exclude)
-            logger.info("{} made mark at {} on slice {}".format(agent.name(),
-                                                                str(mark.mark_position), str(mark.slice)))
+            self._logger.info("{} made mark at {} on slice {}".format(agent.name(),
+                                                                      str(mark.mark_position), str(mark.slice)))
 
         # Allocate by rightmost rule
-        logger.info("Starting allocation by rightmost rule")
+        self._logger.info("Starting allocation by rightmost rule")
 
         rightmost_marks = allocation.marking.rightmost_marks()
         agents_to_rightmost_marked_slices = marked_slices_by_agents(rightmost_marks)
@@ -318,12 +323,12 @@ class Algorithm(object):
         for agent, slices in agents_to_rightmost_marked_slices.items():
             if len(slices) != 2:
                 continue
-            logger.info("{} has rightmost mark on 2 slices {}".format(agent.name(), str(slices)))
+            self._logger.info("{} has rightmost mark on 2 slices {}".format(agent.name(), str(slices)))
 
             agents_to_allocated, sliced = allocate_by_rightmost_to_agent(agent, slices, allocation, allocation.marking)
 
-            logger.info("slices cut into {}".format(str(sliced)))
-            logger.info("allocated {}".format(', '.join([
+            self._logger.info("slices cut into {}".format(str(sliced)))
+            self._logger.info("allocated {}".format(', '.join([
                 '{}: {}'.format(agent.name(), str(slice))
                 for agent, slice in agents_to_allocated.items()
             ])))
@@ -331,11 +336,11 @@ class Algorithm(object):
             break
 
         if not allocated:
-            logger.info("No agent with rightmost mark on 2 slices")
+            self._logger.info("No agent with rightmost mark on 2 slices")
             agents_to_allocated, sliced = allocate_all_partials_by_marks(rightmost_marks, allocation,
                                                                          allocation.marking)
-            logger.info("slices cut into {}".format(str(sliced)))
-            logger.info("allocated {}".format(', '.join([
+            self._logger.info("slices cut into {}".format(str(sliced)))
+            self._logger.info("allocated {}".format(', '.join([
                 '{}: {}'.format(agent.name(), str(slice))
                 for agent, slice in agents_to_allocated.items()
             ])))
@@ -347,14 +352,14 @@ class Algorithm(object):
                 favorite = find_favorite_slice(agent, allocation.free_complete_slices)
                 allocation.allocate_slice(agent, favorite)
 
-                logger.info("{} has not received slice yet, chose and received {}"
-                            .format(agent.name(), str(favorite)))
+                self._logger.info("{} has not received slice yet, chose and received {}"
+                                  .format(agent.name(), str(favorite)))
 
         # cutter given remaining un-allocated complete slice
-        logger.info("cutter receives {}".format(str(allocation.free_complete_slices[0])))
+        self._logger.info("cutter receives {}".format(str(allocation.free_complete_slices[0])))
         allocation.allocate_slice(cutter, allocation.free_complete_slices[0])
 
-        logger.info("core finished with {}".format(
+        self._logger.info("core finished with {}".format(
             ', '.join("{}: {}".format(agent.name(), str(allocation.get_allocation_for_agent(agent)))
                       for agent in allocation.agents_with_allocations)
         ))
@@ -393,7 +398,7 @@ class Algorithm(object):
         >>> s3 = CakeSlice(1.5,2)
         >>> s4 = CakeSlice(2,2.25)
         >>> s5 = CakeSlice(2.25,3)
-        >>> algo = Algorithm([a, a2, a3, a4, s5])
+        >>> algo = Algorithm([a, a2, a3, a4, s5], logging.getLogger("test"))
         >>> alloc = CakeAllocation([s, s2, s3, s4, s5])
         >>> alloc.allocate_slice(a, s)
         >>> alloc.allocate_slice(a2, s2)
@@ -415,9 +420,9 @@ class Algorithm(object):
         insignificant_slice = allocation.get_insignificant_slice(agent_with_insignificant)
         marks = allocation.marking.marks_on_slice(insignificant_slice)
 
-        logger.info("{} has insignificant {}, with marks {}".format(agent_with_insignificant.name(),
-                                                                    str(insignificant_slice),
-                                                                    str([mark.mark_position for mark in marks])))
+        self._logger.info("{} has insignificant {}, with marks {}".format(agent_with_insignificant.name(),
+                                                                          str(insignificant_slice),
+                                                                          str([mark.mark_position for mark in marks])))
         if len(marks) != 2:
             raise ValueError("Slice should have 2 marks")
         # find insignificant slice
@@ -427,7 +432,7 @@ class Algorithm(object):
         agent_a = agent_with_insignificant
         agent_b = [mark.agent for mark in marks if mark.agent != agent_a][0]
 
-        logger.info("{} is allocated insignificant".format(agent_b.name()))
+        self._logger.info("{} is allocated insignificant".format(agent_b.name()))
 
         total_allocation.allocate_slice(agent_b, insignificant_slice)
 
@@ -438,14 +443,14 @@ class Algorithm(object):
         #   agents choose fav by C, A, D
         # only the insignificant slice remains
         if len(allocation.partial_slices) <= 1:
-            logger.info("no other partial slices")
+            self._logger.info("no other partial slices")
             for agent in [agent_c, agent_a, agent_d]:
                 if len(allocation.all_slices) > 0:
                     favorite = find_favorite_slice(agent, allocation.all_slices)
                     total_allocation.allocate_slice(agent, favorite)
-                    logger.info("{} choose and received {}".format(agent.name(), str(favorite)))
+                    self._logger.info("{} choose and received {}".format(agent.name(), str(favorite)))
 
-            logger.info("correction finished with {}".format(
+            self._logger.info("correction finished with {}".format(
                 ', '.join("{}: {}".format(agent.name(), str(allocation.get_allocation_for_agent(agent)))
                           for agent in allocation.agents_with_allocations)
             ))
@@ -457,22 +462,23 @@ class Algorithm(object):
         #   the cutter is allocated the remaining piece
         else:
             other_slice = exclude_from_list(allocation.partial_slices, [insignificant_slice])[0]
-            logger.info("{} is the other partial slice")
+            self._logger.info("{} is the other partial slice")
 
             mark_made = [mark for mark in allocation.marking.marks_on_slice(other_slice) if mark.agent != agent_b][0]
             agent_e = mark_made.agent
-            logger.info("{} made mark {} on slice and receives it".format(agent_e.name(), str(mark_made.mark_position)))
+            self._logger.info(
+                "{} made mark {} on slice and receives it".format(agent_e.name(), str(mark_made.mark_position)))
             total_allocation.allocate_slice(agent_e, other_slice)
 
             last_non_cutter = exclude_from_list(self._agents, [cutter, agent_e, agent_b])[0]
             favorite = find_favorite_slice(last_non_cutter[0], allocation.free_complete_slices)
-            logger.info("{} last non cutter choose and received {}".format(last_non_cutter.name, str(favorite)))
+            self._logger.info("{} last non cutter choose and received {}".format(last_non_cutter.name, str(favorite)))
             total_allocation.allocate_slice(last_non_cutter, favorite)
 
-            logger.info("{} (cutter) receives {}".format(cutter.name(), str(allocation.free_complete_slices[0])))
+            self._logger.info("{} (cutter) receives {}".format(cutter.name(), str(allocation.free_complete_slices[0])))
             total_allocation.allocate_slice(cutter, allocation.free_complete_slices[0])
 
-            logger.info("correction finished with {}".format(
+            self._logger.info("correction finished with {}".format(
                 ', '.join("{}: {}".format(agent.name(), str(allocation.get_allocation_for_agent(agent)))
                           for agent in allocation.agents_with_allocations)
             ))
@@ -572,3 +578,10 @@ class Algorithm(object):
                     allocation.allocate_slice(agent_b, sliced[0])
 
         return allocation
+
+
+if __name__ == "__main__":
+    import doctest
+
+    (failures, tests) = doctest.testmod(report=True)
+    print("{} failures, {} tests".format(failures, tests))

@@ -1,7 +1,7 @@
 from typing import *
 
-from improve_ef4.cake import CakeSlice
 from agents import Agent, PiecewiseConstantAgent
+from improve_ef4_algo.cake import CakeSlice
 
 
 class AgentPreference(object):
@@ -25,14 +25,6 @@ class AgentPreference(object):
         """
         Gets the agent who made this preference
         :return: agent who made this preference
-
-        >>> pslice = CakeSlice(0, 1)
-        >>> sslice = CakeSlice(1, 1.2)
-        >>> tslice = CakeSlice(1.2, 1.3)
-        >>> a = PiecewiseConstantAgent([1, 1], "agent")
-        >>> p = AgentPreference(a, pslice, sslice, tslice)
-        >>> p.agent == a
-        True
         """
         return self._agent
 
@@ -40,14 +32,7 @@ class AgentPreference(object):
     def first(self) -> CakeSlice:
         """
         Gets the first preference listed in this preference
-        :return: first prefered slice
-
-        >>> pslice = CakeSlice(0, 1)
-        >>> sslice = CakeSlice(1, 1.2)
-        >>> tslice = CakeSlice(1.2, 1.3)
-        >>> p = AgentPreference(None, pslice, sslice, tslice)
-        >>> p.first
-        (0,1)
+        :return: first preferred slice
         """
         return self._first
 
@@ -55,14 +40,7 @@ class AgentPreference(object):
     def second(self) -> CakeSlice:
         """
         Gets the second preference listed in this preference
-        :return: second prefered slice
-
-        >>> pslice = CakeSlice(0, 1)
-        >>> sslice = CakeSlice(1, 1.2)
-        >>> tslice = CakeSlice(1.2, 1.3)
-        >>> p = AgentPreference(None, pslice, sslice, tslice)
-        >>> p.second
-        (1,1.2)
+        :return: second preferred slice
         """
         return self._second
 
@@ -70,14 +48,7 @@ class AgentPreference(object):
     def third(self) -> CakeSlice:
         """
         Gets the third preference listed in this preference
-        :return: third prefered slice
-
-        >>> pslice = CakeSlice(0, 1)
-        >>> sslice = CakeSlice(1, 1.2)
-        >>> tslice = CakeSlice(1.2, 1.3)
-        >>> p = AgentPreference(None, pslice, sslice, tslice)
-        >>> p.third
-        (1.2,1.3)
+        :return: third preferred slice
         """
         return self._third
 
@@ -130,14 +101,6 @@ class PreferenceSearch(object):
         """
         Gets all the `AgentPreferences` in this search result.
         :return: list of preferences found.
-
-        >>> pslice = CakeSlice(0.1, 1)
-        >>> p = AgentPreference(None, CakeSlice(0,0.1), CakeSlice(0.1,1), CakeSlice(1,1.5))
-        >>> p2 = AgentPreference(None, CakeSlice(0.1,1), CakeSlice(0,0.1), CakeSlice(1,1.5))
-        >>> search = PreferenceSearch(pslice, [p, p2])
-        >>> preferences_found = [pref in [p,p2] for pref in search.preferences]
-        >>> all(preferences_found)
-        True
         """
         return list(self._preferences)
 
@@ -146,13 +109,6 @@ class PreferenceSearch(object):
         """
         Gets the amount of preferences found in this search.
         :return: amount of preferences found.
-
-        >>> pslice = CakeSlice(0.1, 1)
-        >>> p = AgentPreference(None, CakeSlice(0,0.1), CakeSlice(0.1,1), CakeSlice(1,1.5))
-        >>> p2 = AgentPreference(None, CakeSlice(0.1,1), CakeSlice(0,0.1), CakeSlice(1,1.5))
-        >>> search = PreferenceSearch(pslice, [p, p2])
-        >>> search.count
-        2
         """
         return len(self._preferences)
 
@@ -162,13 +118,6 @@ class PreferenceSearch(object):
         Gets the amount of preferences found where the slice was the first
         preference.
         :return: amount of preferences found with the slice as the first preference.
-
-        >>> pslice = CakeSlice(0.1, 1)
-        >>> p = AgentPreference(None, CakeSlice(0,0.1), pslice, CakeSlice(1,1.5))
-        >>> p2 = AgentPreference(None, pslice, CakeSlice(0,0.1), CakeSlice(1,1.5))
-        >>> search = PreferenceSearch(pslice, [p, p2])
-        >>> search.primary_count
-        1
         """
         return len([preference for preference in self._preferences if preference.first == self._slice])
 
@@ -178,13 +127,6 @@ class PreferenceSearch(object):
         Gets the amount of preferences found where the slice was the second
         preference.
         :return: amount of preferences found with the slice as the second preference.
-
-        >>> pslice = CakeSlice(0.1, 1)
-        >>> p = AgentPreference(None, CakeSlice(0,0.1), pslice, CakeSlice(1,1.5))
-        >>> p2 = AgentPreference(None, pslice, CakeSlice(0,0.1), CakeSlice(1,1.5))
-        >>> search = PreferenceSearch(pslice, [p, p2])
-        >>> search.secondary_count
-        1
         """
         return len([preference for preference in self._preferences if preference.second == self._slice])
 

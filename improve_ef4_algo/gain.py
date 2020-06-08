@@ -1,10 +1,10 @@
 import itertools
 from typing import List
 
-from improve_ef4.allocation import CakeAllocation, CakeSlice
-from improve_ef4.domination import get_agent_satisfaction, value_for_slices
-from improve_ef4.util import exclude_from_list
 from agents import Agent, PiecewiseConstantAgent
+from improve_ef4_algo.allocation import CakeAllocation, CakeSlice
+from improve_ef4_algo.domination import get_agent_satisfaction, value_for_slices
+from improve_ef4_algo.util import exclude_from_list
 
 
 def get_agent_gain(agent: Agent, other_agents: List[Agent], allocation: CakeAllocation) -> float:
@@ -30,7 +30,7 @@ def get_agent_gain(agent: Agent, other_agents: List[Agent], allocation: CakeAllo
     >>> s2 = [CakeSlice(1, 1.5), CakeSlice(1.5, 2)]
     >>> a = PiecewiseConstantAgent([33, 33], "agent")
     >>> b = PiecewiseConstantAgent([33, 33], "agent2")
-    >>> alloc = CakeAllocation(s)
+    >>> alloc = CakeAllocation(s + s2)
     >>> ignore = [alloc.allocate_slice(a, sl) for sl in s]
     >>> ignore = [alloc.allocate_slice(b, sl) for sl in s2]
     >>> get_agent_gain(a, [b], alloc) == (a.cake_value() / 2 - b.cake_value() / 2)

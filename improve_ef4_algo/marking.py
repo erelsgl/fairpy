@@ -1,9 +1,9 @@
 from typing import *
 
-from improve_ef4.allocation import CakeAllocation, Marking
-from improve_ef4.cake import CakeSlice, Mark
-from improve_ef4.preference import find_favorite_slice, Preferences, AgentPreference
 from agents import Agent, PiecewiseConstantAgent
+from improve_ef4_algo.allocation import CakeAllocation, Marking
+from improve_ef4_algo.cake import CakeSlice, Mark
+from improve_ef4_algo.preference import find_favorite_slice, Preferences, AgentPreference
 
 
 def marked_slices_by_agents(marks: List[Mark]) -> Dict[Agent, List[CakeSlice]]:
@@ -199,3 +199,10 @@ def allocate_all_partials_by_marks(rightmost_marks: List[Mark], allocation: Cake
         allocated_slices[mark.agent] = sliced[0]
 
     return allocated_slices, sliced_parts
+
+
+if __name__ == "__main__":
+    import doctest
+
+    (failures, tests) = doctest.testmod(report=True)
+    print("{} failures, {} tests".format(failures, tests))

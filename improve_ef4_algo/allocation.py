@@ -1,9 +1,9 @@
 import itertools
 from typing import List, Set, Optional
 
-from improve_ef4.cake import CakeSlice, Mark
-from improve_ef4.util import exclude_from_list
 from agents import PiecewiseConstantAgent, Agent
+from improve_ef4_algo.cake import CakeSlice, Mark
+from improve_ef4_algo.util import exclude_from_list
 
 
 class Marking(object):
@@ -20,15 +20,6 @@ class Marking(object):
         """
         Gets the marks made on all the slices.
         :return: list containing all the marks
-
-        >>> s = CakeSlice(0, 2)
-        >>> a = PiecewiseConstantAgent([33, 33], "agent")
-        >>> marking = Marking()
-        >>> m = marking.mark(a, s, 33)
-        >>> len(marking.marks)
-        1
-        >>> marking.marks[0] == m
-        True
         """
         return list(itertools.chain.from_iterable(self._slice_to_marks.values()))
 
@@ -186,19 +177,6 @@ class CakeAllocation(object):
         Gets all the unallocated slices, i.e. the slices which haven't being
         given to an agent.
         :return: unallocated slices, by order of slice.start
-
-        >>> s = CakeSlice(0, 1)
-        >>> s2 = CakeSlice(1, 2)
-        >>> a = PiecewiseConstantAgent([33, 33], "agent")
-        >>> alloc = CakeAllocation([s, s2])
-        >>> alloc.unallocated_slices
-        [(0,1), (1,2)]
-        >>> alloc.allocate_slice(a, s)
-        >>> alloc.unallocated_slices
-        [(1,2)]
-        >>> alloc.allocate_slice(a, s2)
-        >>> alloc.unallocated_slices
-        []
         """
         return sorted([slice for slice in self._all_slices if slice not in self._slice_allocations],
                       key=lambda s: s.start)
@@ -208,19 +186,6 @@ class CakeAllocation(object):
         """
         Gets all the unallocated slices which were not sliced in this allocation scope.
         :return: unallocated-unsliced slices.
-
-        >>> s = CakeSlice(0, 1)
-        >>> s2 = CakeSlice(1, 2)
-        >>> a = PiecewiseConstantAgent([33, 33], "agent")
-        >>> alloc = CakeAllocation([s, s2])
-        >>> alloc.free_complete_slices
-        [(0,1), (1,2)]
-        >>> alloc.allocate_slice(a, s)
-        >>> alloc.free_complete_slices
-        [(1,2)]
-        >>> alloc.set_slice_split(s2, [CakeSlice(1, 1.5), CakeSlice(1.5, 2)])
-        >>> alloc.free_complete_slices
-        []
         """
         return [slice for slice in self._complete_slices if slice not in self._slice_allocations]
 
@@ -228,19 +193,7 @@ class CakeAllocation(object):
     def partial_slices(self) -> List[CakeSlice]:
         """
         Gets all the slices which were sliced in this allocation scope.
-        :return: nsliced slices.
-
-        >>> s = CakeSlice(0, 1)
-        >>> s2 = CakeSlice(1, 2)
-        >>> alloc = CakeAllocation([s, s2])
-        >>> alloc.partial_slices
-        []
-        >>> alloc.set_slice_split(s, [CakeSlice(0, 0.3), CakeSlice(0.3, 1)])
-        >>> alloc.partial_slices
-        [(0,0.3), (0.3,1)]
-        >>> alloc.set_slice_split(s2, [CakeSlice(1, 1.5), CakeSlice(1.5, 2)])
-        >>> alloc.partial_slices
-        [(0,0.3), (0.3,1), (1,1.5), (1.5,2)]
+        :return: unsliced slices.
         """
         return exclude_from_list(self._all_slices, self._complete_slices)
 
@@ -249,18 +202,6 @@ class CakeAllocation(object):
         """
         Gets all the agents who have received at least one slice in this allocation.
         :return agents with allocated slices.
-
-        >>> s = CakeSlice(0, 1)
-        >>> s2 = CakeSlice(1, 2)
-        >>> a = PiecewiseConstantAgent([33, 33], "agent")
-        >>> alloc = CakeAllocation([s, s2])
-        >>> alloc.agents_with_allocations
-        set()
-        >>> alloc.allocate_slice(a, s)
-        >>> len(alloc.agents_with_allocations)
-        1
-        >>> alloc.agents_with_allocations.pop().name()
-        'agent'
         """
         return set(self._slice_allocations.values())
 
@@ -338,6 +279,7 @@ class CakeAllocation(object):
         """
         Gets the insignificant slice out of all the allocated slices according to `agent`.
         Insignificant slice is defined as the slice which least satisfies `agent`.
+
         :param agent: agent whose insignificant slice to get
         :return: insignificant slice of agent
 
@@ -363,6 +305,7 @@ class CakeAllocation(object):
         """
         Tries to get the agent who was allocated the slice they
         consider to be the insignificant slice, as defined by `get_insignificant_slice`.
+
         :return: agent who was allocated their insignificant slice, or None if there
             is no such agent
 
@@ -490,3 +433,10 @@ class CakeAllocation(object):
                 if s in self._all_slices:
                     self._all_slices.remove(s)
             self._all_slices.append(full_slice)
+
+
+if __name__ == "__main__":
+    import doctest
+
+    (failures, tests) = doctest.testmod(report=True)
+    print("{} failures, {} tests".format(failures, tests))

@@ -1,11 +1,11 @@
-from agents import *
-
-import improve_ef4.improve_ef4_impl as impl
 import logging
 import sys
 
-impl.logger.addHandler(logging.StreamHandler(sys.stdout))
-impl.logger.setLevel(logging.INFO)
+import improve_ef4
+from agents import *
+
+improve_ef4.logger.addHandler(logging.StreamHandler(sys.stdout))
+improve_ef4.logger.setLevel(logging.INFO)
 
 cases = [
     [
@@ -35,18 +35,8 @@ cases = [
 ]
 
 for agents in cases:
-    algorithm = impl.Algorithm(agents)
-    allocation = algorithm.main()
+    allocation = improve_ef4.improve_ef4_protocol(agents)
 
-    print('\n', allocation)
-
-    satisfaction = {}
-    for slice, agent in allocation._slice_allocations.items():
-        if agent not in satisfaction:
-            satisfaction[agent] = 0
-        satisfaction[agent] += agent.eval(slice.start, slice.end)
-
-    for agent, sat in satisfaction.items():
-        print('Agent {} satisfaction: {}'.format(agent.name(), str(sat)))
-
+    print()
+    print(allocation)
     print("--------------------------------------------------")
