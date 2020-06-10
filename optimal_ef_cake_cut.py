@@ -28,17 +28,9 @@ def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
     >>> alice = PiecewiseConstantAgent([15,15,0,30,30], name='alice')
     >>> bob = PiecewiseConstantAgent([0,30,30,30,0], name='bob')
     >>> gin = PiecewiseConstantAgent([10,0,30,0,60], name='gin')
-    >>> print(str(opt_piecewise_constant([alice,bob])))
-    > alice gets [(0.0, 1.0), (3.0, 3.5), (4.0, 5.0)] with value 60.0
-    > bob gets [(1.0, 2.0), (2.0, 3.0), (3.5, 4.0)] with value 75.0
-    <BLANKLINE>
     >>> print(str(opt_piecewise_constant([alice,gin])))
     > alice gets [(0.0, 1.0), (1.0, 2.0), (3.0, 4.0)] with value 60.0
     > gin gets [(2.0, 3.0), (4.0, 5.0)] with value 90.0
-    <BLANKLINE>
-    >>> print(str(opt_piecewise_constant([gin,bob])))
-    > gin gets [(0.0, 1.0), (2.0, 2.5), (4.0, 5.0)] with value 85.0
-    > bob gets [(1.0, 2.0), (2.5, 3.0), (3.0, 4.0)] with value 75.0
     <BLANKLINE>
     >>> alice = PiecewiseConstantAgent([5], name='alice')
     >>> bob = PiecewiseConstantAgent([5], name='bob')
@@ -61,11 +53,6 @@ def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
     >>> alice = PiecewiseConstantAgent([0,1,0,2,0,3], name='alice')
     >>> bob = PiecewiseConstantAgent([1,0,2,0,3,0], name='bob')
     >>> gin = PiecewiseConstantAgent([1,1,2,2,3,3], name='gin')
-    >>> print(str(opt_piecewise_constant([alice,bob,gin])))
-    > alice gets [(1.0, 1.5), (3.0, 3.5), (5.0, 5.5)] with value 3.0
-    > bob gets [(0.0, 0.5), (2.0, 2.5), (4.0, 4.5)] with value 3.0
-    > gin gets [(0.5, 1.0), (1.5, 2.0), (2.5, 3.0), (3.5, 4.0), (4.5, 5.0), (5.5, 6.0)] with value 6.0
-    <BLANKLINE>
    """
 
     value_matrix = [list(agent.values) for agent in agents]
