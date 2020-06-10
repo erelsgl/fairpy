@@ -728,13 +728,16 @@ class PiecewiseConstantAgentNormalized(Agent):
 
 class PiecewiseLinearAgent(Agent):
     """
+    Author: Tom Goldenberg
+    Since:  2020-06
+
     A PiecewiseLinearAgent is an Agent whose value function has a piecewise linear density.
     PiecewiseLinearAgent([11,22],[1,0])
     the first list ([11,22]) is the value of pieces e.g. 1st piece has a value of 11 and the second has a value of 22
     the second list ([1,0]) are the slopes of the piece value, meaning: for each piece the corresponding lists will be used
      to build the equation y = mx + c => (y = 1*x + c, y = 0*x + c) and the 11 and 22 are the integral value of the equation
      from x_0 = 0 -> x_1 = 1
-    >>> a = PiecewiseLinearAgent([11,22,33,44],[1,2,3,-2],name="alice") # Four desired intervals: the leftmost has value 11, the second one 22,  etc.
+    >>> a = PiecewiseLinearAgent([11,22,33,44],[1,2,3,-2]) # Four desired intervals: the leftmost has value 11, the second one 22,  etc.
     >>> a.cake_value()
     110
     >>> a.cake_length()
@@ -743,7 +746,7 @@ class PiecewiseLinearAgent(Agent):
     55.0
     >>> a.piece_value([(0,1),(2,3)])
     44.0
-    >>> a = PiecewiseLinearAgent([2],[1],name="alice")
+    >>> a = PiecewiseLinearAgent([2],[1])
     >>> a.length
     1
     >>> a.values
@@ -754,7 +757,7 @@ class PiecewiseLinearAgent(Agent):
     2.0
     >>> a.eval(0,1)
     2.0
-    >>> a = PiecewiseLinearAgent([2,2],[1,0],name="alice")
+    >>> a = PiecewiseLinearAgent([2,2],[1,0])
     >>> a.cake_value()
     4
     >>> a.piece_value([(0,1)])

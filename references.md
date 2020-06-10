@@ -37,6 +37,13 @@ Proceedings of AAAI 2020.
 *Algorithms 1*.
   * [contiguous_approximately_envy_free.py](contiguous_approximately_envy_free.py) by Shalev Goldshtein.
 
+* Yuga J Cohler,  John K Lai, and David C Parkes, Ariel D Procaccia (2011).
+["Optimal envy-free cake cutting"](https://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewPaper/3638).
+Proceedings of AAAI 2011.
+([alternative link](http://procaccia.info/papers/maxsw.aaai11.pdf)).
+*Algorithms 1 and 2*. 
+  * [optimal_ef_cake_cut.py](optimal_ef_cake_cut.py) by Tom Goldenberg.
+
 
 ## Future work
 
@@ -56,12 +63,6 @@ Proceedings of SAGT 2018, 87--99.
 ["Cake cutting algorithms for piecewise constant and piecewise uniform valuations"](https://arxiv.org/abs/1307.2908). 
 Proceedings of WINE 2014. 1--14.
 *All 5 algorithms.*
-
-* Yuga J Cohler,  John K Lai, and David C Parkes, Ariel D Procaccia (2011).
-["Optimal envy-free cake cutting"](https://www.aaai.org/ocs/index.php/AAAI/AAAI11/paper/viewPaper/3638).
-Proceedings of AAAI 2011.
-([alternative link](http://procaccia.info/papers/maxsw.aaai11.pdf)).
-*Algorithms 1 and 2*. 
 
 * Jeff Edmonds, Kirk Pruhs (2006).
 ["Balanced allocations of cake"](http://people.cs.pitt.edu/~kirk/papers/focs2006.pdf)
