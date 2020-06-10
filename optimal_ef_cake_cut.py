@@ -10,7 +10,6 @@ Since: 2020-05
 """
 import operator
 from logging import Logger
-from PiecewiseLinearAgent import *
 from agents import *
 from allocations import *
 import logging
@@ -18,7 +17,6 @@ import cvxpy
 import numpy as np
 
 logger: Logger = logging.getLogger(__name__)
-# logging.basicConfig(level=logging.INFO)
 
 
 def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
@@ -221,10 +219,10 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
         :param poly_2: np.poly1d
         :return: corresponding x or 0 if none exist
         """
-        logger.info(f'isIntersect: {poly_1}=poly_1,{poly_2}=poly_2')
+        logger.debug(f'isIntersect: {poly_1}=poly_1,{poly_2}=poly_2')
         m_1, c_1 = poly_1.c if len(poly_1.c) > 1 else [0, poly_1.c[0]]
         m_2, c_2 = poly_2.c if len(poly_2.c) > 1 else [0, poly_2.c[0]]
-        logger.info(f'isIntersect: m_1={m_1} c_1={c_1}, m_2={m_2} c_2={c_2}')
+        logger.debug(f'isIntersect: m_1={m_1} c_1={c_1}, m_2={m_2} c_2={c_2}')
         return ((c_2 - c_1) / (m_1 - m_2)) if (m_1 - m_2) != 0 else 0.0
 
     def R(x: tuple) -> float:
@@ -263,16 +261,16 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
         Creates maximum total value allocation
         :return: optimal allocation for 2 agents list[list[tuple], list[tuple]] and list of new intervals
         """
-        logger.info(f'length: {agents[0].cake_length()}')
+        logger.debug(f'length: {agents[0].cake_length()}')
         intervals = [(start, start + 1) for start in range(agents[0].cake_length())]
         logger.info(f'getting optimal allocation for initial intervals: {intervals}')
         new_intervals = []
         allocs = [[], []]
         for piece, (start, end) in enumerate(intervals):
-            logger.info(f'get_optimal_allocation: piece={piece}, start={start}, end={end}')
+            logger.debug(f'get_optimal_allocation: piece={piece}, start={start}, end={end}')
             mid = isIntersect(agents[0].piece_poly[piece], agents[1].piece_poly[piece])
             if 0 < mid < 1:
-                logger.info(f'mid={mid}')
+                logger.debug(f'mid={mid}')
                 new_intervals.append((start, start + mid))
                 if V(0, start, start + mid) > V(1, start, start + mid):
                     allocs[0].append((start, start + mid))
@@ -311,11 +309,11 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
     y_0_ge_1 = Y(0, operator.ge, 1, pieces)
     y_1_ge_0 = Y(1, operator.ge, 0, pieces)
     y_0_lt_1 = Y(0, operator.lt, 1, pieces)
-    logger.info(f'y_0_gt_1 {y_0_gt_1}')
-    logger.info(f'y_1_gt_0 {y_1_gt_0}')
-    logger.info(f'y_0_eq_1 {y_0_eq_1}')
-    logger.info(f'y_0_ge_1 {y_0_ge_1}')
-    logger.info(f'y_1_ge_0 {y_1_ge_0}')
+    logger.debug(f'y_0_gt_1 {y_0_gt_1}')
+    logger.debug(f'y_1_gt_0 {y_1_gt_0}')
+    logger.debug(f'y_0_eq_1 {y_0_eq_1}')
+    logger.debug(f'y_0_ge_1 {y_0_ge_1}')
+    logger.debug(f'y_1_ge_0 {y_1_ge_0}')
 
     if (V_l(0, y_0_ge_1) >= (agents[0].cake_value() / 2) and
         V_l(1, y_1_ge_0) >= (agents[1].cake_value() / 2)):
@@ -326,10 +324,10 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
             interval_options = []
             for start, end in y_0_eq_1:
                 mid = agents[0].mark(start, missing_value)
-                logger.info(f'start {start}, end {end}, mid {mid}, missing value {missing_value}')
+                logger.debug(f'start {start}, end {end}, mid {mid}, missing value {missing_value}')
                 if mid:
                     interval_options.append([(start, mid), (mid, end)])
-            logger.info(f'int_opt {interval_options}')
+            logger.debug(f'int_opt {interval_options}')
             agent_0_inter, agent_1_inter = interval_options.pop()
             y_0_gt_1.append(agent_0_inter)
             y_1_gt_0.append(agent_1_inter)
@@ -377,7 +375,7 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
         for start, end in y_eq_r:
             agent_1_allocation.remove((start, end))
             mid = agents[0].mark(start, missing_value)
-            logger.info(f'start {start}, end {end}, mid {mid}, missing value {missing_value}')
+            logger.debug(f'start {start}, end {end}, mid {mid}, missing value {missing_value}')
             if mid <= end:
                 agent_0_allocation.append((start, mid))
                 agent_1_allocation.append((mid, end))
