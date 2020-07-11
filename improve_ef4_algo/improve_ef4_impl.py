@@ -7,7 +7,7 @@ from improve_ef4_algo.cake import CakeSlice, full_cake_slice, slice_equally
 from improve_ef4_algo.domination import get_most_satisfied_agent, get_least_satisfied_agent, \
     is_dominated_by_all
 from improve_ef4_algo.gain import allocation_with_lowest_gain, get_agent_gain
-from improve_ef4_algo.marking import mark_by_preferences, marked_slices_by_agents, \
+from improve_ef4_algo.marking import mark_by_preferences, \
     allocate_by_rightmost_to_agent, allocate_all_partials_by_marks
 from improve_ef4_algo.preference import find_favorite_slice, get_preferences_for_agents
 from improve_ef4_algo.util import exclude_from_list
@@ -268,17 +268,15 @@ class Algorithm(object):
 
         satisfied_agents = []
         for agent in active_agents:
-            preference = preferences.try_get_preference_for_agent(agent)
-            if preference is None:
-                continue
+            preference = preferences.get_preference_for_agent(agent)
 
-            favorite = preference.first
-            conflicts_for_primary = preferences \
+            favorite = preference[0]
+            favorite_conflicts_first, _ = preferences \
                 .find_agents_with_preference_for(favorite,
                                                  exclude_agents=[agent, exclude_from_competition])
 
             # line 8 if, not talking about lack of conflict for primary slice...
-            if conflicts_for_primary.primary_count == 0:
+            if len(favorite_conflicts_first) == 0:
                 allocation.allocate_slice(agent, favorite)
                 satisfied_agents.append(agent)
                 self._logger.info("{} has preference {} with no conflicts, allocating".format(agent.name(), favorite))
@@ -309,15 +307,14 @@ class Algorithm(object):
             [agent.name() for agent in filter(None, exclude)])))
 
         for agent in exclude_from_list(active_agents, [exclude_from_competition]):
-            mark = mark_by_preferences(agent, preferences, allocation.marking, exclude)
+            slice, mark = mark_by_preferences(agent, preferences, allocation.marking, exclude)
             self._logger.info("{} made mark at {} on slice {}".format(agent.name(),
-                                                                      str(mark.mark_position), str(mark.slice)))
+                                                                      str(mark), str(slice)))
 
         # Allocate by rightmost rule
         self._logger.info("Starting allocation by rightmost rule")
 
-        rightmost_marks = allocation.marking.rightmost_marks()
-        agents_to_rightmost_marked_slices = marked_slices_by_agents(rightmost_marks)
+        agents_to_rightmost_marked_slices = allocation.marking.rightmost_marks_by_agents()
 
         allocated = False
         for agent, slices in agents_to_rightmost_marked_slices.items():
@@ -337,8 +334,7 @@ class Algorithm(object):
 
         if not allocated:
             self._logger.info("No agent with rightmost mark on 2 slices")
-            agents_to_allocated, sliced = allocate_all_partials_by_marks(rightmost_marks, allocation,
-                                                                         allocation.marking)
+            agents_to_allocated, sliced = allocate_all_partials_by_marks(allocation, allocation.marking)
             self._logger.info("slices cut into {}".format(str(sliced)))
             self._logger.info("allocated {}".format(', '.join([
                 '{}: {}'.format(agent.name(), str(slice))
@@ -464,10 +460,10 @@ class Algorithm(object):
             other_slice = exclude_from_list(allocation.partial_slices, [insignificant_slice])[0]
             self._logger.info("{} is the other partial slice")
 
-            mark_made = [mark for mark in allocation.marking.marks_on_slice(other_slice) if mark.agent != agent_b][0]
-            agent_e = mark_made.agent
+            agent_e, mark_made = [(agent, mark) for agent, mark in allocation.marking.marks_on_slice(other_slice)
+                                  if agent != agent_b][0]
             self._logger.info(
-                "{} made mark {} on slice and receives it".format(agent_e.name(), str(mark_made.mark_position)))
+                "{} made mark {} on slice and receives it".format(agent_e.name(), str(mark_made)))
             total_allocation.allocate_slice(agent_e, other_slice)
 
             last_non_cutter = exclude_from_list(self._agents, [cutter, agent_e, agent_b])[0]
@@ -550,6 +546,14 @@ class Algorithm(object):
         """
         Implements the Cut-and-Choose protocol on the given agents and the cake residue, returning
         an allocation of slices.
+
+        This is an adapted implementation of `fairpy`'s `cut_and_choose.asymmetric_protocol`, modified to work with a
+        cake residue and to match the helper classes used here. This was chosen over using `fairpy`'s implementation
+        due to it working with a full cake rather than a residue, which impacts allocation as agents produce
+        different satisfaction values based on the cake area. This is farther amplified by the small size of the residue
+        which is left by the time this method is used in the algorithm (near the end).
+        Thus making `cut_and_choose.asymmetric_protocol` incompatible with our requirements.
+
         :param agent_a: agent 1 to allocate to
         :param agent_b: agent 2 to allocate to
         :param slices: residue slices of the cake

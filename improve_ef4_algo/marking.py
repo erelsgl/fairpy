@@ -2,37 +2,12 @@ from typing import *
 
 from agents import Agent, PiecewiseConstantAgent
 from improve_ef4_algo.allocation import CakeAllocation, Marking
-from improve_ef4_algo.cake import CakeSlice, Mark
-from improve_ef4_algo.preference import find_favorite_slice, Preferences, AgentPreference
-
-
-def marked_slices_by_agents(marks: List[Mark]) -> Dict[Agent, List[CakeSlice]]:
-    """
-    Groups all slices by the agent which marked them, as defined by `mark.agent`.
-    :param marks: marks to group
-    :return: dictionary mapping agents to a lists of slices they marked.
-
-    >>> s = CakeSlice(0, 1)
-    >>> a = PiecewiseConstantAgent([33, 11, 1], "agent")
-    >>> a2 = PiecewiseConstantAgent([33, 11, 66], "agent")
-    >>> m = [Mark(a, s, 0.1), Mark(a2, s, 0.2)]
-    >>> res = marked_slices_by_agents(m)
-    >>> res[a][0] == s
-    True
-    >>> res[a2][0] == s
-    True
-    """
-    agents_to_marks = {}
-    for mark in marks:
-        if mark.agent not in agents_to_marks:
-            agents_to_marks[mark.agent] = []
-        if mark.slice not in agents_to_marks[mark.agent]:
-            agents_to_marks[mark.agent].append(mark.slice)
-    return agents_to_marks
+from improve_ef4_algo.cake import CakeSlice
+from improve_ef4_algo.preference import find_favorite_slice, Preferences
 
 
 def mark_by_preferences(agent: Agent, preferences: Preferences, marking: Marking,
-                        excluded_agents: List[Agent]) -> Mark:
+                        excluded_agents: List[Agent]) -> Tuple[CakeSlice, float]:
     """
     Marks slices by the preference of agent and conflicts it has with other agents,
     as defined by the envy-free algorithm's core protocol lines 7-12 regarding 
@@ -41,56 +16,55 @@ def mark_by_preferences(agent: Agent, preferences: Preferences, marking: Marking
     :param preferences: preferences for all agents participating
     :param marking: marking context
     :param excluded_agents: agents whose preferences should be ignored
-    :return: mark made
+    :return: mark made, as tuple of slice marked and marking position
 
     >>> s = CakeSlice(0, 1)
     >>> s2 = CakeSlice(1, 1.5)
     >>> s3 = CakeSlice(1.7, 2)
     >>> a = PiecewiseConstantAgent([33, 11, 1], "agent")
     >>> a2 = PiecewiseConstantAgent([3, 11, 1], "agent2")
-    >>> p = AgentPreference(a, s, s2, s3)
-    >>> p2 = AgentPreference(a2, s, s2, s3)
+    >>> p = s, s2, s3
+    >>> p2 = s, s2, s3
     >>> prefs = Preferences({a: p, a2: p2})
     >>> marking = Marking()
-    >>> mark = mark_by_preferences(a, prefs, marking, [])
-    >>> mark.agent == a
-    True
-    >>> mark.slice == s
+    >>> marked_slice, mark = mark_by_preferences(a, prefs, marking, [])
+    >>> marked_slice == s
     True
     """
     excluded_agents_for_conflicts = [agent]
     excluded_agents_for_conflicts.extend(excluded_agents)
 
-    preference = preferences.try_get_preference_for_agent(agent)
-    favorite = preference.first
-    conflicts_for_primary = preferences.find_agents_with_preference_for(favorite,
-                                                                        exclude_agents=excluded_agents_for_conflicts)
+    preference = preferences.get_preference_for_agent(agent)
+    favorite = preference[0]
+    conflicts_for_primary_first, _ = preferences\
+        .find_agents_with_preference_for(favorite, exclude_agents=excluded_agents_for_conflicts)
 
     # line 8 if, not talking about lack of conflict for primary slice...
     # if conflicts_for_primary.primary_count == 0:
     #   return
 
-    second_favorite = preference.second
-    conflicts_for_secondary = preferences.find_agents_with_preference_for(second_favorite,
-                                                                          exclude_agents=excluded_agents_for_conflicts)
+    second_favorite = preference[1]
+    second_favorite_conflicts_first, second_favorite_conflicts_second = preferences \
+        .find_agents_with_preference_for(second_favorite, exclude_agents=excluded_agents_for_conflicts)
 
-    if conflicts_for_secondary.count == 0:
+    if len(second_favorite_conflicts_first) == 0 and len(second_favorite_conflicts_second) == 0:
         # mark primary so it is equal to secondary in value
-        return marking.mark_to_equalize_value(agent, favorite, second_favorite)
+        return favorite, marking.mark_to_equalize_value(agent, favorite, second_favorite)
 
-    if conflicts_for_secondary.primary_count == 0 and conflicts_for_secondary.secondary_count == 1:
-        competitor_preference = conflicts_for_secondary.preferences[0]
-        exclude = [competitor_preference.agent]
+    if len(second_favorite_conflicts_first) == 0 and len(second_favorite_conflicts_second) == 1:
+        competitor = second_favorite_conflicts_second[0]
+        competitor_preference = preferences.get_preference_for_agent(competitor)
+        exclude = [competitor]
         exclude.extend(excluded_agents)
-        competitor_primary_conflicts = preferences.find_agents_with_preference_for(competitor_preference.first,
-                                                                                   exclude_agents=exclude)
-        if conflicts_for_primary.primary_count == 1 and competitor_primary_conflicts.primary_count == 1:
+        competitor_primary_conflicts_first, _ = preferences.find_agents_with_preference_for(competitor_preference[0],
+                                                                                            exclude_agents=exclude)
+        if len(conflicts_for_primary_first) == 1 and len(competitor_primary_conflicts_first) == 1:
             # mark primary so it is equal to secondary in value
-            return marking.mark_to_equalize_value(agent, favorite, second_favorite)
+            return favorite, marking.mark_to_equalize_value(agent, favorite, second_favorite)
 
     # mark secondary so it is equal to third preference in value
-    third_favorite = preference.third
-    return marking.mark_to_equalize_value(agent, second_favorite, third_favorite)
+    third_favorite = preference[2]
+    return second_favorite, marking.mark_to_equalize_value(agent, second_favorite, third_favorite)
 
 
 def allocate_by_rightmost_to_agent(agent: Agent, marked_slices: List[CakeSlice], allocation: CakeAllocation,
@@ -133,36 +107,33 @@ def allocate_by_rightmost_to_agent(agent: Agent, marked_slices: List[CakeSlice],
     >>> {agent.name(): slice for agent, slice in allocated.items()}
     {'agent': (0,0.5), 'agent2': (1,1.25)}
     """
-    marks = marking.rightmost_marks()
+    second_rightmost1_agent, second_rightmost1_pos = marking.second_rightmost_mark(marked_slices[0])
+    second_rightmost2_agent, second_rightmost2_pos = marking.second_rightmost_mark(marked_slices[1])
 
-    second_rightmost1 = marking.second_rightmost_mark(marks[0].slice)
-    second_rightmost2 = marking.second_rightmost_mark(marks[1].slice)
-
-    sliced1 = marked_slices[0].slice_at(second_rightmost1.mark_position)
-    sliced2 = marked_slices[1].slice_at(second_rightmost2.mark_position)
+    sliced1 = marked_slices[0].slice_at(second_rightmost1_pos)
+    sliced2 = marked_slices[1].slice_at(second_rightmost2_pos)
     allocation.set_slice_split(marked_slices[0], list(sliced1))
     allocation.set_slice_split(marked_slices[1], list(sliced2))
 
     slice_option1 = sliced1[0]
     slice_option2 = sliced2[0]
     favorite = find_favorite_slice(agent, [slice_option1, slice_option2])
-    mark_on_favorite = second_rightmost1 if favorite == slice_option1 else second_rightmost2
+    marking_agent_on_fav = second_rightmost1_agent if favorite == slice_option1 else second_rightmost2_agent
     other_slice = slice_option1 if favorite == slice_option2 else slice_option2
 
     allocation.allocate_slice(agent, favorite)
-    allocation.allocate_slice(mark_on_favorite.agent, other_slice)
+    allocation.allocate_slice(marking_agent_on_fav, other_slice)
 
-    return {agent: favorite, mark_on_favorite.agent: other_slice}, [sliced1, sliced2]
+    return {agent: favorite, marking_agent_on_fav: other_slice}, [sliced1, sliced2]
 
 
-def allocate_all_partials_by_marks(rightmost_marks: List[Mark], allocation: CakeAllocation,
+def allocate_all_partials_by_marks(allocation: CakeAllocation,
                                    marking: Marking) -> Tuple[Dict[Agent, CakeSlice], List[List[CakeSlice]]]:
     """
     Cuts all marked slices until the second-rightmost mark, and for each, the left slice
     (until that mark) is given to the agent who made the rightmost mark on the full slice.
     As defined in envy-free algorithm's main protocol line 18.
 
-    :param rightmost_marks: rightmost marks on the slices
     :param allocation: allocation scope
     :param marking: marking context
     :return: a tuple composed of a map of agents to allocated slices, and the sliced parts
@@ -178,7 +149,7 @@ def allocate_all_partials_by_marks(rightmost_marks: List[Mark], allocation: Cake
     >>> m3 = marking.mark(a2, s, 2.5)
     >>> m4 = marking.mark(a2, s2, 5)
     >>> alloc = CakeAllocation([s, s2, s3])
-    >>> allocated, sliced = allocate_all_partials_by_marks([m1, m4], alloc, marking)
+    >>> allocated, sliced = allocate_all_partials_by_marks(alloc, marking)
     >>> sliced
     [[(0,0.25), (0.25,1)], [(1,1.25), (1.25,1.5)]]
     >>> {agent.name(): slice for agent, slice in allocated.items()}
@@ -186,17 +157,16 @@ def allocate_all_partials_by_marks(rightmost_marks: List[Mark], allocation: Cake
     """
     allocated_slices = {}
     sliced_parts = []
-    for mark in rightmost_marks:
-        slice = mark.slice
+    for agent, slices in marking.rightmost_marks_by_agents().items():
+        for slice in slices:
+            _, second_rightmost_pos = marking.second_rightmost_mark(slice)
 
-        second_rightmost = marking.second_rightmost_mark(slice)
+            sliced = slice.slice_at(second_rightmost_pos)
+            allocation.set_slice_split(slice, sliced)
+            sliced_parts.append(sliced)
 
-        sliced = slice.slice_at(second_rightmost.mark_position)
-        allocation.set_slice_split(slice, sliced)
-        sliced_parts.append(sliced)
-
-        allocation.allocate_slice(mark.agent, sliced[0])
-        allocated_slices[mark.agent] = sliced[0]
+            allocation.allocate_slice(agent, sliced[0])
+            allocated_slices[agent] = sliced[0]
 
     return allocated_slices, sliced_parts
 

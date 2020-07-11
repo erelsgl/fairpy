@@ -1,8 +1,7 @@
-import itertools
-from typing import List, Set, Optional
+from typing import List, Set, Optional, Tuple, Dict
 
 from agents import PiecewiseConstantAgent, Agent
-from improve_ef4_algo.cake import CakeSlice, Mark
+from improve_ef4_algo.cake import CakeSlice
 from improve_ef4_algo.util import exclude_from_list
 
 
@@ -10,48 +9,39 @@ class Marking(object):
     """
     Represents a marking-context. Stores information about marks made
     by agents.
+
+    Allows making marks by different input, or querying information about those marks.
+    Each mark is identified by a position and has associated agent, which made the mark,
+    and an associated slice, which the mark was made on.
     """
 
     def __init__(self):
         self._slice_to_marks = {}
 
-    @property
-    def marks(self) -> List[Mark]:
-        """
-        Gets the marks made on all the slices.
-        :return: list containing all the marks
-        """
-        return list(itertools.chain.from_iterable(self._slice_to_marks.values()))
-
-    def mark(self, agent: Agent, slice: CakeSlice, desired_value: float) -> Mark:
+    def mark(self, agent: Agent, slice: CakeSlice, desired_value: float) -> float:
         """
         Adds a mark, made by `agent` on a given slice.
         :param agent: agent making the mark
         :param slice: slice to mark
         :param desired_value: satisfaction value wanted by agent, such that
             slice.start -> mark position = `desired_value.
-        :return: `Mark` instance representing the mark made.
+        :return: mark position
 
         >>> s = CakeSlice(0, 2)
         >>> a = PiecewiseConstantAgent([33, 33], "agent")
         >>> m = Marking().mark(a, s, 33)
-        >>> m.slice == s
-        True
-        >>> m.agent == a
-        True
-        >>> m.mark_position
+        >>> m
         1.0
         """
         position = agent.mark(slice.start, desired_value)
-        mark = Mark(agent, slice, position)
 
         if slice not in self._slice_to_marks:
             self._slice_to_marks[slice] = []
-        self._slice_to_marks[slice].append(mark)
+        self._slice_to_marks[slice].append((agent, position))
 
-        return mark
+        return position
 
-    def mark_to_equalize_value(self, agent: Agent, slice: CakeSlice, value_slice: CakeSlice) -> Mark:
+    def mark_to_equalize_value(self, agent: Agent, slice: CakeSlice, value_slice: CakeSlice) -> float:
         """
         Adds a mark, made by `agent` on a given slice, such that agent has the same satisfaction
         from slice.start -> mark position as they do with `value_slice`.
@@ -59,68 +49,70 @@ class Marking(object):
         :param slice: slice to mark
         :param value_slice: comparision slice whose satisfaction value for agent indicates
             the wanted satisfaction value for agent out of the new marked slice
-        :return: `Mark` instance representing the mark made.
+        :return: mark position.
 
         >>> s = CakeSlice(1, 2)
         >>> s2 = CakeSlice(0.5, 1)
         >>> a = PiecewiseConstantAgent([33, 33], "agent")
         >>> m = Marking().mark_to_equalize_value(a, s, s2)
-        >>> m.slice == s
-        True
-        >>> m.agent == a
-        True
-        >>> m.mark_position
+        >>> m
         1.5
         """
         value = value_slice.value_according_to(agent)
         return self.mark(agent, slice, value)
 
-    def marks_on_slice(self, slice: CakeSlice) -> List[Mark]:
+    def marks_on_slice(self, slice: CakeSlice) -> List[Tuple[Agent, float]]:
         """
         Gets all the marks made on the given slice.
         :param slice: slice whose marks to return
-        :return: list of marks made on `slice`
+        :return: list of marks made on `slice`, with each mark being a tuple of agent who made the
+            mark and position of mark
 
         >>> s = CakeSlice(1, 2)
         >>> a = PiecewiseConstantAgent([33, 33], "agent")
         >>> marking = Marking()
         >>> m = marking.mark(a, s, 11)
         >>> m2 = marking.mark(a, s, 22)
-        >>> all([mark in [m,m2] for mark in marking.marks_on_slice(s)])
+        >>> all([mark in [(a,m),(a,m2)] for mark in marking.marks_on_slice(s)])
         True
         """
-        return sorted(self._slice_to_marks[slice], key=lambda m: m.mark_position)
+        return sorted([m for m in self._slice_to_marks[slice]], key=lambda m: m[1])
 
-    def rightmost_marks(self) -> List[Mark]:
+    def rightmost_marks_by_agents(self) -> Dict[Agent, List[CakeSlice]]:
         """
         Gets the rightmost marks on all the marked slices, which are the marks
-        closes to the end of each slide.
-        :return: list of rightmost marks.
+        closes to the end of each slide. Grouped by agents who made the marks and the slices which were marked.
+        
+        :return: dictionary mapping agents to a lists of slices they marked.
 
         >>> s = CakeSlice(1, 2)
         >>> a = PiecewiseConstantAgent([33, 33], "agent")
+        >>> a2 = PiecewiseConstantAgent([33, 33], "agent")
         >>> marking = Marking()
         >>> m = marking.mark(a, s, 11)
-        >>> m2 = marking.mark(a, s, 22)
-        >>> len(marking.rightmost_marks())
+        >>> m2 = marking.mark(a2, s, 22)
+        >>> len(marking.rightmost_marks_by_agents())
         1
-        >>> marking.rightmost_marks()[0] == m2
+        >>> list(marking.rightmost_marks_by_agents().keys())[0] == a2
         True
         """
-        rightmost_marks = []
+        rightmost_marks = {}
         for slice, marks in self._slice_to_marks.items():
             if len(marks) == 0:
                 continue
-            rightmost = max(marks, key=lambda m: m.mark_position)
-            rightmost_marks.append(rightmost)
+            rightmost_agent, rightmost = max(marks, key=lambda m: m[1])
+
+            if rightmost_agent not in rightmost_marks:
+                rightmost_marks[rightmost_agent] = []
+            rightmost_marks[rightmost_agent].append(slice)
 
         return rightmost_marks
 
-    def second_rightmost_mark(self, marked_slice: CakeSlice) -> Mark:
+    def second_rightmost_mark(self, marked_slice: CakeSlice) -> Tuple[Agent, float]:
         """
         Gets the second rightmost mark on the given slice.
         :param marked_slice: slice to find the second rightmost mark on.
-        :return: second rightmost mark on the given slice.
+        :return: second rightmost mark on the given slice, as tuple of marking agent and position
         :throws ValueError: if there is only one mark on the given slice
 
         >>> s = CakeSlice(1, 2)
@@ -128,7 +120,7 @@ class Marking(object):
         >>> marking = Marking()
         >>> m = marking.mark(a, s, 11)
         >>> m2 = marking.mark(a, s, 22)
-        >>> marking.second_rightmost_mark(s) == m
+        >>> marking.second_rightmost_mark(s) == (a, m)
         True
         """
         rightmost_marks = self.marks_on_slice(marked_slice)
@@ -140,6 +132,14 @@ class Marking(object):
 class CakeAllocation(object):
     """
     Represents allocations of cake slices to agents.
+
+    This is the main supporting class for the algorithm, as it allows tracking the cake status,
+    including what slices exist, and which slice is allocated to whom.
+
+    Given a list of several slices, an instance of this looks at those slices as the entire cake,
+    like it is a new cake which is untouched, making all slices 'complete' and unallocated.
+    Throughout usage, an instance will keep track of what was done with its slices, i.e. who
+    they were allocated to, were they cut and were they marked.
     """
 
     def __init__(self, all_slices: List[CakeSlice]):

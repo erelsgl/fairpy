@@ -3,47 +3,14 @@ from typing import *
 from agents import Agent, PiecewiseConstantAgent
 
 
-class Mark(object):
-    """
-    Represents a mark by an agent on a slice.
-    Used to indicate where the agent would cut the slice in the future
-    to achieve equal satisfaction.
-    """
-
-    def __init__(self, agent: Agent, slice: 'CakeSlice', mark_position: float):
-        self._agent = agent
-        self._slice = slice
-        self._mark_position = mark_position
-
-    @property
-    def agent(self) -> Agent:
-        """
-        Gets the agent who made this mark.
-        :return: agent who made the mark
-        """
-        return self._agent
-
-    @property
-    def slice(self) -> 'CakeSlice':
-        """
-        Gets the slice this mark was made on
-        :return: slice this mark is on
-        """
-        return self._slice
-
-    @property
-    def mark_position(self) -> float:
-        """
-        Gets the position on the slice where this mark was made
-        :return: position on the slice
-        """
-        return self._mark_position
-
-
 class CakeSlice(object):
     """
     Represents a slice of cake. Can be anywhere between the full cake,
     to 1/20 or smaller out of the full cake.
+
+    The slice is represented on a number axis from 0 until an unspecified limit.
+    Where `slice.start` is always smaller than `slice.end`.
+    Thus, several slices can be seen as a continuation of one-another when `slice1.end == slice2.start`.
     """
 
     def __init__(self, start, end):
