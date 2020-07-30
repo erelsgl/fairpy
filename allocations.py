@@ -116,7 +116,10 @@ class Allocation:
         for i in range(len(self.pieces)):
             agent = self.agents[i]
             piece = self.pieces[i]
-            s += "> {} gets {} with value {}\n".format(agent.name(), round_piece(piece, digits=3), round(agent.piece_value(piece),3))
+            if piece is None:
+                s += "> {} gets {} with value {}\n".format(agent.name(), None, round(agent.piece_value(piece),3))
+            else:
+                s += "> {} gets {} with value {}\n".format(agent.name(), round_piece(piece, digits=3), round(agent.piece_value(piece),3))
         return s
 
 
