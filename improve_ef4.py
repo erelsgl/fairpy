@@ -1,3 +1,16 @@
+"""
+Implements an envy-free cake-cutting protocol for 4 agents.
+
+Reference:
+
+    Georgios Amanatidis,  George Christodoulou,  John Fearnley,  Evangelos Markakis,  Christos-Alexandros Psomas, Eftychia Vakaliou (2018).
+    ["An improved envy-free cake cutting protocol for four agents"](https://arxiv.org/abs/1807.00317)
+    Proceedings of SAGT 2018, 87--99.
+
+Programmer: Shir Fishbain
+Since: 2020-07
+"""
+
 import logging
 from typing import List
 

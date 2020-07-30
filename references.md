@@ -44,6 +44,12 @@ Proceedings of AAAI 2011.
 *Algorithms 1 and 2*. 
   * [optimal_ef_cake_cut.py](optimal_ef_cake_cut.py) by Tom Goldenberg.
 
+* Georgios Amanatidis,  George Christodoulou,  John Fearnley,  Evangelos Markakis,  Christos-Alexandros Psomas, Eftychia Vakaliou (2018).
+["An improved envy-free cake cutting protocol for four agents"](https://arxiv.org/abs/1807.00317)
+Proceedings of SAGT 2018, 87--99.
+*All algorithms.*
+  * [improve_ef4.py](improve_ef4.py) by Shir Fishbain.
+
 
 ## Future work
 
@@ -53,11 +59,6 @@ Proceedings of AAAI 2011.
 ["Truth, justice, and cake cutting"](http://procaccia.info/papers/justruth.geb.pdf). 
 Games and Economic Behavior. 77 (1): 284–297. 
 *Mechanism 1 (in section 3), and the algorithm described in section 4*.
-
-* Georgios Amanatidis,  George Christodoulou,  John Fearnley,  Evangelos Markakis,  Christos-Alexandros Psomas, Eftychia Vakaliou (2018).
-["An improved envy-free cake cutting protocol for four agents"](https://arxiv.org/abs/1807.00317)
-Proceedings of SAGT 2018, 87--99.
-*All algorithms.*
   
 * Haris Aziz, Chun Ye (2013):
 ["Cake cutting algorithms for piecewise constant and piecewise uniform valuations"](https://arxiv.org/abs/1307.2908). 
