@@ -418,7 +418,7 @@ class Algorithm(object):
 
         self._logger.info("{} has insignificant {}, with marks {}".format(agent_with_insignificant.name(),
                                                                           str(insignificant_slice),
-                                                                          str([mark.mark_position for mark in marks])))
+                                                                          str([mark[1] for mark in marks])))
         if len(marks) != 2:
             raise ValueError("Slice should have 2 marks")
         # find insignificant slice
@@ -426,7 +426,7 @@ class Algorithm(object):
         # B is allocated the slice
 
         agent_a = agent_with_insignificant
-        agent_b = [mark.agent for mark in marks if mark.agent != agent_a][0]
+        agent_b = [mark[0] for mark in marks if mark[0] != agent_a][0]
 
         self._logger.info("{} is allocated insignificant".format(agent_b.name()))
 
