@@ -12,8 +12,8 @@ Since: 2020-01
 
 from agents import *
 from allocations import *
+
 from typing import *
-from networkx import *
 import numpy as np
 
 import logging

@@ -8,8 +8,9 @@ Since: 2019-11
 """
 
 from agents import *
+import cut_and_choose
 
-import cut_and_choose, logging, sys
+import logging, sys
 
 cut_and_choose.logger.addHandler(logging.StreamHandler(sys.stdout))
 cut_and_choose.logger.setLevel(logging.INFO)

@@ -6,7 +6,9 @@ Since: 2019-12
 """
 
 from agents import *
-import socially_efficient_cake_divisions, logging, sys
+import socially_efficient_cake_divisions
+import logging, sys
+
 socially_efficient_cake_divisions.logger.addHandler(logging.StreamHandler(sys.stdout))
 socially_efficient_cake_divisions.logger.setLevel(logging.INFO)
 

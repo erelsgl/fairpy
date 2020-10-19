@@ -9,8 +9,9 @@ Since: 2020-01
 
 
 from agents import *
+import Deng_Qi_Saberi
 
-import Deng_Qi_Saberi, logging, sys
+import logging, sys
 
 Deng_Qi_Saberi.logger.addHandler(logging.StreamHandler(sys.stdout))
 Deng_Qi_Saberi.logger.setLevel(logging.INFO)

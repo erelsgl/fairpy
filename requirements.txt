@@ -5,4 +5,5 @@ cvxpy
 networkx
 matplotlib
 pytest
+repackage
 git+git://github.com/trzemecki/dicttools.git

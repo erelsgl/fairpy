@@ -9,8 +9,8 @@ Since: 2019-12
 """
 
 from agents import *
-
-import time_auction_approximation, logging, sys
+import time_auction_approximation
+import logging, sys
 
 logger = logging.getLogger(__name__)
 

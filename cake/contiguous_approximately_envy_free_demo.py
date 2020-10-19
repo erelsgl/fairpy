@@ -9,9 +9,9 @@ Since: 2020-03
 """
 
 from agents import *
+import contiguous_approximately_envy_free
 
-
-import contiguous_approximately_envy_free, logging, sys
+import logging, sys
 
 contiguous_approximately_envy_free.logger.addHandler(logging.StreamHandler(sys.stdout))
 contiguous_approximately_envy_free.logger.setLevel(logging.INFO)

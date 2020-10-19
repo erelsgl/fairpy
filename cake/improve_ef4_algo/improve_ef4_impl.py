@@ -4,11 +4,9 @@ from typing import *
 from agents import PiecewiseConstantAgent, Agent
 from improve_ef4_algo.allocation import CakeAllocation
 from improve_ef4_algo.cake import CakeSlice, full_cake_slice, slice_equally
-from improve_ef4_algo.domination import get_most_satisfied_agent, get_least_satisfied_agent, \
-    is_dominated_by_all
+from improve_ef4_algo.domination import get_most_satisfied_agent, get_least_satisfied_agent, is_dominated_by_all
 from improve_ef4_algo.gain import allocation_with_lowest_gain, get_agent_gain
-from improve_ef4_algo.marking import mark_by_preferences, \
-    allocate_by_rightmost_to_agent, allocate_all_partials_by_marks
+from improve_ef4_algo.marking import mark_by_preferences, allocate_by_rightmost_to_agent, allocate_all_partials_by_marks
 from improve_ef4_algo.preference import find_favorite_slice, get_preferences_for_agents
 from improve_ef4_algo.util import exclude_from_list
 
