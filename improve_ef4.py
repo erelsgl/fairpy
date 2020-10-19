@@ -46,3 +46,4 @@ def improve_ef4_protocol(agents: List[Agent]) -> Allocation:
         allocation.set_piece(i, [(s.start, s.end) for s in allocated_slices])
 
     return allocation
+
