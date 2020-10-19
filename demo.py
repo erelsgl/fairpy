@@ -8,7 +8,7 @@ Since: 2020-10
 """
 
 
-from cake.agents import *
+from cake.agents import PiecewiseUniformAgent, PiecewiseConstantAgent
 from cake import cut_and_choose, last_diminisher
 
 import logging, sys

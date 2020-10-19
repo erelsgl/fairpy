@@ -9,7 +9,9 @@ For each algorithm in file `x.py` there is a demo program `x_demo.py`. For examp
     python3 cut_and_choose_demo.py
     python3 last_diminisher_demo.py
     
-See [references.md](references.md) for a complete list of algorithms and their implementation status. 
+For a complete list of algorithms and their implementation status, see:
+
+* [Cake-cutting references](cake/references.md)  
      
 ![Tox result](https://github.com/erelsgl/fairpy/workflows/tox/badge.svg)
 
