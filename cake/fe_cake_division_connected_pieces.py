@@ -6,8 +6,8 @@ Programmer: Ori Zitzer
 Since: 2019-12
 """
 
-from agents import *
-from allocations import *
+from cake.agents import *
+from cake.allocations import *
 import numpy as np
 import random
 import logging
