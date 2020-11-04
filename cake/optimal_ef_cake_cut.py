@@ -8,10 +8,13 @@ Algorithm #2 : opt_piecewise_linear
 Programmer: Tom Goldenberg
 Since: 2020-05
 """
+
+from cake.agents import *
+from cake.allocations import *
+
 import operator
 from logging import Logger
-from agents import *
-from allocations import *
+
 import logging
 import cvxpy
 import numpy as np

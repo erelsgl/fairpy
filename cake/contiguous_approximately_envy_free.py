@@ -11,8 +11,8 @@ Programmer: Shalev Goldshtein (Algorithm 1)
 Since: 2020-03
 """
 
-from allocations import *
-from agents import *
+from cake.allocations import *
+from cake.agents import *
 
 import logging
 logger = logging.getLogger(__name__)

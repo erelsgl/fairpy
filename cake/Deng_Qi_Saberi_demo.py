@@ -9,7 +9,7 @@ Since: 2020-01
 
 
 from agents import *
-import Deng_Qi_Saberi
+from cake import Deng_Qi_Saberi
 
 import logging, sys
 

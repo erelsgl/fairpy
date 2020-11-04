@@ -9,10 +9,10 @@ Since: 2019-11
 import sys
 if __name__ == "__main__" and (len(sys.argv) < 2 or sys.argv[1] != "quiet"):
 
-    from agents import *
-    import matplotlib.pyplot as pyplot
+    from cake.agents import *
+    from cake import partition_simplex
 
-    import partition_simplex
+    import matplotlib.pyplot as pyplot
     import logging, sys
     partition_simplex.logger.addHandler(logging.StreamHandler(sys.stdout))
     partition_simplex.logger.setLevel(logging.INFO)

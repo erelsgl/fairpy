@@ -6,8 +6,10 @@ Programmer: Tom Goldenberg
 Since: 2020-06
 """
 
-from agents import *
-import optimal_ef_cake_cut, logging, sys
+from cake.agents import *
+from cake import optimal_ef_cake_cut
+
+import logging, sys
 
 optimal_ef_cake_cut.logger.addHandler(logging.StreamHandler(sys.stdout))
 optimal_ef_cake_cut.logger.setLevel(logging.INFO)

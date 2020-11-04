@@ -5,8 +5,9 @@ Programmer: Jonathan Diamant
 Since: 2019-12
 """
 
-from agents import *
-import socially_efficient_cake_divisions
+from cake.agents import *
+from cake import socially_efficient_cake_divisions
+
 import logging, sys
 
 socially_efficient_cake_divisions.logger.addHandler(logging.StreamHandler(sys.stdout))

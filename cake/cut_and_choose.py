@@ -10,8 +10,8 @@ Programmer: Erel Segal-Halevi
 Since: 2019-11
 """
 
-from agents import *
-from allocations import *
+from cake.agents import *
+from cake.allocations import *
 from typing import *
 
 import logging

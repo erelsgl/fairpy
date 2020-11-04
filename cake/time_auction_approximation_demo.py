@@ -8,10 +8,10 @@ Programmers: Naama Berman and Yonatan Lifshitz
 Since: 2019-12
 """
 
-from agents import *
-import time_auction_approximation
-import logging, sys
+from cake.agents import *
+from cake import time_auction_approximation
 
+import logging, sys
 logger = logging.getLogger(__name__)
 
 time_auction_approximation.logger.addHandler(logging.StreamHandler(sys.stdout))

@@ -5,6 +5,7 @@ Algorithm #1 : ALG
 Programmer: Ori Zitzer
 Since: 2019-12
 """
+
 from agents import *
 from allocations import *
 import numpy as np

@@ -7,9 +7,10 @@ Programmer: Erel Segal-Halevi
 Since: 2019-12
 """
 
-from agents import *
+from cake.agents import *
+from cake import last_diminisher
 
-import last_diminisher, logging, sys
+import logging, sys
 
 last_diminisher.logger.addHandler(logging.StreamHandler(sys.stdout))
 last_diminisher.logger.setLevel(logging.INFO)

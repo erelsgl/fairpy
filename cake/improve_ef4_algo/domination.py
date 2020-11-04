@@ -1,8 +1,8 @@
 from typing import List
 
-from agents import Agent, PiecewiseConstantAgent
-from improve_ef4_algo.allocation import CakeAllocation
-from improve_ef4_algo.cake import CakeSlice
+from cake.agents import Agent, PiecewiseConstantAgent
+from cake.improve_ef4_algo.allocation import CakeAllocation
+from cake.improve_ef4_algo.cake import CakeSlice
 
 
 def value_for_slices(agent: Agent, slices: List[CakeSlice]) -> float:

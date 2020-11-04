@@ -9,7 +9,7 @@ Since: 2019-11
 # repackage.up()
 
 from typing import *
-from agents import Agent, PiecewiseUniformAgent
+from cake.agents import Agent, PiecewiseUniformAgent
 
 def round_piece(piece:list, digits:int):
     """

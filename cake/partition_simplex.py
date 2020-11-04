@@ -17,9 +17,9 @@ Programmer: Erel Segal-Halevi
 Since: 2019-11
 """
 
-from agents import *
-import matplotlib.pyplot as pyplot
+from cake.agents import *
 
+import matplotlib.pyplot as pyplot
 import time, logging
 logger = logging.getLogger(__name__)
 

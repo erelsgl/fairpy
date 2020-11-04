@@ -12,15 +12,14 @@ References:
 Programmers: Naama Berman and Yonatan Lifshitz
 Since: 2019-12
 """
-import random
 
-from agents import *
-from allocations import *
+from cake.agents import *
+from cake.allocations import *
+
+import random, logging
 from typing import *
 from networkx import *
 from math import *
-
-import logging
 
 logger = logging.getLogger(__name__)
 

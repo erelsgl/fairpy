@@ -10,8 +10,7 @@ Programmer: Guy Wolf
 Since: 2020-2
 """
 
-from agents import *
-from allocations import *
+from cake.allocations import *
 from typing import *
 
 from itertools import permutations

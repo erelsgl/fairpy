@@ -12,10 +12,10 @@ Programmer: Erel Segal-Halevi
 Since: 2019-12
 """
 
-from agents import *
-from allocations import *
-from typing import *
+from cake.agents import *
+from cake.allocations import *
 
+from typing import *
 import logging
 logger = logging.getLogger(__name__)
 

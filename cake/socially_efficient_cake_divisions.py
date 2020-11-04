@@ -11,11 +11,10 @@ Programmer: Jonathan Diamant
 Since: 2019-12
 """
 
-from agents import *
-from allocations import *
-import sys
+from cake.agents import *
+from cake.allocations import *
 
-import logging
+import sys, logging
 logger = logging.getLogger(__name__)
 
 def discretization_procedure(agents: List[Agent], epsilon:float):

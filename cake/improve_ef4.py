@@ -14,9 +14,9 @@ Since: 2020-07
 import logging
 from typing import List
 
-import improve_ef4_algo.improve_ef4_impl as impl
-from agents import Agent
-from allocations import Allocation
+import cake.improve_ef4_algo.improve_ef4_impl as impl
+from cake.agents import Agent
+from cake.allocations import Allocation
 
 logger = logging.getLogger(__name__)
 

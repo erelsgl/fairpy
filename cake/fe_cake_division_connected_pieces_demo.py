@@ -8,9 +8,11 @@ Since: 2020-1
 """
 
 
-from agents import *
-from fe_cake_division_connected_pieces import ALG ,efCheck
-import fe_cake_division_connected_pieces ,logging, sys
+from cake.agents import *
+from cake.fe_cake_division_connected_pieces import ALG ,efCheck
+from cake import fe_cake_division_connected_pieces
+
+import logging, sys
 
 fe_cake_division_connected_pieces.logger.addHandler(logging.StreamHandler(sys.stdout))
 fe_cake_division_connected_pieces.logger.setLevel(logging.INFO)

@@ -5,9 +5,10 @@ Programmer: Guy Wolf
 Since: 2020-2
 """
 
-from agents import *
+from cake.agents import *
+from cake import piecewise_linear_cake_division
 
-import piecewise_linear_cake_division, logging, sys
+import logging, sys
 
 piecewise_linear_cake_division.logger.addHandler(logging.StreamHandler(sys.stdout))
 piecewise_linear_cake_division.logger.setLevel(logging.INFO)
