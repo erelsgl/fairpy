@@ -327,10 +327,10 @@ def agentNormalize(agents: List[Agent])->List[Agent]:
     >>> Hanna = PiecewiseConstantAgent([3, 3, 3, 3], name="Hanna")
     >>> agents = [Alice, Hanna]
     >>> print("{} is {}".format(agents[0].name(), type(agents[0])))
-    Alice is <class 'agents.PiecewiseConstantAgent'>
+    Alice is <class 'cake.agents.PiecewiseConstantAgent'>
     >>> agents = agentNormalize(agents)
     >>> print("{} is {}".format(agents[0].name(), type(agents[0])))
-    Alice is <class 'agents.PiecewiseConstantAgent1Sgement'>
+    Alice is <class 'cake.agents.PiecewiseConstantAgent1Sgement'>
 
 
     """
