@@ -508,11 +508,6 @@ class BinaryAgent(Agent):
 
 
 
-def plural(i: int)->str:
-    return " " if i==1 else "s"
-
-
-
 if __name__ == "__main__":
     import doctest
     (failures,tests) = doctest.testmod(report=True)
