@@ -45,7 +45,7 @@ class Agent(ABC):
         self.duplicity = duplicity
 
     def name(self):
-        if hasattr(self, 'my_name') and self._name is not None:
+        if hasattr(self, '_name') and self._name is not None:
             return self._name
         else:
             return "Anonymous"
