@@ -23,11 +23,11 @@ class Agent(ABC):
 
     def __init__(self, name:str=None):
         if name is not None:
-            self.my_name = name
+            self._name = name
 
     def name(self):
-        if hasattr(self, 'my_name') and self.my_name is not None:
-            return self.my_name
+        if hasattr(self, 'my_name') and self._name is not None:
+            return self._name
         else:
             return "Anonymous"
 
@@ -116,9 +116,9 @@ class PiecewiseConstantAgent1Sgement(Agent):
         self.total_value_cache = sum(agent.values)
 
     def __repr__(self):
-        return "{} is a piecewise-constant agent with values {} and total value={}".format(self.my_name,
-                                                                                               self.values,
-                                                                                               self.total_value_cache)
+        return "{} is a piecewise-constant agent with values {} and total value={}".format(self._name,
+                                                                                           self.values,
+                                                                                           self.total_value_cache)
     def total_value(self):
         return self.total_value_cache
 
@@ -249,7 +249,7 @@ class PiecewiseConstantAgent(Agent):
         self.total_value_cache = sum(values)
 
     def __repr__(self):
-        return "{} is a piecewise-constant agent with values {} and total value={}".format(self.my_name, self.values, self.total_value_cache)
+        return "{} is a piecewise-constant agent with values {} and total value={}".format(self._name, self.values, self.total_value_cache)
 
     def total_value(self):
         return self.total_value_cache
@@ -381,7 +381,7 @@ class PiecewiseUniformAgent(Agent):
         self.total_value_cache = sum([region[1]-region[0] for region in desired_regions])
 
     def __repr__(self):
-        return "{} is a piecewise-uniform agent with desired regions {} and total value={}".format(self.my_name, self.desired_regions, self.total_value_cache)
+        return "{} is a piecewise-uniform agent with desired regions {} and total value={}".format(self._name, self.desired_regions, self.total_value_cache)
 
     def total_value(self):
         return self.total_value_cache
@@ -501,7 +501,7 @@ class PiecewiseConstantAgentNormalized(Agent):
         self.normal = 1 / self.total_value_cache
 
     def __repr__(self):
-        return "{} is a piecewise-constant agent with values {} (((NORMALIZED)))".format(self.my_name, self.values)
+        return "{} is a piecewise-constant agent with values {} (((NORMALIZED)))".format(self._name, self.values)
 
     def total_value(self):
         return self.total_value_cache
@@ -625,7 +625,7 @@ class PiecewiseConstantAgentNormalized(Agent):
         self.normal = 1 / self.total_value_cache
 
     def __repr__(self):
-        return "{} is a piecewise-constant agent with values {} (((NORMALIZED)))".format(self.my_name, self.values)
+        return "{} is a piecewise-constant agent with values {} (((NORMALIZED)))".format(self._name, self.values)
 
     def total_value(self):
         return self.total_value_cache
@@ -781,7 +781,7 @@ class PiecewiseLinearAgent(Agent):
         self.total_value_cache = sum(values)
 
     def __repr__(self):
-        return "{} is a piecewise-linear agent with values {} and total value={}".format(self.my_name, self.values,
+        return "{} is a piecewise-linear agent with values {} and total value={}".format(self._name, self.values,
                                                                                          self.total_value_cache)
 
     def total_value(self):

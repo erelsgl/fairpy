@@ -38,15 +38,15 @@ class Agent(ABC):
         :param duplicity [optional]: the number of agent/s with the same valuation function.
         """
         if name is not None:
-            self.my_name = name
+            self._name = name
         self.desired_items_list = sorted(desired_items)
         self.desired_items = set(desired_items)
         self.total_value_cache = self.value(self.desired_items)
         self.duplicity = duplicity
 
     def name(self):
-        if hasattr(self, 'my_name') and self.my_name is not None:
-            return self.my_name
+        if hasattr(self, 'my_name') and self._name is not None:
+            return self._name
         else:
             return "Anonymous"
 
