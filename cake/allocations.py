@@ -1,38 +1,33 @@
+
 """
-Defines cake-allocations.
+Represents an allocation of a cake among agents ---  the output of a cake-cutting algorithm.
+Used mainly for display purposes.
 
 Programmer: Erel Segal-Halevi
 Since: 2019-11
 """
 
-# import repackage
-# repackage.up()
-
 from typing import *
 from cake.agents import Agent, PiecewiseUniformAgent
-
-def round_piece(piece:list, digits:int):
-    """
-    Round the numbers in the given piece. For presentation purposes.
-    :param piece:   A list of intervals.
-    :param digits:  How many digits after the decimal point.
-
-    >>> round_piece([(0.1999999, 0.300001), (0.40000001, 0.599999)], 3)
-    [(0.2, 0.3), (0.4, 0.6)]
-    """
-    return [(round(interval[0],digits),round(interval[1],digits)) for interval in piece]
-
 
 
 class Allocation:
     """
-    An allocation of a cake among agents.
-    This is the output of a cake-cutting algorithm.
-
     >>> Alice = PiecewiseUniformAgent([(2,3)], "Alice");George = PiecewiseUniformAgent([(0,10)], "George")
-    >>> A = Allocation([Alice, George]);A.setPieces([[(1,2)],[(4,5)]]);
-    >>> B = Allocation([George, Alice]);B.setPieces([[(0,1)],[(2,3)]]);
-    >>> A.merge(B);print(A)
+    >>> A = Allocation([Alice, George])
+    >>> A.setPieces([[(1,2)],[(4,5)]]);
+    >>> print(A)
+    > Alice gets [(1, 2)] with value 0.0
+    > George gets [(4, 5)] with value 1.0
+    <BLANKLINE>
+    >>> B = Allocation([George, Alice])
+    >>> B.setPieces([[(0,1)],[(2,3)]]);
+    >>> print(B)
+    > George gets [(0, 1)] with value 1.0
+    > Alice gets [(2, 3)] with value 1.0
+    <BLANKLINE>
+    >>> A.merge(B)
+    >>> print(A)
     > Alice gets [(1, 2), (2, 3)] with value 1.0
     > George gets [(4, 5), (0, 1)] with value 2.0
     <BLANKLINE>
@@ -40,9 +35,11 @@ class Allocation:
     True
     """
 
-    def __init__(self, agents:List[Agent]):
+    def __init__(self, agents:List[Agent], pieces:list=None):
         self.agents = agents
-        self.pieces = [None]*len(agents)
+        if pieces is None:
+            pieces = [None]*len(agents)
+        self.pieces = pieces
 
     def get_piece(self, agent_index:int):
         return self.pieces[agent_index]
@@ -126,7 +123,6 @@ class Allocation:
         return s
 
 
-
 class OnePieceAllocation(Allocation):
 
     def __init__(self, agents: List[Agent]):
@@ -143,6 +139,22 @@ class OnePieceAllocation(Allocation):
 
     def get_piece(self,agent_index:int):
         return self.pieces[agent_index]
+
+
+
+def round_piece(piece:list, digits:int):
+    """
+    Round the numbers in the given piece. For presentation purposes.
+    :param piece:   A list of intervals.
+    :param digits:  How many digits after the decimal point.
+
+    >>> round_piece([(0.1999999, 0.300001), (0.40000001, 0.599999)], 3)
+    [(0.2, 0.3), (0.4, 0.6)]
+    """
+    return [(round(interval[0],digits),round(interval[1],digits)) for interval in piece]
+
+
+
 
 
 if __name__ == "__main__":

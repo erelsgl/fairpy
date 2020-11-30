@@ -19,7 +19,6 @@ import indivisible.partitions as partitions
 from typing import *
 Item = Any
 Bundle = Set[Item]
-Allocation = List[Bundle]
 
 
 class Agent(ABC):
@@ -64,7 +63,7 @@ class Agent(ABC):
         return self.total_value_cache
 
 
-    def best_index(self, allocation:Allocation)->int:
+    def best_index(self, allocation:List[Bundle])->int:
         """
         Returns an index of a bundle that is most-valuable for the agent.
         :param   partition: a list of k sets.
@@ -163,7 +162,7 @@ class Agent(ABC):
         """
         return Fraction(self.value_except_best_c_goods(self.desired_items, c) , num_of_agents)
 
-    def is_EFc(self, own_bundle:Bundle, all_bundles:Allocation, c: int) -> bool:
+    def is_EFc(self, own_bundle:Bundle, all_bundles:List[Bundle], c: int) -> bool:
         """
         Checks whether the current agent finds the given allocation envy-free-except-c-goods (EFc).
         :param own_bundle:   the bundle consumed by the current agent.
@@ -176,7 +175,7 @@ class Agent(ABC):
                 return False
         return True
 
-    def is_EF1(self, own_bundle:Bundle, all_bundles:Allocation) -> bool:
+    def is_EF1(self, own_bundle:Bundle, all_bundles:List[Bundle]) -> bool:
         """
         Checks whether the current agent finds the given allocation envy-free-except-1-good (EF1).
         :param own_bundle:   the bundle given to the family of the current agent.
@@ -185,7 +184,7 @@ class Agent(ABC):
         """
         return self.is_EFc(own_bundle, all_bundles, c=1)
 
-    def is_EFx(self, own_bundle:Bundle, all_bundles:Allocation)->bool:
+    def is_EFx(self, own_bundle:Bundle, all_bundles:List[Bundle])->bool:
         """
         Checks whether the current agent finds the given allocation EFx.
         :param own_bundle:   the bundle given to the family of the current agent.
@@ -198,7 +197,7 @@ class Agent(ABC):
                 return False
         return True
 
-    def is_EF(self, own_bundle:Bundle, all_bundles:Allocation)->bool:
+    def is_EF(self, own_bundle:Bundle, all_bundles:List[Bundle])->bool:
         """
         Checks whether the current agent finds the given allocation envy-free.
         :param own_bundle:   the bundle given to the family of the current agent.
