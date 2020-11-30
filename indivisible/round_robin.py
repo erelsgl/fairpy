@@ -1,7 +1,7 @@
 """
 The Round Robin algorithm for item allocation.
 
-Authors: folklore; see https://en.wikipedia.org/wiki/Round-robin_item_allocation
+Authors: folklore. See https://en.wikipedia.org/wiki/Round-robin_item_allocation
 
 Programmer: Erel Segal-Halevi
 Since:  2020-07

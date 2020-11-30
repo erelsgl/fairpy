@@ -1,10 +1,10 @@
 #!python3
 
 """
-Demonstration of the cut-and-choose protocol.
+Demonstration of the round-robin protocol.
 
 Programmer: Erel Segal-Halevi
-Since: 2019-11
+Since: 2020-11
 """
 
 from indivisible.agents import *
