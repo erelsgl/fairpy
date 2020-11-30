@@ -2,6 +2,15 @@
 
 The following algorithms are implemented in this folder:
 
+* Abram and Lot (Genesis 13).
+"Cut and choose".
+  * [cut_and_choose.py](cut_and_choose.py), by Erel Segal-Halevi.
+
+* Hugo Steinhaus (1948).
+["The problem of fair division"](https://www.jstor.org/stable/1914289).
+Econometrica. 16 (1): 101–104.
+  * [last_diminisher.py](last_diminisherpy), by Erel Segal-Halevi.
+
 * Yonatan Aumann, Yair Dombb, Avinatan Hassidim (2012).
 ["Computing socially-efficient cake divisions"](https://arxiv.org/abs/1205.3982).
 Proceedings of AAMAS 2013, 343--350.
