@@ -27,7 +27,7 @@ if __name__ == "__main__" and (len(sys.argv) < 2 or sys.argv[1] != "quiet"):
     _, subplots = pyplot.subplots(2, 2, figsize=figsize_in_inches)
 
     agent = PiecewiseConstantAgent([1, 2, 3, 4], "positive")
-    partition_simplex.plot_1_agent(agent, axes=subplots[0,0], samples_per_side=samples_per_side, savepath="positive.png")
+    partition_simplex.plot_1_agent(agent, axes=subplots[0,0], samples_per_side=samples_per_side)
 
     agent = PiecewiseConstantAgent([-1, -2, -3, -4], "negative")
     partition_simplex.plot_1_agent(agent, axes=subplots[0,1], samples_per_side=samples_per_side)

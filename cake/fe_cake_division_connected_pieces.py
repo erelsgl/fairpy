@@ -389,7 +389,7 @@ def ALG(agents: List[Agent], epsilon:float)->Allocation:
                 str+= " ,"+name
         logger.info("C = all agents satisfying the above condition = {%s}",str)
         a = C[np.argmin(np.asarray(Rb))]
-        logger.info("%s is the chosen one with the minimum Rb = %s",a[0].my_name,Rb[np.argmin(Rb)])
+        logger.info("%s is the chosen one with the minimum Rb = %s",a[0].name(), Rb[np.argmin(Rb)])
         allocation.set_piece(a[1] ,[(interval[0],Rb[np.argmin(Rb)])])
         logger.info("Update partial allocation , Now the partial Allocation is:")
         logger.info(allocation)
