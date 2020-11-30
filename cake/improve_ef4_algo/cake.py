@@ -112,11 +112,11 @@ class CakeSlice(object):
 
         >>> a = PiecewiseConstantAgent([11, 33, 11], "agent")
         >>> s = CakeSlice(0, a.cake_length())
-        >>> len(s.slice_to_value(a, a.cake_value() / 10))
+        >>> len(s.slice_to_value(a, a.total_value() / 10))
         10
         >>> a = PiecewiseConstantAgent([55, 3, 11], "agent")
         >>> s = CakeSlice(0, a.cake_length())
-        >>> len(s.slice_to_value(a, a.cake_value() / 2))
+        >>> len(s.slice_to_value(a, a.total_value() / 2))
         2
         >>> a = PiecewiseConstantAgent([1, 3, 11], "agent")
         >>> s = CakeSlice(0, 1)
@@ -164,11 +164,11 @@ class CakeSlice(object):
 
         >>> a = PiecewiseConstantAgent([33, 3, 0.1], "agent")
         >>> s = CakeSlice(0, a.cake_length())
-        >>> s.value_according_to(a) == a.cake_value()
+        >>> s.value_according_to(a) == a.total_value()
         True
         >>> a = PiecewiseConstantAgent([33, 33, 11], "agent")
         >>> s = CakeSlice(0, a.cake_length())
-        >>> s.value_according_to(a) == a.cake_value()
+        >>> s.value_according_to(a) == a.total_value()
         True
         """
         return agent.eval(self.start, self.end)

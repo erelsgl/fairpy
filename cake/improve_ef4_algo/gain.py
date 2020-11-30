@@ -24,7 +24,7 @@ def get_agent_gain(agent: Agent, other_agents: List[Agent], allocation: CakeAllo
     >>> b = PiecewiseConstantAgent([33, 33], "agent2")
     >>> alloc = CakeAllocation(s)
     >>> ignore = [alloc.allocate_slice(a, sl) for sl in s]
-    >>> get_agent_gain(a, [b], alloc) == a.cake_value() / 2
+    >>> get_agent_gain(a, [b], alloc) == a.total_value() / 2
     True
     >>> s = [CakeSlice(0, 0.5), CakeSlice(0.5, 1)]
     >>> s2 = [CakeSlice(1, 1.5), CakeSlice(1.5, 2)]
@@ -33,14 +33,14 @@ def get_agent_gain(agent: Agent, other_agents: List[Agent], allocation: CakeAllo
     >>> alloc = CakeAllocation(s + s2)
     >>> ignore = [alloc.allocate_slice(a, sl) for sl in s]
     >>> ignore = [alloc.allocate_slice(b, sl) for sl in s2]
-    >>> get_agent_gain(a, [b], alloc) == (a.cake_value() / 2 - b.cake_value() / 2)
+    >>> get_agent_gain(a, [b], alloc) == (a.total_value() / 2 - b.total_value() / 2)
     True
     >>> s = [CakeSlice(0, 0.5), CakeSlice(0.5, 1)]
     >>> a = PiecewiseConstantAgent([33, 33], "agent")
     >>> b = PiecewiseConstantAgent([33, 33], "agent2")
     >>> alloc = CakeAllocation(s)
     >>> ignore = [alloc.allocate_slice(a, sl) for sl in s]
-    >>> get_agent_gain(b, [a], alloc) == -a.cake_value() / 2
+    >>> get_agent_gain(b, [a], alloc) == -a.total_value() / 2
     True
     """
     return get_agent_satisfaction(agent, allocation) - \

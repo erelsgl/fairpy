@@ -32,7 +32,7 @@ class Agent(ABC):
             return "Anonymous"
 
     @abstractmethod
-    def cake_value(self):
+    def total_value(self):
         """
         :return: the value of the entire cake for the agent.
         """
@@ -119,7 +119,7 @@ class PiecewiseConstantAgent1Sgement(Agent):
         return "{} is a piecewise-constant agent with values {} and total value={}".format(self.my_name,
                                                                                                self.values,
                                                                                                self.total_value_cache)
-    def cake_value(self):
+    def total_value(self):
         return self.total_value_cache
 
     def cake_length(self):
@@ -167,7 +167,7 @@ class PiecewiseConstantAgent1Sgement(Agent):
         val += self.values[fromFloor + 1:toCeiling].sum()
         val -= (self.values[toCeiling - 1] * toCeilingRemovedFraction)
 
-        return val/self.cake_value()
+        return val/self.total_value()
 
     def mark(self, start: float, target_value: float):
         """
@@ -194,7 +194,7 @@ class PiecewiseConstantAgent1Sgement(Agent):
         1.0
         """
         start = start*self.cake_length()
-        target_value = target_value*self.cake_value()
+        target_value = target_value*self.total_value()
         # the cake to the left of 0 and to the right of length is considered worthless.
         start = max(0, min(start, self.length))
         if target_value < 0:
@@ -223,7 +223,7 @@ class PiecewiseConstantAgent(Agent):
     A PiecewiseConstantAgent is an Agent whose value function has a constant density on a finite number of intervals.
 
     >>> a = PiecewiseConstantAgent([11,22,33,44]) # Four desired intervals: the leftmost has value 11, the second one 22, etc.
-    >>> a.cake_value()
+    >>> a.total_value()
     110
     >>> a.cake_length()
     4
@@ -251,7 +251,7 @@ class PiecewiseConstantAgent(Agent):
     def __repr__(self):
         return "{} is a piecewise-constant agent with values {} and total value={}".format(self.my_name, self.values, self.total_value_cache)
 
-    def cake_value(self):
+    def total_value(self):
         return self.total_value_cache
 
     def cake_length(self):
@@ -356,7 +356,7 @@ class PiecewiseUniformAgent(Agent):
     A PiecewiseUniformAgent is an Agent with a finite number of desired intervals, all of which have the same value-density (1).
 
     >>> a = PiecewiseUniformAgent([(0,1),(2,4),(6,9)])   # Three desired intervals: (0..1) and (2..4) and (6..9).
-    >>> a.cake_value()
+    >>> a.total_value()
     6
     >>> a.cake_length()
     9
@@ -383,7 +383,7 @@ class PiecewiseUniformAgent(Agent):
     def __repr__(self):
         return "{} is a piecewise-uniform agent with desired regions {} and total value={}".format(self.my_name, self.desired_regions, self.total_value_cache)
 
-    def cake_value(self):
+    def total_value(self):
         return self.total_value_cache
 
     def cake_length(self):
@@ -503,7 +503,7 @@ class PiecewiseConstantAgentNormalized(Agent):
     def __repr__(self):
         return "{} is a piecewise-constant agent with values {} (((NORMALIZED)))".format(self.my_name, self.values)
 
-    def cake_value(self):
+    def total_value(self):
         return self.total_value_cache
 
     def cake_length(self):
@@ -627,7 +627,7 @@ class PiecewiseConstantAgentNormalized(Agent):
     def __repr__(self):
         return "{} is a piecewise-constant agent with values {} (((NORMALIZED)))".format(self.my_name, self.values)
 
-    def cake_value(self):
+    def total_value(self):
         return self.total_value_cache
 
     def cake_length(self):
@@ -738,7 +738,7 @@ class PiecewiseLinearAgent(Agent):
      to build the equation y = mx + c => (y = 1*x + c, y = 0*x + c) and the 11 and 22 are the integral value of the equation
      from x_0 = 0 -> x_1 = 1
     >>> a = PiecewiseLinearAgent([11,22,33,44],[1,2,3,-2]) # Four desired intervals: the leftmost has value 11, the second one 22,  etc.
-    >>> a.cake_value()
+    >>> a.total_value()
     110
     >>> a.cake_length()
     4
@@ -751,14 +751,14 @@ class PiecewiseLinearAgent(Agent):
     1
     >>> a.values
     array([2])
-    >>> a.cake_value()
+    >>> a.total_value()
     2
     >>> a.piece_value([(0,1)])
     2.0
     >>> a.eval(0,1)
     2.0
     >>> a = PiecewiseLinearAgent([2,2],[1,0])
-    >>> a.cake_value()
+    >>> a.total_value()
     4
     >>> a.piece_value([(0,1)])
     2.0
@@ -784,7 +784,7 @@ class PiecewiseLinearAgent(Agent):
         return "{} is a piecewise-linear agent with values {} and total value={}".format(self.my_name, self.values,
                                                                                          self.total_value_cache)
 
-    def cake_value(self):
+    def total_value(self):
         return self.total_value_cache
 
     def cake_length(self):

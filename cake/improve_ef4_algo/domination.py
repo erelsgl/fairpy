@@ -15,15 +15,15 @@ def value_for_slices(agent: Agent, slices: List[CakeSlice]) -> float:
 
     >>> s = [CakeSlice(0, 3)]
     >>> a = PiecewiseConstantAgent([33, 33, 11], "agent")
-    >>> value_for_slices(a, s) == a.cake_value()
+    >>> value_for_slices(a, s) == a.total_value()
     True
     >>> s = [CakeSlice(0, 1)]
     >>> a = PiecewiseConstantAgent([33, 33], "agent")
-    >>> value_for_slices(a, s) == a.cake_value() / 2
+    >>> value_for_slices(a, s) == a.total_value() / 2
     True
     >>> s = [CakeSlice(0, 0.5), CakeSlice(0.5, 1)]
     >>> a = PiecewiseConstantAgent([33, 33], "agent")
-    >>> value_for_slices(a, s) == a.cake_value() / 2
+    >>> value_for_slices(a, s) == a.total_value() / 2
     True
     """
     return sum([slice.value_according_to(agent) for slice in slices])
@@ -41,7 +41,7 @@ def get_agent_satisfaction(agent: Agent, allocation: CakeAllocation) -> float:
     >>> a = PiecewiseConstantAgent([33, 33], "agent")
     >>> alloc = CakeAllocation(s)
     >>> ignore = [alloc.allocate_slice(a, sl) for sl in s]
-    >>> get_agent_satisfaction(a, alloc) == a.cake_value() / 2
+    >>> get_agent_satisfaction(a, alloc) == a.total_value() / 2
     True
     """
     return value_for_slices(agent, allocation.get_allocation_for_agent(agent))

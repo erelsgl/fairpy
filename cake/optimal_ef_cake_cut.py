@@ -300,12 +300,12 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
     logger.debug(f'y_0_ge_1 {y_0_ge_1}')
     logger.debug(f'y_1_ge_0 {y_1_ge_0}')
 
-    if (V_l(0, y_0_ge_1) >= (agents[0].cake_value() / 2) and
-        V_l(1, y_1_ge_0) >= (agents[1].cake_value() / 2)):
-        if V_l(0, y_0_gt_1) >= (agents[0].cake_value() / 2):
+    if (V_l(0, y_0_ge_1) >= (agents[0].total_value() / 2) and
+        V_l(1, y_1_ge_0) >= (agents[1].total_value() / 2)):
+        if V_l(0, y_0_gt_1) >= (agents[0].total_value() / 2):
             a.setPieces([y_0_gt_1, y_1_ge_0])
         else:
-            missing_value = (agents[0].cake_value() / 2) - V_l(0, y_0_gt_1)
+            missing_value = (agents[0].total_value() / 2) - V_l(0, y_0_gt_1)
             interval_options = []
             for start, end in y_0_eq_1:
                 mid = agents[0].mark(start, missing_value)
@@ -321,7 +321,7 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
             a.setPieces([y_0_gt_1, y_1_gt_0])
         return a
 
-    if V_l(0, y_0_ge_1) < (agents[0].cake_value() / 2):
+    if V_l(0, y_0_ge_1) < (agents[0].total_value() / 2):
         # Create V1(Y(1≥2) ∪ Y(≥r)) ≥ 1/2
         ratio_dict = {x: R(x) for x in y_0_lt_1}
         y_le_r_dict = {r: Y_op_r(y_0_lt_1, operator.ge, r) for inter, r in ratio_dict.items()}
@@ -354,7 +354,7 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
         agent_1_allocation = y_0_lt_1
 
         # divide Y=r∗ so that agent 1 receives exactly value 1
-        missing_value = (agents[0].cake_value() / 2) - V_l(0, agent_0_allocation)
+        missing_value = (agents[0].total_value() / 2) - V_l(0, agent_0_allocation)
         y_eq_r = Y_op_r(inter_r_max, operator.eq, r_max)
         logger.info(f'Y(=r*) is {y_eq_r}')
         for start, end in y_eq_r:

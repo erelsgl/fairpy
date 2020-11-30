@@ -244,7 +244,7 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
         start = 0
         # Get pieces with value of 2n
         for i in range(0,2*n):
-            end = a.mark(start, a.cake_value()/(2*n))
+            end = a.mark(start, a.total_value() / (2 * n))
             # if the piece is out of boundaries we don't add it to the partition
             if end is None:
                 break

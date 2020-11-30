@@ -54,10 +54,10 @@ def asymmetric_protocol(agents: List[Agent])->Allocation:
     allocation = Allocation(agents)
 
     (cutter,chooser) = agents     # equivalent to: cutter=agents[0]; chooser=agents[1]
-    cut = cutter.mark(0, cutter.cake_value() / 2)
+    cut = cutter.mark(0, cutter.total_value() / 2)
     logger.info("The cutter (%s) cuts at %.2f.", cutter.name(), cut)
 
-    if chooser.eval(0,cut) > chooser.cake_value()/2:
+    if chooser.eval(0,cut) > chooser.total_value()/2:
         logger.info("The chooser (%s) chooses the leftmost piece.", chooser.name())
         allocation.set_piece(1, [(0,cut)])
         allocation.set_piece(0, [(cut, cutter.cake_length())])
@@ -104,7 +104,7 @@ def symmetric_protocol(agents: List[Agent])->Allocation:
 
     allocation = Allocation(agents)
 
-    marks = [agent.mark(0, agent.cake_value() / 2) for agent in agents]
+    marks = [agent.mark(0, agent.total_value() / 2) for agent in agents]
     logger.info("The agents mark at %f, %f", marks[0], marks[1])
     cut = sum(marks)/2
     logger.info("The cake is cut at %f.", cut)

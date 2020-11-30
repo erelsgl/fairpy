@@ -77,14 +77,14 @@ def last_diminisher_recursive(start:float, agents: List[Agent], active_agents:Li
 
     first_agent_index = active_agents[0]
     first_agent = agents[first_agent_index]
-    first_agent_mark = first_agent.mark(start, first_agent.cake_value() / num_of_agents)
+    first_agent_mark = first_agent.mark(start, first_agent.total_value() / num_of_agents)
     logger.info("%s marks at %f", first_agent.name(), first_agent_mark)
 
     current_mark = first_agent_mark
     current_marker_index = first_agent_index
     for next_agent_index in active_agents[1:]:
         next_agent = agents[next_agent_index]
-        next_agent_mark = next_agent.mark(start, next_agent.cake_value() / num_of_agents)
+        next_agent_mark = next_agent.mark(start, next_agent.total_value() / num_of_agents)
         if next_agent_mark < current_mark:
             logger.info("%s diminishes the current mark to %f.", next_agent.name(), next_agent_mark)
             current_mark = next_agent_mark
