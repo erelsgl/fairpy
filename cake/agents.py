@@ -48,7 +48,7 @@ class Agent(ABC):
 
 
     @abstractmethod
-    def eval(self, start:float, end:float):
+    def eval(self, start:float, end:float)->float:
         """
         Answer an Eval query: return the value of the interval [start,end].
 
@@ -59,7 +59,7 @@ class Agent(ABC):
         pass
 
     @abstractmethod
-    def mark(self, start:float, targetValue:float):
+    def mark(self, start:float, targetValue:float)->float:
         """
         Answer a Mark query: return "end" such that the value of the interval [start,end] is targetValue.
 

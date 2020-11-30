@@ -1,4 +1,6 @@
-# References
+# Cake-cutting algorithms
+
+The following algorithms are implemented in this folder:
 
 * Yonatan Aumann, Yair Dombb, Avinatan Hassidim (2012).
 ["Computing socially-efficient cake divisions"](https://arxiv.org/abs/1205.3982).
@@ -50,61 +52,6 @@ Proceedings of SAGT 2018, 87--99.
 *All algorithms.*
   * [improve_ef4.py](improve_ef4.py) by Shir Fishbain.
 
+---
 
-## Future work
-
-### For one programmer
-
-* Yiling Chen, John K. Lai, David C. Parkes, Ariel D. Procaccia (2013): 
-["Truth, justice, and cake cutting"](http://procaccia.info/papers/justruth.geb.pdf). 
-Games and Economic Behavior. 77 (1): 284–297. 
-*Mechanism 1 (in section 3), and the algorithm described in section 4*.
-  
-* Haris Aziz, Chun Ye (2013):
-["Cake cutting algorithms for piecewise constant and piecewise uniform valuations"](https://arxiv.org/abs/1307.2908). 
-Proceedings of WINE 2014. 1--14.
-*All 5 algorithms.*
-
-* Jeff Edmonds, Kirk Pruhs (2006).
-["Balanced allocations of cake"](http://people.cs.pitt.edu/~kirk/papers/focs2006.pdf)
-Proceedings of FOCS 2006, 623--634.
-
-* Richard Cole, Vasilis Gkatzelis, Gagan Goel (2013):
-["Mechanism Design for Fair Division: Allocating Divisible Items Without Payments"](https://arxiv.org/abs/1212.1522).
-Proceedings of EC 2013. 251–-268.
-*Algorithms 1 and 3*. 
-
-* Agnes Cseh, Tamas Fleiner (2018):
-["The complexity of cake cutting with unequal shares"](https://arxiv.org/abs/1709.03152)
-Proceedings of SAGT 2018, pages={19--30}.
-*Sections 4 and 7*.
-
-* Paul W Goldberg, Alexandros Hollender, Warut Suksompong (2019).
-["Contiguous Cake Cutting: Hardness Results and Approximation Algorithms"](https://arxiv.org/abs/1911.05416).
-Proceedings of AAAI 2020.
-*Algorithm 2*.
-
-
-### For two programmers
-
-* Haris Aziz, Simon MacKenzie (2017).
-["A discrete and bounded envy-free cake cutting protocol for any number of agents"](https://arxiv.org/abs/1604.03655).
-Proceedings of FOCS 2016. 
-* Algorithms 1 and 2 (up to page 10)*.
-
-* Xiaohui Bei and Warut Suksompong (2019).
-["Dividing a Graphical Cake"](https://arxiv.org/abs/1910.14129).
-* All algorithms.
-
-
-## Future future work
-
-* Xiaohui Bei,  Xiaoming Sun,  Hao Wu,  Jialin Zhang, and Zhijie Zhang, Wei Zi (2019).
-["Cake Cutting on Graphs: A Discrete and Bounded Proportional Protocol"](https://arxiv.org/abs/1907.05083)
-Proceedings of SODA 2020.
-*Uses algorithms 1 and 2 from Aziz and Mackenzie (2017).*
-
-* Rediet Abebe, Richard Cole, Vasilis Gkatzelis, Jason D. Hartline (2019).
-["A Truthful Cardinal Mechanism for One-Sided Matching"](https://arxiv.org/abs/1903.07797).
-*Uses Algorithm 1 from Cole et al (2013).*
-
+[Future work](README-future.md)

@@ -50,7 +50,7 @@ class Allocation:
     def get_pieces(self):
         return self.pieces
 
-    def set_piece(self, agent_index:int, piece:List[tuple]):
+    def set_piece(self, agent_index:int, piece:List[Tuple[float]]):
         """
         Sets the piece of the given index.
 

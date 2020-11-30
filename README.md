@@ -1,5 +1,6 @@
 # fairpy
-An open-source library of [fair division algorithms](references.md) in Python.
+
+An open-source library of [fair division algorithms](https://en.wikipedia.org/wiki/Fair_division) in Python.
 To install, clone the repository and run the following in the main folder:
 
     python3 setup.py install
@@ -13,9 +14,11 @@ For each algorithm in file `x.py` there is a demo program `x_demo.py`. For examp
     python3 cake/cut_and_choose_demo.py
     python3 cake/last_diminisher_demo.py
     
-For a complete list of algorithms and their implementation status, see:
+For a complete list of algorithms and their implementation status, see the subfolders:
 
-* [Cake-cutting references](cake/references.md)  
+* [Cake-cutting algorithms](cake/README.md)  
+* [Indivisible object allocation algorithms](indivisible/README.md) - in construction
+
      
 ![Tox result](https://github.com/erelsgl/fairpy/workflows/tox/badge.svg)
 

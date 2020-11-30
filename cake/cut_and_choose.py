@@ -53,7 +53,7 @@ def asymmetric_protocol(agents: List[Agent])->Allocation:
 
     allocation = Allocation(agents)
 
-    (cutter,chooser) = agents
+    (cutter,chooser) = agents     # equivalent to: cutter=agents[0]; chooser=agents[1]
     cut = cutter.mark(0, cutter.cake_value() / 2)
     logger.info("The cutter (%s) cuts at %.2f.", cutter.name(), cut)
 
