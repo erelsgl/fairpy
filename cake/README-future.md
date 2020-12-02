@@ -6,11 +6,6 @@
 ["Truth, justice, and cake cutting"](http://procaccia.info/papers/justruth.geb.pdf). 
 Games and Economic Behavior. 77 (1): 284–297. 
 *Mechanism 1 (in section 3), and the algorithm described in section 4*.
-  
-* Haris Aziz, Chun Ye (2013):
-["Cake cutting algorithms for piecewise constant and piecewise uniform valuations"](https://arxiv.org/abs/1307.2908). 
-Proceedings of WINE 2014. 1--14.
-*All 5 algorithms.*
 
 * Jeff Edmonds, Kirk Pruhs (2006).
 ["Balanced allocations of cake"](http://people.cs.pitt.edu/~kirk/papers/focs2006.pdf)
@@ -33,15 +28,20 @@ Proceedings of AAAI 2020.
 
 
 ## For two programmers
+  
+* Haris Aziz, Chun Ye (2013):
+["Cake cutting algorithms for piecewise constant and piecewise uniform valuations"](https://arxiv.org/abs/1307.2908). 
+Proceedings of WINE 2014. 1--14.
+*All 5 algorithms.*
 
 * Haris Aziz, Simon MacKenzie (2017).
 ["A discrete and bounded envy-free cake cutting protocol for any number of agents"](https://arxiv.org/abs/1604.03655).
 Proceedings of FOCS 2016. 
-* Algorithms 1 and 2 (up to page 10)*.
+*Algorithms 1 and 2 (up to page 10)*.
 
 * Xiaohui Bei and Warut Suksompong (2019).
 ["Dividing a Graphical Cake"](https://arxiv.org/abs/1910.14129).
-* All algorithms.
+*All algorithms.*
 
 * Elad Aigner-Horev, Erel Segal-Halevi
 ["Envy-free matchings and their applications"](https://arxiv.org/abs/1901.09527).
