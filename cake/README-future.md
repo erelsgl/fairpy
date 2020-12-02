@@ -43,6 +43,10 @@ Proceedings of FOCS 2016.
 ["Dividing a Graphical Cake"](https://arxiv.org/abs/1910.14129).
 * All algorithms.
 
+* Elad Aigner-Horev, Erel Segal-Halevi
+["Envy-free matchings and their applications"](https://arxiv.org/abs/1901.09527).
+*Algorithms 1, 3, 5*.
+
 
 ## Future future work
 
