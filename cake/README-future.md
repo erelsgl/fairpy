@@ -43,9 +43,14 @@ Proceedings of FOCS 2016.
 ["Dividing a Graphical Cake"](https://arxiv.org/abs/1910.14129).
 *All algorithms.*
 
-* Elad Aigner-Horev, Erel Segal-Halevi
+* Elad Aigner-Horev, Erel Segal-Halevi (2020).
 ["Envy-free matchings and their applications"](https://arxiv.org/abs/1901.09527).
 *Algorithms 1, 3, 5*.
+
+* Erel Segal-Halevi, Avinatan Hassidim, Yonatan Aumann (2016).
+["Waste Makes Haste: Bounded Time Protocols for Envy-Free Cake Cutting with Free Disposal"](https://arxiv.org/abs/1511.02599).
+ACM Transactions on Algorithms.
+*All 5 algorithms.*
 
 
 ## Future future work
