@@ -13,8 +13,8 @@ Programmers: Naama Berman and Yonatan Lifshitz
 Since: 2019-12
 """
 
-from cake.agents import *
-from cake.allocations import *
+from fairpy.cake.agents import *
+from fairpy.cake.allocations import *
 
 import random, logging
 from typing import *
@@ -315,17 +315,17 @@ def fix_edges(edges_set: Set[Tuple[Agent, Tuple[float, float]]]) -> Set[Tuple[Ag
     >>> partitions = [(0, 1), (1, 2)]
     >>> edges_set = {(Alice, (0, 1.4889))}
     >>> fix_edges(edges_set)
-    {(Alice is a piecewise-constant agent with values [100   1] and total value=101, (0, 1.4889))}
+    [(Alice is a piecewise-constant agent with values [100   1] and total value=101, (0, 1.4889))]
     """
-    ret = set()
+    ret = []
     # Go over all the edges and check if they are in the right order
     for edge in edges_set:
         # If the partition is first we swap the sides of the edge
         if not isinstance(edge[0], Agent):
-            ret.add((edge[1], edge[0]))
+            ret.append((edge[1], edge[0]))
         else:
             # The Agent is first and we leave it like that
-            ret.add((edge[0], edge[1]))
+            ret.append((edge[0], edge[1]))
     # we return the set of edges when all the edges are in the right order of (Agent, partition)
 
     return ret
