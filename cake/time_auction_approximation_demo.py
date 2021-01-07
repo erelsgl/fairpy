@@ -8,8 +8,8 @@ Programmers: Naama Berman and Yonatan Lifshitz
 Since: 2019-12
 """
 
-from cake.agents import *
-from cake import time_auction_approximation
+from fairpy.cake.agents import *
+from fairpy.cake import time_auction_approximation
 
 import logging, sys
 logger = logging.getLogger(__name__)
