@@ -321,18 +321,6 @@ def agentNormalize(agents: List[Agent])->List[Agent]:
     replace all the agents with PiecewiseConstantAgent1Sgement that normalize to (0,1) segment
     :param agents: a list of agents that need to be normalized
     :return: a list of normalized agents
-
-
-    >>> Alice = PiecewiseConstantAgent([3, 6, 3], name="Alice")
-    >>> Hanna = PiecewiseConstantAgent([3, 3, 3, 3], name="Hanna")
-    >>> agents = [Alice, Hanna]
-    >>> print("{} is {}".format(agents[0].name(), type(agents[0])))
-    Alice is <class 'cake.agents.PiecewiseConstantAgent'>
-    >>> agents = agentNormalize(agents)
-    >>> print("{} is {}".format(agents[0].name(), type(agents[0])))
-    Alice is <class 'cake.agents.PiecewiseConstantAgent1Sgement'>
-
-
     """
     for agent,i in zip(agents,range(len(agents))):
         agents[i] = PiecewiseConstantAgent1Sgement(agent)
