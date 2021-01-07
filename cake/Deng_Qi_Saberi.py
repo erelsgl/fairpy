@@ -10,8 +10,8 @@ Programmer: Dvir Fried
 Since: 2020-01
 """
 
-from cake.agents import *
-from cake.allocations import *
+from fairpy.cake.agents import *
+from fairpy.cake.allocations import *
 
 from typing import *
 import numpy as np

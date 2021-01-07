@@ -11,8 +11,8 @@ Programmer: Jonathan Diamant
 Since: 2019-12
 """
 
-from cake.agents import *
-from cake.allocations import *
+from fairpy.cake.agents import *
+from fairpy.cake.allocations import *
 
 import sys, logging
 logger = logging.getLogger(__name__)

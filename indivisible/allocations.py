@@ -8,7 +8,7 @@ Since: 2020-11
 """
 
 from typing import *
-from indivisible.agents import Agent, AdditiveAgent, Item, Bundle
+from fairpy.indivisible.agents import Agent, AdditiveAgent, Item, Bundle
 
 
 class Allocation:

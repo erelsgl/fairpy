@@ -10,7 +10,7 @@ Programmer: Guy Wolf
 Since: 2020-2
 """
 
-from cake.allocations import *
+from fairpy.cake.allocations import *
 from typing import *
 
 from itertools import permutations

@@ -9,8 +9,8 @@ Programmer: Tom Goldenberg
 Since: 2020-05
 """
 
-from cake.agents import *
-from cake.allocations import *
+from fairpy.cake.agents import *
+from fairpy.cake.allocations import *
 
 import operator
 from logging import Logger

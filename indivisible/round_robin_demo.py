@@ -7,8 +7,8 @@ Programmer: Erel Segal-Halevi
 Since: 2020-11
 """
 
-from indivisible.agents import *
-from indivisible import round_robin
+from fairpy.indivisible.agents import *
+from fairpy.indivisible import round_robin
 
 import logging, sys
 

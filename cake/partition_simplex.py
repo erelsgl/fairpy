@@ -17,7 +17,7 @@ Programmer: Erel Segal-Halevi
 Since: 2019-11
 """
 
-from cake.agents import *
+from fairpy.cake.agents import *
 
 import matplotlib.pyplot as pyplot
 import time, logging

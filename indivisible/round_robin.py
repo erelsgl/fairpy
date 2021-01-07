@@ -7,8 +7,8 @@ Programmer: Erel Segal-Halevi
 Since:  2020-07
 """
 
-from indivisible.agents import *
-from indivisible.allocations import *
+from fairpy.indivisible.agents import *
+from fairpy.indivisible.allocations import *
 
 import logging
 logger = logging.getLogger(__name__)

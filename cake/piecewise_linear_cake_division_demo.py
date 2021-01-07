@@ -5,8 +5,8 @@ Programmer: Guy Wolf
 Since: 2020-2
 """
 
-from cake.agents import *
-from cake import piecewise_linear_cake_division
+from fairpy.cake.agents import *
+from fairpy.cake import piecewise_linear_cake_division
 
 import logging, sys
 

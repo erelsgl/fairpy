@@ -8,9 +8,9 @@ Since: 2020-1
 """
 
 
-from cake.agents import *
-from cake.fe_cake_division_connected_pieces import ALG ,efCheck
-from cake import fe_cake_division_connected_pieces
+from fairpy.cake.agents import *
+from fairpy.cake.fe_cake_division_connected_pieces import ALG ,efCheck
+from fairpy.cake import fe_cake_division_connected_pieces
 
 import logging, sys
 

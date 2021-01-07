@@ -1,8 +1,8 @@
 import logging
 import sys
 
-from cake import improve_ef4
-from cake.agents import *
+from fairpy.cake import improve_ef4
+from fairpy.cake.agents import *
 
 improve_ef4.logger.addHandler(logging.StreamHandler(sys.stdout))
 improve_ef4.logger.setLevel(logging.INFO)

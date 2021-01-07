@@ -7,8 +7,8 @@ Programmer: Erel Segal-Halevi
 Since: 2019-11
 """
 
-from cake.agents import *
-from cake import cut_and_choose
+from fairpy.cake.agents import *
+from fairpy.cake import cut_and_choose
 
 import logging, sys
 

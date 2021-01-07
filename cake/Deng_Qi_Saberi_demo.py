@@ -8,8 +8,8 @@ Since: 2020-01
 """
 
 
-from cake.agents import *
-from cake import Deng_Qi_Saberi
+from fairpy.cake.agents import *
+from fairpy.cake import Deng_Qi_Saberi
 
 import logging, sys
 

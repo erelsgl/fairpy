@@ -5,8 +5,8 @@ Programmer: Jonathan Diamant
 Since: 2019-12
 """
 
-from cake.agents import *
-from cake import socially_efficient_cake_divisions
+from fairpy.cake.agents import *
+from fairpy.cake import socially_efficient_cake_divisions
 
 import logging, sys
 
