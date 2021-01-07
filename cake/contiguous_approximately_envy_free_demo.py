@@ -8,8 +8,8 @@ Programmer: Shalev Goldshtein
 Since: 2020-03
 """
 
-from cake.agents import *
-from cake import contiguous_approximately_envy_free
+from fairpy.cake.agents import *
+from fairpy.cake import contiguous_approximately_envy_free
 
 import logging, sys
 

@@ -8,7 +8,7 @@ Since: 2019-11
 """
 
 from typing import *
-from cake.agents import Agent, PiecewiseUniformAgent
+from fairpy.cake.agents import Agent, PiecewiseUniformAgent
 
 
 class Allocation:
