@@ -10,6 +10,7 @@ Games and Economic Behavior. 77 (1): 284–297.
 * Jeff Edmonds, Kirk Pruhs (2006).
 ["Balanced allocations of cake"](http://people.cs.pitt.edu/~kirk/papers/focs2006.pdf)
 Proceedings of FOCS 2006, 623--634.
+  ** Yossi Twito
 
 * Richard Cole, Vasilis Gkatzelis, Gagan Goel (2013):
 ["Mechanism Design for Fair Division: Allocating Divisible Items Without Payments"](https://arxiv.org/abs/1212.1522).
@@ -38,6 +39,7 @@ Proceedings of WINE 2014. 1--14.
 ["A discrete and bounded envy-free cake cutting protocol for any number of agents"](https://arxiv.org/abs/1604.03655).
 Proceedings of FOCS 2016. 
 *Algorithms 1 and 2 (up to page 10)*.
+ ** Netanel Shimoni and Shahar Glickman
 
 * Xiaohui Bei and Warut Suksompong (2019).
 ["Dividing a Graphical Cake"](https://arxiv.org/abs/1910.14129).

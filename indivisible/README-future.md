@@ -11,6 +11,7 @@ ACM Transactions on Algorithms.   *Algorithms 1, 2.*
 * Siddharth Barman, Arpita Biswas (2018).
 ["Fair Division Under Cardinality Constraints"](https://arxiv.org/abs/1804.09521).
 Proceedings of IJCAI 2018.    *Algorithms 1, 2.*
+ ** Netanel Albert
 
 * David Kurokawa, Ariel Procaccia, Junxing Wang (2018).
 ["Fair Enough: Guaranteeing Approximate Maximin Shares"](https://dl.acm.org/doi/abs/10.1145/3140756).
@@ -23,6 +24,7 @@ SIAM Journal on Discrete Mathematics.  *Algorithms 1, 2.*
 * Haris Aziz, Herve Moulin and Fedor Sandomirskiy (2020).
 ["A polynomial-time algorithm for computing a Pareto optimal and almost proportional allocation"](https://www.sciencedirect.com/science/article/pii/S0167637720301024).
 Operations Research Letters. *Algorithms 1, 2.*
+ ** Tom Latinn
 
 
 
