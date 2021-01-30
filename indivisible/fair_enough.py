@@ -33,13 +33,10 @@ Programmer: Shai Aharon
 Since:  2021-02
 """
 
-from fairpy.indivisible.agents import *
 from fairpy.indivisible.allocations import *
 import fairpy.indivisible.partitions as partitions
 
-from itertools import combinations_with_replacement
 import networkx as nx
-import numpy as np
 import logging
 
 logger = logging.getLogger(__name__)
@@ -56,7 +53,7 @@ def calc_gamma(c: int) -> float:
     0.75
     >>> calc_gamma(30)
     0.6744186046511628
-    >>> calc_gamma(1e10)
+    >>> calc_gamma(int(1e10))
     0.6666666666888889
     """
     n_odd = c - (1 - c % 2)
@@ -64,19 +61,22 @@ def calc_gamma(c: int) -> float:
     return (2 * n_odd) / (3 * n_odd - 1)
 
 
-def divide_c_MMS_partition(c: int, items: list, item_value_dict: dict) -> List[Bundle]:
+def divide_c_mms_partition(c: int, items: list, item_value_dict: dict) -> List[Bundle]:
     """
     Computed the MMS given the number of agents and the "value function"
     :param c: Number of agents
     :param items: A list of the values for each item
+    :param item_value_dict: A dictionary holding each items value
     :return: The partitioning the holds the MMS
 
-    >>> mms_part = divide_c_MMS_partition(3,['a', 'c', 'd', 'e', 'f'],{'a': 5, 'b': 5, 'c': 3, 'd': 4, 'e': 5, 'f': 5})
+    >>> items_lst = ['a','b' ,'c', 'd', 'e', 'f']
+    >>> items__val_dict = {'a': 5, 'b': 5, 'c': 3, 'd': 4, 'e': 5, 'f': 5}
+    >>> mms_part = divide_c_mms_partition(3,items_lst,items__val_dict)
     >>> [sorted(x) for x in mms_part]
-    [['a'], ['c', 'd'], ['e', 'f']]
-    >>> mms_part = divide_c_MMS_partition(4,['a', 'c', 'd', 'e', 'f'],{'a': 5, 'b': 5, 'c': 3, 'd': 4, 'e': 5, 'f': 5})
+    [['b', 'c'], ['a', 'd'], ['e', 'f']]
+    >>> mms_part = divide_c_mms_partition(4,items_lst,items__val_dict)
     >>> [sorted(x) for x in mms_part]
-    [['a'], ['c', 'd'], ['e'], ['f']]
+    [['a'], ['b'], ['c', 'd'], ['e', 'f']]
     """
     maxi_min = -1
     partition = []
@@ -98,22 +98,22 @@ def divide_c_MMS_partition(c: int, items: list, item_value_dict: dict) -> List[B
     return [set(x) for x in partition]
 
 
-def createEnvyGraph(agents: Dict[str, AdditiveAgent]) -> nx.DiGraph:
+def create_envy_graph(agents: Dict[str, AdditiveAgent]) -> nx.DiGraph:
     """
     Creates an Envy Graph from the agents and their bundles.
     An Envy Graph, is a directed graph, which each node represents an agent. For every two nodes represeting
     agent u and v, there will be an edge from u to v if agent u belives agent v's bundle is worth more then his.
     @param agents: The list of agents
     @return: The Envy Graph
-    >>> Alice = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1, "g": 4, "h": 5, "i": 3, "j": 3, "k": 3, "l": 1}, name="Alice")
-    >>> Alice.aq_items = ['h','a']
-    >>> Bob = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1, "g": 3, "h": 4, "i": 2, "j": 2, "k": 2, "l": 1}, name="Bob")
-    >>> Bob.aq_items = ['g', 'k']
-    >>> Eve = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1, "g": 4, "h": 4, "i": 2, "j": 3, "k": 2, "l": 1}, name="Eve")
-    >>> Eve.aq_items = ['j', 'i']
-    >>> agents = {x.name():x for x in [Alice,Bob,Eve]}
-    >>> list(createEnvyGraph(agents).edges)
-    [('Alice', 'Bob'), ('Eve', 'Bob')]
+    >>> Alice = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 4, "e": 1}, name="Alice")
+    >>> Alice.aq_items = ['a','b']
+    >>> Bob = AdditiveAgent({"a": 1, "b": 1, "c": 2, "d": 1, "e": 5}, name="Bob")
+    >>> Bob.aq_items = ['c', 'd']
+    >>> Eve = AdditiveAgent({"a": 3, "b": 1, "c": 1, "d": 1, "e": 2}, name="Eve")
+    >>> Eve.aq_items = ['e']
+    >>> agents_dict = {x.name():x for x in [Alice,Bob,Eve]}
+    >>> list(create_envy_graph(agents_dict).edges)
+    [('Alice', 'Bob'), ('Bob', 'Eve'), ('Eve', 'Alice')]
     """
 
     di_graph = nx.DiGraph()
@@ -130,7 +130,7 @@ def createEnvyGraph(agents: Dict[str, AdditiveAgent]) -> nx.DiGraph:
     return di_graph
 
 
-def getGmmItem(agent: AdditiveAgent, items: List[str], gamma: float) -> str:
+def get_gmm_item(agent: AdditiveAgent, items: List[str], gamma: float) -> Optional[str]:
     """
     Finds an item that is has a value of at least GMM for the given agent.
     @param agent: The Agent.
@@ -140,16 +140,16 @@ def getGmmItem(agent: AdditiveAgent, items: List[str], gamma: float) -> str:
 
     >>> Alice = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1}, name="Alice")
     >>> Alice.mms = Alice.value_1_of_c_MMS(3)
-    >>> items = ['a', 'b', 'c', 'd', 'e', 'f']
-    >>> gamma = 0.75
-    >>> item = getGmmItem(Alice,items,gamma)
+    >>> items_lst = ['a', 'b', 'c', 'd', 'e', 'f']
+    >>> gam = 0.75
+    >>> item = get_gmm_item(Alice,items_lst,gam)
     >>> item is None
     True
     >>> Alice = AdditiveAgent({"a": .1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1}, name="Alice")
     >>> Alice.mms = Alice.value_1_of_c_MMS(3)
-    >>> items = ['a', 'b', 'c', 'd', 'e', 'f']
-    >>> gamma = 0.75
-    >>> getGmmItem(Alice,items,gamma)
+    >>> items_lst = ['a', 'b', 'c', 'd', 'e', 'f']
+    >>> gam = 0.75
+    >>> get_gmm_item(Alice,items_lst,gam)
     'b'
     """
     gmm_items = [k for k in items if
@@ -159,25 +159,25 @@ def getGmmItem(agent: AdditiveAgent, items: List[str], gamma: float) -> str:
     return None
 
 
-def handleCycles(envy_graph: nx.DiGraph, agents_dict: Dict[str, AdditiveAgent]) -> bool:
+def handle_cycles(envy_graph: nx.DiGraph, agents_dict: Dict[str, AdditiveAgent]) -> bool:
     """
     Handles the cycles in the Envy Graph, replaces the bundles 'down-the stream'.
     @param envy_graph: The Envy-Graph
     @param agents_dict: The Agents in the Graph
     @return: True if there was a cycle, o.w. False.
 
-    >>> Alice = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1, "g": 4, "h": 5, "i": 3, "j": 3, "k": 3, "l": 1}, name="Alice")
-    >>> Alice.aq_items = ['h', 'd']
-    >>> Bob = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1, "g": 3, "h": 8, "i": 2, "j": 2, "k": 2, "l": 1}, name="Bob")
-    >>> Bob.aq_items =['g', 'k']
-    >>> Eve = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1, "g": 4, "h": 4, "i": 2, "j": 3, "k": 2, "l": 1}, name="Eve")
-    >>> Eve.aq_items = ['j', 'i']
+    >>> Alice = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 4, "e": 1}, name="Alice")
+    >>> Alice.aq_items = ['a','b']
+    >>> Bob = AdditiveAgent({"a": 1, "b": 1, "c": 2, "d": 1, "e": 5}, name="Bob")
+    >>> Bob.aq_items = ['c', 'd']
+    >>> Eve = AdditiveAgent({"a": 3, "b": 1, "c": 1, "d": 1, "e": 2}, name="Eve")
+    >>> Eve.aq_items = ['e']
     >>> agents_dict = {x.name():x for x in [Alice,Bob,Eve]}
-    >>> envy_graph = createEnvyGraph(agents_dict)
-    >>> handleCycles(envy_graph, agents_dict)
+    >>> envy_graph = create_envy_graph(agents_dict)
+    >>> handle_cycles(envy_graph, agents_dict)
     True
-    >>> [x.aq_items for x in agents_dict.values()]
-    [['g', 'k'], ['h', 'd'], ['j', 'i']]
+    >>> [(x.name(),x.aq_items) for x in agents_dict.values()]
+    [('Alice', ['c', 'd']), ('Bob', ['e']), ('Eve', ['a', 'b'])]
     """
     # Looking for Envy-cycles
     try:
@@ -195,8 +195,8 @@ def handleCycles(envy_graph: nx.DiGraph, agents_dict: Dict[str, AdditiveAgent]) 
         return False
 
 
-def handItemToLoser(envy_graph: nx.DiGraph, agents_dict: Dict[str, AdditiveAgent],
-                    all_agents: List[AdditiveAgent], items_remaining: List[str], allocation: Allocation) -> None:
+def hand_item_to_non_envy(envy_graph: nx.DiGraph, agents_dict: Dict[str, AdditiveAgent],
+                          all_agents: List[AdditiveAgent], items_remaining: List[str], allocation: Allocation) -> None:
     """
     Finds an agent that no-one is envy of, and allocates an item to him.
     @param envy_graph: The Envy-Graph
@@ -205,19 +205,19 @@ def handItemToLoser(envy_graph: nx.DiGraph, agents_dict: Dict[str, AdditiveAgent
     @param items_remaining: A list of all the items that have not been allocated
     @param allocation: The allocation of items
 
-    >>> Alice = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1, "g": 4, "h": 5, "i": 3, "j": 3, "k": 3, "l": 1}, name="Alice")
-    >>> Alice.aq_items = ['h', 'd']
-    >>> Bob = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1, "g": 3, "h": 3, "i": 2, "j": 2, "k": 2, "l": 1}, name="Bob")
-    >>> Bob.aq_items =['g', 'k']
-    >>> Eve = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1, "g": 4, "h": 4, "i": 2, "j": 3, "k": 2, "l": 1}, name="Eve")
-    >>> Eve.aq_items = ['j', 'i']
+    >>> Alice = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 4, "e": 1}, name="Alice")
+    >>> Alice.aq_items = ['a']
+    >>> Bob = AdditiveAgent({"a": 1, "b": 1, "c": 2, "d": 1, "e": 5}, name="Bob")
+    >>> Bob.aq_items = ['c']
+    >>> Eve = AdditiveAgent({"a": 3, "b": 1, "c": 1, "d": 1, "e": 2}, name="Eve")
+    >>> Eve.aq_items = ['b']
     >>> agents_dict = {x.name():x for x in [Alice,Bob,Eve]}
-    >>> envy_graph = createEnvyGraph(agents_dict)
-    >>> items_remaining = ['d', 'b', 'f', 'k', 'l', 'j', 'i', 'h', 'a', 'e', 'c', 'g']
+    >>> envy_graph = create_envy_graph(agents_dict)
+    >>> items_remaining = list('de')
     >>> alloc = Allocation([Alice,Bob,Eve])
-    >>> handItemToLoser(envy_graph,agents_dict,[Alice,Bob,Eve],items_remaining,alloc)
-    >>> sorted(list(alloc.get_bundle(0)))
-    ['d', 'g', 'h']
+    >>> hand_item_to_non_envy(envy_graph,agents_dict,[Alice,Bob,Eve],items_remaining,alloc)
+    >>> sorted(list(alloc.get_bundle(1)))
+    ['c', 'e']
     """
     rev_di_graph = envy_graph.reverse()
     for n in rev_di_graph.nodes():
@@ -231,18 +231,18 @@ def handItemToLoser(envy_graph: nx.DiGraph, agents_dict: Dict[str, AdditiveAgent
             return
 
 
-def getHighestValue(agent: AdditiveAgent, items_list: List[str]) -> (float, Set[str]):
+def get_highest_value(agent: AdditiveAgent, items_list: List[str]) -> (float, Set[str]):
     """
     Finds the two highest valued items for the agent that have not been allocated and returns the combined value.
     @param agent: The agent.
     @param items_list: The list of items not been allocated
     @return: The bundle value
 
-    >>> Alice = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1, "g": 4, "h": 5, "i": 3, "j": 3, "k": 3, "l": 1}, name="Alice")
-    >>> Alice.aq_items = ['h', 'd']
-    >>> v,bndl = getHighestValue(Alice,items_list=list('abcdefghijkl'))
+    >>> Alice = AdditiveAgent({"a": 3, "b": 2, "c": 3, "d": 4, "e": 1, "f": 1}, name="Alice")
+    >>> Alice.aq_items = ['a', 'd']
+    >>> v,bndl = get_highest_value(Alice,items_list=list('bcef'))
     >>> v,sorted(bndl)
-    (10, ['d', 'g', 'h'])
+    (9, ['b', 'c', 'd'])
     """
     items_sorted_by_agent = sorted([x for x in agent.desired_items if x[0] in items_list],
                                    key=lambda x: agent.map_good_to_value[x], reverse=True)
@@ -250,27 +250,27 @@ def getHighestValue(agent: AdditiveAgent, items_list: List[str]) -> (float, Set[
     return agent.value(bundle_items), bundle_items
 
 
-def cycleAllocation(agents_dict: Dict[str, Allocation], item_list: List[str], reverse: bool = False) -> None:
+def cycle_allocation(agents_dict: Dict[str, Allocation], item_list: List[str], reverse: bool = False) -> None:
     """
     Allocated each agent with his highest item that has not been allocated.
     @param agents_dict: Agents
     @param item_list: Non allocated items
     @param reverse: If False iterates over the agents in alphabetical order, O.W in reverse order.
 
-    >>> Alice = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 9, "e": 3, "f": 6, }, name="Alice")
+    >>> Alice = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6, }, name="Alice")
     >>> Alice.aq_items = []
-    >>> Bob = AdditiveAgent({"a":   9, "b": 8, "c": 7, "d": 9, "e": 3, "f": 6, }, name="Bob")
+    >>> Bob = AdditiveAgent({"a":   9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6, }, name="Bob")
     >>> Bob.aq_items = []
-    >>> Eve = AdditiveAgent({"a":   9, "b": 8, "c": 7, "d": 9, "e": 3, "f": 6, }, name="Eve")
+    >>> Eve = AdditiveAgent({"a":   9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6, }, name="Eve")
     >>> Eve.aq_items = []
     >>> agents_dict = {x.name():x for x in [Alice,Bob,Eve]}
     >>> items_remaining = list('abcdef')
-    >>> cycleAllocation(agents_dict,items_remaining,False)
+    >>> cycle_allocation(agents_dict,items_remaining,False)
     >>> [(x.name(),sorted(x.aq_items)) for x in agents_dict.values()]
-    [('Alice', ['a']), ('Bob', ['d']), ('Eve', ['b'])]
-    >>> cycleAllocation(agents_dict,items_remaining,True)
+    [('Alice', ['d']), ('Bob', ['a']), ('Eve', ['b'])]
+    >>> cycle_allocation(agents_dict,items_remaining,True)
     >>> [(x.name(),sorted(x.aq_items)) for x in agents_dict.values()]
-    [('Alice', ['a', 'e']), ('Bob', ['d', 'f']), ('Eve', ['b', 'c'])]
+    [('Alice', ['d', 'e']), ('Bob', ['a', 'f']), ('Eve', ['b', 'c'])]
     """
     logger.info('\tItems remaining: ' + ','.join(item_list))
     for k, p in sorted(agents_dict.items(), reverse=reverse):
@@ -283,7 +283,7 @@ def cycleAllocation(agents_dict: Dict[str, Allocation], item_list: List[str], re
 def fair_enough(agents: List[AdditiveAgent], items: Bundle) -> Allocation:
     """
     Allocates the given items to the given agents using the 'Fair Enough' algorithm which
-    garantees \gamma \cdot MaxiMin Share for each agent.
+    garantees gamma * MaxiMin Share for each agent.
 
     :param agents: The agents who participate in the allocation.
     :param items: The items which are being allocated.
@@ -293,16 +293,35 @@ def fair_enough(agents: List[AdditiveAgent], items: Bundle) -> Allocation:
         The number of agents should be at least 3.
         There should be no more then 3n+4 items, where n is the number of agents.
 
-    >>> Alice = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Alice")
-    >>> Bob = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Bob")
-    >>> Eve = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Eve")
+    # >>> Alice = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Alice")
+    # >>> Bob = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Bob")
+    # >>> Eve = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Eve")
+    # >>> agents = [Alice,Bob,Eve]
+    # >>> allocation = fair_enough(agents,set("abcdef"))
+    # >>> {agents[i].name():agents[i].value(allocation.get_bundle(i)) for i,_ in enumerate(agents)}
+    # {'Alice': 2, 'Bob': 2, 'Eve': 2}
+    # >>> Alice = AdditiveAgent({"a": .21, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Alice")
+    # >>> Bob = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Bob")
+    # >>> Eve = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Eve")
+    # >>> agents = [Alice,Bob,Eve]
+    # >>> allocation = fair_enough(agents,set("abcdef"))
+    # >>> {agents[i].name():agents[i].value(allocation.get_bundle(i)) for i,_ in enumerate(agents)}
+    # {'Alice': 1, 'Bob': 2, 'Eve': 3}
+    # >>> Alice = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1,"g":1}, name="Alice")
+    # >>> Bob = AdditiveAgent({"a":   1, "b": 1, "c": 1, "d":1,"e":1,"f":1,"g":1}, name="Bob")
+    # >>> Eve = AdditiveAgent({"a":   1, "b": 1, "c": 1, "d":1,"e":1,"f":1,"g":1}, name="Eve")
+    # >>> agents = [Alice,Bob,Eve]
+    # >>> allocation = fair_enough(agents,set("abcdefg"))
+    # >>> {agents[i].name():agents[i].value(allocation.get_bundle(i)) for i,_ in enumerate(agents)}
+    # {'Alice': 2, 'Bob': 2, 'Eve': 2}
+    >>> Alice = AdditiveAgent({"a":1.1, "b":1,"c":1,"d":1,"e":1,"f":1,"g":3.1  ,"h":2.9,"i":2,"j":3,"k":3,"l":1},name="Alice")
+    >>> Bob = AdditiveAgent({"a":  1, "b":1,"c":1,"d":1,"e":1,"f":1,"g":4.4,"h":4.1,"i":2.1,"j":2,"k":2,"l":1},name="Bob")
+    >>> Eve = AdditiveAgent({"a":  1, "b":1,"c":1,"d":1,"e":1,"f":1,"g":4  ,"h":4,"i":2,"j":3.2,"k":2.2,"l":1},name="Eve")
     >>> agents = [Alice,Bob,Eve]
-    >>> allocation = fair_enough(agents,"abcdef")
+    >>> allocation = fair_enough(agents,set("abcdefghijkl"))
     >>> {agents[i].name():agents[i].value(allocation.get_bundle(i)) for i,_ in enumerate(agents)}
-    {'Alice': 2, 'Bob': 2, 'Eve': 2}
+    {'Alice': 9.9, 'Bob': 9.5, 'Eve': 13.2}
     >>> gamma = calc_gamma(3)
-    >>> gamma
-    0.75
     >>> Alice.is_1_of_c_MMS(allocation.get_bundle(0),3, gamma)
     True
     >>> Bob.is_1_of_c_MMS(allocation.get_bundle(1),3, gamma)
@@ -329,7 +348,7 @@ def fair_enough(agents: List[AdditiveAgent], items: Bundle) -> Allocation:
     while agent_eliminated:
         agent_eliminated = False
         for agn_name, agn_v in agents_dict.items():
-            gmms_item = getGmmItem(agn_v, items_remaining, gamma)
+            gmms_item = get_gmm_item(agn_v, items_remaining, gamma)
             if gmms_item:
                 agent_eliminated = True
                 logger.info("\tAgent {} thinks item '{}' is worth at least his G-MMS".format(agn_name, gmms_item))
@@ -344,24 +363,24 @@ def fair_enough(agents: List[AdditiveAgent], items: Bundle) -> Allocation:
     if len(agents_dict) == 2:
         p1, p2 = agents_dict.values()
         logger.info("\tAgents {} split the remaining items into 2-MMS groups".format(p1.name()))
-        part_2 = divide_c_MMS_partition(2, items_remaining, p2.map_good_to_value)
-        val_1, val_2 = p2.value(part_2[0]), p2.value(part_2[1])
+        mms_2_part = divide_c_mms_partition(2, items_remaining, p1.map_good_to_value)
+        val_1, val_2 = p2.value(mms_2_part[0]), p2.value(mms_2_part[1])
 
-        logger.info("\tGroup I: " + ','.join([x[0] for x in part_2[0]]))
-        logger.info("\tValue: {}-{:.3f}\t{}-{:.3f}".format(p1.name(), p1.value(part_2[0]), p2.name(), val_1))
-        logger.info("\tGroup II: " + ','.join([x[0] for x in part_2[1]]))
-        logger.info("\tValue: {}-{:.3f}\t{}-{:.3f}".format(p1.name(), p1.value(part_2[1]), p2.name(), val_2))
+        logger.info("\tGroup I: " + ','.join([x[0] for x in mms_2_part[0]]))
+        logger.info("\tValue: {}-{:.3f}\t{}-{:.3f}".format(p1.name(), p1.value(mms_2_part[0]), p2.name(), val_1))
+        logger.info("\tGroup II: " + ','.join([x[0] for x in mms_2_part[1]]))
+        logger.info("\tValue: {}-{:.3f}\t{}-{:.3f}".format(p1.name(), p1.value(mms_2_part[1]), p2.name(), val_2))
 
-        k1, k2 = 0, 1
+        k1, k2 = 1, 0
         itm_grp_str = "FIRST"
         if val_1 < val_2:
-            k1, k2 = 1, 0
+            k1, k2 = 0, 1
             itm_grp_str = "SECOND"
 
         logger.info("\tAgent {} will take the {} group".format(p2.name(), itm_grp_str))
         for p, k in zip([p1, p2], [k1, k2]):
             agnt_idx = agents.index(p)
-            allocation.set_bundle(agnt_idx, set(part_2[k]))
+            allocation.set_bundle(agnt_idx, set(mms_2_part[k]))
 
         return allocation
     logger.info("\tThere are more then 2 agents left, Stage 2 is skipped")
@@ -375,14 +394,14 @@ def fair_enough(agents: List[AdditiveAgent], items: Bundle) -> Allocation:
         for ag in agents_dict.values():
             ag.aq_items = []
         logger.info("Stage 3")
-        cycleAllocation(agents_dict, tmp_items_list, reverse=False)
+        cycle_allocation(agents_dict, tmp_items_list, reverse=False)
         logger.info("Stage 4")
-        cycleAllocation(agents_dict, tmp_items_list, reverse=True)
+        cycle_allocation(agents_dict, tmp_items_list, reverse=True)
 
         logger.info("Stage 5")
         if tmp_items_list:
             for k, p in sorted(agents_dict.items()):
-                potential_value, bundle_items = getHighestValue(p, tmp_items_list)
+                potential_value, bundle_items = get_highest_value(p, tmp_items_list)
 
                 if potential_value >= gamma * p.mms:
                     logger.info("\tAgent {} took {} with the value of {:.3f}".format(p.name(), ','.join(bundle_items),
@@ -405,6 +424,7 @@ def fair_enough(agents: List[AdditiveAgent], items: Bundle) -> Allocation:
         logger.info("All agents have reached their G-MMS")
         return allocation
 
+    items_remaining.sort()  # For testing purposes
     # Stage 6-7
     logger.info("Stage 6-7")
     iter_count = 0
@@ -412,10 +432,10 @@ def fair_enough(agents: List[AdditiveAgent], items: Bundle) -> Allocation:
         logger.info("Iteration: {}".format(iter_count))
         iter_count += 1
 
-        envy_graph = createEnvyGraph(agents_dict)
-        had_cycle = handleCycles(envy_graph, agents_dict)
+        envy_graph = create_envy_graph(agents_dict)
+        had_cycle = handle_cycles(envy_graph, agents_dict)
         if not had_cycle:
-            handItemToLoser(envy_graph, agents_dict, agents, items_remaining, allocation)
+            hand_item_to_non_envy(envy_graph, agents_dict, agents, items_remaining, allocation)
 
     return allocation
 
