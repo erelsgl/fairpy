@@ -293,27 +293,27 @@ def fair_enough(agents: List[AdditiveAgent], items: Bundle) -> Allocation:
         The number of agents should be at least 3.
         There should be no more then 3n+4 items, where n is the number of agents.
 
-    # >>> Alice = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Alice")
-    # >>> Bob = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Bob")
-    # >>> Eve = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Eve")
-    # >>> agents = [Alice,Bob,Eve]
-    # >>> allocation = fair_enough(agents,set("abcdef"))
-    # >>> {agents[i].name():agents[i].value(allocation.get_bundle(i)) for i,_ in enumerate(agents)}
-    # {'Alice': 2, 'Bob': 2, 'Eve': 2}
-    # >>> Alice = AdditiveAgent({"a": .21, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Alice")
-    # >>> Bob = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Bob")
-    # >>> Eve = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Eve")
-    # >>> agents = [Alice,Bob,Eve]
-    # >>> allocation = fair_enough(agents,set("abcdef"))
-    # >>> {agents[i].name():agents[i].value(allocation.get_bundle(i)) for i,_ in enumerate(agents)}
-    # {'Alice': 1, 'Bob': 2, 'Eve': 3}
-    # >>> Alice = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1,"g":1}, name="Alice")
-    # >>> Bob = AdditiveAgent({"a":   1, "b": 1, "c": 1, "d":1,"e":1,"f":1,"g":1}, name="Bob")
-    # >>> Eve = AdditiveAgent({"a":   1, "b": 1, "c": 1, "d":1,"e":1,"f":1,"g":1}, name="Eve")
-    # >>> agents = [Alice,Bob,Eve]
-    # >>> allocation = fair_enough(agents,set("abcdefg"))
-    # >>> {agents[i].name():agents[i].value(allocation.get_bundle(i)) for i,_ in enumerate(agents)}
-    # {'Alice': 2, 'Bob': 2, 'Eve': 2}
+    >>> Alice = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Alice")
+    >>> Bob = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Bob")
+    >>> Eve = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Eve")
+    >>> agents = [Alice,Bob,Eve]
+    >>> allocation = fair_enough(agents,set("abcdef"))
+    >>> {agents[i].name():agents[i].value(allocation.get_bundle(i)) for i,_ in enumerate(agents)}
+    {'Alice': 2, 'Bob': 2, 'Eve': 2}
+    >>> Alice = AdditiveAgent({"a": .21, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Alice")
+    >>> Bob = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Bob")
+    >>> Eve = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1}, name="Eve")
+    >>> agents = [Alice,Bob,Eve]
+    >>> allocation = fair_enough(agents,set("abcdef"))
+    >>> {agents[i].name():agents[i].value(allocation.get_bundle(i)) for i,_ in enumerate(agents)}
+    {'Alice': 1, 'Bob': 2, 'Eve': 3}
+    >>> Alice = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d":1,"e":1,"f":1,"g":1}, name="Alice")
+    >>> Bob = AdditiveAgent({"a":   1, "b": 1, "c": 1, "d":1,"e":1,"f":1,"g":1}, name="Bob")
+    >>> Eve = AdditiveAgent({"a":   1, "b": 1, "c": 1, "d":1,"e":1,"f":1,"g":1}, name="Eve")
+    >>> agents = [Alice,Bob,Eve]
+    >>> allocation = fair_enough(agents,set("abcdefg"))
+    >>> {agents[i].name():agents[i].value(allocation.get_bundle(i)) for i,_ in enumerate(agents)}
+    {'Alice': 2, 'Bob': 2, 'Eve': 2}
     >>> Alice = AdditiveAgent({"a":1.1, "b":1,"c":1,"d":1,"e":1,"f":1,"g":3.1  ,"h":2.9,"i":2,"j":3,"k":3,"l":1},name="Alice")
     >>> Bob = AdditiveAgent({"a":  1, "b":1,"c":1,"d":1,"e":1,"f":1,"g":4.4,"h":4.1,"i":2.1,"j":2,"k":2,"l":1},name="Bob")
     >>> Eve = AdditiveAgent({"a":  1, "b":1,"c":1,"d":1,"e":1,"f":1,"g":4  ,"h":4,"i":2,"j":3.2,"k":2.2,"l":1},name="Eve")
