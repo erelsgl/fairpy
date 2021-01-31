@@ -18,8 +18,8 @@ Proceedings of EC 2013. 251–-268.
 *Algorithms 1 and 3*. 
 
 * Agnes Cseh, Tamas Fleiner (2018):
-["The complexity of cake cutting with unequal shares"](https://arxiv.org/abs/1709.03152)
-Proceedings of SAGT 2018, pages={19--30}.
+["The complexity of cake cutting with unequal shares"](https://dl.acm.org/doi/abs/10.1145/3380742)
+Proceedings of SAGT 2018, 19--30.
 *Sections 4 and 7*.
 
 * Paul W Goldberg, Alexandros Hollender, Warut Suksompong (2019).
