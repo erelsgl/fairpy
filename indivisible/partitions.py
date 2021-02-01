@@ -49,7 +49,7 @@ def partitions_to_at_most_c(collection:list, c:int):
             yield [ [ first ] ] + smaller
 
 
-def partitions_to_exactly_c(collection: set, c: int):
+def partitions_to_exactly_c(collection: list, c: int):
     """
     Generates all partitions of the given set whose size is exactly c subsets.
     NOTE: This is very inefficient - better to use powerset.
