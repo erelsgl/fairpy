@@ -1,8 +1,8 @@
 from typing import List, Set, Optional, Tuple, Dict
 
-from cake.agents import PiecewiseConstantAgent, Agent
-from cake.improve_ef4_algo.cake import CakeSlice
-from cake.improve_ef4_algo.util import exclude_from_list
+from fairpy.cake.agents import PiecewiseConstantAgent, Agent
+from fairpy.cake.improve_ef4_algo.cake import CakeSlice
+from fairpy.cake.improve_ef4_algo.util import exclude_from_list
 
 
 class Marking(object):

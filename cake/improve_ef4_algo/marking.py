@@ -1,9 +1,9 @@
 from typing import *
 
-from cake.agents import Agent, PiecewiseConstantAgent
-from cake.improve_ef4_algo.allocation import CakeAllocation, Marking
-from cake.improve_ef4_algo.cake import CakeSlice
-from cake.improve_ef4_algo.preference import find_favorite_slice, Preferences
+from fairpy.cake.agents import Agent, PiecewiseConstantAgent
+from fairpy.cake.improve_ef4_algo.allocation import CakeAllocation, Marking
+from fairpy.cake.improve_ef4_algo.cake import CakeSlice
+from fairpy.cake.improve_ef4_algo.preference import find_favorite_slice, Preferences
 
 
 def mark_by_preferences(agent: Agent, preferences: Preferences, marking: Marking,

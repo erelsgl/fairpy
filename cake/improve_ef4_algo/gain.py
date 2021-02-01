@@ -1,10 +1,10 @@
 import itertools
 from typing import List
 
-from cake.agents import Agent, PiecewiseConstantAgent
-from cake.improve_ef4_algo.allocation import CakeAllocation, CakeSlice
-from cake.improve_ef4_algo.domination import get_agent_satisfaction, value_for_slices
-from cake.improve_ef4_algo.util import exclude_from_list
+from fairpy.cake.agents import Agent, PiecewiseConstantAgent
+from fairpy.cake.improve_ef4_algo.allocation import CakeAllocation, CakeSlice
+from fairpy.cake.improve_ef4_algo.domination import get_agent_satisfaction, value_for_slices
+from fairpy.cake.improve_ef4_algo.util import exclude_from_list
 
 
 def get_agent_gain(agent: Agent, other_agents: List[Agent], allocation: CakeAllocation) -> float:

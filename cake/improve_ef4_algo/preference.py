@@ -1,7 +1,7 @@
 from typing import *
 
-from cake.agents import Agent, PiecewiseConstantAgent
-from cake.improve_ef4_algo.cake import CakeSlice
+from fairpy.cake.agents import Agent, PiecewiseConstantAgent
+from fairpy.cake.improve_ef4_algo.cake import CakeSlice
 
 
 class Preferences(object):
