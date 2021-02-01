@@ -17,9 +17,17 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 # # Get the list of requirements from requirements.txt
-with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
-    requirements = f.read().splitlines()
-    requirements = [r for r in requirements if "git+" not in r]
+# with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
+#     requirements = f.read().splitlines()
+#     requirements = [r for r in requirements if "git+" not in r]
+    # NOTE: The above code fails in GitHub actions:
+    #   File "/tmp/pip-req-build-kwpxjwjf/setup.py", line 20, in <module>
+    #     with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
+    #   File "/usr/lib/python3.6/codecs.py", line 897, in open
+    #     file = builtins.open(filename, mode, buffering)
+    # FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pip-req-build-kwpxjwjf/requirements.txt'
+
+requirements = ["numpy","cvxpy","networkx","matplotlib"]
 
 setup(
     name='fairpy',  # Required. Enables intallation with "pip install fairpy".
