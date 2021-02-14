@@ -1,33 +1,9 @@
+#!python3
+
 """
 Fair Enough: Guaranteeing Approximate Maximin Shares
-
-Authors: David Kurokawa, Ariel D. Procaccia, and Junxing Wang
+Authors: David Kurokawa, Ariel D. Procaccia, and Junxing Wang (2018)
 See https://dl.acm.org/doi/10.1145/3140756
-
-@article{10.1145/3140756,
-    author = {Kurokawa, David and Procaccia, Ariel D. and Wang, Junxing},
-    title = {Fair Enough: Guaranteeing Approximate Maximin Shares},
-    year = {2018},
-    issue_date = {March 2018},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
-    volume = {65},
-    number = {2},
-    issn = {0004-5411},
-    url = {https://doi.org/10.1145/3140756},
-    doi = {10.1145/3140756},
-    abstract = {We consider the problem of fairly allocating indivisible goods, focusing on a recently introduced
-    notion of fairness called maximin share guarantee: each player’s value for his allocation should be at least as
-    high as what he can guarantee by dividing the items into as many bundles as there are players and receiving his
-    least desirable bundle. Assuming additive valuation functions, we show that such allocations may not exist, but
-    allocations guaranteeing each player 2/3 of the above value always exist. These theoretical results have direct
-    practical implications.},
-    journal = {J. ACM},
-    month = feb,
-    articleno = {8},
-    numpages = {27},
-    keywords = {Computational fair division}
-}
 
 Programmer: Shai Aharon
 Since:  2021-02
@@ -441,21 +417,10 @@ def fair_enough(agents: List[AdditiveAgent], items: Bundle) -> Allocation:
 
 
 if __name__ == "__main__":
-    import sys
-
-    logger.addHandler(logging.StreamHandler(sys.stdout))
-    logger.setLevel(logging.INFO)
+    # import sys
+    # logger.addHandler(logging.StreamHandler(sys.stdout))
+    # logger.setLevel(logging.INFO)
 
     import doctest
-
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
-
-    # Alice = AdditiveAgent(
-    #     {"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1, "g": 1, "h": 1, "i": 1, "j": 1, "k": 1, "l": 1}, name="Alice")
-    # Bob = AdditiveAgent(
-    #     {"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1, "g": 1, "h": 1, "i": 1, "j": 1, "k": 1, "l": 1}, name="Bob")
-    # Eve = AdditiveAgent(
-    #     {"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1, "g": 1, "h": 1, "i": 1, "j": 1, "k": 1, "l": 1}, name="Eve")
-    # allocation = fair_enough([Alice, Bob, Eve], set("abcdefghikjl"))
-    # print(allocation)
