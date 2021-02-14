@@ -1,9 +1,13 @@
 #!python3
 
 """
-Fair Enough: Guaranteeing Approximate Maximin Shares
-Authors: David Kurokawa, Ariel D. Procaccia, and Junxing Wang (2018)
-See https://dl.acm.org/doi/10.1145/3140756
+An implementation of the 2/3-fraction MMS approximation.
+
+Reference:
+
+    David Kurokawa, Ariel Procaccia, Junxing Wang (2018).
+    ["Fair Enough: Guaranteeing Approximate Maximin Shares"](https://dl.acm.org/doi/abs/10.1145/3140756).
+    Journal of the ACM.   *Algorithm 1.*
 
 Programmer: Shai Aharon
 Since:  2021-02

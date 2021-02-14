@@ -13,10 +13,6 @@ ACM Transactions on Algorithms.   *Algorithms 1, 2.*
 Proceedings of IJCAI 2018.    *Algorithms 1, 2.*
  ** Netanel Albert
 
-* David Kurokawa, Ariel Procaccia, Junxing Wang (2018).
-["Fair Enough: Guaranteeing Approximate Maximin Shares"](https://dl.acm.org/doi/abs/10.1145/3140756).
-Journal of the ACM.   *Algorithm 1.*
-
 * Benjamin Plaut, Tim Roughgarden (2020).
 ["Almost Envy-Freeness with General Valuations"](https://dl.acm.org/doi/abs/10.1145/3140756).
 SIAM Journal on Discrete Mathematics.  *Algorithms 1, 2.*
