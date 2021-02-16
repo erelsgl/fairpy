@@ -93,6 +93,8 @@ class FractionalAllocation:
        agent1's bundle: {x,y,z},  value: 3.0
        agent2's bundle: {x,y,z},  value: 3.0
        <BLANKLINE>
+       >>> A.value_of_fractional_allocation()
+       6.0
        >>> agent3 = AdditiveAgent({'x':1, 'y':2, 'z':3}, name="agent3")
        >>> agent4 = AdditiveAgent({'x':3, 'y':2, 'z':1}, name="agent4")
        >>> B = FractionalAllocation([agent3, agent4], [{'x':0.4, 'y':0, 'z':0.5},{'x':0.6, 'y':1, 'z':0.5}])
@@ -100,6 +102,17 @@ class FractionalAllocation:
        agent3's bundle: {x,z},  value: 1.9
        agent4's bundle: {x,y,z},  value: 4.3
        <BLANKLINE>
+       >>> B.value_of_fractional_allocation()
+       6.2
+       >>> agent3 = AdditiveAgent({'x':1, 'y':-2, 'z':3}, name="agent3")
+       >>> agent4 = AdditiveAgent({'x':3, 'y':2, 'z':-1}, name="agent4")
+       >>> C = FractionalAllocation([agent3, agent4], [{'x':0.4, 'y':0, 'z':0.5},{'x':0.6, 'y':1, 'z':0.5}])
+       >>> print(C)
+       agent3's bundle: {x,z},  value: 1.9
+       agent4's bundle: {x,y,z},  value: 3.3
+       <BLANKLINE>
+       >>> C.value_of_fractional_allocation()
+       5.2
        >>> agent5 = AdditiveAgent({'x':1, 'y':2, 'z':3}, name="agent5")
        >>> agent6 = AdditiveAgent({'x':3, 'y':2, 'z':1}, name="agent6")
        >>> FractionalAllocation([agent5, agent6], [{'x':0.4, 'y':0, 'z':0.5}])
@@ -131,11 +144,12 @@ class FractionalAllocation:
             self.agents = None
             self.map_item_to_fraction = None
 
-    def value_of_fractional_allocation(self):
+    def value_of_fractional_allocation(self) -> float:
         result = 0
         for i_agent, agent in enumerate(self.agents):
                 agent_value = get_value_of_agent_in_alloc(self.agents[i_agent].map_good_to_value, self.map_item_to_fraction[i_agent])
                 result += agent_value
+        return result
 
     def __repr__(self):
         if self.agents is None and self.map_item_to_fraction is None:
@@ -227,6 +241,7 @@ if __name__ == "__main__":
     import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
+
 
 
 

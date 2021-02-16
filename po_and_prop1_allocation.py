@@ -7,81 +7,165 @@ from networkx.algorithms import bipartite, find_cycle
 #Main functions
 def find_fpo_allocation(agents: List[AdditiveAgent], items: Bundle, alloc_y: FractionalAllocation) -> (bipartite, FractionalAllocation):
     """
-    # First example:   ###The problem with returning a graph is that we return an object so we return space in memory so I do not know how to check it
+    # First example:
     Case 1: Only one player(must get everything),Items with positive utility.
     >>> agent1_for_func = AdditiveAgent({"x": 1, "y": 2, "z": 4}, name="agent1")
     >>> list_of_agents_for_func = [agent1_for_func]
-    >>> alloc_y_for_func = Allocation([agent1_for_func], ["xyz"])
-    >>> items_for_func = alloc_y_for_func.get_bundles()
-    >>> utility_for_func = agent1_for_func.get_values()
-    >>> find_fpo_allocation(list_of_agents_for_func,items_for_func,utility_for_func,alloc_y_for_func)
-    (agent1's bundle: {x,y,z},  value: 7,  all values: [1, 2, 4] , )
+    >>> items_for_func ={'x','y','z'}
+    >>> alloc_y_for_func = FractionalAllocation(list_of_agents_for_func, [{'x':1,'y':1, 'z':1}])
+    >>> (Gx,alloc) = find_fpo_allocation(list_of_agents_for_func,items_for_func,alloc_y_for_func)
+    >>> print(Gx.edges())
+    [('agent1', 'x'), ('agent1', 'y'), ('agent1', 'z')]
+    >>> print(Gx.nodes())
+    ['agent1', 'x', 'y', 'z']
+    >>> print(alloc)
+    agent1's bundle: {x,y,z},  value: 7
 
     Case 2: Only one player(must get everything),Items with negative utility.
-    >>> agent1_for_func.set_values([-1,-2,-4])
-    >>> print(agent1_for_func.get_values())
-    >>> find_fpo_allocation(list_of_agents_for_func,items_for_func,utility_for_func,alloc_y_for_func)
-    (agent2's bundle: {x,y,z},  value: -7,  all values: [-1, -2, -4] , )
+    >>> agent1_for_func = AdditiveAgent({"x": -1, "y": -2, "z": -4}, name="agent1")
+    >>> list_of_agents_for_func = [agent1_for_func]
+    >>> (Gx,alloc) = find_fpo_allocation(list_of_agents_for_func,items_for_func,alloc_y_for_func)
+    >>> print(Gx.edges())
+    [('agent1', 'x'), ('agent1', 'y'), ('agent1', 'z')]
+    >>> print(Gx.nodes())
+    ['agent1', 'x', 'y', 'z']
+    >>> print(alloc)
+    agent1's bundle: {x,y,z},  value: -7
 
     Case 3: Only one player(must get everything),Items with negative and positive utilitys.
-    >>> agent1_for_func.set_values([-1,2,-4])
-    >>> find_fpo_allocation(list_of_agents_for_func,items_for_func,utility_for_func,alloc_y_for_func)
-    (agent1's bundle: {x,y,z},  value: -3,  all values: [-1, 2, -4] , )
+    >>> agent1_for_func = AdditiveAgent({"x": -1, "y": 2, "z": -4}, name="agent1")
+    >>> list_of_agents_for_func = [agent1_for_func]
+    >>> (Gx,alloc) = find_fpo_allocation(list_of_agents_for_func,items_for_func,utility_for_func,alloc_y_for_func)
+    >>> print(Gx.edges())
+    [('agent1', 'x'), ('agent1', 'y'), ('agent1', 'z')]
+    >>> print(Gx.nodes())
+    ['agent1', 'x', 'y', 'z']
+    >>> print(alloc)
+    agent1's bundle: {x,y,z},  value: -3
 
-    Fourth example: original y allocation that is already fpo - there is no Pareto improvement so the output will be equal to the input.
-     >>> agent1= AdditiveAgent({"a": -100, "b": -10, "c": -50, "d":-100 ,"e":-70,"f":-100, "g":-200, "h":-40, "i":-30}, name="agent1")
-     >>> agent2= AdditiveAgent({"a": -20, "b": -20, "c": -40, "d":-90 ,"e":-90,"f":-100, "g":-100, "h":-80, "i":-90}, name="agent2")
-     >>> agent3= AdditiveAgent({"a": -10, "b": -30, "c": -30, "d":-40 ,"e":-180,"f":-100, "g":-200, "h":-20, "i":-90}, name="agent3")
-     >>> agent4= AdditiveAgent({"a": -200, "b": -40, "c": -20, "d":-80 ,"e":-300,"f":-100, "g":-100, "h":-60, "i":-180}, name="agent4")
-     >>> agent5= AdditiveAgent({"a": -50, "b": -50, "c": -10, "d":-60 ,"e":-90,"f":-100, "g":-200, "h":-120, "i":-180}, name="agent5")
-     >>> list_of_agents_for_func = [agent1, agent2, agent3, agent4, agent5]
-     >>> utility_for_func=[]
-     >>> for a in list_of_agents_for_func: utility_for_func.append(a.get_values())
-     >>> #! alloc_y_for_func = Allocation([agent1, agent2, agent3,agent4, agent5], ["abcdefghi","abcdefghi","abcdefghi","abcdefghi","abcdefghi"])
-     >>> items_for_func = alloc_y_for_func.get_bundles()
+    Second example:
+    Case 1: original y allocation that is already fpo - there is no Pareto improvement so the output will be equal to the input.Items with positive utility.
+    >>> agent1= AdditiveAgent({"a": 100, "b": 10, "c": 50, "d": 100 ,"e": 70,"f": 100, "g": 300, "h": 40, "i": 30}, name="agent1")
+    >>> agent2= AdditiveAgent({"a": 20, "b": 20, "c": 40, "d": 90 ,"e": 90,"f": 100, "g": 30, "h": 80, "i": 90}, name="agent2")
+    >>> agent3= AdditiveAgent({"a": 10, "b": 30, "c": 30, "d": 40 ,"e": 180,"f": 100, "g": 300, "h": 20, "i": 90}, name="agent3")
+    >>> agent4= AdditiveAgent({"a": 200, "b": 40, "c": 20, "d": 80 ,"e": 300,"f": 100, "g": 30, "h": 60, "i": 180}, name="agent4")
+    >>> agent5= AdditiveAgent({"a": 50, "b": 50, "c": 10, "d": 60 ,"e": 90,"f": 100, "g": 300, "h": 120, "i": 180}, name="agent5")
+    >>> list_of_agents_for_func = [agent1, agent2, agent3, agent4, agent5]
+    >>> items_for_func = {'a','b','c','d','e','f','g','h','i'}
+    >>> alloc_y_for_func = FractionalAllocation(list_of_agents_for_func, [{'a':0,'b':0,'c':1,'d':1,'e':0,'f':0.2,'g':0,'h':0,'i':0},{'a':0,'b':0,'c':0,'d':0,'e':0.8,'f':0.4,'g':0,'h':0,'i':0},{'a':0,'b':0,'c':0,'d':0,'e':0,'f':0.2,'g':1,'h':0,'i':0},{'a':1,'b':0,'c':0,'d':0,'e':0.2,'f':0,'g':0,'h':0,'i':0},{'a':0,'b':1,'c':0,'d':0,'e':0,'f':0.2,'g':0,'h':1,'i':1}])
+    >>> (Gx,alloc) = find_fpo_allocation(list_of_agents_for_func,items_for_func, alloc_y_for_func)
+    >>> print(Gx.edges())
+    [ ('agent1', 'c'), ('agent1', 'd'), ('agent1', 'f'), ('agent2', 'e'), ('agent2', 'f'), ('agent3', 'g'), ('agent3', 'f'), ('agent4', 'a'), ('agent4', 'e'), ('agent5', 'b'), ('agent5', 'f'), ('agent5', 'h'), ('agent5', 'i')]
+    >>> print(Gx.nodes())
+    ['agent1', 'agent1', 'agent3', 'agent4', 'agent5', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']
+    >>> print(alloc)
+    agent1's bundle: {c,d,f},  value: 170.0
+    agent2's bundle: {e,f},  value: 112.0
+    agent3's bundle: {f,g},  value: 320.0
+    agent4's bundle: {a,e},  value: 260.0
+    agent5's bundle: {b,f,h,i},  value: 370.0
+
+    Case 2: original y allocation that is already fpo - there is no Pareto improvement so the output will be equal to the input.Items with negative utility.
+    >>> agent1= AdditiveAgent({"a": -100, "b": -10, "c": -50, "d":-100 ,"e": -70,"f": -100, "g": -200, "h": -40, "i": -30}, name="agent1")
+    >>> agent2= AdditiveAgent({"a": -20, "b": -20, "c": -40, "d": -90 ,"e": -90,"f": -100, "g": -100, "h": -80, "i": -90}, name="agent2")
+    >>> agent3= AdditiveAgent({"a": -10, "b": -30, "c": -30, "d": -40 ,"e": -180,"f": -100, "g": -200, "h": -20, "i": -90}, name="agent3")
+    >>> agent4= AdditiveAgent({"a": -200, "b": -40, "c": -20, "d": -80 ,"e": -300,"f": -100, "g": -100, "h": -60, "i": -180}, name="agent4")
+    >>> agent5= AdditiveAgent({"a": -50, "b": -50, "c": -10, "d": -60 ,"e": -90,"f": -100, "g": -200, "h": -120, "i": -180}, name="agent5")
+    >>> list_of_agents_for_func = [agent1, agent2, agent3, agent4, agent5]
+    >>> items_for_func = {'a','b','c','d','e','f','g','h','i'}
+    >>> alloc_y_for_func = FractionalAllocation(list_of_agents_for_func, [{'a':0,'b':1,'c':0,'d':0,'e':1,'f':0.2,'g':0,'h':0,'i':1},{'a':0,'b':0,'c':0,'d':0,'e':0,'f':0.2,'g':0,'h':0,'i':0},{'a':1,'b':0,'c':0,'d':1,'e':0,'f':0.2,'g':0,'h':1,'i':0},{'a':0,'b':0,'c':0,'d':0,'e':0,'f':0.2,'g':1,'h':0,'i':0},{'a':0,'b':0,'c':1,'d':0,'e':0,'f':0.2,'g':0,'h':0,'i':0}])
+    >>> (Gx,alloc) = find_fpo_allocation(list_of_agents_for_func,items_for_func, alloc_y_for_func)
+    >>> print(Gx.edges())
+    [('agent1', 'b'), ('agent1', 'e'), ('agent1', 'f'), ('agent1', 'i'), ('agent2', 'f'), ('agent3', 'a'), ('agent3', 'd'), ('agent3', 'f'), ('agent3', 'h'), ('agent4', 'f'), ('agent4', 'g'), ('agent5', 'c'), ('agent5', 'f')]
+    >>> print(Gx.nodes())
+    ['agent1', 'agent1', 'agent3', 'agent4', 'agent5', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']
+    >>> print(alloc)
+    agent1's bundle: {b,e,f,i},  value: -130.0
+    agent2's bundle: {f},  value: -20.0
+    agent3's bundle: {a,d,f,h},  value: -90.0
+    agent4's bundle: {f,g},  value: -120.0
+    agent5's bundle: {c,f},  value: -30.0
+
+    Case 3: original y allocation that is already fpo - there is no Pareto improvement so the output will be equal to the input.Items with negative utility.
+    >>> agent1= AdditiveAgent({"a": -100, "b": 10, "c": 50, "d": -100 ,"e": 70,"f": 300, "g": -300, "h": -40, "i": 30}, name="agent1")
+    >>> agent2= AdditiveAgent({"a": 20, "b": 20, "c": -40, "d": 90 ,"e": -90,"f": -100, "g": 300, "h": 80, "i": 90}, name="agent2")
+    >>> agent3= AdditiveAgent({"a": 10, "b": -30, "c": 30, "d": 40 ,"e": 180,"f": 300, "g": 30, "h": 20, "i": -90}, name="agent3")
+    >>> agent4= AdditiveAgent({"a": -200, "b": 40, "c": -20, "d": 80 ,"e": -300,"f": 300, "g": 300, "h": 60, "i": -180}, name="agent4")
+    >>> agent5= AdditiveAgent({"a": 50, "b": 50, "c": 10, "d": 60 ,"e": 90,"f": 100, "g": 300, "h": -120, "i": 180}, name="agent5")
+    >>> list_of_agents_for_func = [agent1, agent2, agent3, agent4, agent5]
+    >>> items_for_func = {'a','b','c','d','e','f','g','h','i'}
+    >>> alloc_y_for_func = FractionalAllocation(list_of_agents_for_func, [{'a':0,'b':0,'c':1,'d':0,'e':0,'f':0.4,'g':0,'h':0,'i':0},{'a':0,'b':0,'c':0,'d':1,'e':0,'f':0,'g':0.5,'h':1,'i':0},{'a':0,'b':0,'c':0,'d':0,'e':1,'f':0.4,'g':0,'h':0,'i':0},{'a':0,'b':0,'c':0,'d':0,'e':0,'f':0,'g':0.5,'h':0,'i':0},{'a':1,'b':1,'c':0,'d':0,'e':0,'f':0.2,'g':0,'h':0,'i':1}])
+    >>> (Gx,alloc) = find_fpo_allocation(list_of_agents_for_func,items_for_func, alloc_y_for_func)
+    >>> print(Gx.edges())
+    [('agent1', 'c'), ('agent1', 'f'), ('agent2', 'd'), ('agent2', 'g'), ('agent2', 'h'), ('agent3', 'e'), ('agent3', 'f'), ('agent4', 'g'), ('agent5', 'c'), ('agent5', 'a'), ('agent5', 'b'), ('agent5', 'f'), ('agent5', 'i')]
+    >>> print(Gx.nodes())
+    ['agent1', 'agent1', 'agent3', 'agent4', 'agent5', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']
+    >>> print(alloc)
+    agent1's bundle: {c,f},  value: 170.0
+    agent2's bundle: {d,g,h},  value: 320.0
+    agent3's bundle: {e,f},  value: 300.0
+    agent4's bundle: {g},  value: 150.0
+    agent5's bundle: {a,b,f,i},  value: 300.0
+
+    Third example: A situation where there is only one fpo division
+    >>> agent1= AdditiveAgent({"a": -100, "b": 10, "c": 50, "d": -100 ,"e": 70,"f": 300, "g": -300, "h": -40, "i": -30}, name="agent1")
+    >>> agent2= AdditiveAgent({"a": 20, "b": -20, "c": -40, "d": 90 ,"e": -90,"f": -100, "g": 300, "h": 80, "i": 90}, name="agent2")
+    >>> list_of_agents_for_func = [agent1, agent2]
+    >>> items_for_func = {'a','b','c','d','e','f','g','h','i'}
+    >>> alloc_y_for_func = FractionalAllocation(list_of_agents_for_func, [{'a':0.5,'b':0.5,'c':0.5,'d':0.5,'e':0.5,'f':0.5,'g':0.5,'h':0.5,'i':0.5}])
+    >>> (Gx,alloc) = find_fpo_allocation(list_of_agents_for_func,items_for_func, alloc_y_for_func)
+    >>> print(Gx.edges())
+    [('agent1', 'c'), ('agent1', 'f'), ('agent2', 'd'), ('agent2', 'g'), ('agent2', 'h'), ('agent3', 'e'), ('agent3', 'f'), ('agent4', 'g'), ('agent5', 'c'), ('agent5', 'a'), ('agent5', 'b'), ('agent5', 'f'), ('agent5', 'i')]
+    >>> print(Gx.nodes())
+    ['agent1', 'agent1', 'agent3', 'agent4', 'agent5', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']
+    >>> print(alloc)
+    agent1's bundle: {b,c,e,f},  value: 430.0
+    agent2's bundle: {a,d,g,h,i},  value: 580.0
+
+    Fourth example: A general situation, in which the new division is indeed a pareto improvement of the original division
+    >>> agent1= AdditiveAgent({"a": -100, "b": 10, "c": 50, "d": -100 ,"e": 70,"f": 100, "g": -300, "h": -40, "i": 30}, name="agent1")
+    >>> agent2= AdditiveAgent({"a": 20, "b": 20, "c": -40, "d": 90 ,"e": -90,"f": -100, "g": 30, "h": 80, "i": 90}, name="agent2")
+    >>> agent3= AdditiveAgent({"a": 10, "b": -30, "c": 30, "d": 40 ,"e": 180,"f": 100, "g": 300, "h": 20, "i": -90}, name="agent3")
+    >>> agent4= AdditiveAgent({"a": -200, "b": 40, "c": -20, "d": 80 ,"e": -300,"f": 100, "g": 30, "h": 60, "i": -180}, name="agent4")
+    >>> agent5= AdditiveAgent({"a": 50, "b": 50, "c": 10, "d": 60 ,"e": 90,"f": -100, "g": 300, "h": -120, "i": 180}, name="agent5")
+    >>> list_of_agents_for_func = [agent1, agent2, agent3, agent4, agent5]
+    >>> items_for_func = {'a','b','c','d','e','f','g','h','i'}
+    >>> alloc_y_for_func = FractionalAllocation(list_of_agents_for_func, [{'a':0.2,'b':0.7,'c':0,'d':0.2,'e':0.9,'f':0.5,'g':0,'h':0.2,'i':0.4},{'a':0.4,'b':0.2,'c':0,'d':0.2,'e':0,'f':0,'g':0.8,'h':0.3,'i':0.1},{'a':0.1,'b':0.1,'c':0.6,'d':0.4,'e':0,'f':0,'g':0.1,'h':0.2,'i':0.4},{'a':0.1,'b':0,'c':0.2,'d':0.1,'e':0.1,'f':0,'g':0.1,'h':0.3,'i':0},{'a':0.2,'b':0,'c':0.2,'d':0.1,'e':0,'f':0.5,'g':0,'h':0,'i':0.1}])
+    >>> (Gx,alloc) = find_fpo_allocation(list_of_agents_for_func,items_for_func, alloc_y_for_func)
+    >>> print(Gx.edges())
+    [('agent1', 'b'), ('agent1', 'e'), ('agent1', 'f'), ('agent1', 'i'), ('agent2', 'd'), ('agent2', 'h'), ('agent3', 'c'), ('agent3', 'g'), ('agent5', 'a'), ('agent5', 'i')]
+    >>> print(Gx.nodes())
+    ['agent1', 'agent1', 'agent3', 'agent4', 'agent5', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']
+    >>> print(alloc)
+    agent1's bundle: {b,e,f,i},  value: 192.0
+    agent2's bundle: {d,h},  value: 170.0
+    agent3's bundle: {c,g},  value: 330.0
+    agent4's bundle: {},  value: 0.0
+    agent5's bundle: {a,i},  value: 158.0
+
     """
-
-    # B = nx.Graph()
-    # # Add nodes with the node attribute "bipartite"
-    # B.add_nodes_from([1, 2, 3, 4], bipartite=0)
-    # B.add_nodes_from(["a", "b", "c"], bipartite=1)
-    # # Add edges only between nodes of opposite node sets
-    # B.add_edges_from([(1, "a"), (1, "b"), (2, "b"), (2, "c"), (3, "c"), (4, "a")])
-    #EdgeView([(1, 'a'), (1, 'b'), (2, 'b'), (2, 'c'), (3, 'c'), (4, 'a')])
-    #NodeView((1, 2, 3, 4, 'a', 'b', 'c'))
-
-    # bipartite_graph = init_graph()
-    # T = {}
-    # while find_cycle(bipartite_graph, source=None, orientation=None) is not None:
-    #     agent = cvxpy.Variable()
-    #     object = cvxpy.Variable()
-    return None, None
+    b = nx.Graph()
+    return (b, None)
 
 
 def find_po_and_prop1_allocation(agents: List[AdditiveAgent], items: Bundle, rights_b: List[List[float]]) -> Allocation:
     """
 
     """
-    # agent1_for_func = AdditiveAgent({"x": 1, "y": 2, "z": 4}, name="agent1")
-    # list_of_agents_for_func = [agent1_for_func]
-    # alloc_y_for_func = Allocation([agent1_for_func], ["xyz"])
-    # items_for_func = alloc_y_for_func.get_bundles()
-    # utility_for_func = agent1_for_func.value(alloc_y_for_func.get_bundle(0))
-    # B1 = nx.Graph()
-    # print(find_fpo_allocation(list_of_agents_for_func, items_for_func, utility_for_func, alloc_y_for_func))
+
 
     return None
 
-#Help functions
+#-----------------Help functions---------------------
 def init_graph() -> bipartite:
-    # b = nx.Graph()
-    # return b
     pass
 
 if __name__ == "__main__":
     import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
+
+
 
 
 
