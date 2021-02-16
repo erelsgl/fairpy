@@ -290,8 +290,6 @@ class MonotoneAgent(Agent):
             return "{} are {} agents with monotone valuations. Desired goods: {}".format(self.name(), self.duplicity, sorted(self.desired_items))
 
 
-
-
 class AdditiveAgent(Agent):
     """
     Represents an agent or several agents with an additive valuation function.
@@ -428,6 +426,7 @@ class AdditiveAgent(Agent):
             return "{} are {} agents with additive valuations: {}".format(self.name(), self.duplicity, values_as_string)
 
 
+
 class BinaryAgent(Agent):
     """
     Represents an agent with binary valuations, or several agents with the same binary valuations.
@@ -504,8 +503,6 @@ class BinaryAgent(Agent):
             return "{} is a binary agent who wants {}".format(self.name(), sorted(self.desired_items))
         else:
             return "{} are {} binary agents who want {}".format(self.name(), self.duplicity, sorted(self.desired_items))
-
-
 
 if __name__ == "__main__":
     import doctest
