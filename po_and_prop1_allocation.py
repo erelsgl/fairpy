@@ -5,6 +5,11 @@ from indivisible.allocations import Allocation, FractionalAllocation
 from networkx.algorithms import bipartite, find_cycle
 
 #Main functions
+
+'''
+This function receives a proportional allocation and returns an allocation that is fpo, meaning that the same allocation 
+has no Paparto fractional improvement.
+'''
 def find_fpo_allocation(agents: List[AdditiveAgent], items: Bundle, alloc_y: FractionalAllocation) -> (bipartite, FractionalAllocation):
     """
     # First example:
@@ -45,6 +50,7 @@ def find_fpo_allocation(agents: List[AdditiveAgent], items: Bundle, alloc_y: Fra
 
     Second example:
     Case 1: original y allocation that is already fpo - there is no Pareto improvement so the output will be equal to the input.Items with positive utility.
+    (example 5 in the second part of the work)
     >>> agent1= AdditiveAgent({"a": 100, "b": 10, "c": 50, "d": 100 ,"e": 70,"f": 100, "g": 300, "h": 40, "i": 30}, name="agent1")
     >>> agent2= AdditiveAgent({"a": 20, "b": 20, "c": 40, "d": 90 ,"e": 90,"f": 100, "g": 30, "h": 80, "i": 90}, name="agent2")
     >>> agent3= AdditiveAgent({"a": 10, "b": 30, "c": 30, "d": 40 ,"e": 180,"f": 100, "g": 300, "h": 20, "i": 90}, name="agent3")
@@ -66,6 +72,7 @@ def find_fpo_allocation(agents: List[AdditiveAgent], items: Bundle, alloc_y: Fra
     agent5's bundle: {b,f,h,i},  value: 370.0
 
     Case 2: original y allocation that is already fpo - there is no Pareto improvement so the output will be equal to the input.Items with negative utility.
+    (example 4 in the second part of the work)
     >>> agent1= AdditiveAgent({"a": -100, "b": -10, "c": -50, "d":-100 ,"e": -70,"f": -100, "g": -200, "h": -40, "i": -30}, name="agent1")
     >>> agent2= AdditiveAgent({"a": -20, "b": -20, "c": -40, "d": -90 ,"e": -90,"f": -100, "g": -100, "h": -80, "i": -90}, name="agent2")
     >>> agent3= AdditiveAgent({"a": -10, "b": -30, "c": -30, "d": -40 ,"e": -180,"f": -100, "g": -200, "h": -20, "i": -90}, name="agent3")
@@ -86,7 +93,8 @@ def find_fpo_allocation(agents: List[AdditiveAgent], items: Bundle, alloc_y: Fra
     agent4's bundle: {f,g},  value: -120.0
     agent5's bundle: {c,f},  value: -30.0
 
-    Case 3: original y allocation that is already fpo - there is no Pareto improvement so the output will be equal to the input.Items with negative utility.
+    Case 3: original y allocation that is already fpo - there is no Pareto improvement so the output will be equal to the input.Items with negative and positive utilitys.
+    (example 6 in the second part of the work)
     >>> agent1= AdditiveAgent({"a": -100, "b": 10, "c": 50, "d": -100 ,"e": 70,"f": 300, "g": -300, "h": -40, "i": 30}, name="agent1")
     >>> agent2= AdditiveAgent({"a": 20, "b": 20, "c": -40, "d": 90 ,"e": -90,"f": -100, "g": 300, "h": 80, "i": 90}, name="agent2")
     >>> agent3= AdditiveAgent({"a": 10, "b": -30, "c": 30, "d": 40 ,"e": 180,"f": 300, "g": 30, "h": 20, "i": -90}, name="agent3")
@@ -123,6 +131,7 @@ def find_fpo_allocation(agents: List[AdditiveAgent], items: Bundle, alloc_y: Fra
     agent2's bundle: {a,d,g,h,i},  value: 580.0
 
     Fourth example: A general situation, in which the new division is indeed a pareto improvement of the original division
+    (example 7 in the second part of the work)
     >>> agent1= AdditiveAgent({"a": -100, "b": 10, "c": 50, "d": -100 ,"e": 70,"f": 100, "g": -300, "h": -40, "i": 30}, name="agent1")
     >>> agent2= AdditiveAgent({"a": 20, "b": 20, "c": -40, "d": 90 ,"e": -90,"f": -100, "g": 30, "h": 80, "i": 90}, name="agent2")
     >>> agent3= AdditiveAgent({"a": 10, "b": -30, "c": 30, "d": 40 ,"e": 180,"f": 100, "g": 300, "h": 20, "i": -90}, name="agent3")
@@ -147,7 +156,11 @@ def find_fpo_allocation(agents: List[AdditiveAgent], items: Bundle, alloc_y: Fra
     b = nx.Graph()
     return (b, None)
 
-def find_po_and_prop1_allocation(agents: List[AdditiveAgent], items: Bundle, rights_b: List[dict]) -> FractionalAllocation:
+'''
+This function gets a list of agents, all the items and the rights of each agent on each item.
+And it returns a whole allocation which is PO and PROP1.
+'''
+def find_po_and_prop1_allocation(agents: List[AdditiveAgent], items: Bundle, rights_b: List[dict]) -> Allocation:
     """
     # First example:
     Case 1: Only one player(must get everything),Items with positive utility.
@@ -179,6 +192,7 @@ def find_po_and_prop1_allocation(agents: List[AdditiveAgent], items: Bundle, rig
 
     Second example:
     Case 1:
+    (example 5 in the second part of the work)
     >>> agent1= AdditiveAgent({"a": 100, "b": 10, "c": 50, "d": 100 ,"e": 70,"f": 100, "g": 300, "h": 40, "i": 30}, name="agent1")
     >>> agent2= AdditiveAgent({"a": 20, "b": 20, "c": 40, "d": 90 ,"e": 90,"f": 100, "g": 30, "h": 80, "i": 90}, name="agent2")
     >>> agent3= AdditiveAgent({"a": 10, "b": 30, "c": 30, "d": 40 ,"e": 180,"f": 100, "g": 300, "h": 20, "i": 90}, name="agent3")
@@ -196,6 +210,7 @@ def find_po_and_prop1_allocation(agents: List[AdditiveAgent], items: Bundle, rig
     agent5's bundle: {b,h,i},  value: 350.0
 
      Case 2: original y allocation that is already fpo - there is no Pareto improvement so the output will be equal to the input.Items with negative utility.
+     (example 4 in the second part of the work)
     >>> agent1= AdditiveAgent({"a": -100, "b": -10, "c": -50, "d":-100 ,"e": -70,"f": -100, "g": -200, "h": -40, "i": -30}, name="agent1")
     >>> agent2= AdditiveAgent({"a": -20, "b": -20, "c": -40, "d": -90 ,"e": -90,"f": -100, "g": -100, "h": -80, "i": -90}, name="agent2")
     >>> agent3= AdditiveAgent({"a": -10, "b": -30, "c": -30, "d": -40 ,"e": -180,"f": -100, "g": -200, "h": -20, "i": -90}, name="agent3")
@@ -213,6 +228,7 @@ def find_po_and_prop1_allocation(agents: List[AdditiveAgent], items: Bundle, rig
     agent5's bundle: {c},  value: -30.0
 
     Case 3: original y allocation that is already fpo - there is no Pareto improvement so the output will be equal to the input.Items with negative utility.
+    (example 6 in the second part of the work)
     >>> agent1= AdditiveAgent({"a": -100, "b": 10, "c": 50, "d": -100 ,"e": 70,"f": 300, "g": -300, "h": -40, "i": 30}, name="agent1")
     >>> agent2= AdditiveAgent({"a": 20, "b": 20, "c": -40, "d": 90 ,"e": -90,"f": -100, "g": 300, "h": 80, "i": 90}, name="agent2")
     >>> agent3= AdditiveAgent({"a": 10, "b": -30, "c": 30, "d": 40 ,"e": 180,"f": 300, "g": 30, "h": 20, "i": -90}, name="agent3")
@@ -241,6 +257,7 @@ def find_po_and_prop1_allocation(agents: List[AdditiveAgent], items: Bundle, rig
     agent2's bundle: {a,d,g,h,i},  value: 580.0
 
     Fourth example: A general situation, in which the new division is indeed a pareto improvement of the original division
+    (example 7 in the second part of the work)
     >>> agent1= AdditiveAgent({"a": -100, "b": 10, "c": 50, "d": -100 ,"e": 70,"f": 100, "g": -300, "h": -40, "i": 30}, name="agent1")
     >>> agent2= AdditiveAgent({"a": 20, "b": 20, "c": -40, "d": 90 ,"e": -90,"f": -100, "g": 30, "h": 80, "i": 90}, name="agent2")
     >>> agent3= AdditiveAgent({"a": 10, "b": -30, "c": 30, "d": 40 ,"e": 180,"f": 100, "g": 300, "h": 20, "i": -90}, name="agent3")
@@ -257,7 +274,8 @@ def find_po_and_prop1_allocation(agents: List[AdditiveAgent], items: Bundle, rig
     agent4's bundle: {},  value: 0.0
     agent5's bundle: {a},  value: 50.0
     """
-    (Gx, fpo_alloc) = find_fpo_allocation(agents, items, rights_b)
+    alloc_y = FractionalAllocation(agents, rights_b)
+    (Gx, fpo_alloc) = find_fpo_allocation(agents, items, alloc_y)
     final_alloc = find_po_and_prop1_allocation(Gx, fpo_alloc)
     return final_alloc
 
@@ -266,7 +284,10 @@ def find_po_and_prop1_allocation(agents: List[AdditiveAgent], items: Bundle, rig
 def init_graph() -> bipartite:
     pass
 
-def find_po_and_prop1_allocation(Gx: bipartite, fpo_alloc: FractionalAllocation) -> FractionalAllocation:
+def find_po_and_prop1_allocation(Gx: bipartite, fpo_alloc: FractionalAllocation) -> Allocation:
+    pass
+
+def FractionalAllocation_to_Allocation(fpo_alloc: FractionalAllocation) -> Allocation:
     pass
 
 if __name__ == "__main__":

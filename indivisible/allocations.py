@@ -83,7 +83,10 @@ def stringify_bundle(bundle: Bundle):
     return "{" + ",".join(sorted(bundle)) + "}"
     # return ",".join(["".join(item) for item in bundle])
 
-
+'''
+A class that represents a fractional allocation, that is, an allocation in which several agents can be given parts of 
+the same object.
+'''
 class FractionalAllocation:
     """
        >>> agent1 = AdditiveAgent({'x':1, 'y':2, 'z':3}, name="agent1")
@@ -131,6 +134,7 @@ class FractionalAllocation:
        <BLANKLINE>
     """
 
+    # constructor
     def __init__(self, agents: List[AdditiveAgent], map_item_to_fraction: List[dict]):
         if len(agents) != len(map_item_to_fraction):
             print("The amount of agents differs from the dictionaries that represent how much each agent received from each item.")
@@ -144,6 +148,7 @@ class FractionalAllocation:
             self.agents = None
             self.map_item_to_fraction = None
 
+    # A method that calculates the value of the whole allocation. Returns float number.
     def value_of_fractional_allocation(self) -> float:
         result = 0
         for i_agent, agent in enumerate(self.agents):
@@ -151,6 +156,7 @@ class FractionalAllocation:
                 result += agent_value
         return result
 
+    # to string
     def __repr__(self):
         if self.agents is None and self.map_item_to_fraction is None:
             return ""
@@ -214,7 +220,15 @@ def check_input(map_item_to_fraction: List[dict]) -> bool:
             return False
     return True
 
+'''
+The function checks which objects the agent received by receiving map_item_to_fraction and then checks whether the value 
+of the part he received from that item is greater than 1 if so he will add it to list another list no, and finally return the list of items.
+'''
 def get_items_of_agent_in_alloc(map_item_to_fraction: dict):
+    """
+    >>> print(get_items_of_agent_in_alloc({'x':0.4, 'y':0, 'z':0.5}))
+    ['x', 'z']
+    """
     result = []
     for key, val in zip(map_item_to_fraction.keys(), map_item_to_fraction.values()):
         if val > 0:
@@ -241,6 +255,7 @@ if __name__ == "__main__":
     import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
+
 
 
 
