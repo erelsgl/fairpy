@@ -224,7 +224,7 @@ def check_input(map_item_to_fraction: List[dict]) -> bool:
 The function checks which objects the agent received by receiving map_item_to_fraction and then checks whether the value 
 of the part he received from that item is greater than 1 if so he will add it to list another list no, and finally return the list of items.
 '''
-def get_items_of_agent_in_alloc(map_item_to_fraction: dict):
+def get_items_of_agent_in_alloc(map_item_to_fraction: dict) -> List:
     """
     >>> print(get_items_of_agent_in_alloc({'x':0.4, 'y':0, 'z':0.5}))
     ['x', 'z']
