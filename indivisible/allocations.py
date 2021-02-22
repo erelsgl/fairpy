@@ -105,7 +105,7 @@ class FractionalAllocation:
        agent3's bundle: {x,z},  value: 1.9
        agent4's bundle: {x,y,z},  value: 4.3
        <BLANKLINE>
-       >>> B.value_of_fractional_allocation()
+       >>> round(B.value_of_fractional_allocation(), 2)
        6.2
        >>> agent3 = AdditiveAgent({'x':1, 'y':-2, 'z':3}, name="agent3")
        >>> agent4 = AdditiveAgent({'x':3, 'y':2, 'z':-1}, name="agent4")
@@ -114,39 +114,35 @@ class FractionalAllocation:
        agent3's bundle: {x,z},  value: 1.9
        agent4's bundle: {x,y,z},  value: 3.3
        <BLANKLINE>
-       >>> C.value_of_fractional_allocation()
+       >>> round(C.value_of_fractional_allocation(), 2)
        5.2
        >>> agent5 = AdditiveAgent({'x':1, 'y':2, 'z':3}, name="agent5")
        >>> agent6 = AdditiveAgent({'x':3, 'y':2, 'z':1}, name="agent6")
-       >>> FractionalAllocation([agent5, agent6], [{'x':0.4, 'y':0, 'z':0.5}])
-       The amount of agents differs from the dictionaries that represent how much each agent received from each item.
+       >>> FractionalAllocation([agent5, agent6], [{'x':0.4, 'y':0, 'z':0.5}]) # doctest: +IGNORE_EXCEPTION_DETAIL
+       Traceback (most recent call last):
+       Exception: The amount of agents differs from the dictionaries that represent how much each agent received from each item.
        <BLANKLINE>
        >>> agent7 = AdditiveAgent({'x':1, 'y':2, 'z':3}, name="agent7")
        >>> agent8 = AdditiveAgent({'x':3, 'y':2, 'z':1}, name="agent8")
-       >>> FractionalAllocation([agent7, agent8], [{'x':0.4, 'y':0, 'z':0.5},{'x':0.4, 'y':0, 'z':0.1},{'x':0.2, 'y':1, 'z':0.4}])
-       The amount of agents differs from the dictionaries that represent how much each agent received from each item.
+       >>> FractionalAllocation([agent7, agent8], [{'x':0.4, 'y':0, 'z':0.5},{'x':0.4, 'y':0, 'z':0.1},{'x':0.2, 'y':1, 'z':0.4}]) # doctest: +IGNORE_EXCEPTION_DETAIL
+       Traceback (most recent call last):
+       Exception: The amount of agents differs from the dictionaries that represent how much each agent received from each item.
        <BLANKLINE>
        >>> agent9 = AdditiveAgent({'x':1, 'y':2, 'z':3}, name="agent9")
        >>> agent10 = AdditiveAgent({'x':3, 'y':2, 'z':1}, name="agent10")
-       >>> FractionalAllocation([agent9, agent10], [{'x':0, 'y':0, 'z':0.5},{'x':0.6, 'y':1, 'z':5}])
-       The values of the fractional allocation of items are not between 0 and 1
-       Invalid input.
+       >>> FractionalAllocation([agent9, agent10], [{'x':0, 'y':0, 'z':0.5},{'x':0.6, 'y':1, 'z':5}]) # doctest: +IGNORE_EXCEPTION_DETAIL
+       Traceback (most recent call last):
+       Exception: The values of the fractional allocation of items are not between 0 and 1
        <BLANKLINE>
     """
 
     # constructor
     def __init__(self, agents: List[AdditiveAgent], map_item_to_fraction: List[dict]):
         if len(agents) != len(map_item_to_fraction):
-            print("The amount of agents differs from the dictionaries that represent how much each agent received from each item.")
-            self.agents = None
-            self.map_item_to_fraction = None
+            raise Exception("The amount of agents differs from the dictionaries that represent how much each agent received from each item.")
         elif check_input(map_item_to_fraction):
             self.agents = agents
             self.map_item_to_fraction = map_item_to_fraction
-        else:
-            print("Invalid input.")
-            self.agents = None
-            self.map_item_to_fraction = None
 
     # A method that calculates the value of the whole allocation. Returns float number.
     def value_of_fractional_allocation(self) -> float:
@@ -156,7 +152,8 @@ class FractionalAllocation:
                 result += agent_value
         return result
 
-    def is_complete_allocation(self):
+    # A method that tests whether the allocation is complete (since all fractions are 0.0 or 1.0)
+    def is_complete_allocation(self) -> bool:
         for d in self.map_item_to_fraction:
             for val in d.values():
                 if val != 0.0 and val != 1.0:
@@ -193,38 +190,38 @@ def check_input(map_item_to_fraction: List[dict]) -> bool:
     True
 
     ### Checks for values that are not in the range of 0 to 1
-    >>> check_input([{'x':0.5, 'y':0.5, 'z':1.9},{'x':0.5, 'y':0.5, 'z':0.5}])
-    The values of the fractional allocation of items are not between 0 and 1
-    False
-    >>> check_input([{'x':0.5, 'y':0.5, 'z':1},{'x':0.5, 'y':0.5, 'z':-0.1}])
-    The values of the fractional allocation of items are not between 0 and 1
-    False
+    >>> check_input([{'x':0.5, 'y':0.5, 'z':1.9},{'x':0.5, 'y':0.5, 'z':0.5}]) # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+    Exception: The values of the fractional allocation of items are not between 0 and 1
+
+    >>> check_input([{'x':0.5, 'y':0.5, 'z':1},{'x':0.5, 'y':0.5, 'z':-0.1}]) # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+    Exception: The values of the fractional allocation of items are not between 0 and 1
 
     ### Checks for items whose sum of parts is greater than 1
-    >>> check_input([{'x':0.7, 'y':0.5, 'z':0.5},{'x':0.9, 'y':0.5, 'z':0.5}])
-    There is an item whose sum of parts is greater than 1
-    False
+    >>> check_input([{'x':0.7, 'y':0.5, 'z':0.5},{'x':0.9, 'y':0.5, 'z':0.5}]) # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+    Exception: There is an item whose sum of parts is greater than 1
+
 
     ### Checks for items that has not been assigned to any agent
-    >>> check_input([{'x':0, 'y':0.5, 'z':0.5},{'x':0, 'y':0.5, 'z':0.5}])
-    There is an item that has not been assigned to any agent
-    False
+    >>> check_input([{'x':0, 'y':0.5, 'z':0.5},{'x':0, 'y':0.5, 'z':0.5}]) # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+    Exception: There is an item that has not been assigned to any agent
+
     """
     sum_value_list = [0] * len(map_item_to_fraction[0])  # Help array
     for i in range(len(map_item_to_fraction)):
         for v, j in zip(map_item_to_fraction[i].values(), range(len(sum_value_list))):
             sum_value_list[j] += v
             if v > 1 or v < 0:
-                print("The values of the fractional allocation of items are not between 0 and 1")
-                return False
+                raise Exception("The values of the fractional allocation of items are not between 0 and 1")
 
     for k in range(len(sum_value_list)):
         if sum_value_list[k] > 1:
-            print("There is an item whose sum of parts is greater than 1")
-            return False
+            raise Exception("There is an item whose sum of parts is greater than 1")
         if sum_value_list[k] == 0:
-            print("There is an item that has not been assigned to any agent")
-            return False
+            raise Exception("There is an item that has not been assigned to any agent")
     return True
 
 '''
