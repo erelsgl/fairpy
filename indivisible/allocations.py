@@ -156,6 +156,13 @@ class FractionalAllocation:
                 result += agent_value
         return result
 
+    def is_complete_allocation(self):
+        for d in self.map_item_to_fraction:
+            for val in d.values():
+                if val != 0.0 and val != 1.0:
+                    return False
+        return True
+
     # to string
     def __repr__(self):
         if self.agents is None and self.map_item_to_fraction is None:
