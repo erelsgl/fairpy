@@ -147,13 +147,13 @@ def find_po_and_prop1_allocation(Gx: bipartite, fpo_alloc: FractionalAllocation,
     >>> G.add_edge(agent5, 'i')
     >>> G.add_edge(agent5, 'f')
     >>> alloc = find_po_and_prop1_allocation(G, alloc_y_for_func, items_for_func)
-    >>> print(alloc)
-    agent1's bundle: {c,d,f},  value: 250.0
-    agent2's bundle: {e},  value: 90.0
-    agent3's bundle: {g},  value: 300.0
-    agent4's bundle: {a},  value: 200.0
-    agent5's bundle: {b,h,i},  value: 350.0
-    <BLANKLINE>
+    >>> # print(alloc)  # Below is ONE possible output.
+    # agent1's bundle: {c,d,f},  value: 250.0
+    # agent2's bundle: {e},  value: 90.0
+    # agent3's bundle: {g},  value: 300.0
+    # agent4's bundle: {a},  value: 200.0
+    # agent5's bundle: {b,h,i},  value: 350.0
+    # <BLANKLINE>
     >>> alloc.is_complete_allocation()
     True
 
@@ -390,8 +390,8 @@ def find_agent_sharing_item(Gx: bipartite, items: Bundle) -> AdditiveAgent:
     >>> G.add_edge(agent5, 'h')
     >>> G.add_edge(agent5, 'i')
     >>> G.add_edge(agent5, 'f')
-    >>> find_agent_sharing_item(G,items_for_func) #the output can be:
-    agent1 is an agent with additive valuations: a=100 b=10 c=50 d=100 e=70 f=100 g=300 h=40 i=30
+    >>> # find_agent_sharing_item(G,items_for_func) #the output can be:
+    # agent1 is an agent with additive valuations: a=100 b=10 c=50 d=100 e=70 f=100 g=300 h=40 i=30
     """
     for i in items:
         neighbors_of_i = [n for n in Gx.neighbors(i)]
