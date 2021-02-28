@@ -1,7 +1,7 @@
 import queue
 import networkx as nx
-from indivisible.agents import AdditiveAgent, Bundle, List
-from indivisible.allocations import FractionalAllocation
+from fairpy.indivisible.agents import AdditiveAgent, Bundle, List
+from fairpy.indivisible.allocations import FractionalAllocation
 from networkx.algorithms import bipartite, find_cycle
 
 #Main functions
@@ -13,8 +13,8 @@ fpo_alloc: Fractional allocation
 items: Group of items of all agents (union)
 
 The function returns as output:
-Fractional allocation which is basically a complete allocation (since all fractions are 0.0 or 1.0)
-Which is PO and PROP1
+Fractional allocation which is an integral allocation (since all fractions are 0.0 or 1.0),
+which is PO and PROP1
 '''
 def find_po_and_prop1_allocation(Gx: bipartite, fpo_alloc: FractionalAllocation, items: Bundle) -> FractionalAllocation:
     """
@@ -304,7 +304,7 @@ def find_po_and_prop1_allocation(Gx: bipartite, fpo_alloc: FractionalAllocation,
     # Check input
     try:
         find_cycle(Gx)
-        raise Exception("There are circles in the given graph")
+        raise Exception("There are cycles in the given graph")
     except nx.NetworkXNoCycle:
         pass
 

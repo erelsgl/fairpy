@@ -1,7 +1,9 @@
+#!python3
+
 import networkx as nx
-from indivisible.agents import AdditiveAgent
-from indivisible.allocations import FractionalAllocation
-from indivisible.po_and_prop1_allocation import find_po_and_prop1_allocation
+from fairpy.indivisible.agents import AdditiveAgent
+from fairpy.indivisible.allocations import FractionalAllocation
+from fairpy.indivisible.po_and_prop1_allocation import find_po_and_prop1_allocation
 
 agent1 = AdditiveAgent({"a": 10, "b": 100, "c": 80, "d": -100}, name="agent1")
 agent2 = AdditiveAgent({"a": 20, "b": 100, "c": -40, "d": 10}, name="agent2")
