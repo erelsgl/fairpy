@@ -13,7 +13,7 @@ Journal of the ACM.   *Algorithm 1.*
 * Haris Aziz, Herve Moulin and Fedor Sandomirskiy (2020).
 ["A polynomial-time algorithm for computing a Pareto optimal and almost proportional allocation"](https://www.sciencedirect.com/science/article/pii/S0167637720301024).
 Operations Research Letters. *Algorithms 1, 2.*
- * [po_and_prop1_allocation](po_and_prop1_allocation), by Tom Latinn.
+  * [po_and_prop1_allocation](po_and_prop1_allocation), by Tom Latinn.
 
 ---
 
