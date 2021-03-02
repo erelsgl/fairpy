@@ -1,9 +1,24 @@
+#!python3
+
+"""
+A skeleton and unit-tests of an algorithm for cake-cutting with unequal shares. Reference:
+
+    Agnes Cseh, Tamas Fleiner (2018):
+    ["The complexity of cake cutting with unequal shares"](https://dl.acm.org/doi/abs/10.1145/3380742)
+    Proceedings of SAGT 2018, 19--30.
+    *Sections 4 and 7*.
+
+Programmer: Ofir Peller
+Since:  2021-02
+"""
+
+
 from fairpy.cake.agents import *
 from fairpy.cake.allocations import *
 from typing import *
 import logging
 
-def proportional_division_with_unequal_shares(agents: List[Agent], agents_demands: dict[str,int], allocation: Allocation, start: float, end: float):
+def proportional_division_with_unequal_shares(agents: List[Agent], agents_demands: Dict[str,int], allocation: Allocation, start: float, end: float):
     """
        An algorithm for proportional cake division, with unequal shares. Best known complexity! 2(n-1)*celling(log2(D)), where D is the value of the whole cake.
        All agents must value the cake with the same value D, which is the sum of their demands.
@@ -87,5 +102,7 @@ def proportional_division_with_unequal_shares(agents: List[Agent], agents_demand
     return
 
 
-def proportional_division_with_irrational_demands(agents: List[Agent], agents_demands: dict[str,float], allocation: Allocation, start: float, end: float):
+def proportional_division_with_irrational_demands(agents: List[Agent], agents_demands: Dict[str,float], allocation: Allocation, start: float, end: float):
     return
+
+

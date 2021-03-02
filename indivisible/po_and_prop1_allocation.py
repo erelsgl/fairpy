@@ -1,3 +1,17 @@
+#!python3
+
+"""
+An implementation of a PO+PROP1 allocation algorithm. Reference:
+
+    Haris Aziz, Herve Moulin and Fedor Sandomirskiy (2020).
+    ["A polynomial-time algorithm for computing a Pareto optimal and almost proportional allocation"](https://www.sciencedirect.com/science/article/pii/S0167637720301024).
+    Operations Research Letters. 
+
+Programmer: Tom Latinn
+Since:  2021-02
+"""
+
+
 import queue
 import networkx as nx
 from fairpy.indivisible.agents import AdditiveAgent, Bundle, List

@@ -1,5 +1,13 @@
 #!python3
 
+"""
+Demonstration of the PO+PROP1 algorithm.
+
+Programmer: Tom Latinn
+Since: 2021-02
+"""
+
+
 import networkx as nx
 from fairpy.indivisible.agents import AdditiveAgent
 from fairpy.indivisible.allocations import FractionalAllocation
