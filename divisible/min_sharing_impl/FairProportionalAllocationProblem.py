@@ -68,10 +68,8 @@ class FairProportionalAllocationProblem(FairAllocationProblem):
          [1.   0.54 0.   0.07]]
         >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 0.0, 1, 1], [1, 1, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fpap.find_allocation_for_graph(g).round(2))
-        [[0.   0.   0.   0.84]
-         [0.   0.   1.   0.15]
-         [1.   1.   0.   0.01]]
+        >>> fpap.find_allocation_for_graph(g).round(2).num_of_sharings()
+        2
         >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 0.0, 1, 1], [1, 1, 1, 1]]
         >>> g = ConsumptionGraph(g1)
         >>> print(fpap.find_allocation_for_graph(g).round(2))
