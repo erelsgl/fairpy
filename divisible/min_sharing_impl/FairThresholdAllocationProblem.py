@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class FairThresholdAllocationProblem(FairAllocationProblem):
     """
-    This class finds a min-sharing allocation
+    Finds a min-sharing allocation
       under the constraint that each agent's value is above some threshold.
     Proportionality is a special case.
 

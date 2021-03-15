@@ -4,6 +4,7 @@ import cvxpy
 
 from fairpy.divisible.ValuationMatrix import ValuationMatrix
 from fairpy.divisible.AllocationMatrix import AllocationMatrix
+from fairpy.divisible.max_product import max_product_allocation
 
 from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
 from fairpy.divisible.min_sharing_impl.FairThresholdAllocationProblem import FairThresholdAllocationProblem
@@ -15,19 +16,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class FairProportionalAllocationProblem(FairThresholdAllocationProblem):
+class FairMaxProductAllocationProblem(FairThresholdAllocationProblem):
     """
-    Finds a proportional allocation with minimum sharing.
-    
-    Proportional allocation definition:
-    V = agents valuation
-    C = all agents properties
-    X = proportional allocation
-    n = the number of the agents
-    For all i: Vi(Xi) ≥ Vi(C) / n
+    Finds a Nash-optimal (aka max-product) allocation with minimum sharing.
 
     >>> v = [[1, 2, 3,4], [4, 5, 6,5], [7, 8, 9,6]]
-    >>> fpap =FairProportionalAllocationProblem(v)
+    >>> fpap =FairMaxProductAllocationProblem(v)
     >>> g1 = [[0.0, 0.0, 0.0, 1], [1, 1, 1, 1], [0.0, 0.0, 0.0, 1]]
     >>> g = ConsumptionGraph(g1)
     >>> print(fpap.find_allocation_for_graph(g))
@@ -43,19 +37,17 @@ class FairProportionalAllocationProblem(FairThresholdAllocationProblem):
     >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 1, 1, 1], [1, 1, 0.0, 1]]
     >>> g = ConsumptionGraph(g1)
     >>> print(fpap.find_allocation_for_graph(g).round(2))
-    [[0.   0.   0.   0.88]
-     [0.   0.46 1.   0.05]
-     [1.   0.54 0.   0.07]]
+    [[0.   0.   0.   0.99]
+     [0.   0.34 1.   0.  ]
+     [1.   0.66 0.   0.  ]]
     >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 0.0, 1, 1], [1, 1, 0.0, 1]]
     >>> g = ConsumptionGraph(g1)
-    >>> fpap.find_allocation_for_graph(g).round(2).num_of_sharings()
-    2
+    >>> print(fpap.find_allocation_for_graph(g))
+    None
     >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 0.0, 1, 1], [1, 1, 1, 1]]
     >>> g = ConsumptionGraph(g1)
-    >>> print(fpap.find_allocation_for_graph(g).round(2))
-    [[0.   0.   0.   0.84]
-     [0.   0.   0.99 0.15]
-     [1.   1.   0.01 0.01]]
+    >>> print(fpap.find_allocation_for_graph(g))
+    None
     >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 1, 1, 1], [1, 0.0, 0.0, 0.0]]
     >>> g = ConsumptionGraph(g1)
     >>> print(fpap.find_allocation_for_graph(g))
@@ -63,26 +55,29 @@ class FairProportionalAllocationProblem(FairThresholdAllocationProblem):
     >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 1, 1, 1], [1, 1, 0.0, 0.0]]
     >>> g = ConsumptionGraph(g1)
     >>> print(fpap.find_allocation_for_graph(g).round(2))
-    [[0.   0.   0.   0.86]
-     [0.   0.47 1.   0.14]
-     [1.   0.53 0.   0.  ]]
+    [[0.   0.   0.   0.99]
+     [0.   0.33 1.   0.01]
+     [1.   0.67 0.   0.  ]]
     >>> v = [ [465,0,535] , [0,0,1000]  ]  # This example exposed a bug in OSQP solver!
-    >>> fpap =FairProportionalAllocationProblem(v)
+    >>> fpap =FairMaxProductAllocationProblem(v)
     >>> g1 = [[1,1,1],[0,0,1]]
     >>> g = ConsumptionGraph(g1)
     >>> print(fpap.find_allocation_for_graph(g).round(3))
-    [[1.    1.    0.391]
-     [0.    0.    0.609]]
+    [[1.   1.   0.07]
+     [0.   0.   0.93]]
     """
 
-    def __init__(self, valuations:ValuationMatrix):
+    def __init__(self, valuations:ValuationMatrix, tolerance=0.01):
         valuations = ValuationMatrix(valuations)
-        thresholds = [
+        mpa = max_product_allocation(valuations)
+        mpa_utilities = mpa.utility_profile(valuations)
+        logger.info("The max-product allocation is:\n%s,\nwith utility profile: %s",mpa,mpa_utilities)
+        thresholds = mpa_utilities * (1-tolerance)
+        logger.info("The thresholds are: %s",thresholds)
+        logger.info("The proportionality thresholds are: %s", [
             sum(valuations[i]) / valuations.num_of_agents 
-            for i in valuations.agents()]
-        logger.info("The proportionality thresholds are: %s",thresholds)
+            for i in valuations.agents()])
         super().__init__(valuations, thresholds)
-
 
 
 if __name__ == '__main__':
@@ -91,7 +86,7 @@ if __name__ == '__main__':
     # logger.setLevel(logging.INFO)
 
     # v = [ [465,0,535] , [0,0,1000]  ]
-    # fpap =FairProportionalAllocationProblem(v)
+    # fpap =FairMaxProductAllocationProblem(v)
     # g1 = [[1,1,1],[0,0,1]]
     # g = ConsumptionGraph(g1)
     # print(fpap.find_allocation_for_graph(g).round(3))

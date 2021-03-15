@@ -13,8 +13,7 @@ logger = logging.getLogger(__name__)
 
 class FairEnvyFreeAllocationProblem(FairAllocationProblem):
     """
-    This class solves an envy-free allocation Problem.
-    It inherits FairAllocationProblem.
+    Finds an envy-free allocation with minimum sharing.
 
     Envy free definition:
     V = agents valuation
