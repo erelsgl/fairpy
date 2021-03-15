@@ -28,20 +28,19 @@ def max_product_allocation(v: ValuationMatrix) -> AllocationMatrix:
 	[[1. 0.]
 	 [0. 1.]]
 	"""
-	if isinstance(v,list):
-		v = ValuationMatrix(v)
+	v = ValuationMatrix(v)
 	z = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
 	feasibility_constraints = [
-		sum([z[i][o] for i in v.agents])==1
-		for o in v.objects
+		sum([z[i][o] for i in v.agents()])==1
+		for o in v.objects()
 	]
 	positivity_constraints = [
-		z[i][o] >= 0 for i in v.agents
-		for o in v.objects
+		z[i][o] >= 0 for i in v.agents()
+		for o in v.objects()
 	]
 	sum_of_logs = sum([
-		cvxpy.log( sum([z[i][o]*v.v[i][o] for o in v.objects]) )
-		for i in v.agents
+		cvxpy.log( sum([z[i][o]*v[i][o] for o in v.objects()]) )
+		for i in v.agents()
 	])
 	prob = cvxpy.Problem(
 		cvxpy.Maximize(sum_of_logs),
@@ -53,8 +52,8 @@ def max_product_allocation(v: ValuationMatrix) -> AllocationMatrix:
 		raise ValueError("Problem is unbounded")
 	else:
 		allocation_matrix = np.array([
-			[np.round(z[i][o].value,3) for o in v.objects]
-			for i in v.agents
+			[np.round(z[i][o].value,3) for o in v.objects()]
+			for i in v.agents()
 		])
 		return AllocationMatrix(allocation_matrix)
 
@@ -73,8 +72,8 @@ def product_of_utilities(z:AllocationMatrix, v:ValuationMatrix)->float:
 	12.0
 	"""
 	sum_of_logs = sum([
-		np.log(sum([v.v[i][o]*z.z[i][o] for o in v.objects]))
-		for i in v.agents
+		np.log(sum([v[i][o]*z[i][o] for o in v.objects()]))
+		for i in v.agents()
 	])
 	return np.exp(sum_of_logs)
 

@@ -6,16 +6,31 @@ from typing import *
 class AllocationMatrix:
 	"""
 	A matrix z in which each row represents an agent, each column represents an object, and z[i][j] is the fraction given to agent i from object j.
+
+	>>> z = AllocationMatrix([[.2,.3,.5],[.8,.7,.5]])
+	>>> z[0,1]
+	0.3
+	>>> z[0]
+	array([0.2, 0.3, 0.5])
+	>>> z
+	[[0.2 0.3 0.5]
+	 [0.8 0.7 0.5]]
 	"""
 
 	def __init__(self, allocation_matrix:np.ndarray):
 		if isinstance(allocation_matrix,list):
 			allocation_matrix = np.array(allocation_matrix)
-		self.z = allocation_matrix
+		elif isinstance(allocation_matrix,AllocationMatrix):
+			allocation_matrix = allocation_matrix._z
+		self._z = allocation_matrix
 		self.num_of_agents = len(allocation_matrix)
-		self.agents = range(self.num_of_agents)
 		self.num_of_objects = len(allocation_matrix[0])
-		self.objects = range(self.num_of_objects)
+
+	def agents(self):
+		return range(self.num_of_agents)
+
+	def objects(self):
+		return range(self.num_of_objects)
 		
 	def num_of_sharings(self):
 		"""
@@ -32,11 +47,17 @@ class AllocationMatrix:
 		num_of_edges = 0
 		for i in self.agents:
 			for o in self.objects:
-				num_of_edges += np.ceil(self.z[i][o])
+				num_of_edges += np.ceil(self._z[i][o])
 		return int(num_of_edges - self.num_of_objects)
 
+	def __getitem__(self, key):
+		if isinstance(key,tuple):
+			return self._z[key[0]][key[1]]
+		else:
+			return self._z[key]
+
 	def __repr__(self):
-		return np.array2string (self.z, max_line_width=100)		
+		return np.array2string (self._z, max_line_width=100)		
 
 
 if __name__ == '__main__':
