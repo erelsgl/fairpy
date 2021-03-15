@@ -1,69 +1,63 @@
 #!python3
 
 """
-Functions for finding fair allocations.
+An implementation of the min-sharing algorithm. Reference:
+
+Fedor Sandomirskiy and Erel Segal-Halevi (2020).
+["Efficient Fair Division with Minimal Sharing"](https://arxiv.org/abs/1908.01669).
+
+Programmer: Eliyahu Sattat
+Since:  2020
 """
 
 import datetime, cvxpy, numpy as np
 from time_limit import time_limit, TimeoutException
 
-from max_product import find_max_product_allocation, product_of_utilities
 from fairpy.divisible.ValuationMatrix import ValuationMatrix
 from fairpy.divisible.AllocationMatrix import AllocationMatrix
 
+from fairpy.divisible.min_sharing_impl.FairProportionalAllocationProblem import FairProportionalAllocationProblem
+from fairpy.divisible.min_sharing_impl.FairEnvyFreeAllocationProblem import FairEnvyFreeAllocationProblem
 
-def find_allocation_with_min_sharing(problem, time_limit_in_seconds=999)->(str,float,int):
-    start = datetime.datetime.now()
-    try:
-        with time_limit(time_limit_in_seconds):
-            problem.find_allocation_with_min_shering()
-            num_sharing = problem.min_sharing_number
-            allocation_matrix = problem.min_sharing_allocation
-            status = "OK" if num_sharing<len(problem.valuation) else "Bug"
-            valuation_matrix = problem.valuation
-            prod_of_utils = product_of_utilities(AllocationMatrix(allocation_matrix), ValuationMatrix(valuation_matrix))
-    except TimeoutException:
-        status = "TimeOut"
-        prod_of_utils = num_sharing = -1
-        allocation_matrix = []
-    except cvxpy.error.SolverError:
-        status = "SolverError"
-        prod_of_utils = num_sharing = -1
-        allocation_matrix = []
-    except SystemError:
-        status = "SystemError"
-        prod_of_utils = num_sharing = -1
-        allocation_matrix = []
-    end = datetime.datetime.now()
-    time_in_seconds = (end - start).total_seconds()
-    return (status, time_in_seconds, num_sharing, allocation_matrix, prod_of_utils)
+def proportional_allocation_with_min_sharing(valuation_matrix: ValuationMatrix)->AllocationMatrix:
+    """
+    Finds a proportional allocation with a minimum number of sharings.
 
+    >>> proportional_allocation_with_min_sharing([ [3] , [5] ])   # single item
+    [[0.5]
+     [0.5]]
+    >>> proportional_allocation_with_min_sharing([ [3,3] , [1,1] ])   # two identical items
+    [[1. 0.]
+     [0. 1.]]
+    >>> proportional_allocation_with_min_sharing([ [3,2] , [1,4] ])   # two different items
+    [[1. 0.]
+     [0. 1.]]
+    """
+    valuation_matrix = ValuationMatrix(valuation_matrix)
+    problem = FairProportionalAllocationProblem(valuation_matrix)  # FairEnvyFreeAllocationProblem
+    problem.find_allocation_with_min_shering()
+    num_sharing = problem.min_sharing_number
+    return AllocationMatrix(problem.min_sharing_allocation)
 
-def find_max_product_allocation_and_sharing(valuation_matrix: np.ndarray, time_limit_in_seconds=999)->(str,float,int):
-    start = datetime.datetime.now()
-    try:
-        with time_limit(time_limit_in_seconds):
-            valuation_matrix = ValuationMatrix(valuation_matrix)
-            allocation_matrix = find_max_product_allocation(valuation_matrix)
-            num_sharing = allocation_matrix.num_of_sharings()
-            prod_of_utils = product_of_utilities(allocation_matrix, valuation_matrix)
-            allocation_matrix = allocation_matrix.z
-            status = "OK"
-    except TimeoutException:
-        status = "TimeOut"
-        prod_of_utils = num_sharing = -1
-        allocation_matrix = []
-    except cvxpy.error.SolverError:
-        status = "SolverError"
-        prod_of_utils = num_sharing = -1
-        allocation_matrix = []
-    except SystemError:
-        status = "SystemError"
-        prod_of_utils = num_sharing = -1
-        allocation_matrix = []
-    end = datetime.datetime.now()
-    time_in_seconds = (end - start).total_seconds()
-    return (status, time_in_seconds, num_sharing, allocation_matrix, prod_of_utils)
+def envyfree_allocation_with_min_sharing(valuation_matrix: ValuationMatrix)->AllocationMatrix:
+    """
+    Finds an envy-free allocation with a minimum number of sharings.
+
+    >>> envyfree_allocation_with_min_sharing([ [3] , [5] ])   # single item
+    [[0.5]
+     [0.5]]
+    >>> envyfree_allocation_with_min_sharing([ [3,3] , [1,1] ])   # two identical items
+    [[1. 0.]
+     [0. 1.]]
+    >>> envyfree_allocation_with_min_sharing([ [3,2] , [1,4] ])   # two different items
+    [[1. 0.]
+     [0. 1.]]
+    """
+    valuation_matrix = ValuationMatrix(valuation_matrix)
+    problem = FairEnvyFreeAllocationProblem(valuation_matrix)  # FairEnvyFreeAllocationProblem
+    problem.find_allocation_with_min_shering()
+    num_sharing = problem.min_sharing_number
+    return AllocationMatrix(problem.min_sharing_allocation)
 
 
 
