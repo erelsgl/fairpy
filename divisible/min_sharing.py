@@ -19,45 +19,38 @@ from fairpy.divisible.AllocationMatrix import AllocationMatrix
 from fairpy.divisible.min_sharing_impl.FairProportionalAllocationProblem import FairProportionalAllocationProblem
 from fairpy.divisible.min_sharing_impl.FairEnvyFreeAllocationProblem import FairEnvyFreeAllocationProblem
 
-def proportional_allocation_with_min_sharing(valuation_matrix: ValuationMatrix)->AllocationMatrix:
+
+def proportional_allocation_with_min_sharing(valuation_matrix: ValuationMatrix, num_of_decimal_digits=3)->AllocationMatrix:
     """
     Finds a proportional allocation with a minimum number of sharings.
 
-    >>> proportional_allocation_with_min_sharing([ [3] , [5] ])   # single item
+    >>> proportional_allocation_with_min_sharing([ [3] , [5] ]).round(2)   # single item
     [[0.5]
      [0.5]]
-    >>> proportional_allocation_with_min_sharing([ [3,3] , [1,1] ])   # two identical items
+    >>> proportional_allocation_with_min_sharing([ [3,3] , [1,1] ]).round(2)   # two identical items
     [[1. 0.]
      [0. 1.]]
-    >>> proportional_allocation_with_min_sharing([ [3,2] , [1,4] ])   # two different items
+    >>> proportional_allocation_with_min_sharing([ [3,2] , [1,4] ]).round(2)   # two different items
     [[1. 0.]
      [0. 1.]]
     """
-    valuation_matrix = ValuationMatrix(valuation_matrix)
-    problem = FairProportionalAllocationProblem(valuation_matrix)  # FairEnvyFreeAllocationProblem
-    problem.find_allocation_with_min_shering()
-    num_sharing = problem.min_sharing_number
-    return AllocationMatrix(problem.min_sharing_allocation)
+    return FairProportionalAllocationProblem(valuation_matrix).find_allocation_with_min_sharing(num_of_decimal_digits)
 
-def envyfree_allocation_with_min_sharing(valuation_matrix: ValuationMatrix)->AllocationMatrix:
+def envyfree_allocation_with_min_sharing(valuation_matrix: ValuationMatrix, num_of_decimal_digits=3)->AllocationMatrix:
     """
     Finds an envy-free allocation with a minimum number of sharings.
 
-    >>> envyfree_allocation_with_min_sharing([ [3] , [5] ])   # single item
+    >>> envyfree_allocation_with_min_sharing([ [3] , [5] ]).round(2)   # single item
     [[0.5]
      [0.5]]
-    >>> envyfree_allocation_with_min_sharing([ [3,3] , [1,1] ])   # two identical items
+    >>> envyfree_allocation_with_min_sharing([ [3,3] , [1,1] ]).round(2)   # two identical items
     [[1. 0.]
      [0. 1.]]
-    >>> envyfree_allocation_with_min_sharing([ [3,2] , [1,4] ])   # two different items
+    >>> envyfree_allocation_with_min_sharing([ [3,2] , [1,4] ]).round(2)   # two different items
     [[1. 0.]
      [0. 1.]]
     """
-    valuation_matrix = ValuationMatrix(valuation_matrix)
-    problem = FairEnvyFreeAllocationProblem(valuation_matrix)  # FairEnvyFreeAllocationProblem
-    problem.find_allocation_with_min_shering()
-    num_sharing = problem.min_sharing_number
-    return AllocationMatrix(problem.min_sharing_allocation)
+    return FairEnvyFreeAllocationProblem(valuation_matrix).find_allocation_with_min_sharing(num_of_decimal_digits)
 
 
 

@@ -21,7 +21,7 @@ class FairAllocationProblem():
         self.graph_generator = GraphGenerator(valuation)
         self.find = False
 
-    def find_allocation_with_min_shering(self)->AllocationMatrix:
+    def find_allocation_with_min_sharing(self, num_of_decimal_digits:int=3)->AllocationMatrix:
         allowed_num_of_sharings = 0
         while (allowed_num_of_sharings < self.num_of_agents) and (not self.find):
             self.graph_generator.set_num_of_sharing_is_allowed(allowed_num_of_sharings)
@@ -38,9 +38,10 @@ class FairAllocationProblem():
                 break
             allowed_num_of_sharings += 1
 
-        self.min_sharing_number = allowed_num_of_sharings
+        alloc.round(num_of_decimal_digits)
+        self.min_sharing_number = alloc.num_of_sharings()
         if self.min_sharing_number >= self.num_of_agents:
-            raise AssertionError("Num of sharings is {} but it should be at most {}", self.min_sharing_number, self.num_of_agents-1)
+            raise AssertionError("Num of sharings is {} but it should be at most {}.\n{}".format(self.min_sharing_number, self.num_of_agents-1,alloc))
         return self.min_sharing_allocation
 
 

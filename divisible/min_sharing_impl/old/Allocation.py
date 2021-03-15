@@ -16,7 +16,7 @@ class Allocation():
     def __repr__(self):
         pass
 
-    def num_of_shering(self)-> int :
+    def num_of_sharing(self)-> int :
         """
         this function calculate the number of sharing in
         the allocation

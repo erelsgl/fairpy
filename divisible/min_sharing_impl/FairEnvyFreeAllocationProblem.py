@@ -41,7 +41,7 @@ class FairEnvyFreeAllocationProblem(FairAllocationProblem):
         4) the sum of every column in the allocation == 1
         each item divided exactly to 100 percent
         and after solving the problem - check if the result are better from the
-        "min_sharing_allocation"  (meaning if the current allocation as lass shering from "min_sharing_allocation")
+        "min_sharing_allocation"  (meaning if the current allocation has fewer sharings from "min_sharing_allocation")
         and update it
         :param consumption_graph: some given consumption graph
         :return: update "min_sharing_allocation"

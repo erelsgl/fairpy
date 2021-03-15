@@ -11,20 +11,20 @@ import numpy as np, cvxpy
 from fairpy.divisible.ValuationMatrix import ValuationMatrix
 from fairpy.divisible.AllocationMatrix import AllocationMatrix
 
-def max_product_allocation(v: ValuationMatrix) -> AllocationMatrix:
+def max_product_allocation(v: ValuationMatrix, num_of_decimal_digits=3) -> AllocationMatrix:
 	"""
 	Find the max-product (aka Max Nash Welfare) allocation.
 	:param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
 	:return allocation_matrix:  a matrix z of a similar shape in which z[i][j] is the fraction allocated to agent i from object j.
 	The allocation should maximize the product (= sum of logs) of utilities
-	>>> max_product_allocation([ [3] , [5] ])   # single item
+	>>> max_product_allocation([ [3] , [5] ]).round(3)   # single item
 	[[0.5]
 	 [0.5]]
-	>>> max_product_allocation([ [3,3] , [1,1] ])   # two identical items
+	>>> max_product_allocation([ [3,3] , [1,1] ]).round(3)   # two identical items
 	[[0.5 0.5]
 	 [0.5 0.5]]
-	>>> max_product_allocation([ [3,2] , [1,4] ])   # two different items
+	>>> max_product_allocation([ [3,2] , [1,4] ]).round(3)   # two different items
 	[[1. 0.]
 	 [0. 1.]]
 	"""
@@ -51,11 +51,7 @@ def max_product_allocation(v: ValuationMatrix) -> AllocationMatrix:
 	elif prob.status == "unbounded":
 		raise ValueError("Problem is unbounded")
 	else:
-		allocation_matrix = np.array([
-			[np.round(z[i][o].value,3) for o in v.objects()]
-			for i in v.agents()
-		])
-		return AllocationMatrix(allocation_matrix)
+		return AllocationMatrix(z.value).round(num_of_decimal_digits)
 
 
 

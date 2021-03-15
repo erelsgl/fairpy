@@ -41,8 +41,8 @@ if __name__ == '__main__':
     print(v)
     start = datetime.datetime.now()
     # THE TEST EXECUTION
-    ans = fpap.find_allocation_with_min_shering()
-    #ans = fpap1.find_allocation_with_min_shering()
+    ans = fpap.find_allocation_with_min_sharing()
+    #ans = fpap1.find_allocation_with_min_sharing()
     print(ans)
     print(is_envy_free(v, ans))
     end = datetime.datetime.now()

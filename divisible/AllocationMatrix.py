@@ -51,6 +51,13 @@ class AllocationMatrix:
 		return int(num_of_edges - self.num_of_objects)
 
 	def round(self, num_digits:int):
+		"""
+		Rounds the allocation to the given number of digits.
+
+		WARNING: The rounding might change the sum of rows and columns.
+		See here http://people.mpi-inf.mpg.de/~doerr/papers/unbimatround.pdf 
+		for an unbiased matrix rounding algorithm
+		"""
 		for i in range(len(self._z)):
 			for j in range(len(self._z[i])):
 				fraction = np.round(self._z[i][j], num_digits)
