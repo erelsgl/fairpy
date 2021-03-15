@@ -1,9 +1,10 @@
 #!python3
 
-from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
-from fairpy.divisible.min_sharing_impl.GraphGenerator import GraphGenerator
 from fairpy.divisible.ValuationMatrix import ValuationMatrix
 from fairpy.divisible.AllocationMatrix import AllocationMatrix
+
+from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
+from fairpy.divisible.min_sharing_impl.GraphGenerator import GraphGenerator
 
 
 import logging
