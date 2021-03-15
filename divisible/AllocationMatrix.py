@@ -31,7 +31,7 @@ class AllocationMatrix:
 
 	def objects(self):
 		return range(self.num_of_objects)
-		
+
 	def num_of_sharings(self):
 		"""
 		Return the number of sharings in this allocation.
@@ -45,8 +45,8 @@ class AllocationMatrix:
 		2
 		"""
 		num_of_edges = 0
-		for i in self.agents:
-			for o in self.objects:
+		for i in self.agents():
+			for o in self.objects():
 				num_of_edges += np.ceil(self._z[i][o])
 		return int(num_of_edges - self.num_of_objects)
 
