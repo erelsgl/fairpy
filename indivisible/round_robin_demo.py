@@ -11,7 +11,6 @@ from fairpy.indivisible.agents import *
 from fairpy.indivisible import round_robin
 
 import logging, sys
-
 round_robin.logger.addHandler(logging.StreamHandler(sys.stdout))
 round_robin.logger.setLevel(logging.INFO)
 

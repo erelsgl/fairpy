@@ -6,6 +6,8 @@ from fairpy.divisible.AllocationMatrix import AllocationMatrix
 from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
 from fairpy.divisible.min_sharing_impl.FairAllocationProblem import FairAllocationProblem
 
+from cvxpy.constraints.constraint import Constraint
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -61,21 +63,21 @@ class FairProportionalAllocationProblem(FairAllocationProblem):
         >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 1, 1, 1], [1, 1, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
         >>> print(fpap.find_allocation_for_graph(g).round(2))
-        [[0.   0.   0.   0.92]
-         [0.   0.39 1.   0.04]
-         [1.   0.61 0.   0.04]]
+        [[0.   0.   0.   0.88]
+         [0.   0.46 1.   0.05]
+         [1.   0.54 0.   0.07]]
         >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 0.0, 1, 1], [1, 1, 0.0, 1]]
-        >>> g = ConsumptionGraph(g1)
-        >>> print(fpap.find_allocation_for_graph(g).round(2))
-        [[0.   0.   0.   0.84]
-         [0.   0.   1.   0.14]
-         [1.   1.   0.   0.01]]
-        >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 0.0, 1, 1], [1, 1, 1, 1]]
         >>> g = ConsumptionGraph(g1)
         >>> print(fpap.find_allocation_for_graph(g).round(2))
         [[0.   0.   0.   0.84]
          [0.   0.   1.   0.15]
          [1.   1.   0.   0.01]]
+        >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 0.0, 1, 1], [1, 1, 1, 1]]
+        >>> g = ConsumptionGraph(g1)
+        >>> print(fpap.find_allocation_for_graph(g).round(2))
+        [[0.   0.   0.   0.84]
+         [0.   0.   0.99 0.15]
+         [1.   1.   0.01 0.01]]
         >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 1, 1, 1], [1, 0.0, 0.0, 0.0]]
         >>> g = ConsumptionGraph(g1)
         >>> print(fpap.find_allocation_for_graph(g))
@@ -83,36 +85,52 @@ class FairProportionalAllocationProblem(FairAllocationProblem):
         >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 1, 1, 1], [1, 1, 0.0, 0.0]]
         >>> g = ConsumptionGraph(g1)
         >>> print(fpap.find_allocation_for_graph(g).round(2))
-        [[0.   0.   0.   0.91]
-         [0.   0.37 1.   0.09]
-         [1.   0.63 0.   0.  ]]
+        [[0.   0.   0.   0.86]
+         [0.   0.47 1.   0.14]
+         [1.   0.53 0.   0.  ]]
+        >>> v = [ [465,0,535] , [0,0,1000]  ]  # This example exposed a bug in OSQP solver!
+        >>> fpap =FairProportionalAllocationProblem(v)
+        >>> g1 = [[1,1,1],[0,0,1]]
+        >>> g = ConsumptionGraph(g1)
+        >>> print(fpap.find_allocation_for_graph(g).round(3))
+        [[1.    1.    0.391]
+         [0.    0.    0.609]]
         """
-        mat = cvxpy.Variable((self.num_of_agents, self.num_of_items))
+        mat = cvxpy.Variable((self.valuation.num_of_agents, self.valuation.num_of_objects))
         constraints = []
         # every var >=0 and if there is no edge the var is zero
         # and proportional condition
-        for i in range(self.num_of_agents):
+        for i in self.valuation.agents():
             count = 0
-            for j in range(self.num_of_items):
+            for j in self.valuation.objects():
                 if (consumption_graph.get_graph()[i][j] == 0):
+                    logger.info("graph[%d][%d]==0",i,j)
                     constraints.append(mat[i][j] == 0)
                 else:
+                    logger.info("graph[%d][%d]>0",i,j)
                     constraints.append(mat[i][j] >= 0)
                 count += mat[i][j] * self.valuation[i][j]
             constraints.append(count >= sum(self.valuation[i]) / self.valuation.num_of_agents)
         # the sum of each column is 1 (the property on each object is 100%)
-        for i in range(self.num_of_items):
+        for i in self.valuation.objects():
             constraints.append(sum(mat[:, i]) == 1)
         objective = cvxpy.Maximize(1)
         prob = cvxpy.Problem(objective, constraints)
+        solver1 = "ECOS"
+        solver2 = "SCS"
+        # See here https://www.cvxpy.org/tutorial/advanced/index.html for a list of supported solvers
+        # CBC, GLPK, GLPK_MI, CPLEX, NAG all fail. 
+        # OSQP violates ==0 constraints.
         try:
-            prob.solve(solver="OSQP")
+            prob.solve(solver=solver1) 
         except cvxpy.SolverError:
+            logger.info("%s solver raised SolverError -- trying %s solver", solver1, solver2)
             prob.solve(solver="SCS")
         if prob.status == 'optimal':
             if mat.value is None:
                 raise ValueError("mat.value is None! prob.status="+prob.status)
-            logger.info("Found a proportional allocation")
+            for constraint in constraints:
+                logger.info("Constraint: %s, violation: %f", constraint, constraint.violation())
             return AllocationMatrix(mat.value)
         else:
             return None
@@ -120,6 +138,16 @@ class FairProportionalAllocationProblem(FairAllocationProblem):
 
 
 if __name__ == '__main__':
+    # import logging, sys
+    # logger.addHandler(logging.StreamHandler(sys.stdout))
+    # logger.setLevel(logging.INFO)
+
+    # v = [ [465,0,535] , [0,0,1000]  ]
+    # fpap =FairProportionalAllocationProblem(v)
+    # g1 = [[1,1,1],[0,0,1]]
+    # g = ConsumptionGraph(g1)
+    # print(fpap.find_allocation_for_graph(g).round(3))
+
     import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))

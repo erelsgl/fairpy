@@ -51,15 +51,15 @@ class FairEnvyFreeAllocationProblem(FairAllocationProblem):
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 0.0], [1, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
         >>> print(fefap.find_allocation_for_graph(g).round(2))
-        [[0.33 1.   0.   0.  ]
-         [0.33 0.   1.   0.  ]
-         [0.33 0.   0.   1.  ]]
+        [[0.34 1.   0.   0.  ]
+         [0.34 0.   1.   0.  ]
+         [0.32 0.   0.   1.  ]]
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 0.0], [1, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
         >>> print(fefap.find_allocation_for_graph(g).round(2))
-        [[0.33 1.   0.   0.  ]
-         [0.33 0.   1.   0.  ]
-         [0.33 0.   0.   1.  ]]
+        [[0.34 1.   0.   0.  ]
+         [0.34 0.   1.   0.  ]
+         [0.32 0.   0.   1.  ]]
         >>> g1 = [[1, 1, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [1, 0.0, 1, 1]]
         >>> g = ConsumptionGraph(g1)
         >>> print(fefap.find_allocation_for_graph(g))
@@ -73,9 +73,9 @@ class FairEnvyFreeAllocationProblem(FairAllocationProblem):
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 1], [1, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
         >>> print(fefap.find_allocation_for_graph(g).round(2))
-        [[0.33 1.   0.   0.  ]
-         [0.22 0.   1.   0.43]
-         [0.45 0.   0.   0.57]]
+        [[0.32 1.   0.   0.  ]
+         [0.25 0.   1.   0.33]
+         [0.43 0.   0.   0.67]]
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 1], [0.0, 0.0, 0.0, 0.0]]
         >>> g = ConsumptionGraph(g1)
         >>> print(fefap.find_allocation_for_graph(g))
@@ -83,37 +83,40 @@ class FairEnvyFreeAllocationProblem(FairAllocationProblem):
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 0.0], [1, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
         >>> print(fefap.find_allocation_for_graph(g).round(2))
-        [[0.33 1.   0.   0.  ]
-         [0.33 0.   1.   0.  ]
-         [0.33 0.   0.   1.  ]]
+        [[0.34 1.   0.   0.  ]
+         [0.34 0.   1.   0.  ]
+         [0.32 0.   0.   1.  ]]
         """
-        mat = cvxpy.Variable((self.num_of_agents, self.num_of_items))
+        mat = cvxpy.Variable((self.valuation.num_of_agents, self.valuation.num_of_objects))
         constraints = []
         # every var >=0 and if there is no edge the var is zero
         # and envy_free condition
-        for i in range(self.num_of_agents):
+        for i in self.valuation.agents():
             agent_sum = 0
-            for j in range(self.num_of_items):
+            for j in self.valuation.objects():
                 agent_sum += mat[i][j] * self.valuation[i][j]
                 if (consumption_graph.get_graph()[i][j] == 0):
                     constraints.append(mat[i][j] == 0)
                 else:
                     constraints.append(mat[i][j] >= 0)
             anther_agent_sum = 0
-            for j in range(self.num_of_agents):
+            for j in self.valuation.agents():
                 anther_agent_sum = 0
-                for k in range(self.num_of_items):
+                for k in self.valuation.objects():
                     anther_agent_sum += mat[j][k] * self.valuation[i][k]
                 constraints.append(agent_sum >= anther_agent_sum)
         # the sum of each column is 1 (the property on each object is 100%)
-        for i in range(self.num_of_items):
+        for i in self.valuation.objects():
             constraints.append(sum(mat[:, i]) == 1)
         objective = cvxpy.Maximize(1)
         prob = cvxpy.Problem(objective, constraints)
+        solver1 = "ECOS"
+        solver2 = "SCS"
+        # See here https://www.cvxpy.org/tutorial/advanced/index.html for a list of supported solvers
         try:
-            prob.solve(solver="OSQP")
+            prob.solve(solver=solver1)
         except cvxpy.SolverError:
-            prob.solve(solver="SCS")
+            prob.solve(solver=solver2)
         if prob.status == 'optimal':
             if mat.value is None:
                 raise ValueError("mat.value is None! prob.status="+prob.status)
