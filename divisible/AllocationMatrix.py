@@ -50,6 +50,15 @@ class AllocationMatrix:
 				num_of_edges += np.ceil(self._z[i][o])
 		return int(num_of_edges - self.num_of_objects)
 
+	def round(self, num_digits:int):
+		for i in range(len(self._z)):
+			for j in range(len(self._z[i])):
+				fraction = np.round(self._z[i][j], num_digits)
+				if fraction==0:
+					fraction=0   # avoid "negative zero"
+				self._z[i][j] = fraction
+		return self
+
 	def __getitem__(self, key):
 		if isinstance(key,tuple):
 			return self._z[key[0]][key[1]]

@@ -4,8 +4,8 @@ import numpy as np
 
 class Allocation():
     """
-    this class represent an Allocation of the object to the
-    agents represent by matrix - if graph[i][j] = x its mean that agent i
+    this class represent an allocation of objects to agents,
+    represented by matrix - if graph[i][j] = x its mean that agent i
     gets x%  from object j
     0 <= graph[i][j] <= 1
     """

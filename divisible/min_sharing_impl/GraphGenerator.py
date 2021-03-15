@@ -18,7 +18,7 @@ class GraphGenerator():
         self.valuation_ratios = ValueRatio(valuation_matrix)
         self.num_of_sharing_is_allowed = self.valuation_matrix.num_of_agents
 
-    def set_num_of_sharing_is_allowed(self , n):
+    def set_num_of_sharing_is_allowed(self, n:int):
         self.num_of_sharing_is_allowed = n
 
 
@@ -149,7 +149,7 @@ class GraphGenerator():
         """
         for code in consumption_graph.generate_all_codes():
             g = self.code_to_consumption_graph(consumption_graph, code)
-            if(g.is_prop(self.valuation_matrix))and(g.get_num_of_sharing() <= self.num_of_sharing_is_allowed):
+            if(g.is_prop(self.valuation_matrix)) and (g.get_num_of_sharing() <= self.num_of_sharing_is_allowed):
                 yield g
 
     def code_to_consumption_graph(self, consumption_graph: ConsumptionGraph, code) -> ConsumptionGraph:

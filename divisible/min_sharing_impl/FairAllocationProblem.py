@@ -8,10 +8,8 @@ from fairpy.divisible.AllocationMatrix import AllocationMatrix
 
 class FairAllocationProblem():
     """
-    this class is abstract class for solve Fair Allocation Problem
-    meaning - get agents valuation and a Fair Allocation
+    ‎This is an abstract class for solving a fair allocation problem.
     """
-
 
     def __init__(self ,valuation:ValuationMatrix):
         valuation = ValuationMatrix(valuation)
@@ -23,17 +21,24 @@ class FairAllocationProblem():
         self.graph_generator = GraphGenerator(valuation)
         self.find = False
 
-    def find_allocation_with_min_shering(self):
-        i = 0
-        while (i < self.num_of_agents) and (not self.find):
-            self.graph_generator.set_num_of_sharing_is_allowed(i)
+    def find_allocation_with_min_shering(self)->AllocationMatrix:
+        allowed_num_of_sharings = 0
+        while (allowed_num_of_sharings < self.num_of_agents) and (not self.find):
+            self.graph_generator.set_num_of_sharing_is_allowed(allowed_num_of_sharings)
             for consumption_graph in self.graph_generator.generate_all_consumption_graph():
-                self.find_allocation_for_graph(consumption_graph)
+                if consumption_graph.get_num_of_sharing() != allowed_num_of_sharings:
+                    continue
+                alloc = self.find_allocation_for_graph(consumption_graph)
+                if alloc is None:
+                    continue
+                self.find = True
+                self.min_sharing_allocation = alloc
+                break
             if self.find:
                 break
-            i += 1
+            allowed_num_of_sharings += 1
 
-        self.min_sharing_number = i
+        self.min_sharing_number = allowed_num_of_sharings
         if self.min_sharing_number >= self.num_of_agents:
             raise AssertionError("Num of sharings is {} but it should be at most {}", self.min_sharing_number, self.num_of_agents-1)
         return self.min_sharing_allocation

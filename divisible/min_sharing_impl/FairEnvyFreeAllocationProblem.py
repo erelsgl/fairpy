@@ -2,7 +2,8 @@
 
 
 import cvxpy
-from fairpy.divisible.min_sharing_impl.Allocation import Allocation
+
+from fairpy.divisible.AllocationMatrix import AllocationMatrix
 from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
 from fairpy.divisible.min_sharing_impl.FairAllocationProblem import FairAllocationProblem
 
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class FairEnvyFreeAllocationProblem(FairAllocationProblem):
     """
-    This class solves Fair Envy Free Allocation Problem.
+    This class solves an envy-free allocation Problem.
     It inherits FairAllocationProblem.
 
     Envy free definition:
@@ -26,10 +27,10 @@ class FairEnvyFreeAllocationProblem(FairAllocationProblem):
         super().__init__(valuation)
 
 
-    def find_allocation_for_graph(self, consumption_graph : ConsumptionGraph):
+    def find_allocation_for_graph(self, consumption_graph: ConsumptionGraph)->AllocationMatrix:
         """
-        this function get a consumption graph and use cvxpy to solve
-        the convex problem to find a envy free allocation.
+        Accepts a consumption graph and tries to find an envy free allocation.
+        Uses cvxpy to solve a linear program.
         the condition for the convex problem is:
         1) each alloc[i][j] >=0 - an agent cant get minus pesent
         from some item
@@ -49,42 +50,42 @@ class FairEnvyFreeAllocationProblem(FairAllocationProblem):
         >>> fefap =FairEnvyFreeAllocationProblem(v)
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 0.0], [1, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fefap.find_allocation_for_graph(g))
-        [[0.333 1.    0.    0.   ]
-         [0.333 0.    1.    0.   ]
-         [0.333 0.    0.    1.   ]]
+        >>> print(fefap.find_allocation_for_graph(g).round(2))
+        [[0.33 1.   0.   0.  ]
+         [0.33 0.   1.   0.  ]
+         [0.33 0.   0.   1.  ]]
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 0.0], [1, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fefap.find_allocation_for_graph(g))
-        [[0.333 1.    0.    0.   ]
-         [0.333 0.    1.    0.   ]
-         [0.333 0.    0.    1.   ]]
+        >>> print(fefap.find_allocation_for_graph(g).round(2))
+        [[0.33 1.   0.   0.  ]
+         [0.33 0.   1.   0.  ]
+         [0.33 0.   0.   1.  ]]
         >>> g1 = [[1, 1, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [1, 0.0, 1, 1]]
         >>> g = ConsumptionGraph(g1)
         >>> print(fefap.find_allocation_for_graph(g))
         None
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 1], [1, 0.0, 0.0, 0.0]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fefap.find_allocation_for_graph(g))
-        [[0.3   1.    0.    0.   ]
-         [0.047 0.    1.    1.   ]
-         [0.653 0.    0.    0.   ]]
+        >>> print(fefap.find_allocation_for_graph(g).round(2))
+        [[0.3  1.   0.   0.  ]
+         [0.05 0.   1.   1.  ]
+         [0.65 0.   0.   0.  ]]
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 1], [1, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fefap.find_allocation_for_graph(g))
-        [[0.329 1.    0.    0.   ]
-         [0.224 0.    1.    0.428]
-         [0.447 0.    0.    0.572]]
+        >>> print(fefap.find_allocation_for_graph(g).round(2))
+        [[0.33 1.   0.   0.  ]
+         [0.22 0.   1.   0.43]
+         [0.45 0.   0.   0.57]]
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 1], [0.0, 0.0, 0.0, 0.0]]
         >>> g = ConsumptionGraph(g1)
         >>> print(fefap.find_allocation_for_graph(g))
         None
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 0.0], [1, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fefap.find_allocation_for_graph(g))
-        [[0.333 1.    0.    0.   ]
-         [0.333 0.    1.    0.   ]
-         [0.333 0.    0.    1.   ]]
+        >>> print(fefap.find_allocation_for_graph(g).round(2))
+        [[0.33 1.   0.   0.  ]
+         [0.33 0.   1.   0.  ]
+         [0.33 0.   0.   1.  ]]
         """
         mat = cvxpy.Variable((self.num_of_agents, self.num_of_items))
         constraints = []
@@ -116,14 +117,12 @@ class FairEnvyFreeAllocationProblem(FairAllocationProblem):
         if prob.status == 'optimal':
             if mat.value is None:
                 raise ValueError("mat.value is None! prob.status="+prob.status)
-            logger.info("Found an allocation")
-            alloc = Allocation(mat.value)
-            alloc.round()
-            self.min_sharing_number = alloc.num_of_shering()
-            self.min_sharing_allocation = alloc.get_allocation()
-            self.find = True
-        # only for doctet:
-        return (mat.value)
+            logger.info("Found an envy-free allocation")
+            return AllocationMatrix(mat.value)
+        else:
+            return None
+
+
 
 if __name__ == '__main__':
     import doctest

@@ -1,14 +1,18 @@
 #!python3
 
 import cvxpy
-from fairpy.divisible.min_sharing_impl.Allocation import Allocation
+
+from fairpy.divisible.AllocationMatrix import AllocationMatrix
 from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
 from fairpy.divisible.min_sharing_impl.FairAllocationProblem import FairAllocationProblem
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 class FairProportionalAllocationProblem(FairAllocationProblem):
     """
-    this class solve Fair Proportional Allocation Problem
+    This class solves a proportional allocation problem.
     she is inherited from FairAllocationProblem
     proportional definition:
     V = agents valuation
@@ -22,7 +26,7 @@ class FairProportionalAllocationProblem(FairAllocationProblem):
         super().__init__(valuation)
 
 
-    def find_proportional_allocation_for_graph(self, consumption_graph: ConsumptionGraph)->Allocation:
+    def find_allocation_for_graph(self, consumption_graph: ConsumptionGraph)->AllocationMatrix:
         """
         Accepts a consumption graph and tries to find a proportional allocation.
         Uses cvxpy to solve a linear program.
@@ -44,48 +48,44 @@ class FairProportionalAllocationProblem(FairAllocationProblem):
         >>> fpap =FairProportionalAllocationProblem(v)
         >>> g1 = [[0.0, 0.0, 0.0, 1], [1, 1, 1, 1], [0.0, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fpap.find_proportional_allocation_for_graph(g))
+        >>> print(fpap.find_allocation_for_graph(g))
         None
         >>> g1 = [[0.0, 0.0, 0.0, 1], [1, 1, 1, 1], [1, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fpap.find_proportional_allocation_for_graph(g))
+        >>> print(fpap.find_allocation_for_graph(g))
         None
         >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 1, 1, 1], [1, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fpap.find_proportional_allocation_for_graph(g))
+        >>> print(fpap.find_allocation_for_graph(g))
         None
         >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 1, 1, 1], [1, 1, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
-        >>> a = fpap.find_proportional_allocation_for_graph(g)
-        >>> print(a.get_allocation())
-        [[0.    0.    0.    0.917]
-         [0.    0.391 1.    0.04 ]
-         [1.    0.609 0.    0.043]]
+        >>> print(fpap.find_allocation_for_graph(g).round(2))
+        [[0.   0.   0.   0.92]
+         [0.   0.39 1.   0.04]
+         [1.   0.61 0.   0.04]]
         >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 0.0, 1, 1], [1, 1, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
-        >>> a = fpap.find_proportional_allocation_for_graph(g)
-        >>> print(a.get_allocation())
-        [[0.    0.    0.    0.845]
-         [0.    0.    1.    0.144]
-         [1.    1.    0.    0.011]]
+        >>> print(fpap.find_allocation_for_graph(g).round(2))
+        [[0.   0.   0.   0.84]
+         [0.   0.   1.   0.14]
+         [1.   1.   0.   0.01]]
         >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 0.0, 1, 1], [1, 1, 1, 1]]
         >>> g = ConsumptionGraph(g1)
-        >>> a = fpap.find_proportional_allocation_for_graph(g)
-        >>> print(a.get_allocation())
-        [[0.    0.    0.    0.843]
-         [0.    0.    0.995 0.148]
-         [1.    1.    0.005 0.009]]
+        >>> print(fpap.find_allocation_for_graph(g).round(2))
+        [[0.   0.   0.   0.84]
+         [0.   0.   1.   0.15]
+         [1.   1.   0.   0.01]]
         >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 1, 1, 1], [1, 0.0, 0.0, 0.0]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fpap.find_proportional_allocation_for_graph(g))
+        >>> print(fpap.find_allocation_for_graph(g))
         None
         >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 1, 1, 1], [1, 1, 0.0, 0.0]]
         >>> g = ConsumptionGraph(g1)
-        >>> a = fpap.find_proportional_allocation_for_graph(g)
-        >>> print(a.get_allocation())
-        [[0.    0.    0.    0.914]
-         [0.    0.369 1.    0.086]
-         [1.    0.631 0.    0.   ]]
+        >>> print(fpap.find_allocation_for_graph(g).round(2))
+        [[0.   0.   0.   0.91]
+         [0.   0.37 1.   0.09]
+         [1.   0.63 0.   0.  ]]
         """
         mat = cvxpy.Variable((self.num_of_agents, self.num_of_items))
         constraints = []
@@ -110,32 +110,13 @@ class FairProportionalAllocationProblem(FairAllocationProblem):
         except cvxpy.SolverError:
             prob.solve(solver="SCS")
         if prob.status == 'optimal':
-            alloc = Allocation(mat.value)
-            alloc.round()
-            return alloc
+            if mat.value is None:
+                raise ValueError("mat.value is None! prob.status="+prob.status)
+            logger.info("Found a proportional allocation")
+            return AllocationMatrix(mat.value)
         else:
             return None
 
-
-
-    def find_allocation_for_graph(self, consumption_graph: ConsumptionGraph):
-        """
-        Accepts a consumption graph and tries to find a proportional allocation using find_proportional_allocation_for_graph.
-        After solving the problem, check if the results are better than the
-        "min_sharing_allocation"  (meaning if the current allocation has lass sharing than "min_sharing_allocation")
-        and update it if needed.
-        :param consumption_graph: some given consumption graph.
-        :return: None (updates "min_sharing_allocation" if needed).
-        """
-        if(consumption_graph.get_num_of_sharing() == self.graph_generator.num_of_sharing_is_allowed):
-            mat = cvxpy.Variable((self.num_of_agents, self.num_of_items))
-            alloc = self.find_proportional_allocation_for_graph(consumption_graph)
-            if alloc is None:
-                return None
-            else:
-                self.min_sharing_number = alloc.num_of_shering()
-                self.min_sharing_allocation = alloc.get_allocation()
-                self.find = True
 
 
 if __name__ == '__main__':
