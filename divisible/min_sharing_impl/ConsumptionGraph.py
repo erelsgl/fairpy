@@ -56,26 +56,26 @@ class ConsumptionGraph():
                 self.__num_of_sharing = num_of_edges - self.num_of_objects
         return self.__num_of_sharing
 
-    def is_prop(self, valuation_matrix:ValuationMatrix) -> bool:
+    def can_be_proportional(self, valuation_matrix:ValuationMatrix) -> bool:
         """
         Checks if this graph can possibly correspond to a proportional allocation.
         Note: from the graph we can only know a necessary condition:
           if every agent gets all the objects he is connected to, his value should be at least 1/n.
         >>> v = [[1,3,5,2],[4,3,2,4]]
         >>> g = ConsumptionGraph([[0,0,1,1],[1,1,0,1]])
-        >>> g.is_prop(ValuationMatrix(v))
+        >>> g.can_be_proportional(ValuationMatrix(v))
         True
         >>> v = [[11,3],[7,7]]
         >>> g = ConsumptionGraph([[0,1],[1,0]])
-        >>> g.is_prop(ValuationMatrix(v))
+        >>> g.can_be_proportional(ValuationMatrix(v))
         False
         >>> v = [[11,3],[7,7]]
         >>> g = ConsumptionGraph([[1,0],[0,1]])
-        >>> g.is_prop(ValuationMatrix(v))
+        >>> g.can_be_proportional(ValuationMatrix(v))
         True
         >>> v = [[11,3],[7,7],[3,6]]
         >>> g = ConsumptionGraph([[0,0],[0,1],[1,1]])
-        >>> g.is_prop(ValuationMatrix(v))
+        >>> g.can_be_proportional(ValuationMatrix(v))
         False
         """
         if self.__calculate_prop == False:

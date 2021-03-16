@@ -28,12 +28,11 @@ def proportional_allocation_with_min_sharing(valuation_matrix: ValuationMatrix, 
     >>> proportional_allocation_with_min_sharing([ [3] , [5] ]).round(2)   # single item
     [[0.5]
      [0.5]]
-    >>> proportional_allocation_with_min_sharing([ [3,3] , [1,1] ]).round(2)   # two identical items
+    >>> proportional_allocation_with_min_sharing([ [3,2] , [1,4] ]).round(2)   # two items
     [[1. 0.]
      [0. 1.]]
-    >>> proportional_allocation_with_min_sharing([ [3,2] , [1,4] ]).round(2)   # two different items
-    [[1. 0.]
-     [0. 1.]]
+    >>> proportional_allocation_with_min_sharing([ [10,18,1,1] , [10,18,1,1] , [10,10,5,5] ]).num_of_sharings()   # three items
+    0
     """
     return FairProportionalAllocationProblem(valuation_matrix).find_allocation_with_min_sharing(num_of_decimal_digits)
 
@@ -44,12 +43,11 @@ def envyfree_allocation_with_min_sharing(valuation_matrix: ValuationMatrix, num_
     >>> envyfree_allocation_with_min_sharing([ [3] , [5] ]).round(2)   # single item
     [[0.5]
      [0.5]]
-    >>> envyfree_allocation_with_min_sharing([ [3,3] , [1,1] ]).round(2)   # two identical items
+    >>> envyfree_allocation_with_min_sharing([ [3,2] , [1,4] ]).round(2)   # two items
     [[1. 0.]
      [0. 1.]]
-    >>> envyfree_allocation_with_min_sharing([ [3,2] , [1,4] ]).round(2)   # two different items
-    [[1. 0.]
-     [0. 1.]]
+    >>> envyfree_allocation_with_min_sharing([ [10,18,1,1] , [10,18,1,1] , [10,10,5,5] ]).num_of_sharings()   # three items
+    1
     """
     return FairEnvyFreeAllocationProblem(valuation_matrix).find_allocation_with_min_sharing(num_of_decimal_digits)
 
@@ -62,12 +60,11 @@ def maxproduct_allocation_with_min_sharing(valuation_matrix: ValuationMatrix, to
     >>> maxproduct_allocation_with_min_sharing([ [3] , [5] ]).round(2)   # single item
     [[0.5]
      [0.5]]
-    >>> maxproduct_allocation_with_min_sharing([ [3,3] , [1,1] ]).round(2)   # two identical items
+    >>> maxproduct_allocation_with_min_sharing([ [3,2] , [1,4] ]).round(2)   # two items
     [[1. 0.]
      [0. 1.]]
-    >>> maxproduct_allocation_with_min_sharing([ [3,2] , [1,4] ]).round(2)   # two different items
-    [[1. 0.]
-     [0. 1.]]
+    >>> maxproduct_allocation_with_min_sharing([ [10,18,1,1] , [10,18,1,1] , [10,10,5,5] ]).num_of_sharings()   # three items
+    2
     """
     return FairMaxProductAllocationProblem(valuation_matrix,tolerance).find_allocation_with_min_sharing(num_of_decimal_digits)
 

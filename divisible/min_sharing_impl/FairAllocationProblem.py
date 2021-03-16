@@ -6,6 +6,7 @@ from fairpy.divisible.AllocationMatrix import AllocationMatrix
 from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
 from fairpy.divisible.min_sharing_impl.GraphGenerator import GraphGenerator
 
+from abc import ABC, abstractmethod
 
 import logging
 logger = logging.getLogger(__name__)
@@ -24,19 +25,27 @@ class FairAllocationProblem():
         self.graph_generator = GraphGenerator(valuation)
         self.find = False
 
+    @abstractmethod
     def fairness_adjective(self)->str:
-        return "fair"   # override in child classes
+        """ 
+        Return an adjective that describes the fairness criterion. For display and logging.
+        """
+        return "fair" 
 
-    def find_allocation_for_graph(self,consumption_graph : ConsumptionGraph)->AllocationMatrix:
-        """ This is overriden in FairProportionalAllocationProblem and FairEnvyFreeAlllocationProblem """
-        return None
+    @abstractmethod
+    def find_allocation_for_graph(self, consumption_graph: ConsumptionGraph)->AllocationMatrix:
+        """ 
+        Find an allocatin that corresponds to the given consumption graph and satisfies the fairness criterion. 
+        :return the allocation, or None if none found.
+        """
+        pass
 
     def find_allocation_with_min_sharing(self, num_of_decimal_digits:int=3)->AllocationMatrix:
         allowed_num_of_sharings = 0
         logger.info("")
         while (allowed_num_of_sharings < self.valuation.num_of_agents) and (not self.find):
             logger.info("Looking for %s allocations with %d sharings", self.fairness_adjective(), allowed_num_of_sharings)
-            self.graph_generator.set_num_of_sharing_is_allowed(allowed_num_of_sharings)
+            self.graph_generator.set_maximum_allowed_num_of_sharings(allowed_num_of_sharings)
             for consumption_graph in self.graph_generator.generate_all_consumption_graph():
                 if consumption_graph.get_num_of_sharing() != allowed_num_of_sharings:
                     continue

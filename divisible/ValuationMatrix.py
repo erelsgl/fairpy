@@ -55,6 +55,9 @@ class ValuationMatrix:
 		else:
 			return self._v[key]
 
+	def equals(self, other)->bool:
+		return np.array_equal(self._v, other._v)		
+
 	def __repr__(self):
 		return np.array2string (self._v, max_line_width=100)		
 

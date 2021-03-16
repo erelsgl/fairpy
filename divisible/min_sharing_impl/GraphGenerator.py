@@ -18,33 +18,36 @@ class GraphGenerator():
         self.valuation_ratios = ValueRatio(valuation_matrix)
         self.num_of_sharing_is_allowed = self.valuation_matrix.num_of_agents
 
-    def set_num_of_sharing_is_allowed(self, n:int):
+    def set_maximum_allowed_num_of_sharings(self, n:int):
         self.num_of_sharing_is_allowed = n
 
 
     def generate_all_consumption_graph(self):
         """
-        Generates all the possible consumption graph for the given valuation matrix.
+        Generates consumption graphs for the given valuation matrix.
         Each graph is represented by a ConsumptionGraph object.
-        :return: generator of all possible graphs.
-        >>> v = [[20,10],[5,4]]
+        Returns only graphs that may correspond to fractionally-Pareto-efficient and proportional allocations.
+        :return: a generator of all possibly fPO+PROP consumption graphs.
+
+        >>> v = [[20,10],[6,4]]   # first agent must get at least 15; second agent at least 5
         >>> gg = GraphGenerator(ValuationMatrix(v))
-        >>> for g in gg.generate_all_consumption_graph():
-        ...      print(g)
+        >>> for g in gg.generate_all_consumption_graph(): print(g)    # [[1,0],[0,1]] not prop; [[0,1],[1,0]] not fPO; [[1,1],[1,1]] too many sharings;
         [[1, 0.0], [1, 1]]
+        >>> v = [[20,10,0],[6,0,4]]
+        >>> gg = GraphGenerator(ValuationMatrix(v))
+        >>> for g in gg.generate_all_consumption_graph(): print(g)    # [[1,0],[0,1]] not prop; [[0,1],[1,0]] not fPO; [[1,1],[1,1]] too many sharings;
+        [[1, 1, 0.0], [1, 0.0, 1]]
         >>> v = [[30,20,10],[5,5,5]]
         >>> gg = GraphGenerator(ValuationMatrix(v))
-        >>> for g in gg.generate_all_consumption_graph():
-        ...      print(g)
+        >>> for g in gg.generate_all_consumption_graph(): print(g)
         [[1, 1, 0.0], [0.0, 1, 1]]
         [[1, 0.0, 0.0], [0.0, 1, 1]]
         [[1, 0.0, 0.0], [1, 1, 1]]
         >>> v = [[30,20,10],[20,15,10],[5,5,5]]
         >>> gg = GraphGenerator(ValuationMatrix(v))
-        >>> # its the same check as ver1 and its work the same (111 count)
-        >>> # it spouse to be 101 graphs i didnt check the correctness of the graphs
-        >>> for g in gg.generate_all_consumption_graph():
-        ...      print(g.get_graph())
+        >>> # It is the same check as ver1 and its work the same (111 count)
+        >>> # I did not check the correctness of the graphs
+        >>> for g in gg.generate_all_consumption_graph(): print(g)
         [[1, 1, 0.0], [0.0, 1, 1], [0.0, 0.0, 1]]
         [[1, 1, 0.0], [0.0, 1, 0.0], [0.0, 0.0, 1]]
         [[1, 1, 0.0], [0.0, 1, 0.0], [0.0, 1, 1]]
@@ -88,7 +91,7 @@ class GraphGenerator():
             for j in self.add_agent_to_graph(i):
                 yield j
 
-    def add_agent(self,genneretor,i):
+    def add_agent(self, genneretor,i):
         """
         this function get generator for all the the graph for i-1 agent
         and generate all the graph for adding agent i
@@ -99,8 +102,7 @@ class GraphGenerator():
         >>> v = [[30,20,10],[20,15,10],[5,5,5]]
         >>> gg = GraphGenerator(ValuationMatrix(v))
         >>> gen = gg.add_agent(a,0)
-        >>> for g in gg.add_agent(gen,1):
-        ...       print(g.get_graph())
+        >>> for g in gg.add_agent(gen,1): print(g)
         [[1, 1, 0.0], [0.0, 1, 1]]
         [[1, 0.0, 0.0], [0.0, 1, 1]]
         [[1, 0.0, 0.0], [1, 1, 1]]
@@ -117,7 +119,7 @@ class GraphGenerator():
 
     def add_agent_to_graph(self, consumption_graph: ConsumptionGraph):
         """
-        :param consumption_graph: : some given ConsumptionGraph that represent agent and there properties
+        :param consumption_graph: some given ConsumptionGraph that represents agents and their allocated objects.
         :return: generator for the all the  graphs from adding agent i to the given graph
         >>> matv = [[40,30,20],[40,30,20],[10,10,10]]
         >>> graph = [[1,1,0],[0,1,1]]
@@ -149,7 +151,7 @@ class GraphGenerator():
         """
         for code in consumption_graph.generate_all_codes():
             g = self.code_to_consumption_graph(consumption_graph, code)
-            if(g.is_prop(self.valuation_matrix)) and (g.get_num_of_sharing() <= self.num_of_sharing_is_allowed):
+            if(g.can_be_proportional(self.valuation_matrix)) and (g.get_num_of_sharing() <= self.num_of_sharing_is_allowed):
                 yield g
 
     def code_to_consumption_graph(self, consumption_graph: ConsumptionGraph, code) -> ConsumptionGraph:

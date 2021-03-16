@@ -7,63 +7,56 @@ Author: Erel Segal-Halevi
 Since:  2021-03
 """
 
-import numpy as np, cvxpy
-from fairpy.divisible.min_sharing import *
-from fairpy.divisible.ValuationMatrix import ValuationMatrix
-from fairpy.divisible.AllocationMatrix import AllocationMatrix
+import logging
+import sys
+
+import cvxpy
+import numpy as np
 
 import fairpy.divisible.min_sharing_impl.FairAllocationProblem as FairAllocationProblem
+from fairpy.divisible.AllocationMatrix import AllocationMatrix
+from fairpy.divisible.min_sharing import proportional_allocation_with_min_sharing, envyfree_allocation_with_min_sharing, maxproduct_allocation_with_min_sharing
+from fairpy.divisible.ValuationMatrix import ValuationMatrix
+from fairpy.divisible.max_product import max_product_allocation
 
-import logging, sys
+from datetime import datetime;  now = datetime.now
+
+
 FairAllocationProblem.logger.addHandler(logging.StreamHandler(sys.stdout))
 FairAllocationProblem.logger.setLevel(logging.INFO)
 
-print("\n## Four goods and three agents, value sum=30 ##")
-v = ValuationMatrix([ [10,18,1,1] , [10,18,1,1] , [10,10,5,5] ])
-print("v = \n",v)
+def demo(title:str, v:ValuationMatrix):
+	print(f"\n## {title} ##")
+	v = ValuationMatrix(v)
+	print("v = \n",v)
+	start = now()
+	z = proportional_allocation_with_min_sharing(v).round(3)
+	print("Allocation:\n",z, "Time: ", now()-start)
+	start = now()
+	z = envyfree_allocation_with_min_sharing(v).round(3)
+	print("Allocation:\n",z, "Time: ", now()-start)
+	start = now()
+	z = max_product_allocation(v).round(3)
+	print("\nAn arbitrary max-product allocation, with ",z.num_of_sharings()," sharings:\n",z, "Time: ", now()-start)
+	start = now()
+	z = maxproduct_allocation_with_min_sharing(v).round(3)
+	print("Allocation:\n",z, "Time: ", now()-start)
 
-z = proportional_allocation_with_min_sharing(v).round(3)
-print("Allocation:\n",z)  # Should have 0 sharings
+demo(
+	"Four objects, three agents. Each criterion has a different minimum number of sharings.",
+	[ [10,18,1,1] , [10,18,1,1] , [10,10,5,5] ])
 
-z = envyfree_allocation_with_min_sharing(v).round(3)
-print("Allocation:\n",z)  # Should have 1 sharing
+demo(
+	"Ten objects, three agents, some zero values",
+	[ [20,10,10, 5,5,0, 3,0,0,0] , [10,20,10, 5,0,5, 0,3,0,0] , [10,10,20, 0,5,5, 0,0,3,0] ])
 
-z = maxproduct_allocation_with_min_sharing(v).round(3)
-print("Allocation:\n",z)  # Should have 2 sharings
-
-
-print("\n## Some hard instances ##")
-v = ValuationMatrix([ [465,0,535] , [0,0,1000]  ])
-print("v = \n",v)
-z = proportional_allocation_with_min_sharing(v).round(3)
-print("z = \n",z)
-
-
-print("\n## Some random instances ##")
-num_of_agents = 4
-num_of_items = 10
-max_item_value = 100
-v = ValuationMatrix(np.random.randint(max_item_value, size=(num_of_agents, num_of_items)))
-print("v = \n",v)
-z = proportional_allocation_with_min_sharing(v).round(3)
-print("z = \n",z)
-
-
-#     v =  [[150., 150. ,150. ,150., 150. ,250.],
-#          [150., 150. ,150. ,150., 150. ,250.],
-#          [150., 150. ,150. ,150., 150. ,250.]]
+# demo(
+# 	"Three objects, two agents. An instance that broke many solvers.",
+# 	[ [465,0,535] , [0,0,1000] ])
 
 
-# fpap = FairEnvyFreeAllocationProblem(v)
-# fpap1 =  FairProportionalAllocationProblem(v)
-# print(v)
-# start = datetime.datetime.now()
-# # THE TEST EXECUTION
-# ans = fpap.find_allocation_with_min_sharing()
-# #ans = fpap1.find_allocation_with_min_sharing()
-# print(ans)
-# print(is_envy_free(v, ans))
-# end = datetime.datetime.now()
-# # print("the number of graph: {}".format(count))
-# print("Total time for {} agents and {} items  :{}".format(num_of_agents, num_of_items, end - start))
-
+# num_of_agents = 4
+# num_of_items = 10
+# max_item_value = 100
+# v = np.random.randint(max_item_value, size=(num_of_agents, num_of_items))
+# demo("A random instance.", v)
