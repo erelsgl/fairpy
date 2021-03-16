@@ -45,7 +45,13 @@ def max_product_allocation(v: ValuationMatrix, num_of_decimal_digits=3) -> Alloc
 	prob = cvxpy.Problem(
 		cvxpy.Maximize(sum_of_logs),
 		feasibility_constraints + positivity_constraints)
-	prob.solve()
+	solver1 = "ECOS"
+	solver2 = "SCS"
+	# See here https://www.cvxpy.org/tutorial/advanced/index.html for a list of supported solvers
+	try:
+		prob.solve(solver=solver1)
+	except cvxpy.SolverError:
+		prob.solve(solver=solver2)
 	if prob.status == "infeasible":
 		raise ValueError("Problem is infeasible")
 	elif prob.status == "unbounded":
@@ -67,10 +73,8 @@ def product_of_utilities(z:AllocationMatrix, v:ValuationMatrix)->float:
 	>>> np.round(product_of_utilities(alloc1, val2),2)
 	12.0
 	"""
-	sum_of_logs = sum([
-		np.log(sum([v[i][o]*z[i][o] for o in v.objects()]))
-		for i in v.agents()
-	])
+	utility_profile = z.utility_profile(v)
+	sum_of_logs = sum([np.log(u) for u in utility_profile])
 	return np.exp(sum_of_logs)
 
 if __name__ == '__main__':

@@ -77,8 +77,12 @@ class FairMaxProductAllocationProblem(FairThresholdAllocationProblem):
         logger.info("The proportionality thresholds are: %s", [
             sum(valuations[i]) / valuations.num_of_agents 
             for i in valuations.agents()])
+        self.tolerance = tolerance
         super().__init__(valuations, thresholds)
 
+
+    def fairness_adjective(self)->str:
+        return "{}-max-product".format((1-self.tolerance))
 
 if __name__ == '__main__':
     # import logging, sys

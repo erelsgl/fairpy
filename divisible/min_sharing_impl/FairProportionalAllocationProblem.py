@@ -83,6 +83,8 @@ class FairProportionalAllocationProblem(FairThresholdAllocationProblem):
         logger.info("The proportionality thresholds are: %s",thresholds)
         super().__init__(valuations, thresholds)
 
+    def fairness_adjective(self)->str:
+        return "proportional"
 
 
 if __name__ == '__main__':

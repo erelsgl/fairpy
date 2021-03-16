@@ -24,9 +24,18 @@ class FairAllocationProblem():
         self.graph_generator = GraphGenerator(valuation)
         self.find = False
 
+    def fairness_adjective(self)->str:
+        return "fair"   # override in child classes
+
+    def find_allocation_for_graph(self,consumption_graph : ConsumptionGraph)->AllocationMatrix:
+        """ This is overriden in FairProportionalAllocationProblem and FairEnvyFreeAlllocationProblem """
+        return None
+
     def find_allocation_with_min_sharing(self, num_of_decimal_digits:int=3)->AllocationMatrix:
         allowed_num_of_sharings = 0
+        logger.info("")
         while (allowed_num_of_sharings < self.valuation.num_of_agents) and (not self.find):
+            logger.info("Looking for %s allocations with %d sharings", self.fairness_adjective(), allowed_num_of_sharings)
             self.graph_generator.set_num_of_sharing_is_allowed(allowed_num_of_sharings)
             for consumption_graph in self.graph_generator.generate_all_consumption_graph():
                 if consumption_graph.get_num_of_sharing() != allowed_num_of_sharings:
@@ -36,7 +45,8 @@ class FairAllocationProblem():
                     continue
                 self.find = True
                 self.min_sharing_allocation = alloc
-                logger.info("Found allocation for consumption graph \n%s\nwith %d allowed sharings:\n%s",consumption_graph, allowed_num_of_sharings,alloc)
+                logger.info(" -- Found an allocation with %d sharings, for consumption graph: \n%s", allowed_num_of_sharings, consumption_graph)
+                logger.debug("-- Unrounded allocation:\n%s", alloc)
                 break
             if self.find:
                 break
@@ -49,7 +59,3 @@ class FairAllocationProblem():
         return self.min_sharing_allocation
 
 
-
-    def find_allocation_for_graph(self,consumption_graph : ConsumptionGraph):
-        """ This is overriden in FairProportionalAllocationProblem and FairEnvyFreeAlllocationProblem """
-        pass

@@ -25,6 +25,8 @@ class FairEnvyFreeAllocationProblem(FairAllocationProblem):
     def __init__(self, valuation):
         super().__init__(valuation)
 
+    def fairness_adjective(self)->str:
+        return "envy-free"
 
     def find_allocation_for_graph(self, consumption_graph: ConsumptionGraph)->AllocationMatrix:
         """
