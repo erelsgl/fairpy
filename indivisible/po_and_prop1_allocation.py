@@ -6,6 +6,7 @@ An implementation of a PO+PROP1 allocation algorithm. Reference:
     Haris Aziz, Herve Moulin and Fedor Sandomirskiy (2020).
     ["A polynomial-time algorithm for computing a Pareto optimal and almost proportional allocation"](https://www.sciencedirect.com/science/article/pii/S0167637720301024).
     Operations Research Letters. 
+    * Algorithm 1, starting at step 3.
 
 Programmer: Tom Latinn
 Since:  2021-02
@@ -15,23 +16,25 @@ Since:  2021-02
 import queue
 import networkx as nx
 from fairpy.indivisible.agents import AdditiveAgent, Bundle, List
-from fairpy.indivisible.allocations import FractionalAllocation
+from fairpy.indivisible.allocations_fractional import FractionalAllocation
 from networkx.algorithms import bipartite, find_cycle
 
 #Main functions
 
-'''
-The function receives as input:
-Gx - bipartite graph without circles
-fpo_alloc: Fractional allocation
-items: Group of items of all agents (union)
-
-The function returns as output:
-Fractional allocation which is an integral allocation (since all fractions are 0.0 or 1.0),
-which is PO and PROP1
-'''
 def find_po_and_prop1_allocation(Gx: bipartite, fpo_alloc: FractionalAllocation, items: Bundle) -> FractionalAllocation:
     """
+    This function implements the algorithm starting at step 3.
+
+    INPUT:
+    * Gx - An acyclic consumption graph: a bipartite graph describing which agent consumes which object. 
+    * fpo_alloc: A fractionally-Pareto-optimal fractional allocation corresponding to the given consumption graph.
+        NOTE: Converting a general allocation to an fPO allocation with an acyclic consumption graph should be done by a different algorithm in a previous step (step 2).
+    * items: Set of items to allocate.
+
+    OUTPUT:
+    * Fractional allocation which is an integral allocation (since all fractions are 0.0 or 1.0),
+    which is PO and PROP1
+
     First example:
     Case 1: Only one player(must get everything),Items with positive utility.
     >>> agent1 = AdditiveAgent({"x": 1, "y": 2, "z": 4}, name="agent1")
@@ -98,21 +101,12 @@ def find_po_and_prop1_allocation(Gx: bipartite, fpo_alloc: FractionalAllocation,
     >>> agent1 = AdditiveAgent({"a": 10, "b": 100, "c": 80, "d": -100}, name="agent1")
     >>> agent2 = AdditiveAgent({"a": 20, "b": 100, "c": -40, "d": 10}, name="agent2")
     >>> G = nx.Graph()
-    >>> G.add_node(agent1)
-    >>> G.add_node(agent2)
-    >>> G.add_node('a')
-    >>> G.add_node('b')
-    >>> G.add_node('c')
-    >>> G.add_node('d')
-    >>> G.add_edge(agent1, 'b')
-    >>> G.add_edge(agent1, 'c')
-    >>> G.add_edge(agent2, 'a')
-    >>> G.add_edge(agent2, 'b')
-    >>> G.add_edge(agent2, 'd')
-    >>> items_for_func = {'a', 'b', 'c', 'd'}
-    >>> list_of_agents_for_func = [agent1, agent2]
-    >>> alloc_y_for_func = FractionalAllocation(list_of_agents_for_func, [{'a':0.0,'b':0.3,'c':1.0,'d':0.0},{'a':1.0,'b':0.7,'c':0.0,'d':1.0}])
-    >>> alloc = find_po_and_prop1_allocation(G, alloc_y_for_func, items_for_func)
+    >>> all_agents = [agent1, agent2]
+    >>> all_items = {'a', 'b', 'c', 'd'}
+    >>> G.add_nodes_from(all_agents + list(all_items))
+    >>> G.add_edges_from([[agent1, 'b'], [agent1, 'c'], [agent2, 'a'], [agent2, 'b'], [agent2, 'd']])
+    >>> alloc_y_for_func = FractionalAllocation(all_agents, [{'a':0.0,'b':0.3,'c':1.0,'d':0.0},{'a':1.0,'b':0.7,'c':0.0,'d':1.0}])
+    >>> alloc = find_po_and_prop1_allocation(G, alloc_y_for_func, all_items)
     >>> print(alloc)
     agent1's bundle: {b,c},  value: 180.0
     agent2's bundle: {a,d},  value: 30.0
@@ -322,7 +316,7 @@ def find_po_and_prop1_allocation(Gx: bipartite, fpo_alloc: FractionalAllocation,
     except nx.NetworkXNoCycle:
         pass
 
-    #Algorthim
+    #Algorithm
     Q = queue.Queue()
     while Gx.number_of_edges() > len(items):  #If each item belongs to exactly one agent, the number of edges in the graph will necessarily be the same as the number of items
         agent = find_agent_sharing_item(Gx, items)
