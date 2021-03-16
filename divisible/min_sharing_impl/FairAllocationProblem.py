@@ -12,8 +12,12 @@ from fairpy.divisible.allocations import AllocationMatrix
 
 from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
 from fairpy.divisible.min_sharing_impl.GraphGenerator import GraphGenerator
+from fairpy.divisible.max_product import product_of_utilities
+
+from time_limit import time_limit, TimeoutException
 
 from abc import ABC, abstractmethod
+import datetime, cvxpy
 
 import logging
 logger = logging.getLogger(__name__)
@@ -47,7 +51,13 @@ class FairAllocationProblem():
         """
         pass
 
-    def find_allocation_with_min_sharing(self, num_of_decimal_digits:int=3)->AllocationMatrix:
+
+    def find_allocation_with_min_sharing(self, min_sharing_allocation:int=3)->AllocationMatrix:
+        """
+        Runs the min-sharing algorithm on this valuation matrix.
+
+        :return the allocation with min sharing satisfying the criterion of `find_allocation_for_graph`.
+        """
         allowed_num_of_sharings = 0
         logger.info("")
         while (allowed_num_of_sharings < self.valuation.num_of_agents) and (not self.find):
@@ -67,11 +77,54 @@ class FairAllocationProblem():
             if self.find:
                 break
             allowed_num_of_sharings += 1
-
-        alloc.round(num_of_decimal_digits)
+        alloc.round(min_sharing_allocation)
         self.min_sharing_number = alloc.num_of_sharings()
         if self.min_sharing_number >= self.valuation.num_of_agents:
             raise AssertionError("Num of sharings is {} but it should be at most {}.\n{}".format(self.min_sharing_number, self.valuation.num_of_agents-1,alloc))
         return self.min_sharing_allocation
 
 
+    def find_min_sharing_allocation_with_time_limit(self, num_of_decimal_digits:int=3, time_limit_in_seconds=999)->(str,float,AllocationMatrix,float):
+        """
+        Wraps the above algorithm with a time-limit.
+
+        :return (status, time_in_seconds, allocation_matrix, prod_of_utils)
+        """
+        start = datetime.datetime.now()
+        try:
+            with time_limit(time_limit_in_seconds):
+                allocation_matrix = self.find_allocation_with_min_sharing()
+                status = "OK" if allocation_matrix.num_of_sharings() < self.valuation.num_of_agents else "Bug"
+                prod_of_utils = product_of_utilities(allocation_matrix, self.valuation)
+        except TimeoutException:
+            status = "TimeOut"
+            prod_of_utils =  -1
+            allocation_matrix = ErrorAllocationMatrix()
+        except cvxpy.error.SolverError:
+            status = "SolverError"
+            prod_of_utils = -1
+            allocation_matrix = ErrorAllocationMatrix()
+        except SystemError:
+            status = "SystemError"
+            prod_of_utils =  -1
+            allocation_matrix = ErrorAllocationMatrix()
+        except AssertionError:  # Indicates too many sharings
+            status = "Bug"
+            prod_of_utils =  -1
+            allocation_matrix = ErrorAllocationMatrix()
+        end = datetime.datetime.now()
+        time_in_seconds = (end - start).total_seconds()
+        return (status, time_in_seconds, allocation_matrix, prod_of_utils)
+
+
+
+class ErrorAllocationMatrix(AllocationMatrix):
+    """
+    An allocation matrix that denotes an error in the algorithm.
+    """
+
+    def __init__(self):
+        pass
+
+    def num_of_sharings(self): 
+        return -1
