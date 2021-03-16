@@ -3,7 +3,7 @@
 
 import cvxpy
 
-from fairpy.divisible.AllocationMatrix import AllocationMatrix
+from fairpy.divisible.allocations import AllocationMatrix
 from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
 from fairpy.divisible.min_sharing_impl.FairAllocationProblem import FairAllocationProblem
 

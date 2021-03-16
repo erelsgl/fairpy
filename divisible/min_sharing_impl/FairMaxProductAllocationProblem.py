@@ -2,8 +2,8 @@
 
 import cvxpy
 
-from fairpy.divisible.ValuationMatrix import ValuationMatrix
-from fairpy.divisible.AllocationMatrix import AllocationMatrix
+from fairpy.divisible.agents import ValuationMatrix
+from fairpy.divisible.allocations import AllocationMatrix
 from fairpy.divisible.max_product import max_product_allocation
 
 from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph

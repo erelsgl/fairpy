@@ -8,8 +8,8 @@ Since:  2021-03
 """
 
 import numpy as np, cvxpy
-from fairpy.divisible.ValuationMatrix import ValuationMatrix
-from fairpy.divisible.AllocationMatrix import AllocationMatrix
+from fairpy.divisible.agents import ValuationMatrix
+from fairpy.divisible.allocations import AllocationMatrix
 
 def max_product_allocation(v: ValuationMatrix, num_of_decimal_digits=3) -> AllocationMatrix:
 	"""

@@ -2,7 +2,7 @@
 
 import numpy as np
 from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
-from fairpy.divisible.ValuationMatrix import ValuationMatrix
+from fairpy.divisible.agents import ValuationMatrix
 
 
 

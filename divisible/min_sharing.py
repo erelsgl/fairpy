@@ -13,8 +13,8 @@ Since:  2020
 import datetime, cvxpy, numpy as np
 from time_limit import time_limit, TimeoutException
 
-from fairpy.divisible.ValuationMatrix import ValuationMatrix
-from fairpy.divisible.AllocationMatrix import AllocationMatrix
+from fairpy.divisible.agents import ValuationMatrix
+from fairpy.divisible.allocations import AllocationMatrix
 
 from fairpy.divisible.min_sharing_impl.FairProportionalAllocationProblem import FairProportionalAllocationProblem
 from fairpy.divisible.min_sharing_impl.FairEnvyFreeAllocationProblem import FairEnvyFreeAllocationProblem

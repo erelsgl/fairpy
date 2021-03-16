@@ -3,7 +3,7 @@
 import numpy as np
 from typing import *
 
-from fairpy.divisible.ValuationMatrix import ValuationMatrix
+from fairpy.divisible.agents import ValuationMatrix
 
 class AllocationMatrix:
 	"""

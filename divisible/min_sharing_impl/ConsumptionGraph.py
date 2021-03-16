@@ -1,8 +1,8 @@
 #!python3
 
 import itertools
-from fairpy.divisible.ValuationMatrix import ValuationMatrix
-from fairpy.divisible.AllocationMatrix import AllocationMatrix
+from fairpy.divisible.agents import ValuationMatrix
+from fairpy.divisible.allocations import AllocationMatrix
 
 
 class ConsumptionGraph():

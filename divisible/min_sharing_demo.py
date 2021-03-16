@@ -14,9 +14,9 @@ import cvxpy
 import numpy as np
 
 import fairpy.divisible.min_sharing_impl.FairAllocationProblem as FairAllocationProblem
-from fairpy.divisible.AllocationMatrix import AllocationMatrix
+from fairpy.divisible.allocations import AllocationMatrix
 from fairpy.divisible.min_sharing import proportional_allocation_with_min_sharing, envyfree_allocation_with_min_sharing, maxproduct_allocation_with_min_sharing
-from fairpy.divisible.ValuationMatrix import ValuationMatrix
+from fairpy.divisible.agents import ValuationMatrix
 from fairpy.divisible.max_product import max_product_allocation
 
 from datetime import datetime;  now = datetime.now
