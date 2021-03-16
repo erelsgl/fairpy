@@ -1,4 +1,11 @@
 #!python3
+"""
+    A generator for fractionally-Pareto-efficient consumption graphs.
+
+    Programmer: Eliyahu Sattat
+    Since:  2020
+"""
+
 
 from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
 from fairpy.divisible.min_sharing_impl.ValueRatio import ValueRatio

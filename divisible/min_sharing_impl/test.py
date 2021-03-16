@@ -1,4 +1,10 @@
 #!python3
+"""
+    Some tests for the min-sharing algorithm.
+
+    Programmer: Eliyahu Sattat
+    Since:  2020
+"""
 
 import doctest as doctest
 from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph

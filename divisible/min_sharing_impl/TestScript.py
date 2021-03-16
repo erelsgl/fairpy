@@ -1,4 +1,11 @@
 #!python3
+"""
+    Some tests for the min-sharing algorithm.
+
+    Programmer: Eliyahu Sattat
+    Since:  2020
+"""
+
 
 import numpy as np
 import datetime

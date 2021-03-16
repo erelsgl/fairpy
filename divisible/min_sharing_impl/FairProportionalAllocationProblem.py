@@ -1,4 +1,10 @@
 #!python3
+"""
+    A min-sharing proportional allocation algorithm.
+
+    Programmer: Eliyahu Sattat
+    Since:  2020
+"""
 
 import cvxpy
 

@@ -1,4 +1,11 @@
 #!python3
+"""
+    An abstract class for solving a min-sharing fair allocation problem.
+
+    Programmer: Eliyahu Sattat
+    Since:  2020
+"""
+
 
 from fairpy.divisible.agents import ValuationMatrix
 from fairpy.divisible.allocations import AllocationMatrix

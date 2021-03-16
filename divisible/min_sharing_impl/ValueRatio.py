@@ -1,4 +1,10 @@
 #!python3
+"""
+    A class for computing and caching the value-ratios of different agents.
+
+    Programmer: Eliyahu Sattat
+    Since:  2020
+"""
 
 import numpy as np
 from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph

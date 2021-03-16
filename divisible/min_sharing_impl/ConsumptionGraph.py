@@ -1,4 +1,11 @@
 #!python3
+"""
+    ConsumptionGraph class - a bipartite graph representing what agent consumes which object.
+
+    Programmer: Eliyahu Sattat
+    Since:  2020
+"""
+
 
 import itertools
 from fairpy.divisible.agents import ValuationMatrix
@@ -7,7 +14,7 @@ from fairpy.divisible.allocations import AllocationMatrix
 
 class ConsumptionGraph():
     """
-    This class represents a graph of consumption of the agents.
+    Represents a graph of consumption of the agents.
     Represented by a binary matrix:
       graph[i][0] = 1 it means that agent i consumes a positive fraction of object o.
     """

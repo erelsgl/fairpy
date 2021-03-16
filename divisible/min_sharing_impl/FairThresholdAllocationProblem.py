@@ -1,4 +1,10 @@
 #!python3
+"""
+    A min-sharing fair allocation algorithm, where fairness is determined by general thresholds.
+
+    Programmer: Eliyahu Sattat
+    Since:  2020
+"""
 
 import cvxpy
 
