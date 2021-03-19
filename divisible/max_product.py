@@ -72,6 +72,9 @@ def product_of_utilities(z:AllocationMatrix, v:ValuationMatrix)->float:
 	>>> val2   = ValuationMatrix([[3,2],[5,4]])
 	>>> np.round(product_of_utilities(alloc1, val2),2)
 	12.0
+	>>> alloc2 = AllocationMatrix([[0,0],[0,0]])
+	>>> np.round(product_of_utilities(alloc2, val2),2)
+	0.0
 	"""
 	utility_profile = z.utility_profile(v)
 	sum_of_logs = sum([np.log(u) for u in utility_profile])
