@@ -41,6 +41,8 @@ def demo(title:str, v:ValuationMatrix):
 	start = now()
 	z = maxproduct_allocation_with_min_sharing(v).round(3)
 	print("Allocation:\n",z, "Time: ", now()-start)
+	z = maxproduct_allocation_with_min_sharing(v, tolerance=0.001).round(3)
+	print("Allocation:\n",z, "Time: ", now()-start)
 
 demo(
 	"Four objects, three agents. Each criterion has a different minimum number of sharings.",
