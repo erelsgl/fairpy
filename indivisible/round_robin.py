@@ -23,8 +23,8 @@ def round_robin(items:Bundle, agents:List[AdditiveAgent], agent_order:List[int])
     >>> George = AdditiveAgent({"x": 2, "y": 1, "z": 6, "w":3}, name="George")
     >>> allocation = round_robin("xyzw", [Alice,George], [0,1])
     >>> allocation
-    Alice's bundle: {y,z},  value: 6.
-    George's bundle: {w,x},  value: 5.
+    Alice gets {y,z} with value 6.
+    George gets {w,x} with value 5.
     <BLANKLINE>
     >>> Alice.is_EF1(allocation.get_bundle(0), allocation.get_bundles())
     True

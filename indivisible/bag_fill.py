@@ -83,16 +83,16 @@ def bag_fill(v:ValuationMatrix, map_agent_to_value_threshold:List[float]):
 
 	>>> valuations = ValuationMatrix([[11,33],[44,22]])
 	>>> bag_fill(valuations, map_agent_to_value_threshold=[30,30])
-	0's bundle: {1},  value: 33.
-	1's bundle: {0},  value: 44.
+	Agent #0 gets {1} with value 33.
+	Agent #1 gets {0} with value 44.
 	<BLANKLINE>
 	>>> bag_fill(valuations, map_agent_to_value_threshold=[10,10])
-	0's bundle: {0},  value: 11.
-	1's bundle: {1},  value: 22.
+	Agent #0 gets {0} with value 11.
+	Agent #1 gets {1} with value 22.
 	<BLANKLINE>
 	>>> bag_fill(valuations, map_agent_to_value_threshold=[40,30])
-	0's bundle: None,  value: 0.
-	1's bundle: {0},  value: 44.
+	Agent #0 gets None with value 0.
+	Agent #1 gets {0} with value 44.
 	<BLANKLINE>
 	"""
 	if len(map_agent_to_value_threshold) != v.num_of_agents:

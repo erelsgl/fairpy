@@ -1,3 +1,4 @@
+#!python3
 """
 Defines agents with various kinds of valuation functions.
 
@@ -78,6 +79,9 @@ class Agent(ABC):
         if(piece==None):
             return 0
         return sum([self.eval(*interval) for interval in piece])
+
+    def value(self, piece:List[tuple]):
+        return self.piece_value(piece)
 
     def partition_values(self, partition:List[float]):
         """

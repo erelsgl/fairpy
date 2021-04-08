@@ -17,11 +17,11 @@ class Allocation:
     Represents an allocation of objects to agents.
     An immutable object; used mainly for display purposes.
 
-    >>> a = Allocation(agents=range(3), bundles=[[3,6],None,[2,5]], values=[9,0,7])
+    >>> a = Allocation(agents=range(3), bundles=[[3,6],None,[2,5]], values=[9,0,6.999999])
     >>> a
-    0's bundle: {3,6},  value: 9.
-    1's bundle: None,  value: 0.
-    2's bundle: {2,5},  value: 7.
+    Agent #0 gets {3,6} with value 9.
+    Agent #1 gets None with value 0.
+    Agent #2 gets {2,5} with value 7.
     <BLANKLINE>
     """
 
@@ -61,13 +61,22 @@ class Allocation:
     def __getitem__(self, agent_index:int):
         return self.get_bundle(agent_index)
 
+    @staticmethod
+    def agent_name(agent):
+        if hasattr(agent,'name'):
+            return agent.name() 
+        elif isinstance(agent,int):
+            return (f"Agent #{agent}")
+        else:
+            return agent
+
+
     def __repr__(self):
         result = ""
         for i_agent, agent in enumerate(self.agents):
             agent_bundle = self.bundles[i_agent]
             agent_value = self.values[i_agent]
-            agent_name = agent.name() if hasattr(agent,'name') else agent
-            result += f"{agent_name}'s bundle: {stringify_bundle(agent_bundle)},  value: {agent_value}.\n"
+            result += f"{self.agent_name(agent)} gets {stringify_bundle(agent_bundle)} with value {agent_value:.3g}.\n"
         return result
 
 
