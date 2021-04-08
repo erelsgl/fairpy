@@ -46,6 +46,9 @@ class Allocation:
     def get_bundle(self, agent_index: int):
         return self.bundles[agent_index]
 
+    def get_bundles(self):
+        return self.bundles
+
     def __getitem__(self, agent_index:int):
         return self.get_bundle(agent_index)
 
