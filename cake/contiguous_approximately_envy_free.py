@@ -1,3 +1,4 @@
+#!python3
 """
 Algorithm for approximate contiguous envy-free allocation.
 
@@ -11,7 +12,7 @@ Programmer: Shalev Goldshtein (Algorithm 1)
 Since: 2020-03
 """
 
-from fairpy.cake.allocations import *
+from fairpy.allocations import *
 from fairpy.cake.agents import *
 
 import logging
@@ -67,8 +68,8 @@ def algor1(AgentList)->Allocation:
     >>> bb = PiecewiseConstantAgentNormalized([4, 2, 6], name="bb")
     >>> lstba = [aa,bb]
     >>> algor1(lstba)
-    > aa gets [(0.333, 1.0)] with value 0.833
-    > bb gets [(0.0, 0.333)] with value 0.333
+    aa gets {(0.3333333333333333, 1.0)} with value 0.833.
+    bb gets {(0.0, 0.3333333333333333)} with value 0.333.
     <BLANKLINE>
 
     >>> a0 = PiecewiseConstantAgentNormalized([4, 10, 20], name="a0")
@@ -76,9 +77,9 @@ def algor1(AgentList)->Allocation:
     >>> a2 = PiecewiseConstantAgentNormalized([30, 1, 12], name="a2")
     >>> lstaaa = [a0,a1,a2]
     >>> algor1(lstaaa)
-    > a0 gets [(0.382, 1.0)] with value 0.839
-    > a1 gets [(0.159, 0.382)] with value 0.333
-    > a2 gets [(0.0, 0.159)] with value 0.333
+    a0 gets {(0.3824514991181658, 1.0)} with value 0.839.
+    a1 gets {(0.15925925925925924, 0.3824514991181658)} with value 0.333.
+    a2 gets {(0.0, 0.15925925925925924)} with value 0.333.
     <BLANKLINE>
 
     """
@@ -89,7 +90,7 @@ def algor1(AgentList)->Allocation:
 
 
     # Mlist is the list who save the M Parts of the cake
-    alloc = Allocation(AgentList)
+    pieces = lenAgents*[None]
     #####Mlist = [None] * lenAgents
 
     # the leftest point of each of the agent to fulfill the condition of the 1/3
@@ -117,7 +118,7 @@ def algor1(AgentList)->Allocation:
                 r = rList[k]
         logger.info("From The agents who remained The agent (%s) is with the leftest point - which is %s.", AgentList[j].name(),str(r))
         # gives agent j this segment , moves l to the right (r)
-        alloc.set_piece(j, [(l,r)])
+        pieces[j] = [(l,r)]
         #####Mlist[j] = [l, r]
         l = r
 
@@ -133,21 +134,21 @@ def algor1(AgentList)->Allocation:
 
         j = N[0]
         logger.info(" (%s) is getting the rest. %s till 1.0",AgentList[j].name(), str(l))
-        alloc.set_piece(j, [(l, 1.0)])
+        pieces[j] = [(l, 1.0)]
         #####Mlist[j] = [l, 1.0]
     else:
         logger.info("There is no agents that remained")
         j = lastAgentRemove
         logger.info(" we are adding to (%s) the rest. %s till 1.0", AgentList[j].name(), str(l))
         # [a, l] unite with [l, 1] => [a, 1]
-        tupe1 = alloc.get_piece(j)
-        alloc.set_piece(j, [(tupe1[0][0], 1.0)])
+        tupe1 = pieces[j]
+        pieces[j] = [(tupe1[0][0], 1.0)]
         #####Mlist[j][1] = 1.0
     logger.info("")
 
     # for printing the results
 
-    return alloc
+    return Allocation(AgentList, pieces)
 
 if __name__ == "__main__":
     import doctest
