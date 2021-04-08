@@ -13,8 +13,12 @@ Programmer: Shai Aharon
 Since:  2021-02
 """
 
-from fairpy.indivisible.allocations import *
 import fairpy.indivisible.partitions as partitions
+from fairpy.indivisible.agents import Agent, AdditiveAgent
+
+from typing import *
+Item = Any
+Bundle = List[Item]
 
 import networkx as nx
 import logging
@@ -176,14 +180,14 @@ def handle_cycles(envy_graph: nx.DiGraph, agents_dict: Dict[str, AdditiveAgent])
 
 
 def hand_item_to_non_envy(envy_graph: nx.DiGraph, agents_dict: Dict[str, AdditiveAgent],
-                          all_agents: List[AdditiveAgent], items_remaining: List[str], allocation: Allocation) -> None:
+                          all_agents: List[AdditiveAgent], items_remaining: List[str], allocations: List[List[Any]]) -> None:
     """
     Finds an agent that no-one is envy of, and allocates an item to him.
     @param envy_graph: The Envy-Graph
     @param agents_dict: The agents in the Graph
     @param all_agents: A list of the agents
     @param items_remaining: A list of all the items that have not been allocated
-    @param allocation: The allocation of items
+    @param allocations: The allocation of items
 
     >>> Alice = AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 4, "e": 1}, name="Alice")
     >>> Alice.aq_items = ['a']
@@ -194,9 +198,9 @@ def hand_item_to_non_envy(envy_graph: nx.DiGraph, agents_dict: Dict[str, Additiv
     >>> agents_dict = {x.name():x for x in [Alice,Bob,Eve]}
     >>> envy_graph = create_envy_graph(agents_dict)
     >>> items_remaining = list('de')
-    >>> alloc = Allocation([Alice,Bob,Eve])
+    >>> alloc = [None,None,None]
     >>> hand_item_to_non_envy(envy_graph,agents_dict,[Alice,Bob,Eve],items_remaining,alloc)
-    >>> sorted(list(alloc.get_bundle(1)))
+    >>> sorted(list(alloc[1]))
     ['c', 'e']
     """
     rev_di_graph = envy_graph.reverse()
@@ -205,8 +209,7 @@ def hand_item_to_non_envy(envy_graph: nx.DiGraph, agents_dict: Dict[str, Additiv
             pop_item = items_remaining.pop()
             agnt = agents_dict[n]
             agnt.aq_items.append(pop_item)
-            allocation.set_bundle(all_agents.index(agnt), set(agnt.aq_items))
-
+            allocations[all_agents.index(agnt)] = set(agnt.aq_items)
             logger.info("\tAgent {} received item {}".format(agnt.name(), pop_item))
             return
 
@@ -230,7 +233,7 @@ def get_highest_value(agent: AdditiveAgent, items_list: List[str]) -> (float, Se
     return agent.value(bundle_items), bundle_items
 
 
-def cycle_allocation(agents_dict: Dict[str, Allocation], item_list: List[str], reverse: bool = False) -> None:
+def cycle_allocation(agents_dict: Dict[str,Agent], item_list: List[Item], reverse: bool = False) -> None:
     """
     Allocated each agent with his highest item that has not been allocated.
     @param agents_dict: Agents

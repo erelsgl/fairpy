@@ -42,9 +42,7 @@ def round_robin(items:Bundle, agents:List[AdditiveAgent], agent_order:List[int])
     while True:
         for agent_index in agent_order:
             if len(remaining_items)==0:
-                agent_names = [agent.name() for agent in agents]
-                agent_values = [agent.value(allocations[i]) for i,agent in enumerate(agents)]
-                return Allocation(agent_names, allocations, agent_values)
+                return Allocation(agents, allocations)
             agent = agents[agent_index]
             best_item_for_agent = max(remaining_items, key=agent.value)
             best_item_value = agent.value(best_item_for_agent)

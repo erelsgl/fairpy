@@ -13,7 +13,7 @@ Programmer: Shai Aharon
 Since:  2021-02
 """
 
-from fairpy.indivisible.allocations import Allocation
+from fairpy.allocations import Allocation
 import fairpy.indivisible.partitions as partitions
 
 from fairpy.indivisible.fair_enough_utils import *
@@ -75,7 +75,7 @@ def fair_enough(agents: List[AdditiveAgent], items: Bundle) -> Allocation:
     """
 
     agents_dict = {agn.name(): agn for agn in agents}
-    allocation = Allocation(agents)
+    allocations = len(agents)*[None]
     gamma = calc_gamma(len(agents))
     logger.info("The Gamma is:{}".format(gamma))
 
@@ -99,7 +99,7 @@ def fair_enough(agents: List[AdditiveAgent], items: Bundle) -> Allocation:
 
                 agnt_idx = agents.index(agn_v)
                 items_remaining.remove(gmms_item)
-                allocation.set_bundle(agnt_idx, set(gmms_item))
+                allocations[agnt_idx] = set(gmms_item)
                 agents_dict.pop(agn_name)
                 break
 
@@ -124,9 +124,9 @@ def fair_enough(agents: List[AdditiveAgent], items: Bundle) -> Allocation:
         logger.info("\tAgent {} will take the {} group".format(p2.name(), itm_grp_str))
         for p, k in zip([p1, p2], [k1, k2]):
             agnt_idx = agents.index(p)
-            allocation.set_bundle(agnt_idx, set(mms_2_part[k]))
+            allocations[agnt_idx] = set(mms_2_part[k])
+        return Allocation(agents, allocations)
 
-        return allocation
     logger.info("\tThere are more then 2 agents left, Stage 2 is skipped")
 
     # Stage 3-5
@@ -155,18 +155,18 @@ def fair_enough(agents: List[AdditiveAgent], items: Bundle) -> Allocation:
                     [items_remaining.remove(p_obj[0]) for p_obj in bundle_items]
 
                     p.aq_items += bundle_items
-                    allocation.set_bundle(agents.index(p), set(p.aq_items))
+                    allocations[agents.index(p)] = set(p.aq_items)
                     agents_dict.pop(p.name())
                     break
         else:
             logger.info("No Agent can reach his GMMS")
             items_remaining = tmp_items_list
             for k, v in agents_dict.items():
-                allocation.set_bundle(agents.index(v), set(v.aq_items))
+                allocations[agents.index(v)] = set(v.aq_items)
 
     if len(agents_dict) == 0 or len(items_remaining) == 0:
         logger.info("All agents have reached their G-MMS")
-        return allocation
+        return Allocation(agents, allocations)
 
     items_remaining.sort()  # For testing purposes
     # Stage 6-7
@@ -179,9 +179,10 @@ def fair_enough(agents: List[AdditiveAgent], items: Bundle) -> Allocation:
         envy_graph = create_envy_graph(agents_dict)
         had_cycle = handle_cycles(envy_graph, agents_dict)
         if not had_cycle:
-            hand_item_to_non_envy(envy_graph, agents_dict, agents, items_remaining, allocation)
+            hand_item_to_non_envy(envy_graph, agents_dict, agents, items_remaining, allocations)
 
-    return allocation
+    return Allocation(agents, allocations)
+
 
 
 if __name__ == "__main__":
