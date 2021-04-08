@@ -32,6 +32,9 @@ class ValuationMatrix:
 	>>> v
 	[[1 4 7]
  	 [6 3 0]]
+	>>> for agent in v.agents(): print(v[agent])
+	[1 4 7]
+	[6 3 0]
 	"""
 	def __init__(self, valuation_matrix: np.ndarray):
 		if isinstance(valuation_matrix,list):
