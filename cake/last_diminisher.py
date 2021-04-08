@@ -1,3 +1,4 @@
+#!python3
 """
 Implementation of the Last Diminisher protocol
 for fair cake-cutting among n agents.
@@ -13,7 +14,7 @@ Since: 2019-12
 """
 
 from fairpy.cake.agents import *
-from fairpy.cake.allocations import *
+from fairpy.allocations import Allocation
 
 from typing import *
 import logging
@@ -26,35 +27,35 @@ def last_diminisher(agents: List[Agent])->Allocation:
 
     >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
     >>> last_diminisher([Alice])
-    > Alice gets [(0, 2)] with value 66.0
+    Alice gets {(0, 2)} with value 66.
     <BLANKLINE>
     >>> George = PiecewiseConstantAgent([11,55], "George")
     >>> last_diminisher([Alice, George])
-    > Alice gets [(0, 1.0)] with value 33.0
-    > George gets [(1.0, 2)] with value 55.0
+    Alice gets {(0, 1.0)} with value 33.
+    George gets {(1.0, 2)} with value 55.
     <BLANKLINE>
     >>> last_diminisher([George, Alice])
-    > George gets [(1.0, 2)] with value 55.0
-    > Alice gets [(0, 1.0)] with value 33.0
+    George gets {(1.0, 2)} with value 55.
+    Alice gets {(0, 1.0)} with value 33.
     <BLANKLINE>
     >>> Abraham = PiecewiseConstantAgent([4,1,1], "Abraham")
     >>> last_diminisher([Abraham, George, Alice])
-    > Abraham gets [(0, 0.5)] with value 2.0
-    > George gets [(1.167, 2)] with value 45.833
-    > Alice gets [(0.5, 1.167)] with value 22.0
+    Abraham gets {(0, 0.5)} with value 2.
+    George gets {(1.1666666666666667, 2)} with value 45.8.
+    Alice gets {(0.5, 1.1666666666666667)} with value 22.
     <BLANKLINE>
     """
     num_of_agents = len(agents)
     if num_of_agents==0:
         raise ValueError("There must be at least one agent")
-    allocation = Allocation(agents)
+    pieces = num_of_agents*[None]
     start=0
     active_agents = list(range(num_of_agents))
-    last_diminisher_recursive(start, agents, active_agents, allocation)
-    return allocation
+    last_diminisher_recursive(start, agents, active_agents, pieces)
+    return Allocation(agents, pieces)
 
 
-def last_diminisher_recursive(start:float, agents: List[Agent], active_agents:List[int], allocation:Allocation):
+def last_diminisher_recursive(start:float, agents: List[Agent], active_agents:List[int], pieces:List[Any]):
     """
     A recursive subroutine for last-diminisher.
     :param start: the leftmost end of the cake that should be allocated.
@@ -69,7 +70,7 @@ def last_diminisher_recursive(start:float, agents: List[Agent], active_agents:Li
         remaining_agent_index = active_agents[0]
         remaining_agent = agents[remaining_agent_index]
         logger.info("\nOne agent remains (%s), and receives the entire remaining cake starting at %s.", remaining_agent.name(), start)
-        allocation.set_piece(remaining_agent_index, [(start, remaining_agent.cake_length())])
+        pieces[remaining_agent_index] = [(start, remaining_agent.cake_length())]
         return
 
     num_of_agents = len(agents)
@@ -93,12 +94,12 @@ def last_diminisher_recursive(start:float, agents: List[Agent], active_agents:Li
             logger.info("%s does not diminish the current mark.", next_agent.name())
 
     current_marker = agents[current_marker_index]
-    allocation.set_piece(current_marker_index, [(start, current_mark)])
+    pieces[current_marker_index] = [(start, current_mark)]
     logger.info("%s is the last diminisher, and gets the piece [%f,%f].", current_marker.name(), start, current_mark)
 
     active_agents.remove(current_marker_index)
     new_start = current_mark
-    last_diminisher_recursive(new_start, agents, active_agents, allocation)
+    last_diminisher_recursive(new_start, agents, active_agents, pieces)
 
 if __name__ == "__main__":
     import doctest
