@@ -9,7 +9,7 @@ Since:  2021-03
 
 import numpy as np, cvxpy
 from fairpy.divisible.max_product import *
-from fairpy.divisible.agents import ValuationMatrix
+from fairpy.valuations import ValuationMatrix
 from fairpy.divisible.allocations import AllocationMatrix
 
 print("\nThree identical goods:")

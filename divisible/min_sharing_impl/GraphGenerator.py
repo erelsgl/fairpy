@@ -9,7 +9,7 @@
 
 from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
 from fairpy.divisible.min_sharing_impl.ValueRatio import ValueRatio
-from fairpy.divisible.agents import ValuationMatrix
+from fairpy.valuations import ValuationMatrix
 import numpy as np
 import math
 

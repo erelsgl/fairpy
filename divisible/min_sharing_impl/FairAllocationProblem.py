@@ -7,7 +7,7 @@
 """
 
 
-from fairpy.divisible.agents import ValuationMatrix
+from fairpy.valuations import ValuationMatrix
 from fairpy.divisible.allocations import AllocationMatrix
 
 from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
