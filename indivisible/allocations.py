@@ -64,11 +64,9 @@ class Allocation:
         for i_agent, agent in enumerate(self.agents):
             agent_bundle = self.bundles[i_agent]
             agent_value = agent.value(agent_bundle)
-            result += "{}'s bundle: {},  value: {},  all values: {}\n".format(
-                agent.name(), stringify_bundle(agent_bundle), agent_value,
-                [agent.value(bundle) for bundle in self.bundles],
-                [agent_value - agent.value(bundle) for bundle in self.bundles],
-            )
+            all_values = [agent.value(bundle) for bundle in self.bundles]
+            # all_differences = [agent_value - agent.value(bundle) for bundle in self.bundles]
+            result += f"{agent.name()}'s bundle: {stringify_bundle(agent_bundle)},  value: {agent_value},  all values: {all_values}\n"
         return result
 
 
