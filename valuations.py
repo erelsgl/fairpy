@@ -3,13 +3,15 @@
 """
 A valuation matrix is a matrix v in which each row represents an agent, 
    each column represents an object, and v[i][j] is the value of agent i to object j.
-It is used as an input to algorithms of fair division with additive valuations.
+It is used as an input to algorithms of fair division with additive valuations,
+   both of divisible and of indivisible goods.
 
 Author: Erel Segal-Halevi
 Since:  2021-03
 """
 
 import numpy as np
+from typing import *
 
 class ValuationMatrix:
 	"""
@@ -35,7 +37,23 @@ class ValuationMatrix:
 	>>> for agent in v.agents(): print(v[agent])
 	[1 4 7]
 	[6 3 0]
+	>>> v.agent_value_for_bundle(0, [0,2])
+	8
+	>>> v.agent_value_for_bundle(1, [1,0])
+	9
+	>>> v.without_agent(0)
+	[[6 3 0]]
+	>>> v.without_object(1)
+	[[1 7]
+ 	 [6 0]]
+	>>> ValuationMatrix(np.ones([2,3]))
+	[[1. 1. 1.]
+ 	 [1. 1. 1.]]
 	"""
+	
+	num_of_agents:int
+	num_of_objects:int
+
 	def __init__(self, valuation_matrix: np.ndarray):
 		if isinstance(valuation_matrix,list):
 			valuation_matrix = np.array(valuation_matrix)
@@ -54,12 +72,28 @@ class ValuationMatrix:
 
 	def __getitem__(self, key):
 		if isinstance(key,tuple):
-			return self._v[key[0]][key[1]]
+			return self._v[key[0]][key[1]]  # agent's value for a single object
 		else:
-			return self._v[key]
+			return self._v[key]             # agent's values for all objects
+
+	def agent_value_for_bundle(self, agent:int, bundle:List[int])->float:
+		return sum([self._v[agent][object] for object in bundle])
+
+	def without_agent(self, agent:int)->'ValuationMatrix':
+		"""
+		:return a copy of this valuation matrix, in which the given agent is removed.
+		"""
+		return ValuationMatrix(np.delete(self._v, agent, axis=0))
+
+	def without_object(self, object:int)->'ValuationMatrix':
+		"""
+		:return a copy of this valuation matrix, in which the given object is removed.
+		"""
+		return ValuationMatrix(np.delete(self._v, object, axis=1))
+	
 
 	def equals(self, other)->bool:
-		return np.array_equal(self._v, other._v)		
+		return np.array_equal(self._v, other._v)
 
 	def __repr__(self):
 		return np.array2string (self._v, max_line_width=100)		
