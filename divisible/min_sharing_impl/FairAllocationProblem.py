@@ -101,16 +101,16 @@ class FairAllocationProblem():
                 status = "OK" if allocation_matrix.num_of_sharings() < self.valuation.num_of_agents else "Bug"
         except TimeoutException:
             status = "TimeOut"
-            allocation_matrix = ErrorAllocationMatrix()
+            allocation_matrix = ErrorAllocationMatrix(default_num_of_sharings=self.valuation.num_of_agents-1)
         except cvxpy.error.SolverError:
             status = "SolverError"
-            allocation_matrix = ErrorAllocationMatrix()
+            allocation_matrix = ErrorAllocationMatrix(default_num_of_sharings=self.valuation.num_of_agents-1)
         except SystemError:
             status = "SystemError"
-            allocation_matrix = ErrorAllocationMatrix()
+            allocation_matrix = ErrorAllocationMatrix(default_num_of_sharings=self.valuation.num_of_agents-1)
         except AssertionError:  # Indicates too many sharings
             status = "Bug"
-            allocation_matrix = ErrorAllocationMatrix()
+            allocation_matrix = ErrorAllocationMatrix(default_num_of_sharings=self.valuation.num_of_agents-1)
         end = datetime.datetime.now()
         time_in_seconds = (end - start).total_seconds()
         return (status, time_in_seconds, allocation_matrix)
@@ -119,19 +119,19 @@ class FairAllocationProblem():
 
 class ErrorAllocationMatrix(AllocationMatrix):
     """
-    An allocation matrix that denotes an error in the algorithm.
+    An allocation matrix that denotes time-out or another error in the algorithm.
     """
 
-    def __init__(self):
+    def __init__(self, default_num_of_sharings:int):
+        self.default_num_of_sharings = default_num_of_sharings
         pass
 
     def num_of_sharings(self): 
-        return -1
+        return self.default_num_of_sharings
 
     def utility_profile(self, v):
         return [0]
 
     def __repr__(self):
         return "ErrorAllocationMatrix"
-
 
