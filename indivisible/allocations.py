@@ -81,8 +81,6 @@ def stringify_bundle(bundle: Bundle):
     '{x,y}'
     """
     return "{" + ",".join(sorted(bundle)) + "}"
-    # return ",".join(["".join(item) for item in bundle])
-
 
 
 if __name__ == "__main__":

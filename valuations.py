@@ -41,6 +41,8 @@ class ValuationMatrix:
 	8
 	>>> v.agent_value_for_bundle(1, [1,0])
 	9
+	>>> v.agent_value_for_bundle(1, None)
+	0
 	>>> v.without_agent(0)
 	[[6 3 0]]
 	>>> v.without_object(1)
@@ -77,7 +79,10 @@ class ValuationMatrix:
 			return self._v[key]             # agent's values for all objects
 
 	def agent_value_for_bundle(self, agent:int, bundle:List[int])->float:
-		return sum([self._v[agent][object] for object in bundle])
+		if bundle is None:
+			return 0
+		else:
+			return sum([self._v[agent][object] for object in bundle])
 
 	def without_agent(self, agent:int)->'ValuationMatrix':
 		"""
