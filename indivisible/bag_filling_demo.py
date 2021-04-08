@@ -36,13 +36,13 @@ def one_directional_bag_filling(v:ValuationMatrix, map_agent_to_value_threshold:
 	Agent #1 gets {0} with value 44.
 	<BLANKLINE>
 	"""
+	v = ValuationMatrix(v)
 	if len(map_agent_to_value_threshold) != v.num_of_agents:
 		raise ValueError(f"Number of valuations {v.num_of_agents} differs from number of thresholds {len(map_agent_to_value_threshold)}")
 
 	allocations = [None] * v.num_of_agents
 	remaining_objects = list(v.objects())
 	remaining_agents  = list(v.agents())
-	v = ValuationMatrix(v)
 	bag = Bag(v, map_agent_to_value_threshold)
 	for object in remaining_objects:
 		bag.append(object)

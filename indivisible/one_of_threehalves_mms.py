@@ -10,44 +10,57 @@ from fairpy.valuations import ValuationMatrix
 from fairpy.allocations import Allocation
 from fairpy.indivisible.bag_filling import Bag
 
+from typing import List
+
 import logging
 logger = logging.getLogger(__name__)
 
-
-def round_robin(items:Bundle, agents:List[AdditiveAgent], agent_order:List[int]) -> Allocation:
+def one_of_threehalves_mms(v:ValuationMatrix, map_agent_to_value_threshold:List[float]) -> Allocation:
     """
-    Allocate the given items to the given agents using the round-robin protocol, in the given agent-order.
+    Runs a bi-directional bag-filling algorithm.
+    Assumes that the instance is ordered: item 0 is the highest-valued for all agents, then item 1, etc.
 
-    >>> Alice = AdditiveAgent({"x": 1, "y": 2, "z": 4, "w":0}, name="Alice")
-    >>> George = AdditiveAgent({"x": 2, "y": 1, "z": 6, "w":3}, name="George")
-    >>> allocation = round_robin("xyzw", [Alice,George], [0,1])
-    >>> allocation
-    Alice gets {y,z} with value 6.
-    George gets {w,x} with value 5.
+    >>> identical_valuations = [97,96,90,12,3,2,1,1,1]
+    >>> valuations = ValuationMatrix(3*[identical_valuations])
+    >>> alloc = one_of_threehalves_mms(valuations, map_agent_to_value_threshold=[100,100,100])
+    >>> alloc
+    Agent #0 gets {0,6,7,8} with value 100.
+    Agent #1 gets {1,4,5} with value 101.
+    Agent #2 gets {2,3} with value 102.
     <BLANKLINE>
-    >>> Alice.is_EF1(allocation.get_bundle(0), allocation.get_bundles())
-    True
-    >>> George.is_EF1(allocation.get_bundle(1), allocation.get_bundles())
-    True
-    >>> Alice.is_EF(allocation.get_bundle(0), allocation.get_bundles())
-    True
-    >>> George.is_EF(allocation.get_bundle(1), allocation.get_bundles())
-    False
     """
-    logger.info("\nRound Robin with order %s", agent_order)
-    allocations = [[] for _ in agents]
-    agent_order = list(agent_order)
-    remaining_items = list(items)
+    v = ValuationMatrix(v)
+    v.verify_ordered()
+    if len(map_agent_to_value_threshold) != v.num_of_agents:
+        raise ValueError(f"Number of valuations {v.num_of_agents} differs from number of thresholds {len(map_agent_to_value_threshold)}")
+
+    allocations = [None] * v.num_of_agents
+    remaining_objects = list(v.objects())
+    remaining_agents  = list(v.agents())
     while True:
-        for agent_index in agent_order:
-            if len(remaining_items)==0:
-                return Allocation(agents, allocations)
-            agent = agents[agent_index]
-            best_item_for_agent = max(remaining_items, key=agent.value)
-            best_item_value = agent.value(best_item_for_agent)
-            allocations[agent_index].append(best_item_for_agent)
-            logger.info("%s takes %s (value %d)", agent.name(), best_item_for_agent, best_item_value)
-            remaining_items.remove(best_item_for_agent)
+        if len(remaining_agents)==0:
+            break
+        if len(remaining_objects)==0:
+            break
+
+        # Initialize a bag with the highest-valued object:
+        bag = Bag(v, map_agent_to_value_threshold)
+        highest_valued_object = remaining_objects.pop(0)
+        bag.append(highest_valued_object)
+        
+        while True:
+            # If an agent is willing to accept the bag, allocate it immediately:
+            if (willing_agent := bag.willing_agent(remaining_agents)) is not None:
+                allocations[willing_agent] = bag.objects
+                remaining_agents.remove(willing_agent)
+                break
+            if len(remaining_objects)==0:
+                break
+            lowest_valued_object = remaining_objects.pop(-1)
+            bag.append(lowest_valued_object)
+
+    valuations = [v.agent_value_for_bundle(agent,allocations[agent]) for agent in v.agents()]
+    return Allocation(v.agents(), allocations, valuations)
 
 
 

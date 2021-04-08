@@ -95,6 +95,23 @@ class ValuationMatrix:
 		:return a copy of this valuation matrix, in which the given object is removed.
 		"""
 		return ValuationMatrix(np.delete(self._v, object, axis=1))
+
+	def verify_ordered(self)->bool:
+		"""
+		Verifies that the instance is ordered --- all valuations are ordered by descending value.
+
+		>>> v = ValuationMatrix([[7,4,1],[6,3,0]])
+		>>> v.verify_ordered()
+		>>> v = ValuationMatrix([[7,4,1],[6,0,3]])
+		>>> v.verify_ordered()
+		Traceback (most recent call last):
+		...
+		ValueError: Valuations of agent 1 are not ordered: [6 0 3]
+		"""
+		for i in self.agents():
+			v_i = self._v[i]
+			if any(v_i[j] < v_i[j+1] for j in range(self.num_of_objects-1)):
+				raise ValueError(f"Valuations of agent {i} are not ordered: {v_i}")
 	
 
 	def equals(self, other)->bool:
