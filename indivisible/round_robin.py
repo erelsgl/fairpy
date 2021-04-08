@@ -1,3 +1,4 @@
+#!python3
 """
 The Round Robin algorithm for item allocation.
 
@@ -8,7 +9,7 @@ Since:  2020-07
 """
 
 from fairpy.indivisible.agents import *
-from fairpy.indivisible.allocations import *
+from fairpy.allocations import Allocation
 
 import logging
 logger = logging.getLogger(__name__)
@@ -22,8 +23,8 @@ def round_robin(items:Bundle, agents:List[AdditiveAgent], agent_order:List[int])
     >>> George = AdditiveAgent({"x": 2, "y": 1, "z": 6, "w":3}, name="George")
     >>> allocation = round_robin("xyzw", [Alice,George], [0,1])
     >>> allocation
-    Alice's bundle: {y,z},  value: 6,  all values: [6, 1]
-    George's bundle: {w,x},  value: 5,  all values: [7, 5]
+    Alice's bundle: {y,z},  value: 6.
+    George's bundle: {w,x},  value: 5.
     <BLANKLINE>
     >>> Alice.is_EF1(allocation.get_bundle(0), allocation.get_bundles())
     True
@@ -35,17 +36,19 @@ def round_robin(items:Bundle, agents:List[AdditiveAgent], agent_order:List[int])
     False
     """
     logger.info("\nRound Robin with order %s", agent_order)
-    allocation = [[] for _ in agents]
+    allocations = [[] for _ in agents]
     agent_order = list(agent_order)
     remaining_items = list(items)
     while True:
         for agent_index in agent_order:
             if len(remaining_items)==0:
-                return Allocation(agents, allocation)
+                agent_names = [agent.name() for agent in agents]
+                agent_values = [agent.value(allocations[i]) for i,agent in enumerate(agents)]
+                return Allocation(agent_names, allocations, agent_values)
             agent = agents[agent_index]
             best_item_for_agent = max(remaining_items, key=agent.value)
             best_item_value = agent.value(best_item_for_agent)
-            allocation[agent_index].append(best_item_for_agent)
+            allocations[agent_index].append(best_item_for_agent)
             logger.info("%s takes %s (value %d)", agent.name(), best_item_for_agent, best_item_value)
             remaining_items.remove(best_item_for_agent)
 
