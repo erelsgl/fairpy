@@ -11,7 +11,7 @@ Since: 2020-01
 """
 
 from fairpy.cake.agents import *
-from fairpy.cake.allocations import *
+from fairpy.allocations import Allocation
 
 from typing import *
 import numpy as np
@@ -288,9 +288,9 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
     >>> Hanna = PiecewiseConstantAgent([3, 3], name="Hanna")
     >>> agents = [George, Abraham, Hanna]
     >>> elaborate_simplex_solution(agents, 1/2)
-    > George gets [(0, 1.0)] with value 4.0
-    > Abraham gets [(1.0, 1.5)] with value 2.0
-    > Hanna gets [(1.5, 2)] with value 1.5
+    George gets {(0, 1.0)} with value 4.
+    Abraham gets {(1.0, 1.5)} with value 2.
+    Hanna gets {(1.5, 2)} with value 1.5.
     <BLANKLINE>
     """
     # checking parameters validity
@@ -298,7 +298,7 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
     if num_of_agents != 3 or epsilon == 0:
         raise ValueError("This simplex solution works only for 3 agents, with approximation epsilon greater than 0")
 
-    allocation = Allocation(agents)
+    pieces = num_of_agents*[None]
     n = max([agent.cake_length() for agent in agents])
 
     # init the solver with simplex, with the approximation value, cake length and agents's list
@@ -320,7 +320,7 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
 
     if first_color_index == 0:
         # then allocate to him his choice
-        allocation.set_piece(first_index, [(0, or_indices[0])])
+        pieces[first_index] = [(0, or_indices[0])]
         logger.info("%s gets the the piece [%f,%f].", solver.agents[first_index].name(), 0, or_indices[0])
         # find which of the next two has more envious between the leftovers pieces, and let him be second
         options = [(or_indices[0], or_indices[1]), (or_indices[1], n)]
@@ -336,14 +336,14 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
 
         # allocate both players
 
-        allocation.set_piece(second, [max_option])
+        pieces[second] = [max_option]
         logger.info("%s gets the the piece [%f,%f].", solver.agents[second].name(), max_option[0], max_option[1])
-        allocation.set_piece(third, [min_option])
+        pieces[third] = [min_option]
         logger.info("%s gets the the piece [%f,%f].", solver.agents[third].name(), min_option[0], min_option[1])
 
     elif first_color_index == 1:
         # same things happens, just for another option
-        allocation.set_piece(first_index, [(or_indices[0], or_indices[1])])
+        pieces[first_index] = [(or_indices[0], or_indices[1])]
         logger.info("%s gets the the piece [%f,%f].", solver.agents[first_index].name(), or_indices[0], or_indices[1])
 
         # find which of the next two has more envious between the leftovers pieces, and let him be second
@@ -360,13 +360,13 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
 
         # allocate both players
 
-        allocation.set_piece(second, [max_option])
+        pieces[second] = [max_option]
         logger.info("%s gets the the piece [%f,%f].", solver.agents[second].name(), max_option[0], max_option[1])
-        allocation.set_piece(third, [min_option])
+        pieces[third] = [min_option]
         logger.info("%s gets the the piece [%f,%f].", solver.agents[third].name(), min_option[0], min_option[1])
     else:
         # same things happens, just for another option
-        allocation.set_piece(first_index, [(or_indices[1], n)])
+        pieces[first_index] = [(or_indices[1], n)]
         logger.info("%s gets the the piece [%f,%f].", solver.agents[first_index].name(), or_indices[1], n)
 
         # find which of the next two has more envious between the leftovers pieces, and let him be second
@@ -382,11 +382,12 @@ def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
         min_option = options[np.argmin(agents[second].eval(start, end) for (start, end) in options)]
 
         # allocate both players
-        allocation.set_piece(second, [max_option])
+        pieces[second] = [max_option]
         logger.info("%s gets the the piece [%f,%f].", solver.agents[second].name(), max_option[0], max_option[1])
-        allocation.set_piece(third, [min_option])
+        pieces[third] = [min_option]
         logger.info("%s gets the the piece [%f,%f].", solver.agents[third].name(), min_option[0], min_option[1])
-    return allocation
+
+    return Allocation(agents, pieces)
 
 
 if __name__ == '__main__':
