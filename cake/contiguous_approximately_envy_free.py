@@ -12,9 +12,8 @@ Programmer: Shalev Goldshtein (Algorithm 1)
 Since: 2020-03
 """
 
-from fairpy.allocations import *
+from fairpy.allocations import Allocation
 from fairpy.cake.agents import *
-from fairpy.cake.pieces import round_allocation
 
 import logging
 logger = logging.getLogger(__name__)
@@ -149,6 +148,8 @@ def algor1(AgentList)->Allocation:
 
     return Allocation(AgentList, pieces)
 
+
+from fairpy.cake.pieces import round_allocation
 if __name__ == "__main__":
     import doctest
     (failures,tests) = doctest.testmod(report=True)

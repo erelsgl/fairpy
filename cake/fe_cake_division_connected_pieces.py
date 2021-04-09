@@ -81,8 +81,8 @@ def ALG(agents: List[Agent], epsilon:float)->Allocation:
 
 
 
+from fairpy.cake.pieces import round_allocation
 if __name__ == "__main__":
-    from fairpy.cake.pieces import round_allocation
     import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures,tests))

@@ -101,8 +101,9 @@ def last_diminisher_recursive(start:float, agents: List[Agent], active_agents:Li
     new_start = current_mark
     last_diminisher_recursive(new_start, agents, active_agents, pieces)
 
+
+from fairpy.cake.pieces import round_allocation
 if __name__ == "__main__":
     import doctest
-    from fairpy.cake.pieces import round_allocation
     (failures,tests) = doctest.testmod(report=True)
     print ("{} failures, {} tests".format(failures,tests))
