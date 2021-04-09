@@ -15,7 +15,6 @@ Since: 2019-12
 
 from fairpy.cake.agents import *
 from fairpy.allocations import Allocation
-from fairpy.cake.pieces import round_piece, round_allocation
 
 from typing import *
 import logging
@@ -104,5 +103,6 @@ def last_diminisher_recursive(start:float, agents: List[Agent], active_agents:Li
 
 if __name__ == "__main__":
     import doctest
+    from fairpy.cake.pieces import round_allocation
     (failures,tests) = doctest.testmod(report=True)
     print ("{} failures, {} tests".format(failures,tests))

@@ -8,10 +8,8 @@ Since: 2019-12
 
 from fairpy.cake.agents import *
 from fairpy.allocations import Allocation
-from fairpy.cake.pieces import round_allocation
 from fairpy.cake.fe_cake_division_connected_pieces_utils import *
 import numpy as np
-import random
 import logging
 logger = logging.getLogger(__name__)
 
@@ -84,6 +82,7 @@ def ALG(agents: List[Agent], epsilon:float)->Allocation:
 
 
 if __name__ == "__main__":
+    from fairpy.cake.pieces import round_allocation
     import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures,tests))
