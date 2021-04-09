@@ -15,6 +15,7 @@ Since: 2019-12
 
 from fairpy.cake.agents import *
 from fairpy.allocations import Allocation
+from fairpy.cake.pieces import round_piece, round_allocation
 
 from typing import *
 import logging
@@ -39,10 +40,10 @@ def last_diminisher(agents: List[Agent])->Allocation:
     Alice gets {(0, 1.0)} with value 33.
     <BLANKLINE>
     >>> Abraham = PiecewiseConstantAgent([4,1,1], "Abraham")
-    >>> last_diminisher([Abraham, George, Alice])
+    >>> round_allocation(last_diminisher([Abraham, George, Alice]), 3)
     Abraham gets {(0, 0.5)} with value 2.
-    George gets {(1.1666666666666667, 2)} with value 45.8.
-    Alice gets {(0.5, 1.1666666666666667)} with value 22.
+    George gets {(1.167, 2)} with value 45.8.
+    Alice gets {(0.5, 1.167)} with value 22.
     <BLANKLINE>
     """
     num_of_agents = len(agents)

@@ -14,6 +14,7 @@ Since: 2020-03
 
 from fairpy.allocations import *
 from fairpy.cake.agents import *
+from fairpy.cake.pieces import round_allocation
 
 import logging
 logger = logging.getLogger(__name__)
@@ -67,21 +68,19 @@ def algor1(AgentList)->Allocation:
     >>> aa = PiecewiseConstantAgentNormalized([2, 8, 2], name="aa")
     >>> bb = PiecewiseConstantAgentNormalized([4, 2, 6], name="bb")
     >>> lstba = [aa,bb]
-    >>> algor1(lstba)
-    aa gets {(0.3333333333333333, 1.0)} with value 0.833.
-    bb gets {(0.0, 0.3333333333333333)} with value 0.333.
+    >>> round_allocation(algor1(lstba))
+    aa gets {(0.333, 1.0)} with value 0.833.
+    bb gets {(0.0, 0.333)} with value 0.333.
     <BLANKLINE>
-
     >>> a0 = PiecewiseConstantAgentNormalized([4, 10, 20], name="a0")
     >>> a1 = PiecewiseConstantAgentNormalized([14, 42, 9, 17], name="a1")
     >>> a2 = PiecewiseConstantAgentNormalized([30, 1, 12], name="a2")
     >>> lstaaa = [a0,a1,a2]
-    >>> algor1(lstaaa)
-    a0 gets {(0.3824514991181658, 1.0)} with value 0.839.
-    a1 gets {(0.15925925925925924, 0.3824514991181658)} with value 0.333.
-    a2 gets {(0.0, 0.15925925925925924)} with value 0.333.
+    >>> round_allocation(algor1(lstaaa))
+    a0 gets {(0.382, 1.0)} with value 0.839.
+    a1 gets {(0.159, 0.382)} with value 0.333.
+    a2 gets {(0.0, 0.159)} with value 0.333.
     <BLANKLINE>
-
     """
     l = 0.00
     lenAgents = len(AgentList)

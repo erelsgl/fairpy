@@ -9,6 +9,7 @@ Since: 2019-11
 
 from typing import *
 from fairpy.cake.agents import Agent, PiecewiseUniformAgent
+from fairpy.cake.pieces import round_piece
 
 
 class Allocation:
@@ -140,18 +141,6 @@ class OnePieceAllocation(Allocation):
     def get_piece(self,agent_index:int):
         return self.pieces[agent_index]
 
-
-
-def round_piece(piece:list, digits:int):
-    """
-    Round the numbers in the given piece. For presentation purposes.
-    :param piece:   A list of intervals.
-    :param digits:  How many digits after the decimal point.
-
-    >>> round_piece([(0.1999999, 0.300001), (0.40000001, 0.599999)], 3)
-    [(0.2, 0.3), (0.4, 0.6)]
-    """
-    return [(round(interval[0],digits),round(interval[1],digits)) for interval in piece]
 
 
 
