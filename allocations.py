@@ -1,7 +1,7 @@
 #!python3
 
 """
-Represents an allocation of objects to agents ---  the output of an item-allocation algorithm.
+Represents an allocation of objects to agents ---  the output of a fair allocation algorithm.
 
 An immutable object; used mainly for display purposes.
 

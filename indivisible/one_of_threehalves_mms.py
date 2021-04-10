@@ -59,7 +59,6 @@ def bidirectional_bag_filling(valuations:ValuationMatrix, thresholds:List[float]
 
 
 
-### MAIN
 
 if __name__ == "__main__":
 	# import sys
