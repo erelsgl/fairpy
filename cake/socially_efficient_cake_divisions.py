@@ -1,3 +1,4 @@
+#!python3
 """
 Implementation of an Approximation Algorithm for computing continuous
 division of a cake among n agents in order to maximize the welfare.
@@ -11,8 +12,10 @@ Programmer: Jonathan Diamant
 Since: 2019-12
 """
 
-from fairpy.cake.agents import *
-from fairpy.cake.allocations import *
+from fairpy import Allocation
+from fairpy.cake.pieces import round_allocation
+from fairpy.cake.agents import Agent
+from typing import List
 
 import sys, logging
 logger = logging.getLogger(__name__)
@@ -29,6 +32,7 @@ def discretization_procedure(agents: List[Agent], epsilon:float):
 
     example for one player:
 
+    >>> from fairpy.cake.agents import PiecewiseConstantAgent
     >>> a = PiecewiseConstantAgent([0.2, 0.4, 0.4])
     >>> discretization_procedure([a], 0.2)
     [0, 1.0, 1.5, 2.0, 2.5, 3]
@@ -73,6 +77,7 @@ def get_players_valuation(agents: List[Agent], c : List[float]):
     len(matrix[i]) == number of items
     matrix[i][j] == the value of item j according to player i
     #the partition:
+    >>> from fairpy.cake.agents import PiecewiseConstantAgent
     >>> a = PiecewiseConstantAgent([0.25, 0.5, 0.25])
     >>> b = PiecewiseConstantAgent([0.23, 0.7, 0.07])
     >>> agents = [a, b]
@@ -112,6 +117,7 @@ def aprox_v(s:int ,t:int ,k:int,matrix: List[List[float]]):
     len(l) == number of items
     l[j] == the value of item j according to player i
 
+    >>> from fairpy.cake.agents import PiecewiseConstantAgent
     >>> a = PiecewiseConstantAgent([0.25, 0.5, 0.25])
     >>> b = PiecewiseConstantAgent([0.23, 0.7, 0.07])
     >>> agents = [a, b]
@@ -165,6 +171,7 @@ def V_without_k(s:int ,t:int , current_s:List[int] , current_t:List[int], matrix
     so we want the value of items 0,1,2,3 without what player 1 holds
     that means items 0,1,2 so the sum is 1+2+3 = 6
 
+    >>> from fairpy.cake.agents import PiecewiseConstantAgent
     >>> matrix = [[1,2,3,4,5,6], [4,5,1,2,3, 0]]
     >>> V_without_k(0,3, [0,3], [2,5], matrix, k=1)
     6
@@ -277,11 +284,12 @@ def divide(agents: List[Agent], epsilon:float) -> Allocation:
     :param epsilon: a float
     :return: starting points and end points of the cuts
 
+    >>> from fairpy.cake.agents import PiecewiseConstantAgent
     >>> a = PiecewiseConstantAgent([0.25, 0.5, 0.25], name="Alice")
     >>> b = PiecewiseConstantAgent([0.23, 0.7, 0.07], name="Bob")
-    >>> divide([a,b], 0.2)
-    > Alice gets [(0, 0.8)] with value 0.2
-    > Bob gets [(0.8, 1.791)] with value 0.6
+    >>> round_allocation(divide([a,b], 0.2))
+    Alice gets {(0, 0.8)} with value 0.2.
+    Bob gets {(0.8, 1.791)} with value 0.6.
     <BLANKLINE>
     """
     logger.info("\nStep 1: Discretizing the cake to parts with value at most epsilon=%f",epsilon)
@@ -298,11 +306,11 @@ def divide(agents: List[Agent], epsilon:float) -> Allocation:
     logger.info("\nStep 3: Discrete allocation")
     result = discrete_utilitarian_welfare_approximation(matrix, items)
 
-    allocation = Allocation(agents)
     num_of_players = len(result[0])
+    pieces = num_of_players*[None]
     for j in range(num_of_players):
-        allocation.set_piece(j, [(items[result[0][j]], items[result[1][j] + 1])])
-    return allocation
+        pieces[j] = [(items[result[0][j]], items[result[1][j] + 1])]
+    return Allocation(agents,pieces)
 
 if __name__ == "__main__":
     import doctest

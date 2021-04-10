@@ -14,7 +14,7 @@ Since: 2019-12
 """
 
 from fairpy.cake.agents import *
-from fairpy.cake.allocations import *
+from fairpy import Allocation
 
 import random, logging
 from typing import *
@@ -49,19 +49,19 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     >>> Alice = PiecewiseConstantAgent([100, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([2, 90], "Bob")
     >>> equally_sized_pieces([Alice, Bob], 0.5)
-    > Alice gets [(0, 1)] with value 100.0
-    > Bob gets [(1, 2)] with value 90.0
+    Alice gets {(0, 1)} with value 100.
+    Bob gets {(1, 2)} with value 90.
     <BLANKLINE>
 
     The doctest will work when the set of edges will return according lexicographic order
     >>> Alice = PiecewiseConstantAgent([1, 1, 1, 1, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([3, 3, 3, 1, 1], "Bob")
     >>> equally_sized_pieces([Alice, Bob], 3 / 5)
-    > Alice gets [(2, 5)] with value 3.0
-    > Bob gets [(0, 3)] with value 9.0
+    Alice gets {(2, 5)} with value 3.
+    Bob gets {(0, 3)} with value 9.
     <BLANKLINE>
     """
-    # > Bob gets [(0, 3)] with value 9.00
+    # > Bob gets {(0, 3)} with value 9.00
 
     # Initializing variables and asserting conditions
     num_of_agents = len(agents)
@@ -124,12 +124,12 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     chosen_agents = [agent for (agent,piece) in edges_set]
     chosen_agents.sort(key=lambda agent:agent.name())
     # Create allocation
-    allocation = Allocation(chosen_agents)
+
+    pieces = len(chosen_agents)*[None]
     # Add the edges to the allocation
     for edge in edges_set:
-        allocation.set_piece(agent_index=chosen_agents.index(edge[0]), piece=[edge[1]])
-
-    return allocation
+        pieces[chosen_agents.index(edge[0])] = [edge[1]]
+    return Allocation(chosen_agents, pieces)
 
 
 def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> Allocation:
@@ -150,8 +150,8 @@ def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> 
     >>> Alice = PiecewiseConstantAgent([100, 1], "Alice")
     >>> Bob = PiecewiseConstantAgent([2, 90], "Bob")
     >>> discrete_setting([Alice, Bob], [(0, 1), (1, 2)])
-    > Alice gets [(0, 1)] with value 100.0
-    > Bob gets [(1, 2)] with value 90.0
+    Alice gets {(0, 1)} with value 100.
+    Bob gets {(1, 2)} with value 90.
     <BLANKLINE>
 
     """
@@ -201,12 +201,11 @@ def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> 
     chosen_agents = [edge[0] for edge in max_match]
     chosen_agents.sort(key=lambda agent:agent.name())
     # Create the allocation
-    allocation = Allocation(chosen_agents)
+    pieces = len(chosen_agents)*[None]
     # Add the edges to the allocation
     for edge in max_match:
-        allocation.set_piece(agent_index=chosen_agents.index(edge[0]), piece=[edge[1]])
-
-    return allocation
+        pieces[chosen_agents.index(edge[0])] = [edge[1]]
+    return Allocation(chosen_agents, pieces)
 
 
 def continuous_setting(agents: List[Agent]) -> Allocation:
@@ -225,7 +224,7 @@ def continuous_setting(agents: List[Agent]) -> Allocation:
     >>> Alice1 = PiecewiseConstantAgent([100, 1], "Alice")
     >>> Alice2 = PiecewiseConstantAgent([100, 1], "Alice")
     >>> continuous_setting([Alice1, Alice2])
-    > Alice gets [(0, 2.0)] with value 101.0
+    Alice gets {(0, 2.0)} with value 101.
     <BLANKLINE>
     """
     # set n to be the number of agents
