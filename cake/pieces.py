@@ -5,7 +5,6 @@ A utility function to round a piece, for presentation purposes.
 """
 
 from fairpy import Allocation
-Allocation.default_separator=", "
 
 
 def round_piece(piece:list, digits:int=3):
@@ -38,6 +37,7 @@ def merge_allocations(self:Allocation, other:Allocation):
     :param other: the other allocation to merge with.
 
     >>> from fairpy.cake.agents import PiecewiseUniformAgent
+    >>> Allocation.default_separator=", "
     >>> Alice = PiecewiseUniformAgent([(2,3)], "Alice")
     >>> George = PiecewiseUniformAgent([(0,10)], "George")
     >>> A = Allocation([Alice, George], [[(1,2)],[(4,5)]])

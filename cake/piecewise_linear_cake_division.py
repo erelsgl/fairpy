@@ -116,6 +116,8 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
     :param roundAcc: the rounding accuracy of the algorithm in decimal digits.
     :return: an envy-free allocation.
 
+    >>> Allocation.default_separator=", "
+    >>> Allocation.default_precision=3
     >>> from fairpy.cake.agents import PiecewiseUniformAgent
     >>> Alice = PiecewiseUniformAgent([(5,7)], "Alice")
     >>> George = PiecewiseUniformAgent([(4,9)], "George")

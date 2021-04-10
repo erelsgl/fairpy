@@ -29,6 +29,7 @@ def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
     :param agents: a list of PiecewiseConstantAgent agents
     :return: an optimal envy-free allocation
 
+    >>> Allocation.default_separator=", "
     >>> Allocation.default_precision=3
     >>> alice = PiecewiseConstantAgent([15,15,0,30,30], name='alice')
     >>> bob = PiecewiseConstantAgent([0,30,30,30,0], name='bob')
@@ -149,6 +150,8 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
      algorithm for finding an optimal EF allocation when agents have piecewise linear valuations.
     :param agents: a list of agents
     :return: an optimal envy-free allocation
+    >>> Allocation.default_separator=", "
+    >>> Allocation.default_precision=3
     >>> alice = PiecewiseLinearAgent([11,22,33,44],[1,0,3,-2],name="alice")
     >>> bob = PiecewiseLinearAgent([11,22,33,44],[-1,0,-3,2],name="bob")
     >>> print(str(opt_piecewise_linear([alice,bob])))
