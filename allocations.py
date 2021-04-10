@@ -34,6 +34,12 @@ class Allocation:
     <BLANKLINE>
     >>> Allocation.default_separator=","
     >>> Allocation.default_precision=3
+    >>> a = Allocation(agents=["Alice","George","Dina"], bundles=[[3,6],None,[2,5]], map_agent_to_value=[9,0,6.999999])
+    >>> a
+    Alice gets {3,6} with value 9.
+    George gets None with value 0.
+    Dina gets {2,5} with value 7.
+    <BLANKLINE>
     >>> from valuations import ValuationMatrix
     >>> a = Allocation(agents=ValuationMatrix([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=[[0,4],None,[1,2]])
     >>> a
@@ -70,6 +76,7 @@ class Allocation:
         self.num_of_agents = num_of_agents
         #
         self.bundles = bundles
+        self.agents = agents
         #
         map_agent_to_name = agents
 

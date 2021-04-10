@@ -1,9 +1,9 @@
 #!python3
 
-__test__ = []
+# __test__ = [] # Does not work
 
 # import pytest
-# pytestmark = pytest.mark.skip("Not implemented yet")
+# pytestmark = pytest.mark.skip("Not implemented yet")   # Does not work
 
 """
 A skeleton and unit-tests of an algorithm for cake-cutting with unequal shares. Reference:

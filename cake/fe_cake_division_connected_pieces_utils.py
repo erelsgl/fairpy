@@ -243,8 +243,8 @@ def setRemain(partialAlloc:List[List[tuple]], agents: List[Agent])->List[List[tu
     >>> pieces
     [[(0.4, 0.73), (0.73, 1)], [(0.2, 0.3), (0.3, 0.4), (0, 0.2)]]
     >>> print(Allocation(agents,pieces))
-    Alice gets {(0.4, 0.73),(0.73, 1)} with value 19.8.
-    George gets {(0, 0.2),(0.2, 0.3),(0.3, 0.4)} with value 2.
+    Alice gets {(0.4, 0.73), (0.73, 1)} with value 19.8.
+    George gets {(0, 0.2), (0.2, 0.3), (0.3, 0.4)} with value 2.
     <BLANKLINE>
     """
     remain = findRemainIntervals(partialAlloc)
@@ -340,7 +340,6 @@ def efCheck(allocation:Allocation, epsilon:float)->str:
     agents = allocation.agents
     o = (1/(3+(9*epsilon)/len(agents)))
     for i,a in zip(range(len(agents)),agents):
-        x = allocation[i]
         aPiece = allocation[i][0]
         for piece in allocation.get_bundles():
             if a.eval(aPiece[0],aPiece[1])<o*a.eval(piece[0][0],piece[0][1]):
