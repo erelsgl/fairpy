@@ -1,5 +1,5 @@
 #!python3
-__test__ = None
+# __test__ = []
 
 import pytest
 pytestmark = pytest.mark.skip("Not implemented yet")
