@@ -18,6 +18,7 @@ class Allocation:
     An immutable object; used mainly for display purposes.
 
     >>> a = Allocation(agents=range(3), bundles=[[3,6],None,[2,5]], values=[9,0,6.999999])
+    >>> Allocation.default_separator=","
     >>> a
     Agent #0 gets {3,6} with value 9.
     Agent #1 gets None with value 0.
