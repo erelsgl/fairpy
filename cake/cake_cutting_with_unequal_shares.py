@@ -1,8 +1,9 @@
 #!python3
-# __test__ = []
 
-import pytest
-pytestmark = pytest.mark.skip("Not implemented yet")
+__test__ = []
+
+# import pytest
+# pytestmark = pytest.mark.skip("Not implemented yet")
 
 """
 A skeleton and unit-tests of an algorithm for cake-cutting with unequal shares. Reference:
@@ -22,7 +23,7 @@ from fairpy.cake.agents import Agent
 from typing import List, Dict
 import logging
 
-def proportional_division_with_unequal_shares(agents: List[Agent], agents_demands: Dict[str,int], allocation: Allocation, start: float, end: float)->Allocation:
+def proportional_division_with_unequal_shares(agents: List[Agent], agents_demands: Dict[str,int], start: float, end: float)->Allocation:
     """
     An algorithm for proportional cake division, with unequal shares. Best known complexity! 2(n-1)*celling(log2(D)), where D is the value of the whole cake.
     All agents must value the cake with the same value D, which is the sum of their demands.
@@ -40,9 +41,7 @@ def proportional_division_with_unequal_shares(agents: List[Agent], agents_demand
     >>> Alice = PiecewiseConstantAgent([1,1], "Alice")
     >>> Bob = PiecewiseConstantAgent([1,1], "Bob")
     >>> _agents_demands = {"Alice":1, "Bob":1}
-    >>> allocations = Allocation([Alice, Bob])
-    >>>
-    >>> proportional_division_with_unequal_shares([Alice, Bob], _agents_demands, allocations, 0, 1) # doctest: +SKIP
+    >>> proportional_division_with_unequal_shares([Alice, Bob], _agents_demands, 0, 1) # doctest: +SKIP
     Alice gets {(0, 0.5)} with value 1.
     Bob gets {(0.5, 1)} with value 1.
     <BLANKLINE>
@@ -53,9 +52,7 @@ def proportional_division_with_unequal_shares(agents: List[Agent], agents_demand
     >>> Bob = PiecewiseConstantAgent([4,4,4], "Bob")
     >>> Cat = PiecewiseConstantAgent([1,8,3], "Cat")
     >>> _agents_demands = {"Alice":6, "Bob":3, "Cat":3}
-    >>> allocations = Allocation([Alice, Bob, Cat])
-    >>>
-    >>> proportional_division_with_unequal_shares([Alice, Bob, Cat], _agents_demands, allocations, 0, 1) # doctest: +SKIP
+    >>> proportional_division_with_unequal_shares([Alice, Bob, Cat], _agents_demands, 0, 1) # doctest: +SKIP
     Alice gets {(0, 0.3)} with value 6.
     Bob gets {(0.53, 1)} with value 5.64.
     Cat gets {(0.3, 0.53)} with value 3.
@@ -65,9 +62,7 @@ def proportional_division_with_unequal_shares(agents: List[Agent], agents_demand
     >>> Alice = PiecewiseConstantAgent([1,1,2,2,2,1], "Alice")
     >>> Bob = PiecewiseConstantAgent([2,2,1,1,1,2], "Bob")
     >>> _agents_demands = {"Alice":5, "Bob":4}
-    >>> allocations = Allocation([Alice, Bob])
-    >>>
-    >>> proportional_division_with_unequal_shares([Alice, Bob], _agents_demands, allocations, 0, 1) # doctest: +SKIP
+    >>> proportional_division_with_unequal_shares([Alice, Bob], _agents_demands, 0, 1) # doctest: +SKIP
     Alice gets {(0.333, 1)} with value 7.
     Bob gets {(0,0.333)} with value 4.
     <BLANKLINE>
@@ -78,9 +73,7 @@ def proportional_division_with_unequal_shares(agents: List[Agent], agents_demand
     >>> Cat = PiecewiseConstantAgent([1,1,1,1], "Cat")
     >>> Dug = PiecewiseConstantAgent([1,1,1,1], "Dug")
     >>> _agents_demands = {"Alice":1, "Bob":1, "Cat":1, "Dug":1}
-    >>> allocations = Allocation([Alice, Bob, Cat, Dug])
-    >>>
-    >>> proportional_division_with_unequal_shares([Alice, Bob, Cat, Dug], _agents_demands, allocations, 0, 1) # doctest: +SKIP
+    >>> proportional_division_with_unequal_shares([Alice, Bob, Cat, Dug], _agents_demands, 0, 1) # doctest: +SKIP
     Alice gets {(0.0, 0.25)} with value 1.
     Bob gets {(0.25,0.5)} with value 1.
     Cat gets {(0.5,0.75)} with value 1.
@@ -92,9 +85,7 @@ def proportional_division_with_unequal_shares(agents: List[Agent], agents_demand
     >>> Bob = PiecewiseConstantAgent([1,1,1], "Bob")
     >>> Cat = PiecewiseConstantAgent([0.3,0.4,2.3], "Cat")
     >>> _agents_demands = {"Alice":-1, "Bob":1, "Cat":2}
-    >>> allocations = Allocation([Alice, Bob, Cat])
-    >>>
-    >>> proportional_division_with_unequal_shares([Alice, Bob, Cat], _agents_demands, allocations, 0, 1) # doctest: +SKIP
+    >>> proportional_division_with_unequal_shares([Alice, Bob, Cat], _agents_demands, 0, 1) # doctest: +SKIP
     Alice gets ??? - stuck!
     Bob gets 0 - see detailed explanation in documentaion (phase b, writing exapmles)
     Cat gets {(0,1)} with value 3
