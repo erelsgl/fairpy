@@ -11,7 +11,7 @@ Since: 2020-01
 """
 
 from fairpy.cake.agents import *
-from fairpy.allocations import Allocation
+from fairpy import Allocation
 
 from typing import *
 import numpy as np

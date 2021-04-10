@@ -1,3 +1,4 @@
+#!python3
 """
 Article name : Fair and Efficient Cake Division with Connected Pieces
 Authors : Eshwar Ram Arunachaleswaran , Siddharth Barman , Rachitesh Kumar and Nidhi Rathi
@@ -6,8 +7,8 @@ Programmer: Ori Zitzer
 Since: 2019-12
 """
 
+from fairpy import Allocation
 from fairpy.cake.agents import *
-from fairpy.allocations import Allocation
 import numpy as np
 import random
 import logging

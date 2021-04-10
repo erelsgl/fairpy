@@ -1,11 +1,10 @@
+#!python3
 import logging
 import sys
 
 from fairpy.cake import improve_ef4
-from fairpy.cake.agents import *
-
-improve_ef4.logger.addHandler(logging.StreamHandler(sys.stdout))
-improve_ef4.logger.setLevel(logging.INFO)
+from fairpy.cake.agents import PiecewiseConstantAgent
+from fairpy.cake.pieces import round_allocation
 
 cases = [
     [
@@ -34,8 +33,12 @@ cases = [
     ]
 ]
 
+improve_ef4.logger.addHandler(logging.StreamHandler(sys.stdout))
+# improve_ef4.logger.setLevel(logging.INFO)
+
 for agents in cases:
     allocation = improve_ef4.improve_ef4_protocol(agents)
+    allocation = round_allocation(allocation)
 
     print()
     print(allocation)

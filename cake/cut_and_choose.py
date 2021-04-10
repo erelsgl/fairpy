@@ -12,7 +12,7 @@ Since: 2019-11
 """
 
 from fairpy.cake.agents import *
-from fairpy.allocations import *
+from fairpy import Allocation
 from typing import *
 
 import logging

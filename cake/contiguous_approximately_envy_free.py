@@ -12,7 +12,7 @@ Programmer: Shalev Goldshtein (Algorithm 1)
 Since: 2020-03
 """
 
-from fairpy.allocations import Allocation
+from fairpy import Allocation
 from fairpy.cake.agents import *
 
 import logging

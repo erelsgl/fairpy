@@ -8,11 +8,9 @@ Programmer: Erel Segal-Halevi
 Since:  2021-04
 """
 
-from fairpy.valuations import ValuationMatrix
-from fairpy.allocations import Allocation
+from fairpy import ValuationMatrix, Allocation
 from typing import List
 import numpy as np
-from numpy import ndarray
 
 import logging
 logger = logging.getLogger(__name__)
