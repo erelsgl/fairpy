@@ -26,6 +26,7 @@ def asymmetric_protocol(agents: List[Agent])->Allocation:
     :param agents: a list that must contain exactly 2 Agent objects.
     :return: a proportional and envy-free allocation.
 
+    >>> Allocation.default_precision=3
     >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
     >>> George = PiecewiseConstantAgent([11,55], "George")
     >>> asymmetric_protocol([Alice, George])
@@ -77,6 +78,7 @@ def symmetric_protocol(agents: List[Agent])->Allocation:
     :param agents: a list that must contain exactly 2 Agent objects.
     :return: a proportional and envy-free allocation.
 
+    >>> Allocation.default_precision=3
     >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
     >>> George = PiecewiseConstantAgent([11,55], "George")
     >>> symmetric_protocol([Alice, George])

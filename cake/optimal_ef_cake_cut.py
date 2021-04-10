@@ -29,6 +29,7 @@ def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
     :param agents: a list of PiecewiseConstantAgent agents
     :return: an optimal envy-free allocation
 
+    >>> Allocation.default_precision=3
     >>> alice = PiecewiseConstantAgent([15,15,0,30,30], name='alice')
     >>> bob = PiecewiseConstantAgent([0,30,30,30,0], name='bob')
     >>> gin = PiecewiseConstantAgent([10,0,30,0,60], name='gin')

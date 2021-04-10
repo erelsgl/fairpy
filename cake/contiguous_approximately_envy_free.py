@@ -64,6 +64,7 @@ def algor1(AgentList)->Allocation:
     :return: the end of an interval with a value of target_value.
     If the value is too high - returns None.
 
+    >>> Allocation.default_precision=3
     >>> aa = PiecewiseConstantAgentNormalized([2, 8, 2], name="aa")
     >>> bb = PiecewiseConstantAgentNormalized([4, 2, 6], name="bb")
     >>> lstba = [aa,bb]

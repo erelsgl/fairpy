@@ -25,6 +25,7 @@ def ALG(agents: List[Agent], epsilon:float)->Allocation:
             epsilon: constant between 0 to 1/3
     :return: a Fair and Efficient allocation.
 
+    >>> Allocation.default_precision=3
     >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
     >>> print(ALG([Alice],0.2))
     Alice gets {(0, 1)} with value 1.

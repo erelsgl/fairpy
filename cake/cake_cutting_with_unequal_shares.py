@@ -34,6 +34,7 @@ def proportional_division_with_unequal_shares(agents: List[Agent], agents_demand
     :return: nothing - the allocation is modified in place.
 
     *Simple example - 2 agents with same demands and value functions
+    >>> from fairpy.cake.agents import PiecewiseConstantAgent
     >>> Alice = PiecewiseConstantAgent([1,1], "Alice")
     >>> Bob = PiecewiseConstantAgent([1,1], "Bob")
     >>> _agents_demands = {"Alice":1, "Bob":1}
