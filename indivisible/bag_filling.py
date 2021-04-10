@@ -158,6 +158,8 @@ def one_directional_bag_filling(valuations:ValuationMatrix, thresholds:List[floa
 	remaining_agents  = list(valuations.agents())
 	bag = Bag(valuations, thresholds)
 	while True:
+		if len(remaining_agents)==0:   break
+		if len(remaining_objects)==0:  break
 		(willing_agent, allocated_objects) = bag.fill(remaining_objects, remaining_agents)
 		if willing_agent is None: break
 		allocations[willing_agent] = allocated_objects
