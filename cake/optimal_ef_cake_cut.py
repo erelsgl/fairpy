@@ -33,8 +33,8 @@ def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
     >>> bob = PiecewiseConstantAgent([0,30,30,30,0], name='bob')
     >>> gin = PiecewiseConstantAgent([10,0,30,0,60], name='gin')
     >>> print(str(opt_piecewise_constant([alice,gin])))
-    alice gets {(0.0, 1.0), (1.0, 2.0), (3.0, 4.0)} with value 60.
-    gin gets {(2.0, 3.0), (4.0, 5.0)} with value 90.
+    alice gets {(0.0, 1.0),(1.0, 2.0),(3.0, 4.0)} with value 60.
+    gin gets {(2.0, 3.0),(4.0, 5.0)} with value 90.
     <BLANKLINE>
     >>> alice = PiecewiseConstantAgent([5], name='alice')
     >>> bob = PiecewiseConstantAgent([5], name='bob')
@@ -51,8 +51,8 @@ def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
     >>> alice = PiecewiseConstantAgent([0,1,0,2,0,3], name='alice')
     >>> bob = PiecewiseConstantAgent([1,0,2,0,3,0], name='bob')
     >>> print(str(opt_piecewise_constant([alice,bob])))
-    alice gets {(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)} with value 6.
-    bob gets {(0.0, 1.0), (2.0, 3.0), (4.0, 5.0)} with value 6.
+    alice gets {(1.0, 2.0),(3.0, 4.0),(5.0, 6.0)} with value 6.
+    bob gets {(0.0, 1.0),(2.0, 3.0),(4.0, 5.0)} with value 6.
     <BLANKLINE>
    """
 
@@ -151,8 +151,8 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
     >>> alice = PiecewiseLinearAgent([11,22,33,44],[1,0,3,-2],name="alice")
     >>> bob = PiecewiseLinearAgent([11,22,33,44],[-1,0,-3,2],name="bob")
     >>> print(str(opt_piecewise_linear([alice,bob])))
-    alice gets {(0.5, 1), (1, 1.466), (2.5, 3), (3, 3.5)} with value 55.
-    bob gets {(0, 0.5), (1.466, 2), (2, 2.5), (3.5, 4)} with value 55.
+    alice gets {(0.5, 1),(1, 1.466),(2.5, 3),(3, 3.5)} with value 55.
+    bob gets {(0, 0.5),(1.466, 2),(2, 2.5),(3.5, 4)} with value 55.
     <BLANKLINE>
     >>> alice = PiecewiseLinearAgent([5], [0], name='alice')
     >>> bob = PiecewiseLinearAgent([5], [0], name='bob')
@@ -175,8 +175,8 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
     >>> alice = PiecewiseLinearAgent([0,1,0,2,0,3], [0,0,0,0,0,0], name='alice')
     >>> bob = PiecewiseLinearAgent([1,0,2,0,3,0], [0,0,0,0,0,0],name='bob')
     >>> print(str(opt_piecewise_linear([alice,bob])))
-    alice gets {(1, 2), (3, 4), (5, 6)} with value 6.
-    bob gets {(0, 1), (2, 3), (4, 5)} with value 6.
+    alice gets {(1, 2),(3, 4),(5, 6)} with value 6.
+    bob gets {(0, 1),(2, 3),(4, 5)} with value 6.
     <BLANKLINE>
     """
 

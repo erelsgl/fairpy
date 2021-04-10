@@ -57,7 +57,7 @@ def merge_allocations(self:Allocation, other:Allocation):
                 if(other.bundles[j] == None):
                     other.bundles[j] = []
                 self.bundles[i].extend(other.bundles[j])
-                self.values[i] = self.agents[i].value(self.bundles[i])
+                self.map_agent_to_value[i] = self.agents[i].value(self.bundles[i])
 
 
 

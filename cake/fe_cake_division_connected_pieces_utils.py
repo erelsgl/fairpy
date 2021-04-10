@@ -243,8 +243,8 @@ def setRemain(partialAlloc:List[List[tuple]], agents: List[Agent])->List[List[tu
     >>> pieces
     [[(0.4, 0.73), (0.73, 1)], [(0.2, 0.3), (0.3, 0.4), (0, 0.2)]]
     >>> print(Allocation(agents,pieces))
-    Alice gets {(0.4, 0.73), (0.73, 1)} with value 19.8.
-    George gets {(0, 0.2), (0.2, 0.3), (0.3, 0.4)} with value 2.
+    Alice gets {(0.4, 0.73),(0.73, 1)} with value 19.8.
+    George gets {(0, 0.2),(0.2, 0.3),(0.3, 0.4)} with value 2.
     <BLANKLINE>
     """
     remain = findRemainIntervals(partialAlloc)

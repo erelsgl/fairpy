@@ -9,6 +9,7 @@ Since:  2021-04
 """
 
 from fairpy import ValuationMatrix, Allocation
+from fairpy.indivisible import SequentialAllocation
 from typing import List
 import numpy as np
 
@@ -153,21 +154,14 @@ def one_directional_bag_filling(valuations:ValuationMatrix, thresholds:List[floa
 	if len(thresholds) != valuations.num_of_agents:
 		raise ValueError(f"Number of valuations {valuations.num_of_agents} differs from number of thresholds {len(thresholds)}")
 
-	allocations = [None] * valuations.num_of_agents
-	remaining_objects = list(valuations.objects())
-	remaining_agents  = list(valuations.agents())
+	allocation = SequentialAllocation(valuations.agents(), valuations.objects(), logger)
 	bag = Bag(valuations, thresholds)
 	while True:
-		if len(remaining_agents)==0:   break
-		if len(remaining_objects)==0:  break
-		(willing_agent, allocated_objects) = bag.fill(remaining_objects, remaining_agents)
-		if willing_agent is None: break
-		allocations[willing_agent] = allocated_objects
-		remaining_agents.remove(willing_agent)
-		for o in allocated_objects: remaining_objects.remove(o)
-		logger.info("Agent %d takes the bag with objects %s. Remaining agents: %s. Remaining objects: %s.", willing_agent, allocated_objects, remaining_agents, remaining_objects)
+		(willing_agent, allocated_objects) = bag.fill(allocation.remaining_objects, allocation.remaining_agents)
+		if willing_agent is None:  break
+		allocation.let_agent_get_objects(willing_agent, allocated_objects)
 		bag.reset()
-	return Allocation(valuations, allocations)
+	return Allocation(valuations, allocation.bundles)
 
 
 

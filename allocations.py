@@ -40,7 +40,7 @@ class Allocation:
     George gets None with value 0.
     Dina gets {2,5} with value 7.
     <BLANKLINE>
-    >>> from valuations import ValuationMatrix
+    >>> from fairpy.valuations import ValuationMatrix
     >>> a = Allocation(agents=ValuationMatrix([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=[[0,4],None,[1,2]])
     >>> a
     Agent #0 gets {0,4} with value 60.
