@@ -98,11 +98,7 @@ def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
     logger.info(f'Problem status: {prob.status}')
 
     pieces_allocation = get_pieces_allocations(num_of_pieces, XiI)
-    a = Allocation(agents)
-    a.setPieces(pieces_allocation)
-    logger.info(f'Allocation is envy-free {a.isEnvyFree(3)}')
-
-    return a
+    return Allocation(agents, pieces_allocation)
 
 
 def feasibility_constraints(XiI: list) -> list:
@@ -283,17 +279,15 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
                 result.append((start, end))
         return result
 
-    allocation, pieces = get_optimal_allocation()
-    logger.info(f'get_optimal_allocation returned:\nallocation: {allocation}\npieces: {pieces}')
-    a = Allocation(agents)
-    a.setPieces(allocation)
+    allocs, new_intervals = get_optimal_allocation()
+    logger.info(f'get_optimal_allocation returned:\nallocation: {allocs}\npieces: {new_intervals}')
 
-    y_0_gt_1 = Y(0, operator.gt, 1, pieces)
-    y_1_gt_0 = Y(1, operator.gt, 0, pieces)
-    y_0_eq_1 = Y(0, operator.eq, 1, pieces)
-    y_0_ge_1 = Y(0, operator.ge, 1, pieces)
-    y_1_ge_0 = Y(1, operator.ge, 0, pieces)
-    y_0_lt_1 = Y(0, operator.lt, 1, pieces)
+    y_0_gt_1 = Y(0, operator.gt, 1, new_intervals)
+    y_1_gt_0 = Y(1, operator.gt, 0, new_intervals)
+    y_0_eq_1 = Y(0, operator.eq, 1, new_intervals)
+    y_0_ge_1 = Y(0, operator.ge, 1, new_intervals)
+    y_1_ge_0 = Y(1, operator.ge, 0, new_intervals)
+    y_0_lt_1 = Y(0, operator.lt, 1, new_intervals)
     logger.debug(f'y_0_gt_1 {y_0_gt_1}')
     logger.debug(f'y_1_gt_0 {y_1_gt_0}')
     logger.debug(f'y_0_eq_1 {y_0_eq_1}')
@@ -303,7 +297,7 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
     if (V_l(0, y_0_ge_1) >= (agents[0].total_value() / 2) and
         V_l(1, y_1_ge_0) >= (agents[1].total_value() / 2)):
         if V_l(0, y_0_gt_1) >= (agents[0].total_value() / 2):
-            a.setPieces([y_0_gt_1, y_1_ge_0])
+            allocs = [y_0_gt_1, y_1_ge_0]
         else:
             missing_value = (agents[0].total_value() / 2) - V_l(0, y_0_gt_1)
             interval_options = []
@@ -318,8 +312,8 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
             y_1_gt_0.append(agent_1_inter)
             logger.info(f'agent 0 pieces {y_0_gt_1}')
             logger.info(f'agent 1 pieces {y_1_gt_0}')
-            a.setPieces([y_0_gt_1, y_1_gt_0])
-        return a
+            allocs = [y_0_gt_1, y_1_gt_0]
+        return Allocation(agents, allocs)
 
     if V_l(0, y_0_ge_1) < (agents[0].total_value() / 2):
         # Create V1(Y(1≥2) ∪ Y(≥r)) ≥ 1/2
@@ -343,11 +337,11 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
         logger.info(f'Y(≥r*) is {r_star}')
 
         # Give Y>r∗ to agent 1
-        max_value, r_max_dict = r_star.popitem()
+        _, r_max_dict = r_star.popitem()
 
         if not r_max_dict:
             logger.info(f'Y > r* returned empty, returning')
-            return a
+            return Allocation(agents, allocs)
 
         r_max, inter_r_max = r_max_dict.popitem()
         agent_0_allocation = y_0_gt_1 + Y_op_r(inter_r_max, operator.gt, r_max)
@@ -369,9 +363,10 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
 
         logger.info(f'agent 0 pieces {agent_0_allocation}')
         logger.info(f'agent 1 pieces {agent_1_allocation}')
-        a.setPieces([agent_0_allocation, agent_1_allocation])
+        allocs = [agent_0_allocation, agent_1_allocation]
         logger.info(f'Is allocation {agent_0_allocation, agent_1_allocation}, Envy Free ? {a.isEnvyFree(3)}')
-    return a
+       
+    return Allocation(agents, allocs)
 
 
 if __name__ == "__main__":

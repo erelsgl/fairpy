@@ -13,10 +13,10 @@ Programmer: Erel Segal-Halevi
 Since: 2019-12
 """
 
-from fairpy.cake.agents import *
-from fairpy.allocations import Allocation
+from fairpy import Allocation
+from fairpy.cake.agents import Agent
 
-from typing import *
+from typing import List, Any
 import logging
 logger = logging.getLogger(__name__)
 
@@ -25,6 +25,8 @@ def last_diminisher(agents: List[Agent])->Allocation:
     :param agents: a list of Agent objects.
     :return: a proportional cake-allocation.
 
+    >>> from fairpy.cake.agents import PiecewiseConstantAgent
+    >>> from fairpy.cake.pieces import round_allocation
     >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
     >>> last_diminisher([Alice])
     Alice gets {(0, 2)} with value 66.
@@ -102,7 +104,6 @@ def last_diminisher_recursive(start:float, agents: List[Agent], active_agents:Li
     last_diminisher_recursive(new_start, agents, active_agents, pieces)
 
 
-from fairpy.cake.pieces import round_allocation
 if __name__ == "__main__":
     import doctest
     (failures,tests) = doctest.testmod(report=True)
