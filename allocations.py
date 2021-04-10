@@ -85,11 +85,12 @@ class Allocation:
         for i_agent, agent in enumerate(self.agents):
             agent_bundle = self.bundles[i_agent]
             agent_value = self.values[i_agent]
-            result += f"{self.agent_name(agent)} gets {stringify_bundle(agent_bundle)} with value {agent_value:.{Allocation.default_precision}g}.\n"
+            agent_bundle_str = stringify_bundle(agent_bundle, separator=Allocation.default_separator)
+            result += f"{self.agent_name(agent)} gets {agent_bundle_str} with value {agent_value:.{Allocation.default_precision}g}.\n"
         return result
 
 
-def stringify_bundle(bundle: List[Any]):
+def stringify_bundle(bundle: List[Any], separator=","):
     """
     Convert a bundle where each item is a character to a compact string representation.
     For testing purposes only.
@@ -106,7 +107,7 @@ def stringify_bundle(bundle: List[Any]):
     if bundle is None:
         return "None"
     else:
-        return "{" + Allocation.default_separator.join(map(str,sorted(bundle))) + "}"
+        return "{" + separator.join(map(str,sorted(bundle))) + "}"
     # return ",".join(["".join(item) for item in bundle])
 
 
