@@ -9,7 +9,7 @@ Programmer: Erel Segal-Halevi
 Since: 2021-04
 """
 
-from typing import *
+from typing import List, Any
 
 
 class Allocation:
@@ -109,7 +109,7 @@ def stringify_bundle(bundle: List[Any]):
     if bundle is None:
         return "None"
     else:
-        return "{" + ",".join(map(str,sorted(bundle))) + "}"
+        return "{" + ", ".join(map(str,sorted(bundle))) + "}"
     # return ",".join(["".join(item) for item in bundle])
 
 

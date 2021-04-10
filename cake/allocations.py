@@ -1,3 +1,4 @@
+#!python3
 
 """
 Represents an allocation of a cake among agents ---  the output of a cake-cutting algorithm.
@@ -8,6 +9,7 @@ Since: 2019-11
 """
 
 from typing import *
+from fairpy.criteria import  is_envyfree
 from fairpy.cake.agents import Agent, PiecewiseUniformAgent
 from fairpy.cake.pieces import round_piece
 
@@ -57,30 +59,6 @@ class Allocation:
         """
         self.pieces[agent_index] = piece
 
-    def merge(self, other):
-        """
-        merges this allocation with another allocation in place.
-
-        :param other: the other allocation to merge with.
-
-        >>> Alice = PiecewiseUniformAgent([(2,3)], "Alice");George = PiecewiseUniformAgent([(0,10)], "George")
-        >>> A = Allocation([Alice, George]);A.setPieces([[(1,2)],[(4,5)]]);
-        >>> B = Allocation([George, Alice]);B.setPieces([[(0,1)],[(2,3)]]);
-        >>> A.merge(B);print(A)
-        > Alice gets [(1, 2), (2, 3)] with value 1.0
-        > George gets [(4, 5), (0, 1)] with value 2.0
-        <BLANKLINE>
-        """
-
-        for i in range(len(self.pieces)):
-            if(self.pieces[i] == None):
-                self.pieces[i] = []
-            for j in range(len(other.pieces)):
-                #merge the same agents.
-                if(other.agents[j].name() == self.agents[i].name()):
-                    if(other.pieces[j] == None):
-                        other.pieces[j] = []
-                    self.pieces[i].extend(other.pieces[j])
 
     def setAgents(self, agents):
         self.agents = agents
@@ -100,17 +78,7 @@ class Allocation:
         >>> A.isEnvyFree(2)
         True
         """
-        for i in range(len(self.agents)):
-            selfVal = 0
-            for piece in self.pieces[i]:
-                selfVal += self.agents[i].eval(piece[0], piece[1])
-            for j in range(len(self.pieces)):
-                otherVal = 0
-                for otherPiece in self.pieces[j]:
-                    otherVal += self.agents[i].eval(otherPiece[0], otherPiece[1])
-                if round(otherVal-selfVal, roundAcc) > 0:
-                    return False
-        return True
+        return is_envyfree(self.agents, self.pieces, roundAcc)
 
     def __repr__(self):
         s = ""

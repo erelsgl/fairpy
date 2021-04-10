@@ -1,3 +1,4 @@
+#!python3
 """
 Implementation of an envy-free cake cutting protocol for
 agents with piecewise linear preferences in polynomial time.
@@ -10,7 +11,10 @@ Programmer: Guy Wolf
 Since: 2020-2
 """
 
-from fairpy.cake.allocations import *
+from fairpy.criteria import is_envyfree
+from fairpy import Allocation
+from fairpy.cake.pieces import merge_allocations
+from fairpy.cake.agents import Agent
 from typing import *
 
 from itertools import permutations
@@ -43,6 +47,7 @@ def Cover(a: float, b: float, agents: List[Agent], roundAcc = 6)->List:
     :param roundAcc: the rounding accuracy of the algorithm in decimal digits.
     :return: a cover of [a,b].
 
+    >>> from fairpy.cake.agents import PiecewiseUniformAgent
     >>> Alice = PiecewiseUniformAgent([(0.5,0.7)], "Alice")
     >>> George = PiecewiseUniformAgent([(0.4,0.9)], "George")
     >>> print(str(Cover(0,1,[Alice,George])))
@@ -111,17 +116,18 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
     :param roundAcc: the rounding accuracy of the algorithm in decimal digits.
     :return: an envy-free allocation.
 
+    >>> from fairpy.cake.agents import PiecewiseUniformAgent
     >>> Alice = PiecewiseUniformAgent([(5,7)], "Alice")
     >>> George = PiecewiseUniformAgent([(4,9)], "George")
     >>> print(str(EFAllocate([Alice,George])))
-    > Alice gets [(0, 6.0)] with value 1.0
-    > George gets [(6.0, 7.5), (7.5, 9.0)] with value 3.0
+    Alice gets {(0, 6.0)} with value 1.
+    George gets {(6.0, 7.5), (7.5, 9.0)} with value 3.
     <BLANKLINE>
     >>> Alice = PiecewiseUniformAgent([(2,3), (9,10)], "Alice")
     >>> George = PiecewiseUniformAgent([(1,2), (6,7)], "George")
     >>> print(str(EFAllocate([Alice,George])))
-    > George gets [(0, 2.0)] with value 1.0
-    > Alice gets [(2.0, 6.0), (6.0, 10.0)] with value 2.0
+    George gets {(0, 2.0)} with value 1.
+    Alice gets {(2.0, 6.0), (6.0, 10.0)} with value 2.
     <BLANKLINE>
     """
 
@@ -169,21 +175,20 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
         """
 
         if round(a, roundAcc) == round(b, roundAcc):
-            return Allocation(agents)
+            return Allocation(agents, len(agents)*[[]])
 
         #1
         numAgents = len(agents)
-        ret = Allocation(agents)
+        ret = Allocation(agents, len(agents)*[[]])
         cover = Cover(a,b,agents,roundAcc=roundAcc)
 
         #2
         for inter in cover:
-            ret.setPieces(sandwichAllocation(a,b,inter[0],inter[1],numAgents))
+            pieces = sandwichAllocation(a,b,inter[0],inter[1],numAgents)
             for perm in permutations(agents):
-                ret.setAgents(perm)
-                if ret.isEnvyFree(roundAcc):
+                if is_envyfree(perm, pieces, roundAcc):
                     logger.info("allocation from %f to %f completed with sandwich allocation.",a,b)
-                    return ret
+                    return Allocation(perm, pieces)
 
         #3
         logger.info("no valid allocation without recursion from %f to %f.", a, b)
@@ -192,11 +197,11 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
         for interval in cover:
             points.append(interval[1])
         points.sort()
-        ret = Allocation(agents)
+        ret = Allocation(agents, len(agents)*[[]])
         for i in range(1, len(points)):
             logger.info("creating allocation from %f to %f:", points[i-1], points[i])
             alloc = EFAllocateRec(points[i-1], points[i])
-            ret.merge(alloc)
+            merge_allocations(ret, alloc)
         logger.info("covered allocation from %f to %f using merging.",a,b)
         return ret
 
