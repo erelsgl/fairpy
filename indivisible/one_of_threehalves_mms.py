@@ -34,15 +34,15 @@ def bidirectional_bag_filling(valuations:ValuationMatrix, thresholds:List[float]
     Agent #2 gets None with value 0.
     <BLANKLINE>
     """
-    v = ValuationMatrix(valuations)
-    v.verify_ordered()
-    if len(thresholds) != v.num_of_agents:
-        raise ValueError(f"Number of valuations {v.num_of_agents} differs from number of thresholds {len(thresholds)}")
+    valuations = ValuationMatrix(valuations)
+    valuations.verify_ordered()
+    if len(thresholds) != valuations.num_of_agents:
+        raise ValueError(f"Number of valuations {valuations.num_of_agents} differs from number of thresholds {len(thresholds)}")
 
-    allocations = [None] * v.num_of_agents
-    remaining_objects = list(v.objects())
-    remaining_agents  = list(v.agents())
-    bag = Bag(v, thresholds)
+    allocations = [None] * valuations.num_of_agents
+    remaining_objects = list(valuations.objects())
+    remaining_agents  = list(valuations.agents())
+    bag = Bag(valuations, thresholds)
     while True:
         if len(remaining_agents)==0:   break
         if len(remaining_objects)==0:  break
@@ -60,8 +60,7 @@ def bidirectional_bag_filling(valuations:ValuationMatrix, thresholds:List[float]
         logger.info("Agent %d takes the bag with objects %s. Remaining agents: %s. Remaining objects: %s.", willing_agent, allocated_objects, remaining_agents, remaining_objects)
         bag.reset()
 
-    map_agent_to_value = [v.agent_value_for_bundle(agent,allocations[agent]) for agent in v.agents()]
-    return Allocation(v.agents(), allocations, map_agent_to_value)
+    return Allocation(valuations, allocations)
 
 
 

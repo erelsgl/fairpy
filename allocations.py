@@ -17,7 +17,7 @@ class Allocation:
     Represents an allocation of objects to agents.
     An immutable object; used mainly for display purposes.
 
-    >>> a = Allocation(agents=range(3), bundles=[[3,6],None,[2,5]], values=[9,0,6.999999])
+    >>> a = Allocation(agents=range(3), bundles=[[3,6],None,[2,5]], map_agent_to_value=[9,0,6.999999])
     >>> Allocation.default_separator=","
     >>> Allocation.default_precision=3
     >>> a
@@ -25,44 +25,73 @@ class Allocation:
     Agent #1 gets None with value 0.
     Agent #2 gets {2,5} with value 7.
     <BLANKLINE>
+    >>> Allocation.default_separator=", "
     >>> Allocation.default_precision=9
     >>> a
-    Agent #0 gets {3,6} with value 9.
+    Agent #0 gets {3, 6} with value 9.
     Agent #1 gets None with value 0.
-    Agent #2 gets {2,5} with value 6.999999.
+    Agent #2 gets {2, 5} with value 6.999999.
     <BLANKLINE>
+    >>> Allocation.default_separator=","
     >>> Allocation.default_precision=3
+    >>> from valuations import ValuationMatrix
+    >>> a = Allocation(agents=ValuationMatrix([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=[[0,4],None,[1,2]])
+    >>> a
+    Agent #0 gets {0,4} with value 60.
+    Agent #1 gets None with value 0.
+    Agent #2 gets {1,2} with value 70.
+    <BLANKLINE>
     """
 
-    default_precision:int=3   # number of significant digits of values in printing
+    default_precision:int=3   # number of significant digits in printing
     default_separator:str=","
 
     agents:List[Any]
     bundles:List[List[Any]]
-    values:List[float]
+    map_agent_to_value:List[float]
 
     num_of_agents:int
 
-    def __init__(self, agents: List[Any], bundles: List[List[Any]], values:List[float]=None):
+    def __init__(self, agents: List[Any], bundles: List[List[Any]], map_agent_to_value:List[float]=None):
         """
         Initializes an allocation to the given agents, of the given bundles, with the given values.
 
         :param agents: Mandatory. Either a list of names (ints/strings), or a list of Agent objects. 
                        In case of Agent objects, the objects must have a name() and a value() methods.
         :param bundles: Mandatory. For each agent, there must be a bundle (a list of items), or None.
-        :param values: Optional. For each agent, there should be the value of his bundle.
+        :param map_agent_to_value: Optional. For each agent, there should be the value of his bundle.
                        If it is not given, then it is filled in using the Agent object's value method.
         """
-        num_of_agents = len(agents)
-        if num_of_agents!=len(bundles) or (values is not None and num_of_agents!=len(values)):
-            raise ValueError("Numbers of agents, bundles and values must be identical, but they are not: {len(agents)}, {len(bundles)}, {len(values)}")
+        num_of_agents = agents.num_of_agents if hasattr(agents,'num_of_agents') else len(agents)
+        if num_of_agents!=len(bundles):
+            raise ValueError(f"Numbers of agents and bundles must be identical, but they are not: {num_of_agents}, {len(bundles)}")
+        if map_agent_to_value is not None and num_of_agents!=len(map_agent_to_value):
+            raise ValueError(f"Numbers of agents and values must be identical, but they are not: {num_of_agents}, {len(map_agent_to_value)}")
         self.num_of_agents = num_of_agents
-        self.agents = agents
         #
         self.bundles = bundles
-        if values is None:
-            values = [agent.value(bundles[i]) for i,agent in enumerate(agents)]
-        self.values = values
+        #
+        map_agent_to_name = agents
+
+        if hasattr(agents, 'agent_value_for_bundle'):
+           map_agent_to_value = [agents.agent_value_for_bundle(i,bundles[i]) for i,_ in enumerate(agents)]
+           map_agent_to_name  = [f"Agent #{i}" for i in range(num_of_agents)]
+
+        elif hasattr(agents[0], 'value'):
+           map_agent_to_value = [agent.value(bundles[i]) for i,agent in enumerate(agents)]
+           map_agent_to_name  = [agent.name() for agent in agents]
+
+        elif isinstance(agents[0], int):
+            map_agent_to_name = [f"Agent #{i}" for i in agents]
+
+        else:
+            map_agent_to_name = agents
+
+        if map_agent_to_value is None:      
+            raise ValueError("Cannot compute agents' valuations")          
+
+        self.map_agent_to_value = map_agent_to_value
+        self.map_agent_to_name  = map_agent_to_name
 
     def get_bundle(self, agent_index: int):
         return self.bundles[agent_index]
@@ -73,23 +102,13 @@ class Allocation:
     def __getitem__(self, agent_index:int):
         return self.get_bundle(agent_index)
 
-    @staticmethod
-    def agent_name(agent):
-        if hasattr(agent,'name'):
-            return agent.name() 
-        elif isinstance(agent,int):
-            return (f"Agent #{agent}")
-        else:
-            return agent
-
-
     def __repr__(self):
         result = ""
-        for i_agent, agent in enumerate(self.agents):
+        for i_agent, agent_name in enumerate(self.map_agent_to_name):
             agent_bundle = self.bundles[i_agent]
-            agent_value = self.values[i_agent]
+            agent_value = self.map_agent_to_value[i_agent]
             agent_bundle_str = stringify_bundle(agent_bundle, separator=Allocation.default_separator)
-            result += f"{self.agent_name(agent)} gets {agent_bundle_str} with value {agent_value:.{Allocation.default_precision}g}.\n"
+            result += f"{agent_name} gets {agent_bundle_str} with value {agent_value:.{Allocation.default_precision}g}.\n"
         return result
 
 

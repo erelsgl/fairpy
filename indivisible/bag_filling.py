@@ -167,9 +167,7 @@ def one_directional_bag_filling(valuations:ValuationMatrix, thresholds:List[floa
 		for o in allocated_objects: remaining_objects.remove(o)
 		logger.info("Agent %d takes the bag with objects %s. Remaining agents: %s. Remaining objects: %s.", willing_agent, allocated_objects, remaining_agents, remaining_objects)
 		bag.reset()
-
-	map_agent_to_bundle_value = [valuations.agent_value_for_bundle(agent,allocations[agent]) for agent in valuations.agents()]
-	return Allocation(valuations.agents(), allocations, map_agent_to_bundle_value)
+	return Allocation(valuations, allocations)
 
 
 
