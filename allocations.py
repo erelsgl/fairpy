@@ -19,6 +19,7 @@ class Allocation:
 
     >>> a = Allocation(agents=range(3), bundles=[[3,6],None,[2,5]], values=[9,0,6.999999])
     >>> Allocation.default_separator=","
+    >>> Allocation.default_precision=3
     >>> a
     Agent #0 gets {3,6} with value 9.
     Agent #1 gets None with value 0.
@@ -30,6 +31,7 @@ class Allocation:
     Agent #1 gets None with value 0.
     Agent #2 gets {2,5} with value 6.999999.
     <BLANKLINE>
+    >>> Allocation.default_precision=3
     """
 
     default_precision:int=3   # number of significant digits of values in printing
