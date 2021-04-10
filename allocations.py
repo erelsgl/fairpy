@@ -82,17 +82,17 @@ class Allocation:
 
         if hasattr(agents, 'agent_value_for_bundle'):
            map_agent_to_value = [agents.agent_value_for_bundle(i,bundles[i]) for i,_ in enumerate(agents)]
-           map_agent_to_name  = [f"Agent #{i}" for i in range(num_of_agents)]
-
         elif hasattr(agents[0], 'value'):
            map_agent_to_value = [agent.value(bundles[i]) for i,agent in enumerate(agents)]
-           map_agent_to_name  = [agent.name() for agent in agents]
 
+        if hasattr(agents[0], 'name'):
+           map_agent_to_name  = [agent.name() for agent in agents]
         elif isinstance(agents[0], int):
             map_agent_to_name = [f"Agent #{i}" for i in agents]
-
-        else:
+        elif isinstance(agents[0], str):
             map_agent_to_name = agents
+        else:
+           map_agent_to_name  = [f"Agent #{i}" for i in range(num_of_agents)]
 
         if map_agent_to_value is None:      
             raise ValueError("Cannot compute agents' valuations")          
