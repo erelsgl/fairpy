@@ -41,10 +41,10 @@ def improve_ef4_protocol(agents: List[Agent]) -> Allocation:
     >>> agents = [PiecewiseConstantAgent([3, 6, 3], "agent1"), PiecewiseConstantAgent([0, 2, 4], "agent2"), PiecewiseConstantAgent([6, 4, 2], "agent3"), PiecewiseConstantAgent([3, 3, 3], "agent4")]
     >>> allocation = improve_ef4_protocol(agents)
     >>> round_allocation(allocation)
-    agent1 gets {(0.667, 0.833),(1.5, 2.0)} with value 3.5.
-    agent2 gets {(0.333, 0.5),(2.0, 3)} with value 4.
-    agent3 gets {(0.833, 1.0),(1.0, 1.5)} with value 3.
-    agent4 gets {(0, 0.333),(0.5, 0.667)} with value 1.5.
+    agent1 gets {(0.667, 0.833), (1.5, 2.0)} with value 3.5.
+    agent2 gets {(0.333, 0.5), (2.0, 3)} with value 4.
+    agent3 gets {(0.833, 1.0), (1.0, 1.5)} with value 3.
+    agent4 gets {(0, 0.333), (0.5, 0.667)} with value 1.5.
     <BLANKLINE>
     """
     if len(agents) != 4:

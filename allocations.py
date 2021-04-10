@@ -23,7 +23,7 @@ class Allocation:
     Agent #1 gets None with value 0.
     Agent #2 gets {2,5} with value 7.
     <BLANKLINE>
-    >>> a.precision=9
+    >>> Allocation.default_precision=9
     >>> a
     Agent #0 gets {3,6} with value 9.
     Agent #1 gets None with value 0.
@@ -32,6 +32,7 @@ class Allocation:
     """
 
     default_precision:int=3   # number of significant digits of values in printing
+    default_separator:str=","
 
     agents:List[Any]
     bundles:List[List[Any]]
@@ -39,7 +40,7 @@ class Allocation:
 
     num_of_agents:int
 
-    def __init__(self, agents: List[Any], bundles: List[List[Any]], values:List[float]=None, precision:int=None):
+    def __init__(self, agents: List[Any], bundles: List[List[Any]], values:List[float]=None):
         """
         Initializes an allocation to the given agents, of the given bundles, with the given values.
 
@@ -59,10 +60,6 @@ class Allocation:
         if values is None:
             values = [agent.value(bundles[i]) for i,agent in enumerate(agents)]
         self.values = values
-        #
-        if precision is None:
-            precision=Allocation.default_precision
-        self.precision = precision
 
     def get_bundle(self, agent_index: int):
         return self.bundles[agent_index]
@@ -88,7 +85,7 @@ class Allocation:
         for i_agent, agent in enumerate(self.agents):
             agent_bundle = self.bundles[i_agent]
             agent_value = self.values[i_agent]
-            result += f"{self.agent_name(agent)} gets {stringify_bundle(agent_bundle)} with value {agent_value:.{self.precision}g}.\n"
+            result += f"{self.agent_name(agent)} gets {stringify_bundle(agent_bundle)} with value {agent_value:.{Allocation.default_precision}g}.\n"
         return result
 
 
@@ -109,7 +106,7 @@ def stringify_bundle(bundle: List[Any]):
     if bundle is None:
         return "None"
     else:
-        return "{" + ", ".join(map(str,sorted(bundle))) + "}"
+        return "{" + Allocation.default_separator.join(map(str,sorted(bundle))) + "}"
     # return ",".join(["".join(item) for item in bundle])
 
 

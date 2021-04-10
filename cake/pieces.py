@@ -5,6 +5,7 @@ A utility function to round a piece, for presentation purposes.
 """
 
 from fairpy import Allocation
+Allocation.default_separator=", "
 
 
 def round_piece(piece:list, digits:int=3):
