@@ -8,8 +8,7 @@ Since:  2021-04
 
 from fairpy.valuations import ValuationMatrix
 from fairpy.allocations import Allocation
-from fairpy.indivisible import SequentialAllocation
-from fairpy.indivisible.bag_filling import Bag
+from fairpy.indivisible.bag_filling import Bag, SequentialAllocation
 
 from typing import List
 
