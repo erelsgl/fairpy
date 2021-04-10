@@ -15,14 +15,14 @@ from typing import List
 import logging
 logger = logging.getLogger(__name__)
 
-def one_of_threehalves_mms(v:ValuationMatrix, map_agent_to_value_threshold:List[float]) -> Allocation:
+def bidirectional_bag_filling(v:ValuationMatrix, map_agent_to_value_threshold:List[float]) -> Allocation:
     """
     Runs a bi-directional bag-filling algorithm.
     Assumes that the instance is ordered: item 0 is the highest-valued for all agents, then item 1, etc.
 
     >>> identical_valuations = [97,96,90,12,3,2,1,1,1]
     >>> valuations = ValuationMatrix(3*[identical_valuations])
-    >>> alloc = one_of_threehalves_mms(valuations, map_agent_to_value_threshold=[100,100,100])
+    >>> alloc = bidirectional_bag_filling(valuations, map_agent_to_value_threshold=[100,100,100])
     >>> alloc
     Agent #0 gets {0,6,7,8} with value 100.
     Agent #1 gets {1,4,5} with value 101.
@@ -38,16 +38,14 @@ def one_of_threehalves_mms(v:ValuationMatrix, map_agent_to_value_threshold:List[
     remaining_objects = list(v.objects())
     remaining_agents  = list(v.agents())
     while True:
-        if len(remaining_agents)==0:
-            break
-        if len(remaining_objects)==0:
-            break
+        if len(remaining_agents)==0:   break
+        if len(remaining_objects)==0:  break
 
         # Initialize a bag with the highest-valued object:
         bag = Bag(v, map_agent_to_value_threshold)
         highest_valued_object = remaining_objects.pop(0)
         bag.append(highest_valued_object)
-        
+
         while True:
             # If an agent is willing to accept the bag, allocate it immediately:
             if (willing_agent := bag.willing_agent(remaining_agents)) is not None:

@@ -19,8 +19,8 @@ import fairpy.indivisible.partitions as partitions
 from fairpy.indivisible.fair_enough_utils import *
 
 import networkx as nx
-import logging
 
+import logging
 logger = logging.getLogger(__name__)
 
 
