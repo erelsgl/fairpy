@@ -1,6 +1,8 @@
 #!python3
-# __test__ = None
-# pytestmark = pytest.mark.skip("Not implemented yet")
+__test__ = None
+
+import pytest
+pytestmark = pytest.mark.skip("Not implemented yet")
 
 """
 A skeleton and unit-tests of an algorithm for cake-cutting with unequal shares. Reference:
