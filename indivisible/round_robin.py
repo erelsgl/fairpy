@@ -8,8 +8,8 @@ Programmer: Erel Segal-Halevi
 Since:  2020-07
 """
 
+from fairpy import Allocation
 from fairpy.indivisible.agents import *
-from fairpy.allocations import Allocation
 
 import logging
 logger = logging.getLogger(__name__)
@@ -19,6 +19,7 @@ def round_robin(items:Bundle, agents:List[AdditiveAgent], agent_order:List[int])
     """
     Allocate the given items to the given agents using the round-robin protocol, in the given agent-order.
 
+    >>> Allocation.default_separator=","
     >>> Alice = AdditiveAgent({"x": 1, "y": 2, "z": 4, "w":0}, name="Alice")
     >>> George = AdditiveAgent({"x": 2, "y": 1, "z": 6, "w":3}, name="George")
     >>> allocation = round_robin("xyzw", [Alice,George], [0,1])

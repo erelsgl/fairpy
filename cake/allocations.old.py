@@ -1,4 +1,5 @@
 #!python3
+# __test__ = None
 
 """
 Represents an allocation of a cake among agents ---  the output of a cake-cutting algorithm.
