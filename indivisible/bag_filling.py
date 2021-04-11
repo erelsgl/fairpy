@@ -40,6 +40,12 @@ class Bag:
 	Bag objects: [0, 1], values: [44. 66.]
 	>>> print(bag.willing_agent([0,1]))
 	0
+	>>> bag.reset()
+	>>> print(bag)
+	Bag objects: [], values: [0. 0.]
+	>>> bag.append([0,1])
+	>>> print(bag)
+	Bag objects: [0, 1], values: [44. 66.]
 	"""
 	objects: List[int]
 	valuations: ValuationMatrix
@@ -65,8 +71,12 @@ class Bag:
 
 	def append(self, object:int):
 		"""
-		Append the given object to the bag, and update the agents' valuations accordingly.
+		Append the given object or objects to the bag, and update the agents' valuations accordingly.
 		"""
+		if isinstance(object,list):
+			for o in object:
+				self.append(o)
+			return
 		logger.info("   Appending object %s.", object)
 		self.objects.append(object)
 		for agent in self.valuations.agents():
