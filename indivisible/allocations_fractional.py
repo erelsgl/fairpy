@@ -77,7 +77,7 @@ class FractionalAllocation:
     def value_of_fractional_allocation(self) -> float:
         result = 0
         for i_agent, agent in enumerate(self.agents):
-                agent_value = get_value_of_agent_in_alloc(self.agents[i_agent].map_good_to_value, self.map_item_to_fraction[i_agent])
+                agent_value = get_value_of_agent_in_alloc(self.agents[i_agent].valuation.map_good_to_value, self.map_item_to_fraction[i_agent])
                 result += agent_value
         return result
 
@@ -97,7 +97,7 @@ class FractionalAllocation:
             result = ""
             for i_agent, agent in enumerate(self.agents):
                 agent_bundle = stringify_bundle(get_items_of_agent_in_alloc(self.map_item_to_fraction[i_agent]))
-                agent_value = get_value_of_agent_in_alloc(self.agents[i_agent].map_good_to_value, self.map_item_to_fraction[i_agent])
+                agent_value = get_value_of_agent_in_alloc(self.agents[i_agent].valuation.map_good_to_value, self.map_item_to_fraction[i_agent])
                 result += "{}'s bundle: {},  value: {}\n".format(agent.name(),  agent_bundle, agent_value)
             return result
 

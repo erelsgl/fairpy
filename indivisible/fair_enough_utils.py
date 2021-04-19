@@ -45,43 +45,6 @@ def calc_gamma(c: int) -> float:
     return (2 * n_odd) / (3 * n_odd - 1)
 
 
-def divide_c_mms_partition(c: int, items: list, item_value_dict: dict) -> List[Bundle]:
-    """
-    Computed the MMS given the number of agents and the "value function"
-    :param c: Number of agents
-    :param items: A list of the values for each item
-    :param item_value_dict: A dictionary holding each items value
-    :return: The partitioning the holds the MMS
-
-    >>> items_lst = ['a','b' ,'c', 'd', 'e', 'f']
-    >>> items__val_dict = {'a': 5, 'b': 5, 'c': 3, 'd': 4, 'e': 5, 'f': 5}
-    >>> mms_part = divide_c_mms_partition(3,items_lst,items__val_dict)
-    >>> [sorted(x) for x in mms_part]
-    [['b', 'c'], ['a', 'd'], ['e', 'f']]
-    >>> mms_part = divide_c_mms_partition(4,items_lst,items__val_dict)
-    >>> [sorted(x) for x in mms_part]
-    [['a'], ['b'], ['c', 'd'], ['e', 'f']]
-    """
-    maxi_min = -1
-    partition = []
-
-    # Iterates over all possible partitions
-    for tmp_partition in partitions.partitions_to_exactly_c(items, c):
-        min_val = float('inf')
-        for bund in tmp_partition:
-            # Calculate the value of the bundle
-            p_val = sum([item_value_dict[itm] for itm in bund])
-            # Updates min value
-            min_val = min(min_val, p_val)
-
-        # Updates maximin value
-        if maxi_min < min_val:
-            partition = tmp_partition
-            maxi_min = min_val
-
-    return [set(x) for x in partition]
-
-
 def create_envy_graph(agents: Dict[str, AdditiveAgent]) -> nx.DiGraph:
     """
     Creates an Envy Graph from the agents and their bundles.
@@ -137,7 +100,7 @@ def get_gmm_item(agent: AdditiveAgent, items: List[str], gamma: float) -> Option
     'b'
     """
     gmm_items = [k for k in items if
-                 agent.map_good_to_value[k] >= (agent.mms * gamma)]
+                 agent.value(k) >= (agent.mms * gamma)]
     if gmm_items:
         return gmm_items[0]
     return None
@@ -227,15 +190,15 @@ def get_highest_value(agent: AdditiveAgent, items_list: List[str]) -> (float, Se
     >>> v,sorted(bndl)
     (9, ['b', 'c', 'd'])
     """
-    items_sorted_by_agent = sorted([x for x in agent.desired_items if x[0] in items_list],
-                                   key=lambda x: agent.map_good_to_value[x], reverse=True)
+    items_sorted_by_agent = sorted([x for x in agent.valuation.desired_items if x[0] in items_list],
+                                   key=lambda x: agent.value(x), reverse=True)
     bundle_items = set([x[0] for x in items_sorted_by_agent[:2]] + [agent.aq_items[1]])
     return agent.value(bundle_items), bundle_items
 
 
 def cycle_allocation(agents_dict: Dict[str,Agent], item_list: List[Item], reverse: bool = False) -> None:
     """
-    Allocated each agent with his highest item that has not been allocated.
+    Allocate each agent with his highest item that has not been allocated.
     @param agents_dict: Agents
     @param item_list: Non allocated items
     @param reverse: If False iterates over the agents in alphabetical order, O.W in reverse order.
@@ -257,10 +220,10 @@ def cycle_allocation(agents_dict: Dict[str,Agent], item_list: List[Item], revers
     """
     logger.info('\tItems remaining: ' + ','.join(item_list))
     for k, p in sorted(agents_dict.items(), reverse=reverse):
-        max_item = max([x for x in p.desired_items if x[0] in item_list], key=lambda x: p.map_good_to_value[x])
+        max_item = max([x for x in p.valuation.desired_items if x[0] in item_list], key=lambda x: p.value(x))
         item_list.remove(max_item)
         p.aq_items.append(max_item)
-        logger.info("\tAgent {} took item {} Value: {}".format(p.name(), max_item, p.map_good_to_value[max_item]))
+        logger.info("\tAgent {} took item {} Value: {}".format(p.name(), max_item, p.value(max_item)))
 
 
 

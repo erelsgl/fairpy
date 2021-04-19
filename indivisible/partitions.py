@@ -56,6 +56,8 @@ def partitions_to_exactly_c(collection: list, c: int):
 
     >>> list(partitions_to_exactly_c([1,2,3], 2))
     [[[1], [2, 3]], [[1, 2], [3]], [[2], [1, 3]]]
+    >>> list(partitions_to_exactly_c([1,2], 3))
+    []
     """
     for p in partitions_to_at_most_c(collection, c):
         if len(p)==c:

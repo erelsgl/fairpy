@@ -327,7 +327,7 @@ def find_po_and_prop1_allocation(Gx: bipartite, fpo_alloc: FractionalAllocation,
             add_neighbors_to_Q(Q, dict_of_items_curr_agent_share)
             if dict_of_items_curr_agent_share != {}:  #Check that the agent is actually sharing items
                 for item, agents in dict_of_items_curr_agent_share.items():
-                    if curr_agent.map_good_to_value[item] > 0:  #If a positive utility
+                    if curr_agent.value(item) > 0:  #If a positive utility
                         update_fpo_alloc_and_Gx(curr_agent, item, agents, fpo_alloc, Gx) #Gave to the curr_agent the item
                     else:  #If a negative utility
                         other_agent = agents[0]  #Gave another agent the item
@@ -361,8 +361,8 @@ def find_agent_sharing_item(Gx: bipartite, items: Bundle) -> AdditiveAgent:
     >>> G.add_edge(agent1,'a')
     >>> G.add_edge(agent2,'a')
     >>> items_for_func = {'a','b','c'}
-    >>> find_agent_sharing_item(G,items_for_func)
-    agent1 is an agent with additive valuations: a=100 b=10 c=50
+    >>> find_agent_sharing_item(G,items_for_func).name()
+    'agent1'
 
     >>> agent1= AdditiveAgent({"a": 100, "b": 10, "c": 50, "d": 100 ,"e": 70,"f": 100, "g": 300, "h": 40, "i": 30}, name="agent1")
     >>> agent2= AdditiveAgent({"a": 20, "b": 20, "c": 40, "d": 90 ,"e": 90,"f": 100, "g": 30, "h": 80, "i": 90}, name="agent2")
@@ -424,8 +424,9 @@ def get_dict_of_items_curr_agent_share(curr_agent:  AdditiveAgent, fpo_alloc: Fr
     >>> list_of_agents_for_func = [agent1, agent2, agent3, agent4, agent5]
     >>> items_for_func = {'a','b','c','d','e','f','g','h','i'}
     >>> alloc_y_for_func = FractionalAllocation(list_of_agents_for_func, [{'a':0.0,'b':1.0,'c':0.0,'d':0.0,'e':1.0,'f':1.0,'g':0.0,'h':0.0,'i':0.4},{'a':0.0,'b':0.0,'c':0.0,'d':1.0,'e':0.0,'f':0.0,'g':0.0,'h':1.0,'i':0.0},{'a':0.0,'b':0.0,'c':1.0,'d':0.0,'e':0.0,'f':0,'g':1.0,'h':0.0,'i':0.0},{'a':0.0,'b':0.0,'c':0.0,'d':0.0,'e':0.0,'f':0.0,'g':0.0,'h':0.0,'i':0.0},{'a':1.0,'b':0.0,'c':0.0,'d':0.0,'e':0.0,'f':0.0,'g':0.0,'h':0.0,'i':0.6}])
-    >>> get_dict_of_items_curr_agent_share(agent1, alloc_y_for_func)
-    {'i': [agent5 is an agent with additive valuations: a=50 b=50 c=10 d=60 e=90 f=-100 g=300 h=-120 i=180]}
+    >>> d = get_dict_of_items_curr_agent_share(agent1, alloc_y_for_func)
+    >>> {key: list(map(lambda agent:agent.name(), agents)) for key,agents in d.items()}
+    {'i': ['agent5']}
 
     >>> agent1= AdditiveAgent({"a": 100, "b": 10, "c": 50, "d": 100 ,"e": 70,"f": 100, "g": 300, "h": 40, "i": 30}, name="agent1")
     >>> agent2= AdditiveAgent({"a": 20, "b": 20, "c": 40, "d": 90 ,"e": 90,"f": 100, "g": 30, "h": 80, "i": 90}, name="agent2")
@@ -435,8 +436,9 @@ def get_dict_of_items_curr_agent_share(curr_agent:  AdditiveAgent, fpo_alloc: Fr
     >>> list_of_agents_for_func = [agent1, agent2, agent3, agent4, agent5]
     >>> items_for_func = {'a','b','c','d','e','f','g','h','i'}
     >>> alloc_y_for_func = FractionalAllocation(list_of_agents_for_func, [{'a':0.0,'b':0.0,'c':1.0,'d':1.0,'e':0.0,'f':0.2,'g':0.0,'h':0.0,'i':0.0},{'a':0.0,'b':0.0,'c':0.0,'d':0.0,'e':0.8,'f':0.4,'g':0.0,'h':0.0,'i':0.0},{'a':0.0,'b':0.0,'c':0.0,'d':0.0,'e':0.0,'f':0.2,'g':1.0,'h':0.0,'i':0.0},{'a':1.0,'b':0.0,'c':0.0,'d':0.0,'e':0.2,'f':0.0,'g':0.0,'h':0.0,'i':0.0},{'a':0.0,'b':1.0,'c':0.0,'d':0.0,'e':0.0,'f':0.2,'g':0.0,'h':1.0,'i':1.0}])
-    >>> get_dict_of_items_curr_agent_share(agent5, alloc_y_for_func)
-    {'f': [agent1 is an agent with additive valuations: a=100 b=10 c=50 d=100 e=70 f=100 g=300 h=40 i=30, agent2 is an agent with additive valuations: a=20 b=20 c=40 d=90 e=90 f=100 g=30 h=80 i=90, agent3 is an agent with additive valuations: a=10 b=30 c=30 d=40 e=180 f=100 g=300 h=20 i=90]}
+    >>> d = get_dict_of_items_curr_agent_share(agent5, alloc_y_for_func)
+    >>> {key: list(map(lambda agent:agent.name(), agents)) for key,agents in d.items()}
+    {'f': ['agent1', 'agent2', 'agent3']}
     """
     result = {}
     index_of_agent = fpo_alloc.agents.index(curr_agent)
@@ -513,11 +515,11 @@ def remove_edge(item: str, agent: AdditiveAgent, Gx: bipartite) -> None:
     >>> G.add_edge(agent2, 'a')
     >>> G.add_edge(agent2, 'b')
     >>> G.add_edge(agent2, 'd')
-    >>> print(G.edges()) # Before function
-    [(agent1 is an agent with additive valuations: a=100 b=10 c=50, 'b'), (agent1 is an agent with additive valuations: a=100 b=10 c=50, 'c'), (agent2 is an agent with additive valuations: a=20 b=20 c=40, 'a'), (agent2 is an agent with additive valuations: a=20 b=20 c=40, 'b'), (agent2 is an agent with additive valuations: a=20 b=20 c=40, 'd')]
+    >>> print([(agent.name(),item) for (agent,item) in G.edges()]) # Before function
+    [('agent1', 'b'), ('agent1', 'c'), ('agent2', 'a'), ('agent2', 'b'), ('agent2', 'd')]
     >>> remove_edge(agent2, 'b', G)
-    >>> print(G.edges()) #After function
-    [(agent1 is an agent with additive valuations: a=100 b=10 c=50, 'b'), (agent1 is an agent with additive valuations: a=100 b=10 c=50, 'c'), (agent2 is an agent with additive valuations: a=20 b=20 c=40, 'a'), (agent2 is an agent with additive valuations: a=20 b=20 c=40, 'd')]
+    >>> print([(agent.name(),item) for (agent,item) in G.edges()]) # After function
+    [('agent1', 'b'), ('agent1', 'c'), ('agent2', 'a'), ('agent2', 'd')]
     """
     remove_u_v(item, agent, Gx)
     remove_u_v(agent, item, Gx)
@@ -543,8 +545,8 @@ def add_neighbors_to_Q(Q: queue, dict_of_items_curr_agent_share: dict) -> None:
     >>> d={'f': [agent1 , agent3]}
     >>> q = queue.Queue()
     >>> add_neighbors_to_Q(q, d)
-    >>> print(q.queue)
-    deque([agent1 is an agent with additive valuations: a=100 b=10 c=50 d=100 e=70 f=100 g=300 h=40 i=30, agent3 is an agent with additive valuations: a=10 b=30 c=30 d=40 e=180 f=100 g=300 h=20 i=90])
+    >>> print([a.name() for a in q.queue])
+    ['agent1', 'agent3']
     """
     for agents in dict_of_items_curr_agent_share.values():
         for agent in agents:

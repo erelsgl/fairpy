@@ -7,15 +7,9 @@ Programmer: Erel Segal-Halevi
 Since: 2020-04
 """
 
+from fairpy.indivisible.valuations import *
 
 from abc import ABC, abstractmethod
-from dicttools import stringify
-
-import math, itertools
-from fractions import Fraction
-
-import fairpy.indivisible.partitions as partitions
-
 from typing import *
 Item = Any
 Bundle = Set[Item]
@@ -30,17 +24,15 @@ class Agent(ABC):
     Optionally, it can also represent several agents with an identical valuation function.
     """
 
-    def __init__(self, desired_items:Bundle, name:str=None, duplicity:int=1):
+    def __init__(self, valuation:Valuation, name:str=None, duplicity:int=1):
         """
-        :param desired_items: the set of all goods that are desired by this agent/s.
+        :param valuation: represents the agents' valuation function.
         :param name [optional]: a display-name for the agent in logs and printouts.
         :param duplicity [optional]: the number of agent/s with the same valuation function.
         """
+        self.valuation = valuation
         if name is not None:
             self._name = name
-        self.desired_items_list = sorted(desired_items)
-        self.desired_items = set(desired_items)
-        self.total_value_cache = self.value(self.desired_items)
         self.duplicity = duplicity
 
     def name(self):
@@ -49,18 +41,11 @@ class Agent(ABC):
         else:
             return "Anonymous"
 
-    @abstractmethod
     def value(self, bundle:Bundle)->float:
-        """
-        :return: the value for this agent of the given set of items.
-        """
-        pass
+        return self.valuation.value(bundle)
 
     def total_value(self)->float:
-        """
-        :return: the value for this agent of all items together.
-        """
-        return self.total_value_cache
+        return self.valuation.total_value()
 
 
     def best_index(self, allocation:List[Bundle])->int:
@@ -76,7 +61,7 @@ class Agent(ABC):
         >>> a.best_index(["y","xz"])
         1
         """
-        return max(range(len(allocation)), key=lambda i:self.value(allocation[i]))
+        return self.valuation.best_index(allocation)
 
 
     def value_except_best_c_goods(self, bundle:Bundle, c:int=1)->int:
@@ -97,11 +82,7 @@ class Agent(ABC):
         >>> a.value_except_best_c_goods(set(), c=1)
         0
         """
-        if len(bundle) <= c: return 0
-        else: return min([
-            self.value(bundle.difference(sub_bundle))
-            for sub_bundle in itertools.combinations(bundle, c)
-        ])
+        return self.valuation.value_except_best_c_goods(bundle,c)
 
     def value_except_worst_c_goods(self, bundle:Bundle, c:int=1)->int:
         """
@@ -115,11 +96,7 @@ class Agent(ABC):
         >>> a.value_except_worst_c_goods(set("xy"), c=1)
         2
         """
-        if len(bundle) <= c: return 0
-        else: return max([
-            self.value(bundle.difference(sub_bundle))
-            for sub_bundle in itertools.combinations(bundle, c)
-        ])
+        return self.valuation.value_except_worst_c_goods(bundle,c)
 
 
     def values_1_of_c_partitions(self, c:int=1):
@@ -131,8 +108,7 @@ class Agent(ABC):
         [1, 2, 3]
 
         """
-        for partition in partitions.partitions_to_exactly_c(self.desired_items_list, c):
-            yield min([self.value(bundle) for bundle in partition])
+        return self.valuation.values_1_of_c_partitions(c)
 
 
     def value_1_of_c_MMS(self, c:int=1)->int:
@@ -150,17 +126,18 @@ class Agent(ABC):
         >>> a.value_1_of_c_MMS(c=2)
         3
         """
-        if c > len(self.desired_items):
-            return 0
-        else:
-            return max(self.values_1_of_c_partitions(c))
+        return self.valuation.value_1_of_c_MMS(c)
+
+    def partition_1_of_c_MMS(self, c: int, items: list) -> List[Bundle]:
+        return self.valuation.partition_1_of_c_MMS(c, items)
+
 
     def value_proportional_except_c(self, num_of_agents:int, c:int):
         """
         Calculates the proportional value of that agent, when the c most valuable goods are ignored.
         This is a subroutine in checking whether an allocation is PROPc.
         """
-        return Fraction(self.value_except_best_c_goods(self.desired_items, c) , num_of_agents)
+        return self.valuation.value_proportional_except_c(num_of_agents, c)
 
     def is_EFc(self, own_bundle:Bundle, all_bundles:List[Bundle], c: int) -> bool:
         """
@@ -169,11 +146,7 @@ class Agent(ABC):
         :param all_bundles:  the list of all bundles.
         :return: True iff the current agent finds the allocation EFc.
         """
-        own_value = self.value(own_bundle)
-        for other_bundle in all_bundles:
-            if own_value < self.value_except_best_c_goods(other_bundle, c):
-                return False
-        return True
+        return self.valuation.is_EFc(own_bundle, all_bundles, c)
 
     def is_EF1(self, own_bundle:Bundle, all_bundles:List[Bundle]) -> bool:
         """
@@ -182,7 +155,7 @@ class Agent(ABC):
         :param all_bundles:  a list of all bundles.
         :return: True iff the current agent finds the allocation EF1.
         """
-        return self.is_EFc(own_bundle, all_bundles, c=1)
+        return self.valuation.is_EF1(own_bundle, all_bundles)
 
     def is_EFx(self, own_bundle:Bundle, all_bundles:List[Bundle])->bool:
         """
@@ -191,11 +164,7 @@ class Agent(ABC):
         :param all_bundles:  a list of all bundles.
         :return: True iff the current agent finds the allocation EFx.
         """
-        own_value = self.value(own_bundle)
-        for other_bundle in all_bundles:
-            if own_value < self.value_except_worst_c_goods(other_bundle, c=1):
-                return False
-        return True
+        return self.valuation.is_EFx(own_bundle, all_bundles)
 
     def is_EF(self, own_bundle:Bundle, all_bundles:List[Bundle])->bool:
         """
@@ -204,14 +173,10 @@ class Agent(ABC):
         :param all_bundles:  a list of all bundles.
         :return: True iff the current agent finds the allocation envy-free.
         """
-        own_value = self.value(own_bundle)
-        for other_bundle in all_bundles:
-            if own_value < self.value(other_bundle):
-                return False
-        return True
+        return self.valuation.is_EF(own_bundle, all_bundles)
 
     def is_1_of_c_MMS(self, own_bundle:Bundle, c:int, approximation_factor:float=1)->bool:
-        return self.value(own_bundle) >= self.value_1_of_c_MMS(c)*approximation_factor
+        return self.valuation.is_1_of_c_MMS(own_bundle, c, approximation_factor)
 
     def is_PROPc(self, own_bundle:Bundle, num_of_agents:int, c:int)->bool:
         """
@@ -224,7 +189,7 @@ class Agent(ABC):
         :param c: how many best-goods to exclude from the total bundle.
         :return: True iff the current agent finds the allocation PROPc.
         """
-        return self.value(own_bundle) >= self.value_proportional_except_c(num_of_agents, c)
+        return self.valuation.is_PROPc(own_bundle, num_of_agents, c)
 
     def is_PROP(self, own_bundle:Bundle, num_of_agents:int)->bool:
         """
@@ -233,7 +198,13 @@ class Agent(ABC):
         :param num_of_agents:  the total number of agents.
         :return: True iff the current agent finds the allocation PROPc.
         """
-        return self.is_PROPc(own_bundle, num_of_agents, c=0)
+        return self.valuation.is_PROP(own_bundle, num_of_agents)
+
+    def __repr__(self):
+        if self.duplicity==1:
+            return f"{self.name()} is an agent with a {self.valuation.__repr__()}"
+        else:
+            return f"{self.name()} are {self.duplicity} agents with a {self.valuation.__repr__()}"
 
 
 
@@ -243,7 +214,7 @@ class MonotoneAgent(Agent):
 
     >>> a = MonotoneAgent({"x": 1, "y": 2, "xy": 4}, name="Alice")
     >>> a
-    Alice is an agent with monotone valuations. Desired goods: ['x', 'y']
+    Alice is an agent with a Monotone valuation on ['x', 'y'].
     >>> a.value("")
     0
     >>> a.value({"x"})
@@ -259,7 +230,7 @@ class MonotoneAgent(Agent):
     >>> a.is_EFx({"x"}, [{"y"}])
     True
     >>> MonotoneAgent({"x": 1, "y": 2, "xy": 4}, duplicity=2)
-    Anonymous are 2 agents with monotone valuations. Desired goods: ['x', 'y']
+    Anonymous are 2 agents with a Monotone valuation on ['x', 'y'].
 
     """
     def __init__(self, map_bundle_to_value:Dict[Bundle,float], name:str=None, duplicity:int=1):
@@ -268,26 +239,7 @@ class MonotoneAgent(Agent):
         :param map_bundle_to_value: a dict that maps each subset of goods to its value.
         :param duplicity: the number of agents with the same valuation.
         """
-        self.map_bundle_to_value = {frozenset(bundle):value for bundle,value in  map_bundle_to_value.items()}
-        self.map_bundle_to_value[frozenset()] = 0   # normalization: the value of the empty bundle is always 0
-        desired_items = max(map_bundle_to_value.keys(), key=lambda k:map_bundle_to_value[k])
-        super().__init__(desired_items, name=name, duplicity=duplicity)
-
-    def value(self, bundle:Bundle)->int:
-        """
-        Calculates the agent's value for the given set of goods.
-        """
-        bundle = frozenset(bundle)
-        if bundle in self.map_bundle_to_value:
-            return self.map_bundle_to_value[bundle]
-        else:
-            raise ValueError(f"The value of {bundle} is not specified in the valuation function")
-
-    def __repr__(self):
-        if self.duplicity==1:
-            return "{} is an agent with monotone valuations. Desired goods: {}".format(self.name(), sorted(self.desired_items))
-        else:
-            return "{} are {} agents with monotone valuations. Desired goods: {}".format(self.name(), self.duplicity, sorted(self.desired_items))
+        super().__init__(MonotoneValuation(map_bundle_to_value), name, duplicity)
 
 
 class AdditiveAgent(Agent):
@@ -296,7 +248,7 @@ class AdditiveAgent(Agent):
 
     >>> a = AdditiveAgent({"x": 1, "y": 2, "z": 4, "w":0}, name="Alice")
     >>> a
-    Alice is an agent with additive valuations: w=0 x=1 y=2 z=4
+    Alice is an agent with a Additive valuation: w=0 x=1 y=2 z=4.
     >>> a.value(set())
     0
     >>> a.value({"w"})
@@ -328,7 +280,7 @@ class AdditiveAgent(Agent):
     >>> a.value_1_of_c_MMS(c=2)
     3
     >>> AdditiveAgent({"x": 1, "y": 2, "z": 4}, duplicity=2)
-    Anonymous are 2 agents with additive valuations: x=1 y=2 z=4
+    Anonymous are 2 agents with a Additive valuation: x=1 y=2 z=4.
 
     """
     def __init__(self, map_good_to_value:dict, name:str=None, duplicity:int=1):
@@ -337,95 +289,7 @@ class AdditiveAgent(Agent):
         :param map_good_to_value: a dict that maps each single good to its value.
         :param duplicity: the number of agents with the same valuation.
         """
-        self.map_good_to_value = map_good_to_value
-        desired_items = set([g for g,v in map_good_to_value.items() if v>0])
-        super().__init__(desired_items, name=name, duplicity=duplicity)
-
-    def value(self, bundle:Bundle)->int:
-        """
-        Calculates the agent's value for the given set of goods.
-        """
-        return sum([self.map_good_to_value[g] for g in bundle])
-
-    def value_except_best_c_goods(self, bundle:Bundle, c:int=1)->int:
-        """
-        Calculates the value of the given bundle when the "best" (at most) c goods are removed from it.
-        Formally, it calculates:
-              min [G subseteq bundle] value (bundle - G)
-        where G is a subset of duplicity at most c.
-        This is a subroutine in checking whether an allocation is EFc.
-
-        >>> a = AdditiveAgent({"x": 1, "y": 2, "z": 4})
-        >>> a.value_except_best_c_goods(set("xyz"), c=1)
-        3
-        >>> a.value_except_best_c_goods(set("xyz"), c=2)
-        1
-        >>> a.value_except_best_c_goods(set("xy"), c=1)
-        1
-        >>> a.value_except_best_c_goods(set("xy"), c=2)
-        0
-        >>> a.value_except_best_c_goods(set("x"), c=1)
-        0
-        >>> a.value_except_best_c_goods(set(), c=1)
-        0
-        """
-        if len(bundle) <= c: return 0
-        sorted_bundle = sorted(bundle, key=lambda g: -self.map_good_to_value[g]) # sort the goods from best to worst
-        return self.value(sorted_bundle[c:])  # remove the best c goods
-
-    def value_except_worst_c_goods(self, bundle:Bundle, c:int=1)->int:
-        """
-        Calculates the value of the given bundle when the "worst" c goods are removed from it.
-        Formally, it calculates:
-              max [G subseteq bundle] value (bundle - G)
-        where G is a subset of duplicity at most c.
-        This is a subroutine in checking whether an allocation is EFx.
-
-        >>> a = AdditiveAgent({"x": 1, "y": 2, "z": 4})
-        >>> a.value_except_worst_c_goods(set("xyz"), c=1)
-        6
-        >>> a.value_except_worst_c_goods(set("xy"), c=1)
-        2
-        >>> a.value_except_worst_c_goods(set("xy"), c=2)
-        0
-        >>> a.value_except_worst_c_goods(set("x"), c=1)
-        0
-        >>> a.value_except_worst_c_goods(set(), c=1)
-        0
-        """
-        if len(bundle) <= c: return 0
-        sorted_bundle = sorted(bundle, key=lambda g: self.map_good_to_value[g])  # sort the goods from worst to best:
-        return self.value(sorted_bundle[c:])  # remove the worst c goods
-
-
-    def value_of_cth_best_good(self, c:int)->int:
-        """
-        Return the value of the agent's c-th most valuable good.
-
-        >>> a = AdditiveAgent({"x": 1, "y": 2, "z": 4})
-        >>> a.value_of_cth_best_good(1)
-        4
-        >>> a.value_of_cth_best_good(2)
-        2
-        >>> a.value_of_cth_best_good(3)
-        1
-        >>> a.value_of_cth_best_good(4)
-        0
-        """
-        if c > len(self.desired_items):
-            return 0
-        else:
-            sorted_values = sorted(self.map_good_to_value.values(), reverse=True)
-            return sorted_values[c-1]
-
-    def __repr__(self):
-        values_as_string = " ".join(["{}={}".format(k,v) for k,v in sorted(self.map_good_to_value.items())])
-        if self.duplicity==1:
-            return "{} is an agent with additive valuations: {}".format(self.name(), values_as_string)
-        else:
-            return "{} are {} agents with additive valuations: {}".format(self.name(), self.duplicity, values_as_string)
-
-
+        super().__init__(AdditiveValuation(map_good_to_value), name=name, duplicity=duplicity)
 
 class BinaryAgent(Agent):
     """
@@ -433,7 +297,7 @@ class BinaryAgent(Agent):
 
     >>> a = BinaryAgent({"x","y","z"}, name="Alice")
     >>> a
-    Alice is a binary agent who wants ['x', 'y', 'z']
+    Alice is an agent with a Binary valuation who wants ['x', 'y', 'z'].
     >>> a.value({"x","w"})
     1
     >>> a.value({"y","z"})
@@ -453,7 +317,7 @@ class BinaryAgent(Agent):
     >>> a.is_1_of_c_MMS({"w"}, c=2)
     False
     >>> BinaryAgent({"x","y","z"}, duplicity=2)
-    Anonymous are 2 binary agents who want ['x', 'y', 'z']
+    Anonymous are 2 agents with a Binary valuation who wants ['x', 'y', 'z'].
     """
 
     def __init__(self, desired_items:Bundle, name:str=None, duplicity:int=1):
@@ -462,47 +326,8 @@ class BinaryAgent(Agent):
         :param desired_items: a set of strings - each string is a good.
         :param duplicity: the number of agents with the same set of desired goods.
         """
-        super().__init__(desired_items, name=name, duplicity=duplicity)
+        super().__init__(BinaryValuation(desired_items), name=name, duplicity=duplicity)
 
-    def value(self, bundle:Bundle)->int:
-        """
-        Calculates the agent's value for the given set of goods.
-
-        >>> BinaryAgent({"x","y","z"}).value({"w","x","y"})
-        2
-        >>> BinaryAgent({"x","y","z"}).value({"x","y"})
-        2
-        >>> BinaryAgent({"x","y","z"}).value("y")
-        1
-        >>> BinaryAgent({"x","y","z"}).value({"w"})
-        0
-        >>> BinaryAgent({"x","y","z"}).value(set())
-        0
-        >>> BinaryAgent(set()).value({"x","y","z"})
-        0
-        """
-        bundle = set(bundle)
-        return len(self.desired_items.intersection(bundle))
-
-    def value_except_best_c_goods(self, bundle:Bundle, c:int=1)->int:
-        if len(bundle) <= c: return 0
-        return self.value(bundle) - c
-
-    def value_except_worst_c_goods(self, bundle:Bundle, c:int=1)->int:
-        if len(bundle) <= c: return 0
-        return self.value(bundle) - c
-
-    def value_of_cth_best_good(self, c:int)->int:
-        return 1 if self.total_value_cache >= c else 0
-
-    def value_1_of_c_MMS(self, c:int=1)->int:
-        return math.floor(self.total_value_cache / c)
-
-    def __repr__(self):
-        if self.duplicity==1:
-            return "{} is a binary agent who wants {}".format(self.name(), sorted(self.desired_items))
-        else:
-            return "{} are {} binary agents who want {}".format(self.name(), self.duplicity, sorted(self.desired_items))
 
 if __name__ == "__main__":
     import doctest

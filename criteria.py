@@ -7,7 +7,6 @@ Programmer: Erel Segal-Halevi
 Since: 2021-04
 """
 
-
 def is_envyfree(agents, bundles, roundAcc:int=2)->bool:
 	"""
 	checks whether or not the allocation is envy free.
@@ -31,8 +30,6 @@ def is_envyfree(agents, bundles, roundAcc:int=2)->bool:
 			if round(otherVal-selfVal, roundAcc) > 0:
 				return False
 	return True
-
-
 
 if __name__ == "__main__":
     import doctest

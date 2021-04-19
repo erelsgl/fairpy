@@ -7,7 +7,7 @@ Programmer: Shai Aharon
 Since: 2021-02
 """
 
-from fairpy.indivisible.agents import *
+from fairpy.indivisible.agents import AdditiveAgent
 from fairpy.indivisible import fair_enough
 
 import logging
@@ -26,7 +26,7 @@ agents = [Alice, Bob, Eve]
 
 print("Agents:")
 for agn in agents:
-    print('\t', agn.name(), agn.map_good_to_value)
+    print(agn)
 
 print("Fair Enough Algorithm starting..\n")
 allocation = fair_enough.fair_enough(agents, set("abcdefghikjl"))

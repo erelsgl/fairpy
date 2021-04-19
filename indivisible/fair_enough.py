@@ -107,7 +107,7 @@ def fair_enough(agents: List[AdditiveAgent], items: Bundle) -> Allocation:
     if len(agents_dict) == 2:
         p1, p2 = agents_dict.values()
         logger.info("\tAgents {} split the remaining items into 2-MMS groups".format(p1.name()))
-        mms_2_part = divide_c_mms_partition(2, items_remaining, p1.map_good_to_value)
+        mms_2_part = p1.partition_1_of_c_MMS(2, items_remaining)
         val_1, val_2 = p2.value(mms_2_part[0]), p2.value(mms_2_part[1])
 
         logger.info("\tGroup I: " + ','.join([x[0] for x in mms_2_part[0]]))
