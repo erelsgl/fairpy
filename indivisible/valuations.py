@@ -111,18 +111,6 @@ class Valuation(ABC):
         ])
 
 
-    def values_1_of_c_partitions(self, c:int=1):
-        """
-        Generates the minimum values in all partitions into c bundles.
-
-        >>> a = AdditiveValuation({"x": 1, "y": 2, "z": 4, "w":0})
-        >>> sorted(a.values_1_of_c_partitions(c=2))
-        [1, 2, 3]
-
-        """
-        for partition in partitions.partitions_to_exactly_c(self.desired_items_list, c):
-            yield min([self.value(bundle) for bundle in partition])
-
 
 
     def partition_1_of_c_MMS(self, c: int, items: list) -> List[Bundle]:
@@ -143,25 +131,33 @@ class Valuation(ABC):
         >>> mms_part = valuation.partition_1_of_c_MMS(4,items)
         >>> [sorted(x) for x in mms_part]
         [['a'], ['b'], ['c', 'd'], ['e', 'f']]
+        >>> mms_part = valuation.partition_1_of_c_MMS(4,['a','b','c'])
+        >>> [sorted(x) for x in mms_part]
+        []
         """
         maxi_min = -1
         partition = []
-
         # Iterate over all possible partitions
         for tmp_partition in partitions.partitions_to_exactly_c(items, c):
-            min_val = float('inf')
-            for bundle in tmp_partition:
-                # Calculate the value of the bundle
-                p_val = self.value(bundle)
-                # Updates min value
-                min_val = min(min_val, p_val)
-
+            min_val = min([self.value(bundle) for bundle in tmp_partition])
             # Update maximin value
             if maxi_min < min_val:
                 partition = tmp_partition
                 maxi_min = min_val
-
         return [set(x) for x in partition]
+
+
+    def values_1_of_c_partitions(self, c:int=1):
+        """
+        Generates the minimum values in all partitions into c bundles.
+
+        >>> a = AdditiveValuation({"x": 1, "y": 2, "z": 4, "w":0})
+        >>> sorted(a.values_1_of_c_partitions(c=2))
+        [1, 2, 3]
+
+        """
+        for partition in partitions.partitions_to_exactly_c(self.desired_items_list, c):
+            yield min([self.value(bundle) for bundle in partition])
 
 
     def value_1_of_c_MMS(self, c:int=1)->int:
