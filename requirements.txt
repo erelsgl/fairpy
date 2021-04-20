@@ -6,4 +6,5 @@ networkx
 matplotlib
 pytest
 repackage
+pulp
 git+git://github.com/trzemecki/dicttools.git
