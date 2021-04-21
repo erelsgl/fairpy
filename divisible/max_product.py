@@ -45,8 +45,8 @@ def max_product_allocation(v: ValuationMatrix, num_of_decimal_digits=3) -> Alloc
 	prob = cvxpy.Problem(
 		cvxpy.Maximize(sum_of_logs),
 		feasibility_constraints + positivity_constraints)
-	solver1 = "ECOS"
-	solver2 = "SCS"
+	solver1 = cvxpy.XPRESS
+	solver2 = cvxpy.SCS
 	# See here https://www.cvxpy.org/tutorial/advanced/index.html for a list of supported solvers
 	try:
 		prob.solve(solver=solver1)
