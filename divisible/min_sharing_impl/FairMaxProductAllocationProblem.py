@@ -62,8 +62,8 @@ class FairMaxProductAllocationProblem(FairThresholdAllocationProblem):
     >>> g = ConsumptionGraph(g1)
     >>> print(fpap.find_allocation_for_graph(g).round(2))
     [[0.   0.   0.   0.99]
-     [0.   0.33 1.   0.01]
-     [1.   0.67 0.   0.  ]]
+     [0.   0.34 1.   0.01]
+     [1.   0.66 0.   0.  ]]
     >>> v = [ [465,0,535] , [0,0,1000]  ]  # This example exposed a bug in OSQP solver!
     >>> fpap =FairMaxProductAllocationProblem(v)
     >>> g1 = [[1,1,1],[0,0,1]]
