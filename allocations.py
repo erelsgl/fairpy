@@ -14,8 +14,9 @@ from typing import List, Any
 
 class Allocation:
     """
-    Represents an allocation of objects to agents.
-    An immutable object; used mainly for display purposes.
+    Represents an allocation of objects (divisible or indivisible) to agents. 
+    This is the output of a fair allocation algorithm.
+    It is an immutable object. It is used mainly to display the allocation in a nice way.
 
     >>> a = Allocation(agents=range(3), bundles=[[3,6],None,[2,5]], map_agent_to_value=[9,0,6.999999])
     >>> Allocation.default_separator=","
@@ -49,42 +50,49 @@ class Allocation:
     <BLANKLINE>
     """
 
-    default_precision:int=3   # number of significant digits in printing
-    default_separator:str=","
+    # static variables:
+    default_precision:int=3     # number of significant digits in printing
+    default_separator:str=","   # separator between items in printing
 
-    agents:List[Any]
-    bundles:List[List[Any]]
-    map_agent_to_value:List[float]
-
-    num_of_agents:int
 
     def __init__(self, agents: List[Any], bundles: List[List[Any]], map_agent_to_value:List[float]=None):
         """
         Initializes an allocation to the given agents, of the given bundles, with the given values.
 
-        :param agents: Mandatory. Either a list of names (ints/strings), or a list of Agent objects. 
-                       In case of Agent objects, the objects must have a name() and a value() methods.
+        :param agents: Mandatory. Possible types:
+          * A list of names (ints/strings).
+          * A list of Agent objects, which must have a name() and a value() methods.
+          * A dict from agent name to agent valuation.
+
         :param bundles: Mandatory. For each agent, there must be a bundle (a list of items), or None.
         :param map_agent_to_value: Optional. For each agent, there should be the value of his bundle.
                        If it is not given, then it is filled in using the Agent object's value method.
         """
+
+        # Compute num_of_agents:
         num_of_agents = agents.num_of_agents if hasattr(agents,'num_of_agents') else len(agents)
         if num_of_agents!=len(bundles):
             raise ValueError(f"Numbers of agents and bundles must be identical, but they are not: {num_of_agents}, {len(bundles)}")
         if map_agent_to_value is not None and num_of_agents!=len(map_agent_to_value):
             raise ValueError(f"Numbers of agents and values must be identical, but they are not: {num_of_agents}, {len(map_agent_to_value)}")
         self.num_of_agents = num_of_agents
-        #
+
+        # Initialize bundles and agents:
         self.bundles = bundles
         self.agents = agents
-        #
-        map_agent_to_name = agents
 
-        if hasattr(agents, 'agent_value_for_bundle'):
+        # Compute a mapping from agent id to value:
+        map_agent_to_value = None
+        if hasattr(agents, 'agent_value_for_bundle'):  # E.g. when agents is a ValuationMatrix.
            map_agent_to_value = [agents.agent_value_for_bundle(i,bundles[i]) for i,_ in enumerate(agents)]
-        elif hasattr(agents[0], 'value'):
+        elif hasattr(agents[0], 'value'):              # E.g. when agents is a list of Agent.
            map_agent_to_value = [agent.value(bundles[i]) for i,agent in enumerate(agents)]
+        if map_agent_to_value is None:      
+            raise ValueError("Cannot compute agents' valuations")          
+        self.map_agent_to_value = map_agent_to_value
 
+        # Compute a mapping from agent id to agent name:
+        map_agent_to_name = None
         if hasattr(agents[0], 'name'):
            map_agent_to_name  = [agent.name() for agent in agents]
         elif isinstance(agents[0], int):
@@ -93,12 +101,8 @@ class Allocation:
             map_agent_to_name = agents
         else:
            map_agent_to_name  = [f"Agent #{i}" for i in range(num_of_agents)]
-
-        if map_agent_to_value is None:      
-            raise ValueError("Cannot compute agents' valuations")          
-
-        self.map_agent_to_value = map_agent_to_value
         self.map_agent_to_name  = map_agent_to_name
+
 
     def get_bundle(self, agent_index: int):
         return self.bundles[agent_index]
