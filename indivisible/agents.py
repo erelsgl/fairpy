@@ -283,13 +283,32 @@ class AdditiveAgent(Agent):
     Anonymous are 2 agents with a Additive valuation: x=1 y=2 z=4.
 
     """
-    def __init__(self, map_good_to_value:dict, name:str=None, duplicity:int=1):
+    def __init__(self, map_good_to_value:Dict[Item,float], name:str=None, duplicity:int=1):
         """
         Initializes an agent with a given additive valuation function.
         :param map_good_to_value: a dict that maps each single good to its value.
         :param duplicity: the number of agents with the same valuation.
         """
         super().__init__(AdditiveValuation(map_good_to_value), name=name, duplicity=duplicity)
+
+    @staticmethod
+    def list_from_dict(map_name_to_map_good_to_value: Dict[str, Dict[Item,float]])->List[Agent]:
+        """
+        Convert the given dict to a list of AdditiveAgent objects.
+
+        >>> the_dict = { "Alice":{"x":1,"y":2}, "Bob":{"x":3,"y":4} }
+        >>> the_list = AdditiveAgent.list_from_dict(the_dict)
+        >>> the_list[0]
+        Alice is an agent with a Additive valuation: x=1 y=2.
+        >>> the_list[1].name()
+        'Bob'
+        >>> the_list[1].value({"x","y"})
+        7
+        """
+        return [
+            AdditiveAgent(map_good_to_value, name=name)
+            for name,map_good_to_value in map_name_to_map_good_to_value.items()
+        ]
 
 class BinaryAgent(Agent):
     """

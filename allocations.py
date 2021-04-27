@@ -9,6 +9,7 @@ Programmer: Erel Segal-Halevi
 Since: 2021-04
 """
 
+from fairpy.indivisible.agents import AdditiveAgent
 from typing import List, Any
 
 
@@ -41,6 +42,12 @@ class Allocation:
     George gets None with value 0.
     Dina gets {2,5} with value 7.
     <BLANKLINE>
+    >>> agents = agents={"Alice":{"x":1,"y":2,"z":3},"George":{"x":4,"y":5,"z":6}}
+    >>> a = Allocation(agents=agents, bundles = [{"x","z"},{"y"}])
+    >>> a
+    Alice gets {x,z} with value 4.
+    George gets {y} with value 5.
+    <BLANKLINE>
     >>> from fairpy.valuations import ValuationMatrix
     >>> a = Allocation(agents=ValuationMatrix([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=[[0,4],None,[1,2]])
     >>> a
@@ -62,7 +69,7 @@ class Allocation:
         :param agents: Mandatory. Possible types:
           * A list of names (ints/strings).
           * A list of Agent objects, which must have a name() and a value() methods.
-          * A dict from agent name to agent valuation.
+          * A dict from agent name to agent valuation (representing additive valuation).
 
         :param bundles: Mandatory. For each agent, there must be a bundle (a list of items), or None.
         :param map_agent_to_value: Optional. For each agent, there should be the value of his bundle.
@@ -82,7 +89,8 @@ class Allocation:
         self.agents = agents
 
         # Compute a mapping from agent id to value:
-        map_agent_to_value = None
+        if isinstance(agents, dict):   
+            agents = AdditiveAgent.list_from_dict(agents)  
         if hasattr(agents, 'agent_value_for_bundle'):  # E.g. when agents is a ValuationMatrix.
            map_agent_to_value = [agents.agent_value_for_bundle(i,bundles[i]) for i,_ in enumerate(agents)]
         elif hasattr(agents[0], 'value'):              # E.g. when agents is a list of Agent.
