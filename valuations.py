@@ -24,7 +24,7 @@ class ValuationMatrix:
 	* A list of lists;
 	* Another ValuationMatrix.
 
-	>>> v = ValuationMatrix([[1,4,7],[6,3,0]])
+	>>> v = ValuationMatrix([[1,4,7],[6,3,0]])    # Initialize from a list of lists
 	>>> v[0,1]
 	4
 	>>> v[0][1]
@@ -48,18 +48,22 @@ class ValuationMatrix:
 	>>> v.without_object(1)
 	[[1 7]
  	 [6 0]]
-	>>> ValuationMatrix(np.ones([2,3]))
+	>>> v = ValuationMatrix(np.ones([2,3]))        # Initialize from a numpy array.
+	>>> v
+	[[1. 1. 1.]
+ 	 [1. 1. 1.]]
+	>>> int(v.agent_value_for_bundle(0,[1,2]))
+	2
+	>>> v2 = ValuationMatrix(v)
+	>>> v2
 	[[1. 1. 1.]
  	 [1. 1. 1.]]
 	"""
 	
-	num_of_agents:int
-	num_of_objects:int
-
 	def __init__(self, valuation_matrix: np.ndarray):
-		if isinstance(valuation_matrix,list):
+		if isinstance(valuation_matrix, list):
 			valuation_matrix = np.array(valuation_matrix)
-		elif isinstance(valuation_matrix,ValuationMatrix):
+		elif isinstance(valuation_matrix, ValuationMatrix):
 			valuation_matrix = valuation_matrix._v
 
 		self._v = valuation_matrix
