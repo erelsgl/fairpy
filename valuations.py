@@ -139,17 +139,21 @@ def matrix_from(input:Any):
     >>> matrix_from({"a": [1,2,3], "b": [4,5,6]})        # Initialize from a dict.
     [[1 2 3]
      [4 5 6]]
+    >>> matrix_from({"a": {"x":1,"y":2,"z":3}, "b": {"x":4,"y":5,"z":6}})        # Initialize from a dict.
+    [[1 2 3]
+     [4 5 6]]
     """
     if isinstance(input, ValuationMatrix):
         return input
-    elif isinstance(input, np.ndarray):
-        return ValuationMatrix(input)
-    elif isinstance(input, list):
-        return ValuationMatrix(np.array(input))
-    elif isinstance(input, dict):
-        return ValuationMatrix(np.array(list(input.values())))
-    else:
-        return ValuationMatrix(input)
+
+    if isinstance(input, dict):  # 1. Convert dict to list
+        input = list(input.values())
+    if isinstance(input, list):  # 2. Convert list to np.ndarray
+        for i in range(len(input)):
+            if isinstance(input[i], dict):
+                input[i] = list(input[i].values())
+        input = np.array(input)
+    return ValuationMatrix(input)
 
 
 if __name__ == '__main__':

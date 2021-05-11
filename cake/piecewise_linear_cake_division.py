@@ -203,7 +203,7 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
         for i in range(1, len(points)):
             logger.info("creating allocation from %f to %f:", points[i-1], points[i])
             alloc = EFAllocateRec(points[i-1], points[i])
-            merge_allocations(ret, alloc)
+            ret = merge_allocations(ret, alloc)
         logger.info("covered allocation from %f to %f using merging.",a,b)
         return ret
 

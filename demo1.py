@@ -39,21 +39,3 @@ print(cut_and_choose.symmetric_protocol([Alice, George]))
 print("\n--- LAST DIMINISHER ---")
 print(last_diminisher.last_diminisher([Alice, George]))
 
-
-
-
-print("\n--- ROUND ROBIN ---")
-
-from indivisible.agents import AdditiveAgent
-from indivisible import round_robin
-
-Ami = AdditiveAgent({"x": 1, "y": 2, "z": 4, "w": 0}, name="Ami")
-Tami = AdditiveAgent({"x": 2, "y": 1, "z": 6, "w": 3}, name="Tami")
-print(Ami)
-print(Tami)
-
-print("\n### Round-robin when Ami plays first:")
-print(round_robin.round_robin("wxyz", [Ami, Tami], [0,1]))
-
-print("\n### Round-robin when Tami plays first:")
-print(round_robin.round_robin("wxyz", [Tami, Ami], [1,0]))

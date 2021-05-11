@@ -11,7 +11,7 @@ Since:  2020
 """
 
 import datetime, cvxpy, numpy as np
-from time_limit import time_limit, TimeoutException
+from fairpy.time_limit import time_limit, TimeoutException
 
 from fairpy.valuations import ValuationMatrix
 from fairpy.items.allocations import AllocationMatrix

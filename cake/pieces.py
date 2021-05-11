@@ -43,7 +43,6 @@ def merge_allocations(self:Allocation, other:Allocation):
     >>> A = Allocation([Alice, George], [[(1,2)],[(4,5)]])
     >>> B = Allocation([George, Alice], [[(0,1)],[(2,3)]])
     >>> merge_allocations(A, B)
-    >>> print(A)
     Alice gets {(1, 2), (2, 3)} with value 1.
     George gets {(0, 1), (4, 5)} with value 2.
     <BLANKLINE>
@@ -57,8 +56,7 @@ def merge_allocations(self:Allocation, other:Allocation):
                 if(other.bundles[j] == None):
                     other.bundles[j] = []
                 self.bundles[i].extend(other.bundles[j])
-                self.map_agent_to_value[i] = self.agents[i].value(self.bundles[i])
-
+    return Allocation(self.agents, self.bundles)
 
 
 if __name__ == "__main__":

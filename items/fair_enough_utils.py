@@ -13,7 +13,7 @@ Programmer: Shai Aharon
 Since:  2021-02
 """
 
-import fairpy.items.partitions as partitions
+from fairpy.items import partitions
 from fairpy.agents import Agent, AdditiveAgent
 
 from typing import *
