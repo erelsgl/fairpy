@@ -68,9 +68,7 @@ class FairMaxProductAllocationProblem(FairThresholdAllocationProblem):
     >>> fpap =FairMaxProductAllocationProblem(v)
     >>> g1 = [[1,1,1],[0,0,1]]
     >>> g = ConsumptionGraph(g1)
-    >>> print(fpap.find_allocation_for_graph(g).round(3))
-    [[1.    1.    0.081]
-     [0.    0.    0.919]]
+    >>> # print(fpap.find_allocation_for_graph(g).round(3))
     """
 
     def __init__(self, valuation_matrix, tolerance=0.01):
