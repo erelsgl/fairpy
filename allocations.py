@@ -11,6 +11,7 @@ Since: 2021-04
 
 from fairpy.indivisible.agents import AdditiveAgent
 from typing import List, Any
+import numpy as np
 
 
 class Allocation:
@@ -71,7 +72,10 @@ class Allocation:
           * A list of Agent objects, which must have a name() and a value() methods.
           * A dict from agent name to agent valuation (representing additive valuation).
 
-        :param bundles: Mandatory. For each agent, there must be a bundle (a list of items), or None.
+        :param bundles: Mandatory. For each agent, there must be a bundle (a list of items), or None. Possible types:
+          * A list of bundles.
+          * A map from agent names to bundles.
+
         :param map_agent_to_value: Optional. For each agent, there should be the value of his bundle.
                        If it is not given, then it is filled in using the Agent object's value method.
         """
@@ -88,16 +92,34 @@ class Allocation:
         self.bundles = bundles
         self.agents = agents
 
-        # Compute a mapping from agent id to value:
+        # # Compute a mapping from agent id to the agent's valuation of his bundle:
         if isinstance(agents, dict):   
             agents = AdditiveAgent.list_from_dict(agents)  
+        # if hasattr(agents, 'agent_value_for_bundle'):  # E.g. when agents is a ValuationMatrix.
+        #    map_agent_to_value = [agents.agent_value_for_bundle(i,bundles[i]) for i,_ in enumerate(agents)]
+        # elif hasattr(agents[0], 'value'):              # E.g. when agents is a list of Agent.
+        #    map_agent_to_value = [agent.value(bundles[i]) for i,agent in enumerate(agents)]
+        # if map_agent_to_value is None:      
+        #     raise ValueError("Cannot compute agents' valuations")          
+        # self.map_agent_to_value = map_agent_to_value
+
+        # Compute a matrix with each agent's values for all bundles:
+        agent_bundle_value_matrix = np.zeros([num_of_agents,num_of_agents])
         if hasattr(agents, 'agent_value_for_bundle'):  # E.g. when agents is a ValuationMatrix.
-           map_agent_to_value = [agents.agent_value_for_bundle(i,bundles[i]) for i,_ in enumerate(agents)]
+            for i_agent in range(num_of_agents):
+                for i_bundle in range(num_of_agents):
+                    agent_bundle_value_matrix[i_agent,i_bundle] = agents.agent_value_for_bundle(i_agent,bundles[i_bundle])
         elif hasattr(agents[0], 'value'):              # E.g. when agents is a list of Agent.
-           map_agent_to_value = [agent.value(bundles[i]) for i,agent in enumerate(agents)]
-        if map_agent_to_value is None:      
-            raise ValueError("Cannot compute agents' valuations")          
-        self.map_agent_to_value = map_agent_to_value
+            for i_agent in range(num_of_agents):
+                for i_bundle in range(num_of_agents):
+                    agent_bundle_value_matrix[i_agent,i_bundle] = agents[i_agent].value(bundles[i_bundle])
+        elif map_agent_to_value is not None:
+            # WARNING: In this case, only the value of each agent to his own bundle is computed.
+            for i_agent in range(num_of_agents):
+                agent_bundle_value_matrix[i_agent,i_agent] = map_agent_to_value[i_agent]
+        else:
+            raise ValueError("Cannot compute agents' valuations to their bundles")          
+        self.agent_bundle_value_matrix = agent_bundle_value_matrix
 
         # Compute a mapping from agent id to agent name:
         map_agent_to_name = None
@@ -120,15 +142,65 @@ class Allocation:
 
     def __getitem__(self, agent_index:int):
         return self.get_bundle(agent_index)
-
-    def __repr__(self):
+       
+    def str_with_values(self, separator=None, precision=None)->str:
+        """
+        Returns a representation of the current allocation, showing the value of each agent to his own bundle.
+        
+        >>> agents = {"Alice":{"x":1.000000001,"y":2,"z":3},"George":{"x":4,"y":5,"z":6}}
+        >>> a = Allocation(agents=agents, bundles = [{"x","z"},{"y"}])
+        >>> print(a.str_with_values())
+        Alice gets {x,z} with value 4.
+        George gets {y} with value 5.
+        <BLANKLINE>
+        >>> print(a.str_with_values(separator=";"))
+        Alice gets {x;z} with value 4.
+        George gets {y} with value 5.
+        <BLANKLINE>
+        >>> print(a.str_with_values(precision=10))
+        Alice gets {x,z} with value 4.000000001.
+        George gets {y} with value 5.
+        <BLANKLINE>
+        """
+        if separator is None: separator=Allocation.default_separator
+        if precision is None: precision=Allocation.default_precision
         result = ""
         for i_agent, agent_name in enumerate(self.map_agent_to_name):
             agent_bundle = self.bundles[i_agent]
-            agent_value = self.map_agent_to_value[i_agent]
-            agent_bundle_str = stringify_bundle(agent_bundle, separator=Allocation.default_separator)
-            result += f"{agent_name} gets {agent_bundle_str} with value {agent_value:.{Allocation.default_precision}g}.\n"
+            agent_value = self.agent_bundle_value_matrix[i_agent,i_agent]
+            agent_bundle_str = stringify_bundle(agent_bundle, separator=separator)
+            result += f"{agent_name} gets {agent_bundle_str} with value {agent_value:.{precision}g}.\n"
         return result
+        
+    def str_with_value_matrix(self, separator=None, precision=None)->str:
+        """
+        Returns a representation of the current allocation, showing the value of each agent to *all* bundles.
+
+        >>> agents = {"Alice":{"x":1.000000001,"y":2,"z":3},"George":{"x":4,"y":5,"z":6}}
+        >>> a = Allocation(agents=agents, bundles = [{"x","z"},{"y"}])
+        >>> print(a.str_with_value_matrix())
+        Alice gets {x,z}. Values: [4] 2.
+        George gets {y}. Values: 10 [5].
+        <BLANKLINE>
+        """
+        if separator is None: separator=Allocation.default_separator
+        if precision is None: precision=Allocation.default_precision
+        result = ""
+        for i_agent, agent_name in enumerate(self.map_agent_to_name):
+            agent_bundle = self.bundles[i_agent]
+            agent_bundle_str = stringify_bundle(agent_bundle, separator=Allocation.default_separator)
+            values_str = ""
+            for i_bundle, bundle in enumerate(self.bundles):
+                agent_value_to_bundle = self.agent_bundle_value_matrix[i_agent,i_bundle]
+                agent_value_to_bundle_str = f"{agent_value_to_bundle:.{precision}g}"
+                if i_bundle==i_agent:
+                    agent_value_to_bundle_str = "["+agent_value_to_bundle_str+"]"
+                values_str += " " + agent_value_to_bundle_str
+            result += f"{agent_name} gets {agent_bundle_str}. Values:{values_str}.\n"
+        return result
+
+    def __repr__(self)->str:
+        return self.str_with_values(separator=Allocation.default_separator, precision=Allocation.default_precision)
 
 
 def stringify_bundle(bundle: List[Any], separator=","):

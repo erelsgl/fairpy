@@ -8,7 +8,7 @@ Programmer: Erel Segal-Halevi
 Since:  2020-07
 """
 
-from fairpy import Allocation
+from fairpy.allocations import Allocation
 from fairpy.indivisible.agents import *
 
 import logging
