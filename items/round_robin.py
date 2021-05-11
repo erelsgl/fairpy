@@ -15,17 +15,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def round_robin(items:Bundle, agents:List[AdditiveAgent], agent_order:List[int]) -> Allocation:
+def round_robin(agents, agent_order:List[int], items:Bundle=None) -> Allocation:
     """
     Allocate the given items to the given agents using the round-robin protocol, in the given agent-order.
 
-    >>> Allocation.default_separator=","
-    >>> Alice = AdditiveAgent({"x": 1, "y": 2, "z": 4, "w":0}, name="Alice")
-    >>> George = AdditiveAgent({"x": 2, "y": 1, "z": 6, "w":3}, name="George")
-    >>> allocation = round_robin("xyzw", [Alice,George], [0,1])
+    >>> Alice = AdditiveAgent({"x": 11, "y": 22, "z": 44, "w":0}, name="Alice")
+    >>> George = AdditiveAgent({"x": 22, "y": 11, "z": 66, "w":33}, name="George")
+    >>> allocation = round_robin([Alice,George], [0,1], items="xyzw")
     >>> allocation
-    Alice gets {y,z} with value 6.
-    George gets {w,x} with value 5.
+    Alice gets {y,z} with value 66.
+    George gets {w,x} with value 55.
     <BLANKLINE>
     >>> Alice.is_EF1(allocation.get_bundle(0), allocation.get_bundles())
     True
@@ -35,7 +34,13 @@ def round_robin(items:Bundle, agents:List[AdditiveAgent], agent_order:List[int])
     True
     >>> George.is_EF(allocation.get_bundle(1), allocation.get_bundles())
     False
+    >>> # A different input format:
+    >>> round_robin([[11,22,44,0],[22,11,66,33]], [0,1], items={0,1,2,3})
+    Agent #0 gets {1,2} with value 66.
+    Agent #1 gets {0,3} with value 55.
+    <BLANKLINE>
     """
+    agents = agents_from(agents)  # Handles various input formats
     logger.info("\nRound Robin with order %s", agent_order)
     allocations = [[] for _ in agents]
     agent_order = list(agent_order)
@@ -52,6 +57,7 @@ def round_robin(items:Bundle, agents:List[AdditiveAgent], agent_order:List[int])
             remaining_items.remove(best_item_for_agent)
 
 
+round_robin.logger = logger
 
 ### MAIN
 

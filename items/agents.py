@@ -283,32 +283,63 @@ class AdditiveAgent(Agent):
     Anonymous are 2 agents with a Additive valuation: x=1 y=2 z=4.
 
     """
-    def __init__(self, map_good_to_value:Dict[Item,float], name:str=None, duplicity:int=1):
+    def __init__(self, map_good_to_value, name:str=None, duplicity:int=1):
         """
         Initializes an agent with a given additive valuation function.
-        :param map_good_to_value: a dict that maps each single good to its value.
+        :param map_good_to_value: a dict that maps each single good to its value, or a list that lists the values of each good.
         :param duplicity: the number of agents with the same valuation.
         """
         super().__init__(AdditiveValuation(map_good_to_value), name=name, duplicity=duplicity)
 
     @staticmethod
-    def list_from_dict(map_name_to_map_good_to_value: Dict[str, Dict[Item,float]])->List[Agent]:
+    def list_from(input: Any)->List[Agent]:
         """
-        Convert the given dict to a list of AdditiveAgent objects.
+        Construct a list of additive agents from various input formats.
 
-        >>> the_dict = { "Alice":{"x":1,"y":2}, "Bob":{"x":3,"y":4} }
-        >>> the_list = AdditiveAgent.list_from_dict(the_dict)
+        >>> ### From dict of dicts:
+        >>> the_list = AdditiveAgent.list_from({"Alice":{"x":1,"y":2}, "Bob":{"x":3,"y":4}})
         >>> the_list[0]
         Alice is an agent with a Additive valuation: x=1 y=2.
         >>> the_list[1].name()
         'Bob'
         >>> the_list[1].value({"x","y"})
         7
+        >>> ### From dict of lists:
+        >>> the_list = AdditiveAgent.list_from({"Alice":[1,2], "Bob":[3,4]})
+        >>> the_list[1]
+        Bob is an agent with a Additive valuation: v0=3 v1=4.
+        >>> ### From list of dicts:
+        >>> the_list = AdditiveAgent.list_from([{"x":1,"y":2}, {"x":3,"y":4}])
+        >>> the_list[0]
+        Agent #0 is an agent with a Additive valuation: x=1 y=2.
+        >>> the_list[1].name()
+        'Agent #1'
+        >>> ### From list of lists:
+        >>> the_list = AdditiveAgent.list_from([[1,2],[3,4]])
+        >>> the_list[1]
+        Agent #1 is an agent with a Additive valuation: v0=3 v1=4.
+        >>> the_list[0].name()
+        'Agent #0'
+        >>> the_list[0].value({0,1})
+        3
         """
-        return [
-            AdditiveAgent(map_good_to_value, name=name)
-            for name,map_good_to_value in map_name_to_map_good_to_value.items()
-        ]
+        if isinstance(input, dict):
+            return [
+                AdditiveAgent(valuation, name=name)
+                for name,valuation in input.items()
+            ]
+        elif isinstance(input, list):
+            if len(input)==0:
+                return []
+            if isinstance(input[0], Agent):
+                return input
+            return [
+                AdditiveAgent(valuation, name=f"Agent #{index}")
+                for index,valuation in enumerate(input)
+            ]
+        else:
+            raise ValueError(f"Input to list_from should be a dict or a list, but it is {type(input)}")
+
 
 class BinaryAgent(Agent):
     """
@@ -347,6 +378,57 @@ class BinaryAgent(Agent):
         """
         super().__init__(BinaryValuation(desired_items), name=name, duplicity=duplicity)
 
+
+def _representative_item(input:Any):
+    if isinstance(input, list):
+        if len(input)==0:
+            return None
+        else:
+            return input[0]
+    elif isinstance(input, dict):
+        if len(input)==0:
+            return None
+        else:
+            return next(iter(input.values()))
+    else:
+        raise ValueError(f"input should be a list or a dict, but it is {type(input)}")
+
+
+def agents_from(input:Any):
+    """
+    Attempts to construct a list of agents from various input formats.
+
+    >>> ### From dict of dicts:
+    >>> agents_from({"Alice":{"x":1,"y":2}, "Bob":{"x":3,"y":4}})[0]
+    Alice is an agent with a Additive valuation: x=1 y=2.
+    >>> agents_from({"Alice":[1,2], "Bob":[3,4]})[1]
+    Bob is an agent with a Additive valuation: v0=3 v1=4.
+    >>> ### From list of dicts:
+    >>> agents_from([{"x":1,"y":2}, {"x":3,"y":4}])[0]
+    Agent #0 is an agent with a Additive valuation: x=1 y=2.
+    >>> ### From list of lists:
+    >>> agents_from([[1,2],[3,4]])[1]
+    Agent #1 is an agent with a Additive valuation: v0=3 v1=4.
+    >>> ### From list of valuations:
+    >>> agents_from([AdditiveValuation([1,2]), BinaryValuation("xy")])[0]
+    Agent #0 is an agent with a Additive valuation: v0=1 v1=2.
+    >>> ### From list of agents:
+    >>> agents_from([AdditiveAgent([1,2]), BinaryAgent("xy")])[0]
+    Anonymous is an agent with a Additive valuation: v0=1 v1=2.
+    """
+    input_0 = _representative_item(input)
+    if input_0 is None:
+        return []
+    elif isinstance(input_0, Agent):  # The input is already a list of Agent objects - nothing more to do.
+        return input
+    elif isinstance(input_0, Valuation):  # The input is a list of Valuation objects - we just need to add names.
+        return [
+            Agent(valuation, name=f"Agent #{index}")
+            for index,valuation in enumerate(input)
+        ]
+    else:
+        return AdditiveAgent.list_from(input)
+        
 
 if __name__ == "__main__":
     import doctest

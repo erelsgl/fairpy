@@ -313,6 +313,7 @@ class AdditiveValuation(Valuation):
     """
     Represents an additive valuation function.
 
+    >>> ### Initialize from a dict
     >>> a = AdditiveValuation({"x": 1, "y": 2, "z": 4, "w":0})
     >>> a
     Additive valuation: w=0 x=1 y=2 z=4.
@@ -349,15 +350,58 @@ class AdditiveValuation(Valuation):
     >>> a.value_1_of_c_MMS(c=2)
     3
 
+    >>> ### Initialize from a list
+    >>> a = AdditiveValuation([11,22,44,0])  
+    >>> a
+    Additive valuation: v0=11 v1=22 v2=44 v3=0.
+    >>> a.value(set())
+    0
+    >>> a.value(0)
+    11
+    >>> a.value({0})
+    11
+    >>> a.value({1})
+    22
+    >>> a.value({1,2})
+    66
+    >>> a.value({1,2,0})
+    77
+    >>> a.is_PROP({1}, 4)
+    True
+    >>> a.is_PROP({1}, 3)
+    False
+    >>> a.is_PROPc({1}, 3, c=1)
+    True
+    >>> a.is_EF1({1}, [{0,2}])
+    True
+    >>> a.is_EF1({0}, [{1,2}])
+    False
+    >>> a.value_1_of_c_MMS(c=4)
+    0
+    >>> a.value_1_of_c_MMS(c=3)
+    11
+    >>> a.value_1_of_c_MMS(c=2)
+    33
+
+
     """
-    def __init__(self, map_good_to_value:dict, name:str=None, duplicity:int=1):
+    def __init__(self, map_good_to_value, name:str=None, duplicity:int=1):
         """
         Initializes an agent with a given additive valuation function.
-        :param map_good_to_value: a dict that maps each single good to its value.
+        :param map_good_to_value: a dict that maps each single good to its value, or a list that lists the values of individual items.
         :param duplicity: the number of agents with the same valuation.
         """
+        if isinstance(map_good_to_value, AdditiveValuation):
+            map_good_to_value = map_good_to_value.map_good_to_value
+            desired_items = map_good_to_value.desired_items
+        elif isinstance(map_good_to_value, dict):
+            desired_items = set([g for g,v in map_good_to_value.items() if v>0])
+        elif isinstance(map_good_to_value, list):
+            desired_items = set(range(len(map_good_to_value)))
+        else:
+            raise ValueError(f"Input to AdditiveValuation should be a dict or a list, but it is {type(map_good_to_value)}")
+
         self.map_good_to_value = map_good_to_value
-        desired_items = set([g for g,v in map_good_to_value.items() if v>0])
         super().__init__(desired_items)
 
     def value(self, bundle:Bundle)->int:
@@ -366,7 +410,7 @@ class AdditiveValuation(Valuation):
         """
         if isinstance(bundle, Iterable):   # set, list, etc.
             return sum([self.map_good_to_value[g] for g in bundle])
-        else:
+        else:                              # individual item
             return self.map_good_to_value[bundle]
 
     def value_except_best_c_goods(self, bundle:Bundle, c:int=1)->int:
@@ -441,7 +485,10 @@ class AdditiveValuation(Valuation):
             return sorted_values[c-1]
 
     def __repr__(self):
-        values_as_string = " ".join(["{}={}".format(k,v) for k,v in sorted(self.map_good_to_value.items())])
+        if isinstance(self.map_good_to_value,dict):
+            values_as_string = " ".join([f"{k}={v}" for k,v in sorted(self.map_good_to_value.items())])
+        elif isinstance(self.map_good_to_value,list):
+            values_as_string = " ".join([f"v{i}={self.map_good_to_value[i]}" for i in range(len(self.map_good_to_value))])
         return f"Additive valuation: {values_as_string}."
 
 

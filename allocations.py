@@ -94,7 +94,7 @@ class Allocation:
 
         # # Compute a mapping from agent id to the agent's valuation of his bundle:
         if isinstance(agents, dict):   
-            agents = AdditiveAgent.list_from_dict(agents)  
+            agents = AdditiveAgent.list_from(agents)  
         # if hasattr(agents, 'agent_value_for_bundle'):  # E.g. when agents is a ValuationMatrix.
         #    map_agent_to_value = [agents.agent_value_for_bundle(i,bundles[i]) for i,_ in enumerate(agents)]
         # elif hasattr(agents[0], 'value'):              # E.g. when agents is a list of Agent.
