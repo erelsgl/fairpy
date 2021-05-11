@@ -65,11 +65,10 @@ agents2 = {
 }
 
 # Example showing that using a different weight in each category might lead to envy cycles.
-# agents2 = {
-# 	"a": {"0x": -1, "0y": -10,                   "1x": -4, "1y": -5},
-# 	"b": {"0x": -2, "0y": -3,                    "1x": -1, "1y": -12},
-# }
-
+agents2 = {
+	"a": {"0x": -1, "0y": -10,                   "1x": -4, "1y": -5},
+	"b": {"0x": -2, "0y": -3,                    "1x": -1, "1y": -12},
+}
 
 agent_weights2 = {"a": 1, "b": 1}
 

@@ -8,7 +8,7 @@
 
 import cvxpy
 
-from fairpy.valuations import ValuationMatrix
+from fairpy import valuations
 from fairpy.items.allocations import AllocationMatrix
 from fairpy.items.max_product import max_product_allocation
 
@@ -69,22 +69,22 @@ class FairMaxProductAllocationProblem(FairThresholdAllocationProblem):
     >>> g1 = [[1,1,1],[0,0,1]]
     >>> g = ConsumptionGraph(g1)
     >>> print(fpap.find_allocation_for_graph(g).round(3))
-    [[1.   1.   0.07]
-     [0.   0.   0.93]]
+    [[1.    1.    0.081]
+     [0.    0.    0.919]]
     """
 
-    def __init__(self, valuations:ValuationMatrix, tolerance=0.01):
-        valuations = ValuationMatrix(valuations)
-        mpa = max_product_allocation(valuations)
-        mpa_utilities = mpa.utility_profile(valuations)
+    def __init__(self, valuation_matrix, tolerance=0.01):
+        valuation_matrix = valuations.matrix_from(valuation_matrix)
+        mpa = max_product_allocation(valuation_matrix)
+        mpa_utilities = mpa.utility_profile(valuation_matrix)
         logger.info("The max-product allocation is:\n%s,\nwith utility profile: %s",mpa,mpa_utilities)
         thresholds = mpa_utilities * (1-tolerance)
         logger.info("The thresholds are: %s",thresholds)
         logger.info("The proportionality thresholds are: %s", [
-            sum(valuations[i]) / valuations.num_of_agents 
-            for i in valuations.agents()])
+            sum(valuation_matrix[i]) / valuation_matrix.num_of_agents 
+            for i in valuation_matrix.agents()])
         self.tolerance = tolerance
-        super().__init__(valuations, thresholds)
+        super().__init__(valuation_matrix, thresholds)
 
 
     def fairness_adjective(self)->str:

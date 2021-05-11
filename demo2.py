@@ -10,17 +10,17 @@ Since: 2021-05
 
 import fairpy
 
-items = ["green", "red", "blue", "yellow"]
 agents = {
-    "Avi": {"green": 8, "red":7, "blue": 6, "yellow": 5},
-    "Batya": {"green": 12, "red":8, "blue": 4, "yellow": 2} }
+    "Avram": {"green": 8, "red":7, "blue": 6, "yellow": 5},
+    "Sarah": {"green": 12, "red":8, "blue": 4, "yellow": 2} }
 
+print(fairpy.items.round_robin(agents))
+print(fairpy.items.round_robin(agents, agent_order=[1,0], items={"green", "red", "yellow"}))
 
-fairpy.round_robin(items, agents, agent_order=["Avi", "Batya"])
+print(fairpy.items.max_product_allocation(agents))
 
+import sys, logging
+fairpy.items.round_robin.logger.addHandler(logging.StreamHandler(sys.stdout))
+fairpy.items.round_robin.logger.setLevel(logging.INFO)
+print(fairpy.items.round_robin(agents))
 
-# cut_and_choose.logger.addHandler(logging.StreamHandler(sys.stdout))
-# cut_and_choose.logger.setLevel(logging.INFO)
-
-# last_diminisher.logger.addHandler(logging.StreamHandler(sys.stdout))
-# last_diminisher.logger.setLevel(logging.INFO)

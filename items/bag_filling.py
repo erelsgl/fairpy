@@ -8,7 +8,7 @@ Programmer: Erel Segal-Halevi
 Since:  2021-04
 """
 
-from fairpy import ValuationMatrix, Allocation
+from fairpy import Allocation, valuations
 from typing import List
 import numpy as np
 
@@ -23,9 +23,9 @@ class Bag:
 	"""
 	represents a bag for objects. 
 	Different agents may have different valuations for the objects.
-	>>> valuations = ValuationMatrix([[11,33],[44,22]])
+	>>> values = [[11,33],[44,22]]
 	>>> thresholds = [30,30]
-	>>> bag = Bag(valuations, thresholds)
+	>>> bag = Bag(values, thresholds)
 	>>> print(bag)
 	Bag objects: [], values: [0. 0.]
 	>>> print(bag.willing_agent([0,1]))
@@ -47,17 +47,14 @@ class Bag:
 	>>> print(bag)
 	Bag objects: [0, 1], values: [44. 66.]
 	"""
-	objects: List[int]
-	valuations: ValuationMatrix
-	map_agent_to_bag_value: List[float]
 
-	def __init__(self, valuations:ValuationMatrix, thresholds:List[float]):
+	def __init__(self, values, thresholds:List[float]):
 		"""
 		Initialize an empty bag.
-		:param valuations: a matrix representing additive valuations (a row for each agent, a column for each object).
+		:param values: a matrix representing additive valuations (a row for each agent, a column for each object).
 		:param thresholds: determines, for each agent, the minimum value that should be in a bag before the agent accepts it.
 		"""
-		self.valuations = ValuationMatrix(valuations)
+		self.values = valuations.matrix_from(values)
 		self.thresholds = thresholds
 		self.reset()
 
@@ -66,8 +63,8 @@ class Bag:
 		Empty the bag.
 		"""
 		self.objects = []
-		self.map_agent_to_bag_value = np.zeros(self.valuations.num_of_agents)
-		logger.info("Starting an empty bag. %d agents and %d objects.", self.valuations.num_of_agents, self.valuations.num_of_objects)
+		self.map_agent_to_bag_value = np.zeros(self.values.num_of_agents)
+		logger.info("Starting an empty bag. %d agents and %d objects.", self.values.num_of_agents, self.values.num_of_objects)
 
 	def append(self, object:int):
 		"""
@@ -79,8 +76,8 @@ class Bag:
 			return
 		logger.info("   Appending object %s.", object)
 		self.objects.append(object)
-		for agent in self.valuations.agents():
-			self.map_agent_to_bag_value[agent] += self.valuations[agent][object]
+		for agent in self.values.agents():
+			self.map_agent_to_bag_value[agent] += self.values[agent][object]
 		logger.debug("      Bag values: %s.", self.map_agent_to_bag_value)
 
 	def willing_agent(self, remaining_agents)->int:
@@ -100,7 +97,7 @@ class Bag:
 		"""
 		Fill the bag with objects until at least one agent is willing to accept it.
 		:return the willing agent, or None if the objects are insufficient.
-		>>> bag = Bag(valuations=[[1,2,3,4,5,6],[6,5,4,3,2,1]], thresholds=[10,10])
+		>>> bag = Bag(values=[[1,2,3,4,5,6],[6,5,4,3,2,1]], thresholds=[10,10])
 		>>> remaining_objects = list(range(6))
 		>>> remaining_agents = [0,1]
 		>>> (willing_agent, allocated_objects) = bag.fill(remaining_objects, remaining_agents)
@@ -109,13 +106,13 @@ class Bag:
 		>>> allocated_objects
 		[0, 1]
 		>>> remaining_objects = list(set(remaining_objects) - set(allocated_objects))
-		>>> bag = Bag(valuations=[[1,2,3,4,5,6],[6,5,4,3,2,1]], thresholds=[10,10])
+		>>> bag = Bag(values=[[1,2,3,4,5,6],[6,5,4,3,2,1]], thresholds=[10,10])
 		>>> bag.fill(remaining_objects, remaining_agents)
 		(0, [2, 3, 4])
-		>>> bag = Bag(valuations=[[20]], thresholds=[10])  # Edge case: single object
+		>>> bag = Bag(values=[[20]], thresholds=[10])  # Edge case: single object
 		>>> bag.fill(remaining_objects=[0], remaining_agents=[0])
 		(0, [0])
-		>>> bag = Bag(valuations=[[20,5]], thresholds=[10])  # Edge case: bag with an existing large object
+		>>> bag = Bag(values=[[20,5]], thresholds=[10])  # Edge case: bag with an existing large object
 		>>> bag.append(0)
 		>>> bag.fill(remaining_objects=[1], remaining_agents=[0])
 		(0, [0])
@@ -166,38 +163,38 @@ class SequentialAllocation:
 #####################
 
 
-def one_directional_bag_filling(valuations:ValuationMatrix, thresholds:List[float]):
+def one_directional_bag_filling(values, thresholds:List[float]):
 	"""
 	The simplest bag-filling procedure: fills a bag in the given order of objects.
 	
 	:param valuations: a valuation matrix (a row for each agent, a column for each object).
 	:param thresholds: determines, for each agent, the minimum value that should be in a bag before the agent accepts it.
 
-	>>> one_directional_bag_filling(valuations=[[11,33],[44,22]], thresholds=[30,30])
+	>>> one_directional_bag_filling(values=[[11,33],[44,22]], thresholds=[30,30])
 	Agent #0 gets {1} with value 33.
 	Agent #1 gets {0} with value 44.
 	<BLANKLINE>
-	>>> one_directional_bag_filling(valuations=[[11,33],[44,22]], thresholds=[10,10])
+	>>> one_directional_bag_filling(values=[[11,33],[44,22]], thresholds=[10,10])
 	Agent #0 gets {0} with value 11.
 	Agent #1 gets {1} with value 22.
 	<BLANKLINE>
-	>>> one_directional_bag_filling(valuations=[[11,33],[44,22]], thresholds=[40,30])
+	>>> one_directional_bag_filling(values=[[11,33],[44,22]], thresholds=[40,30])
 	Agent #0 gets None with value 0.
 	Agent #1 gets {0} with value 44.
 	<BLANKLINE>
 	"""
-	valuations = ValuationMatrix(valuations)
-	if len(thresholds) != valuations.num_of_agents:
-		raise ValueError(f"Number of valuations {valuations.num_of_agents} differs from number of thresholds {len(thresholds)}")
+	values = valuations.matrix_from(values)
+	if len(thresholds) != values.num_of_agents:
+		raise ValueError(f"Number of valuations {values.num_of_agents} differs from number of thresholds {len(thresholds)}")
 
-	allocation = SequentialAllocation(valuations.agents(), valuations.objects(), logger)
-	bag = Bag(valuations, thresholds)
+	allocation = SequentialAllocation(values.agents(), values.objects(), logger)
+	bag = Bag(values, thresholds)
 	while True:
 		(willing_agent, allocated_objects) = bag.fill(allocation.remaining_objects, allocation.remaining_agents)
 		if willing_agent is None:  break
 		allocation.let_agent_get_objects(willing_agent, allocated_objects)
 		bag.reset()
-	return Allocation(valuations, allocation.bundles)
+	return Allocation(values, allocation.bundles)
 
 
 

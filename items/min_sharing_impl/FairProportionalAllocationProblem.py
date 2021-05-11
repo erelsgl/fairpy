@@ -8,7 +8,7 @@
 
 import cvxpy
 
-from fairpy.valuations import ValuationMatrix
+import fairpy.valuations as valuations
 from fairpy.items.allocations import AllocationMatrix
 
 from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
@@ -81,29 +81,19 @@ class FairProportionalAllocationProblem(FairThresholdAllocationProblem):
      [0.    0.    0.609]]
     """
 
-    def __init__(self, valuations:ValuationMatrix):
-        valuations = ValuationMatrix(valuations)
+    def __init__(self, valuation_matrix):
+        valuation_matrix = valuations.matrix_from(valuation_matrix)
         thresholds = [
-            sum(valuations[i]) / valuations.num_of_agents 
-            for i in valuations.agents()]
+            sum(valuation_matrix[i]) / valuation_matrix.num_of_agents 
+            for i in valuation_matrix.agents()]
         logger.info("The proportionality thresholds are: %s",thresholds)
-        super().__init__(valuations, thresholds)
+        super().__init__(valuation_matrix, thresholds)
 
     def fairness_adjective(self)->str:
         return "proportional"
 
 
 if __name__ == '__main__':
-    # import logging, sys
-    # logger.addHandler(logging.StreamHandler(sys.stdout))
-    # logger.setLevel(logging.INFO)
-
-    # v = [ [465,0,535] , [0,0,1000]  ]
-    # fpap =FairProportionalAllocationProblem(v)
-    # g1 = [[1,1,1],[0,0,1]]
-    # g = ConsumptionGraph(g1)
-    # print(fpap.find_allocation_for_graph(g).round(3))
-
     import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))

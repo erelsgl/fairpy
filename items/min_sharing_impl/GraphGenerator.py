@@ -9,7 +9,7 @@
 
 from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
 from fairpy.items.min_sharing_impl.ValueRatio import ValueRatio
-from fairpy.valuations import ValuationMatrix
+import fairpy.valuations as valuations
 import numpy as np
 import math
 
@@ -20,8 +20,8 @@ class GraphGenerator():
     (represent as ConsumptionGraph) for some valuation_matrix
     """
 
-    def __init__(self, valuation_matrix:ValuationMatrix):
-        self.valuation_matrix = valuation_matrix
+    def __init__(self, valuation_matrix):
+        self.valuation_matrix = valuations.matrix_from(valuation_matrix)
         self.valuation_ratios = ValueRatio(valuation_matrix)
         self.num_of_sharing_is_allowed = self.valuation_matrix.num_of_agents
 
@@ -37,21 +37,21 @@ class GraphGenerator():
         :return: a generator of all possibly fPO+PROP consumption graphs.
 
         >>> v = [[20,10],[6,4]]   # first agent must get at least 15; second agent at least 5
-        >>> gg = GraphGenerator(ValuationMatrix(v))
+        >>> gg = GraphGenerator(v)
         >>> for g in gg.generate_all_consumption_graph(): print(g)    # [[1,0],[0,1]] not prop; [[0,1],[1,0]] not fPO; [[1,1],[1,1]] too many sharings;
         [[1, 0.0], [1, 1]]
         >>> v = [[20,10,0],[6,0,4]]
-        >>> gg = GraphGenerator(ValuationMatrix(v))
+        >>> gg = GraphGenerator(v)
         >>> for g in gg.generate_all_consumption_graph(): print(g)    # [[1,0],[0,1]] not prop; [[0,1],[1,0]] not fPO; [[1,1],[1,1]] too many sharings;
         [[1, 1, 0.0], [1, 0.0, 1]]
         >>> v = [[30,20,10],[5,5,5]]
-        >>> gg = GraphGenerator(ValuationMatrix(v))
+        >>> gg = GraphGenerator(v)
         >>> for g in gg.generate_all_consumption_graph(): print(g)
         [[1, 1, 0.0], [0.0, 1, 1]]
         [[1, 0.0, 0.0], [0.0, 1, 1]]
         [[1, 0.0, 0.0], [1, 1, 1]]
         >>> v = [[30,20,10],[20,15,10],[5,5,5]]
-        >>> gg = GraphGenerator(ValuationMatrix(v))
+        >>> gg = GraphGenerator(v)
         >>> # It is the same check as ver1 and its work the same (111 count)
         >>> # I did not check the correctness of the graphs
         >>> for g in gg.generate_all_consumption_graph(): print(g)
@@ -107,7 +107,7 @@ class GraphGenerator():
         :return: generator for the all the  graph for i agents
         >>> a = (0)
         >>> v = [[30,20,10],[20,15,10],[5,5,5]]
-        >>> gg = GraphGenerator(ValuationMatrix(v))
+        >>> gg = GraphGenerator(v)
         >>> gen = gg.add_agent(a,0)
         >>> for g in gg.add_agent(gen,1): print(g)
         [[1, 1, 0.0], [0.0, 1, 1]]
@@ -130,7 +130,7 @@ class GraphGenerator():
         :return: generator for the all the  graphs from adding agent i to the given graph
         >>> matv = [[40,30,20],[40,30,20],[10,10,10]]
         >>> graph = [[1,1,0],[0,1,1]]
-        >>> g = GraphGenerator(ValuationMatrix(matv))
+        >>> g = GraphGenerator(matv)
         >>> cg = ConsumptionGraph(graph)
         >>> for x in g.add_agent_to_graph(cg):
         ...     print(x.get_graph())
@@ -151,7 +151,7 @@ class GraphGenerator():
         [[1, 0.0, 0.0], [0.0, 1, 0.0], [1, 1, 1]]
         >>> matv = [[40,30,20],[40,30,20],[10,10,10]]
         >>> graph = [[1,1,1],[0,0,0]]
-        >>> g = GraphGenerator(ValuationMatrix(matv))
+        >>> g = GraphGenerator(matv)
         >>> cg = ConsumptionGraph(graph)
         >>> for x in g.add_agent_to_graph(cg):
         ...     print(x.get_graph())
@@ -173,7 +173,7 @@ class GraphGenerator():
                xi in range(number of properties of agent i in graph)
         :return: consumption_graph for that code
         >>> v = [[40,30,20,10],[40,30,20,10],[40,30,20,10],[10,10,10,10]]
-        >>> gg = GraphGenerator(ValuationMatrix(v))
+        >>> gg = GraphGenerator(v)
         >>> g = [[0,1,1,0],[1,0,0,0],[0,1,0,1]]
         >>> cg = ConsumptionGraph(g)
         >>> print(gg.code_to_consumption_graph(cg,(0,0,0)))
@@ -182,7 +182,7 @@ class GraphGenerator():
         [[0.0, 0.0, 0.0, 0.0], [1, 0.0, 0.0, 0.0], [0.0, 1, 0.0, 0.0], [1, 1, 1, 1]]
         >>> v1 = [[1,2,3,4],[8,7,6,5],[9,12,10,11],[1,2,3,4]]
         >>> g1 = [[0,1,1,0],[1,0,0,0],[0,1,0,1]]
-        >>> gg = GraphGenerator(ValuationMatrix(v1))
+        >>> gg = GraphGenerator(v1)
         >>> cg = ConsumptionGraph(g1)
         >>> print(gg.code_to_consumption_graph(cg,(2,3,2)).get_graph())
         [[0.0, 1, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 1, 0.0, 0.0], [1, 0.0, 1, 1]]
@@ -193,7 +193,7 @@ class GraphGenerator():
         >>> print(gg.code_to_consumption_graph(cg,(1,2,3)).get_graph())
         [[0.0, 1, 1, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 1, 0.0, 0.0], [1, 1, 1, 1]]
         >>> v1 = [[1,2,3,4],[8,7,6,5],[9,12,10,11],[1,4,3,2]]
-        >>> gg = GraphGenerator(ValuationMatrix(v1))
+        >>> gg = GraphGenerator(v1)
         >>> print(gg.code_to_consumption_graph(cg,(2,3,2)).get_graph())
         [[0.0, 0.0, 1, 0.0], [0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1], [1, 1, 0.0, 0.0]]
         """
@@ -215,12 +215,6 @@ class GraphGenerator():
 
 
 if __name__ == '__main__':
-    # v = [[20,10],[5,4]]
-    # v = [[30,20,10],[5,5,5]]
-    # gg = GraphGenerator(ValuationMatrix(v))
-    # for g in gg.generate_all_consumption_graph():
-    #     print(g)
-
     import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))

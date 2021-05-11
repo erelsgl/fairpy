@@ -15,7 +15,7 @@ Since:  2021-02
 
 import queue
 import networkx as nx
-from fairpy.items.agents import AdditiveAgent, Bundle, List
+from fairpy.agents import AdditiveAgent, Bundle, List
 from fairpy.items.allocations_fractional import FractionalAllocation
 from networkx.algorithms import bipartite, find_cycle
 

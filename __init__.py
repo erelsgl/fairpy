@@ -5,4 +5,8 @@
 
 from fairpy.valuations import *
 from fairpy.allocations import *
+from fairpy.agents import *
 
+class items:
+	from fairpy.items.round_robin import round_robin
+	from fairpy.items.max_product import max_product_allocation

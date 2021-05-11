@@ -8,7 +8,7 @@
 
 import numpy as np
 from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
-from fairpy.valuations import ValuationMatrix
+import fairpy.valuations as valuations
 
 
 
@@ -18,7 +18,8 @@ class ValueRatio():
     """
 
 
-    def __init__(self, valuation_matrix:ValuationMatrix):
+    def __init__(self, valuation_matrix):
+        valuation_matrix = valuations.matrix_from(valuation_matrix)
         self.valuation_matrix = valuation_matrix
         self.all_ratios = compute_all_ratios(valuation_matrix)
 
@@ -33,43 +34,43 @@ class ValueRatio():
         :return: the sorted array of tuples (index of location in v, the ratio)
 
         >>> a = [[20,30,40,10],[10,60,10,20]]
-        >>> v = ValueRatio(ValuationMatrix(a))
+        >>> v = ValueRatio(a)
         >>> g1 = [[1,1,1,1]]
         >>> g = ConsumptionGraph(g1)
         >>> v.create_the_value_ratio_for_2(g,0,1)
         [(2, 4.0), (0, 2.0), (1, 0.5), (3, 0.5)]
         >>> a = [[20,30,40,20],[10,60,10,20]]
-        >>> v = ValueRatio(ValuationMatrix(a))
+        >>> v = ValueRatio(a)
         >>> g1 = [[0.0,1,0.0,1]]
         >>> g = ConsumptionGraph(g1)
         >>> v.create_the_value_ratio_for_2(g,0,1)
         [(3, 1.0), (1, 0.5)]
         >>> a = [[40,30,20],[40,30,20],[10,10,10]]
-        >>> v = ValueRatio(ValuationMatrix(a))
+        >>> v = ValueRatio(a)
         >>> g1 = [[1,1,0],[0,1,1]]
         >>> g = ConsumptionGraph(g1)
         >>> v.create_the_value_ratio_for_2(g,1,2)
         [(1, 3.0), (2, 2.0)]
         >>> a = [[40,30,20],[40,10,20],[10,10,10]]
-        >>> v = ValueRatio(ValuationMatrix(a))
+        >>> v = ValueRatio(a)
         >>> g1 = [[1,1,0],[0,1,1]]
         >>> g = ConsumptionGraph(g1)
         >>> v.create_the_value_ratio_for_2(g,1,2)
         [(2, 2.0), (1, 1.0)]
         >>> a = [[40,30,20],[40,30,20],[10,10,10],[5,2,1]]
-        >>> v = ValueRatio(ValuationMatrix(a))
+        >>> v = ValueRatio(a)
         >>> g1 = [[1,0,1],[0,1,1]]
         >>> g = ConsumptionGraph(g1)
         >>> v.create_the_value_ratio_for_2(g,0,3)
         [(2, 20.0), (0, 8.0)]
         >>> a = [[40,30,20],[40,30,20],[10,10,10],[0,2,1]]
-        >>> v = ValueRatio(ValuationMatrix(a))
+        >>> v = ValueRatio(a)
         >>> g1 = [[1,0,1],[0,1,1]]
         >>> g = ConsumptionGraph(g1)
         >>> v.create_the_value_ratio_for_2(g,0,3)
         [(0, inf), (2, 20.0)]
         >>> a = [[40,30,20],[40,30,20],[10,10,10],[0,2,1]]
-        >>> v = ValueRatio(ValuationMatrix(a))
+        >>> v = ValueRatio(a)
         >>> g1 = [[1,0,1],[0,1,1]]
         >>> g = ConsumptionGraph(g1)
         >>> v.create_the_value_ratio_for_2(g,0,1)
@@ -89,7 +90,7 @@ def second(pair):
 
 
 
-def compute_all_ratios(valuation_matrix:ValuationMatrix)->list:
+def compute_all_ratios(valuation_matrix)->list:
     """
     Creates a list of matrices.
     Each matrix is the ratio between agent i and all the other agents.
@@ -99,15 +100,16 @@ def compute_all_ratios(valuation_matrix:ValuationMatrix)->list:
     :param valuation_matrix: the valuation of the agents.
     :return: ans - list of all the matrices.
     >>> v = [[1,2],[3,4]]
-    >>> compute_all_ratios(ValuationMatrix(v))
+    >>> compute_all_ratios(v)
     [[[(0, 1.0), (1, 1.0)], [(0, 0.3333333333333333), (1, 0.5)]], [[(0, 3.0), (1, 2.0)], [(0, 1.0), (1, 1.0)]]]
     >>> v = [[1,0],[3,7]]
-    >>> compute_all_ratios(ValuationMatrix(v))
+    >>> compute_all_ratios(v)
     [[[(0, 1.0), (1, 1.0)], [(0, 0.3333333333333333), (1, 0.0)]], [[(0, 3.0), (1, inf)], [(0, 1.0), (1, 1.0)]]]
     >>> v = [[1,0,2],[3,7,2.5],[4,2,0]]
-    >>> compute_all_ratios(ValuationMatrix(v))
+    >>> compute_all_ratios(v)
     [[[(0, 1.0), (1, 1.0), (2, 1.0)], [(0, 0.3333333333333333), (1, 0.0), (2, 0.8)], [(0, 0.25), (1, 0.0), (2, inf)]], [[(0, 3.0), (1, inf), (2, 1.25)], [(0, 1.0), (1, 1.0), (2, 1.0)], [(0, 0.75), (1, 3.5), (2, inf)]], [[(0, 4.0), (1, inf), (2, 0.0)], [(0, 1.3333333333333333), (1, 0.2857142857142857), (2, 0.0)], [(0, 1.0), (1, 1.0), (2, 1.0)]]]
     """
+    valuation_matrix = valuations.matrix_from(valuation_matrix)
     ans = []
     for i in valuation_matrix.agents():
         mat = np.zeros((valuation_matrix.num_of_agents, valuation_matrix.num_of_objects)).tolist()

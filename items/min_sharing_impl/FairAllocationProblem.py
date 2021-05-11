@@ -7,7 +7,7 @@
 """
 
 
-from fairpy.valuations import ValuationMatrix
+import fairpy.valuations as valuations
 from fairpy.items.allocations import AllocationMatrix
 
 from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
@@ -27,8 +27,8 @@ class FairAllocationProblem():
     ‎This is an abstract class for solving a fair allocation problem.
     """
 
-    def __init__(self ,valuation:ValuationMatrix):
-        valuation = ValuationMatrix(valuation)
+    def __init__(self ,valuation):
+        valuation = valuations.matrix_from(valuation)
         self.valuation = valuation
         self.min_sharing_number = valuation.num_of_agents
         self.min_sharing_allocation = None

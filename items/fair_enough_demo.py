@@ -7,7 +7,7 @@ Programmer: Shai Aharon
 Since: 2021-02
 """
 
-from fairpy.items.agents import AdditiveAgent
+from fairpy.agents import AdditiveAgent
 from fairpy.items import fair_enough
 
 import logging

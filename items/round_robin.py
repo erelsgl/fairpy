@@ -9,39 +9,48 @@ Since:  2020-07
 """
 
 from fairpy.allocations import Allocation
-from fairpy.items.agents import *
+from fairpy.agents import *
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-def round_robin(agents, agent_order:List[int], items:Bundle=None) -> Allocation:
+def round_robin(agents, agent_order:List[int]=None, items:Bundle=None) -> Allocation:
     """
     Allocate the given items to the given agents using the round-robin protocol, in the given agent-order.
 
+    >>> ### Using Agent objects:
     >>> Alice = AdditiveAgent({"x": 11, "y": 22, "z": 44, "w":0}, name="Alice")
     >>> George = AdditiveAgent({"x": 22, "y": 11, "z": 66, "w":33}, name="George")
-    >>> allocation = round_robin([Alice,George], [0,1], items="xyzw")
+    >>> allocation = round_robin([Alice,George], agent_order=[0,1])
     >>> allocation
     Alice gets {y,z} with value 66.
     George gets {w,x} with value 55.
     <BLANKLINE>
-    >>> Alice.is_EF1(allocation.get_bundle(0), allocation.get_bundles())
+    >>> Alice.is_EF1(allocation[0], allocation)
     True
-    >>> George.is_EF1(allocation.get_bundle(1), allocation.get_bundles())
+    >>> George.is_EF1(allocation[1], allocation)
     True
-    >>> Alice.is_EF(allocation.get_bundle(0), allocation.get_bundles())
+    >>> Alice.is_EF(allocation[0], allocation)
     True
-    >>> George.is_EF(allocation.get_bundle(1), allocation.get_bundles())
+    >>> George.is_EF(allocation[1], allocation)
     False
-    >>> # A different input format:
+    >>> ### Dividing only some of the items:
+    >>> round_robin([Alice,George], agent_order=[0,1], items={"x","y","z"})
+    Alice gets {y,z} with value 66.
+    George gets {x} with value 22.
+    <BLANKLINE>
+    >>> ### A different input format:
     >>> round_robin([[11,22,44,0],[22,11,66,33]], [0,1], items={0,1,2,3})
     Agent #0 gets {1,2} with value 66.
     Agent #1 gets {0,3} with value 55.
     <BLANKLINE>
     """
     agents = agents_from(agents)  # Handles various input formats
-    logger.info("\nRound Robin with order %s", agent_order)
+    if agent_order is None: agent_order = range(len(agents))
+    if items is None: items = agents[0].all_items()
+    
+    logger.info("\nRound Robin with agent-order %s and items %s", agent_order, items)
     allocations = [[] for _ in agents]
     agent_order = list(agent_order)
     remaining_items = list(items)

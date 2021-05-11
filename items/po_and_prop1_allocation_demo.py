@@ -9,7 +9,7 @@ Since: 2021-02
 
 
 import networkx as nx
-from fairpy.items.agents import AdditiveAgent
+from fairpy.agents import AdditiveAgent
 from fairpy.items.allocations_fractional import FractionalAllocation
 from fairpy.items.po_and_prop1_allocation import find_po_and_prop1_allocation
 

@@ -9,7 +9,7 @@ Programmer: Erel Segal-Halevi
 Since: 2021-04
 """
 
-from fairpy.items.agents import AdditiveAgent
+from fairpy.agents import AdditiveAgent
 from typing import List, Any
 import numpy as np
 
@@ -56,6 +56,10 @@ class Allocation:
     Agent #1 gets None with value 0.
     Agent #2 gets {1,2} with value 70.
     <BLANKLINE>
+    >>> for bundle in a: print(bundle)
+    [0, 4]
+    None
+    [1, 2]
     """
 
     # static variables:
@@ -95,13 +99,6 @@ class Allocation:
         # # Compute a mapping from agent id to the agent's valuation of his bundle:
         if isinstance(agents, dict):   
             agents = AdditiveAgent.list_from(agents)  
-        # if hasattr(agents, 'agent_value_for_bundle'):  # E.g. when agents is a ValuationMatrix.
-        #    map_agent_to_value = [agents.agent_value_for_bundle(i,bundles[i]) for i,_ in enumerate(agents)]
-        # elif hasattr(agents[0], 'value'):              # E.g. when agents is a list of Agent.
-        #    map_agent_to_value = [agent.value(bundles[i]) for i,agent in enumerate(agents)]
-        # if map_agent_to_value is None:      
-        #     raise ValueError("Cannot compute agents' valuations")          
-        # self.map_agent_to_value = map_agent_to_value
 
         # Compute a matrix with each agent's values for all bundles:
         agent_bundle_value_matrix = np.zeros([num_of_agents,num_of_agents])
@@ -141,7 +138,10 @@ class Allocation:
         return self.bundles
 
     def __getitem__(self, agent_index:int):
-        return self.get_bundle(agent_index)
+        return self.bundles[agent_index]
+
+    def __iter__(self):
+       return self.bundles.__iter__() 
        
     def str_with_values(self, separator=None, precision=None)->str:
         """

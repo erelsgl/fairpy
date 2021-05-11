@@ -52,6 +52,12 @@ class Valuation(ABC):
         """
         return self.total_value_cache
 
+    def all_items(self):
+        """
+        :return: the set of all items handled by this valuation.
+        """
+        return self.desired_items
+
     def best_index(self, allocation:List[Bundle])->int:
         """
         Returns an index of a bundle that is most-valuable for the agent.
@@ -349,6 +355,21 @@ class AdditiveValuation(Valuation):
     1
     >>> a.value_1_of_c_MMS(c=2)
     3
+    >>> list(a.all_items())
+    ['x', 'y', 'z', 'w']
+
+    >>> ### Initialize from a dict with long names
+    >>> a = AdditiveValuation({"blue": 1, "green": 2, "z": 4, "w": 7})
+    >>> a
+    Additive valuation: blue=1 green=2 w=7 z=4.
+    >>> a.value("blue")
+    1
+    >>> a.value({"green"})
+    2
+    >>> a.value({"blue","green"})
+    3
+    >>> a.value("zw")
+    11
 
     >>> ### Initialize from a list
     >>> a = AdditiveValuation([11,22,44,0])  
@@ -383,7 +404,6 @@ class AdditiveValuation(Valuation):
     >>> a.value_1_of_c_MMS(c=2)
     33
 
-
     """
     def __init__(self, map_good_to_value, name:str=None, duplicity:int=1):
         """
@@ -408,10 +428,18 @@ class AdditiveValuation(Valuation):
         """
         Calculates the agent's value for the given good or set of goods.
         """
-        if isinstance(bundle, Iterable):   # set, list, etc.
+        if isinstance(bundle, str):
+            if bundle in self.map_good_to_value:
+                return self.map_good_to_value[bundle]
+            else:
+                return sum([self.map_good_to_value[g] for g in bundle])
+        elif isinstance(bundle, Iterable):   # set, list, str, etc.
             return sum([self.map_good_to_value[g] for g in bundle])
         else:                              # individual item
             return self.map_good_to_value[bundle]
+
+    def all_items(self):
+        return self.map_good_to_value.keys()
 
     def value_except_best_c_goods(self, bundle:Bundle, c:int=1)->int:
         """

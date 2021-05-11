@@ -8,10 +8,10 @@ Since:  2021-03
 """
 
 import numpy as np, cvxpy
-from fairpy.valuations import ValuationMatrix
+from fairpy import valuations
 from fairpy.items.allocations import AllocationMatrix
 
-def max_product_allocation(v: ValuationMatrix, num_of_decimal_digits=3) -> AllocationMatrix:
+def max_product_allocation(agents, num_of_decimal_digits=3) -> AllocationMatrix:
 	"""
 	Find the max-product (aka Max Nash Welfare) allocation.
 	:param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
@@ -28,7 +28,7 @@ def max_product_allocation(v: ValuationMatrix, num_of_decimal_digits=3) -> Alloc
 	[[1. 0.]
 	 [0. 1.]]
 	"""
-	v = ValuationMatrix(v)
+	v = valuations.matrix_from(agents)
 	z = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
 	feasibility_constraints = [
 		sum([z[i][o] for i in v.agents()])==1
@@ -61,15 +61,15 @@ def max_product_allocation(v: ValuationMatrix, num_of_decimal_digits=3) -> Alloc
 
 
 
-def product_of_utilities(z:AllocationMatrix, v:ValuationMatrix)->float:
+def product_of_utilities(z:AllocationMatrix, v)->float:
 	"""
 	Calculate the product of utilities of the given allocation, w.r.t. the given valuations.
 
 	>>> alloc1 = AllocationMatrix([[1,0],[0,1]])
-	>>> val1   = ValuationMatrix([[2,3],[4,5]])
+	>>> val1   = valuations.matrix_from([[2,3],[4,5]])
 	>>> np.round(product_of_utilities(alloc1, val1),2)
 	10.0
-	>>> val2   = ValuationMatrix([[3,2],[5,4]])
+	>>> val2   = valuations.matrix_from([[3,2],[5,4]])
 	>>> np.round(product_of_utilities(alloc1, val2),2)
 	12.0
 	>>> alloc2 = AllocationMatrix([[0,0],[0,0]])

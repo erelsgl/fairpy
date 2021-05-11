@@ -13,10 +13,10 @@ import sys
 import cvxpy
 import numpy as np
 
-import fairpy.items.min_sharing_impl.FairAllocationProblem as FairAllocationProblem
+from fairpy.items.min_sharing_impl import FairAllocationProblem
 from fairpy.items.allocations import AllocationMatrix
 from fairpy.items.min_sharing import proportional_allocation_with_min_sharing, envyfree_allocation_with_min_sharing, maxproduct_allocation_with_min_sharing
-from fairpy.valuations import ValuationMatrix
+from fairpy import valuations
 from fairpy.items.max_product import max_product_allocation
 
 from datetime import datetime;  now = datetime.now
@@ -25,9 +25,9 @@ from datetime import datetime;  now = datetime.now
 FairAllocationProblem.logger.addHandler(logging.StreamHandler(sys.stdout))
 FairAllocationProblem.logger.setLevel(logging.INFO)
 
-def demo(title:str, v:ValuationMatrix):
+def demo(title:str, v):
 	print(f"\n## {title} ##")
-	v = ValuationMatrix(v)
+	v = valuations.matrix_from(v)
 	print("v = \n",v)
 	start = now()
 	z = proportional_allocation_with_min_sharing(v).round(3)

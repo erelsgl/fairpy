@@ -3,7 +3,7 @@
 import numpy as np
 from typing import *
 
-from fairpy.valuations import ValuationMatrix
+from fairpy import valuations
 
 class AllocationMatrix:
 	"""
@@ -68,16 +68,16 @@ class AllocationMatrix:
 				self._z[i][j] = fraction
 		return self
 
-	def utility_profile(self, v:ValuationMatrix)->np.array:
+	def utility_profile(self, valuation_matrix)->np.array:
 		"""
 		Returns a vector that maps each agent to its utility (=sum of values) under this allocation.
 
 		>>> z = AllocationMatrix([[.2,.3,.5],[.8,.7,.5]])
-		>>> v = ValuationMatrix([[0.5,1,0],[0.5,0,1]])
+		>>> v = valuations.matrix_from([[0.5,1,0],[0.5,0,1]])
 		>>> z.utility_profile(v)
 		array([0.4, 0.9])
 		"""
-		return np.array([np.dot(v[i],self[i]) for i in self.agents()])
+		return np.array([np.dot(valuation_matrix[i],self[i]) for i in self.agents()])
 
 
 	def __getitem__(self, key):

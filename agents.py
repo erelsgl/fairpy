@@ -47,6 +47,9 @@ class Agent(ABC):
     def total_value(self)->float:
         return self.valuation.total_value()
 
+    def all_items(self):
+        return self.valuation.all_items()
+
 
     def best_index(self, allocation:List[Bundle])->int:
         """

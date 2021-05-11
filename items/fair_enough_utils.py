@@ -14,7 +14,7 @@ Since:  2021-02
 """
 
 import fairpy.items.partitions as partitions
-from fairpy.items.agents import Agent, AdditiveAgent
+from fairpy.agents import Agent, AdditiveAgent
 
 from typing import *
 Item = Any

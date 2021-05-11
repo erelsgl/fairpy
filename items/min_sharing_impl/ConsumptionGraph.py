@@ -8,7 +8,7 @@
 
 
 import itertools
-from fairpy.valuations import ValuationMatrix
+import fairpy.valuations as valuations
 from fairpy.items.allocations import AllocationMatrix
 
 
@@ -63,28 +63,29 @@ class ConsumptionGraph():
                 self.__num_of_sharing = num_of_edges - self.num_of_objects
         return self.__num_of_sharing
 
-    def can_be_proportional(self, valuation_matrix:ValuationMatrix) -> bool:
+    def can_be_proportional(self, valuation_matrix) -> bool:
         """
         Checks if this graph can possibly correspond to a proportional allocation.
         Note: from the graph we can only know a necessary condition:
           if every agent gets all the objects he is connected to, his value should be at least 1/n.
         >>> v = [[1,3,5,2],[4,3,2,4]]
         >>> g = ConsumptionGraph([[0,0,1,1],[1,1,0,1]])
-        >>> g.can_be_proportional(ValuationMatrix(v))
+        >>> g.can_be_proportional(v)
         True
         >>> v = [[11,3],[7,7]]
         >>> g = ConsumptionGraph([[0,1],[1,0]])
-        >>> g.can_be_proportional(ValuationMatrix(v))
+        >>> g.can_be_proportional(v)
         False
         >>> v = [[11,3],[7,7]]
         >>> g = ConsumptionGraph([[1,0],[0,1]])
-        >>> g.can_be_proportional(ValuationMatrix(v))
+        >>> g.can_be_proportional(v)
         True
         >>> v = [[11,3],[7,7],[3,6]]
         >>> g = ConsumptionGraph([[0,0],[0,1],[1,1]])
-        >>> g.can_be_proportional(ValuationMatrix(v))
+        >>> g.can_be_proportional(v)
         False
         """
+        valuation_matrix = valuations.matrix_from(valuation_matrix)
         if self.__calculate_prop == False:
             self.__calculate_prop == True
             flag = True
@@ -97,50 +98,51 @@ class ConsumptionGraph():
         return self.__is_prop
 
 
-    def is_single_proportional(self, matv:ValuationMatrix, x:int)->bool:
+    def is_single_proportional(self, valuation_matrix, x:int)->bool:
         """
         Checks if this graph can possibly correspond to a proportional allocation for a single agent x.
         for specific i and any j : ui(xi)>=1/n(xi)
-        :param matv represents the agents' valuations.
+        :param valuation_matrix represents the agents' valuations.
         :param x the index of agent we check
         :return: bool value if the allocation is proportional
         >>> g = ConsumptionGraph([[1,1,0,0],[1,1,0,1]])
         >>> v = [[1,3,5,2],[4,3,2,4]]
-        >>> g.is_single_proportional(ValuationMatrix(v),0)
+        >>> g.is_single_proportional(v,0)
         False
-        >>> g.is_single_proportional(ValuationMatrix(v),1)
+        >>> g.is_single_proportional(v,1)
         True
         >>> g = ConsumptionGraph([[1, 0.0, 0.0], [0.0, 1, 1], [0.0, 0.0, 0.0]])
         >>> v = [[1,3,5],[4,3,2],[4,3,2]]
-        >>> g.is_single_proportional(ValuationMatrix(v),0)
+        >>> g.is_single_proportional(v,0)
         False
-        >>> g.is_single_proportional(ValuationMatrix(v),1)
+        >>> g.is_single_proportional(v,1)
         True
-        >>> g.is_single_proportional(ValuationMatrix(v),2)
+        >>> g.is_single_proportional(v,2)
         False
         >>> g = ConsumptionGraph([[1, 1, 1], [0.0, 1, 1], [0.0, 0.0, 1]])
         >>> v = [[1,3,5],[4,3,2],[4,3,2]]
-        >>> g.is_single_proportional(ValuationMatrix(v),0)
+        >>> g.is_single_proportional(v,0)
         True
-        >>> g.is_single_proportional(ValuationMatrix(v),1)
+        >>> g.is_single_proportional(v,1)
         True
-        >>> g.is_single_proportional(ValuationMatrix(v),2)
+        >>> g.is_single_proportional(v,2)
         False
         >>> g = ConsumptionGraph([[0.0, 0.0, 1], [0.0, 1, 0.0], [0.0, 0.0, 1]])
         >>> v = [[1,3,5],[4,1,2],[4,3,2]]
-        >>> g.is_single_proportional(ValuationMatrix(v),0)
+        >>> g.is_single_proportional(v,0)
         True
-        >>> g.is_single_proportional(ValuationMatrix(v),1)
+        >>> g.is_single_proportional(v,1)
         False
-        >>> g.is_single_proportional(ValuationMatrix(v),2)
+        >>> g.is_single_proportional(v,2)
         False
         """
+        valuation_matrix = valuations.matrix_from(valuation_matrix)
         sum = 0
         part = 0
         for i in range(0, self.num_of_objects):
-            sum += matv[x][i]
-            part += matv[x][i] * self.__graph[x][i]
-        sum = sum / matv.num_of_agents
+            sum += valuation_matrix[x][i]
+            part += valuation_matrix[x][i] * self.__graph[x][i]
+        sum = sum / valuation_matrix.num_of_agents
         return part >= sum
 
     def generate_all_codes(self):
