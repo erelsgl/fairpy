@@ -8,7 +8,7 @@ Since:  2021-04
 
 from fairpy.valuations import ValuationMatrix
 from fairpy.allocations import Allocation
-from fairpy.indivisible.bag_filling import Bag, SequentialAllocation
+from fairpy.items.bag_filling import Bag, SequentialAllocation
 
 from typing import List
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 	# logger.addHandler(logging.StreamHandler(sys.stdout))
 	# logger.setLevel(logging.INFO)
 
-	# import fairpy.indivisible.bag_filling as bag_filling
+	# import fairpy.items.bag_filling as bag_filling
 	# bag_filling.logger.addHandler(logging.StreamHandler(sys.stdout))
 	# bag_filling.logger.setLevel(logging.INFO)
 	

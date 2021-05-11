@@ -10,10 +10,10 @@
 import numpy as np
 import datetime
 
-from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
-from fairpy.divisible.min_sharing_impl.FairEnvyFreeAllocationProblem import FairEnvyFreeAllocationProblem
-from fairpy.divisible.min_sharing_impl.FairProportionalAllocationProblem import FairProportionalAllocationProblem
-from fairpy.divisible.min_sharing_impl.GraphGenerator import GraphGenerator
+from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
+from fairpy.items.min_sharing_impl.FairEnvyFreeAllocationProblem import FairEnvyFreeAllocationProblem
+from fairpy.items.min_sharing_impl.FairProportionalAllocationProblem import FairProportionalAllocationProblem
+from fairpy.items.min_sharing_impl.GraphGenerator import GraphGenerator
 
 
 def is_envy_free(v,z):

@@ -16,7 +16,7 @@ from dicttools import stringify
 import math, itertools
 from fractions import Fraction
 
-import fairpy.indivisible.partitions as partitions
+import fairpy.items.partitions as partitions
 
 from typing import *
 Item = Any

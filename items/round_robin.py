@@ -9,7 +9,7 @@ Since:  2020-07
 """
 
 from fairpy.allocations import Allocation
-from fairpy.indivisible.agents import *
+from fairpy.items.agents import *
 
 import logging
 logger = logging.getLogger(__name__)

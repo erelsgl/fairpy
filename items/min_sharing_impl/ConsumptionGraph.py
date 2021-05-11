@@ -9,7 +9,7 @@
 
 import itertools
 from fairpy.valuations import ValuationMatrix
-from fairpy.divisible.allocations import AllocationMatrix
+from fairpy.items.allocations import AllocationMatrix
 
 
 class ConsumptionGraph():

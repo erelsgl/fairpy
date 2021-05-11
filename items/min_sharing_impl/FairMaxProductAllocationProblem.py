@@ -9,11 +9,11 @@
 import cvxpy
 
 from fairpy.valuations import ValuationMatrix
-from fairpy.divisible.allocations import AllocationMatrix
-from fairpy.divisible.max_product import max_product_allocation
+from fairpy.items.allocations import AllocationMatrix
+from fairpy.items.max_product import max_product_allocation
 
-from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
-from fairpy.divisible.min_sharing_impl.FairThresholdAllocationProblem import FairThresholdAllocationProblem
+from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
+from fairpy.items.min_sharing_impl.FairThresholdAllocationProblem import FairThresholdAllocationProblem
 
 
 from cvxpy.constraints.constraint import Constraint

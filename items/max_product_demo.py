@@ -8,9 +8,9 @@ Since:  2021-03
 """
 
 import numpy as np, cvxpy
-from fairpy.divisible.max_product import *
+from fairpy.items.max_product import *
 from fairpy.valuations import ValuationMatrix
-from fairpy.divisible.allocations import AllocationMatrix
+from fairpy.items.allocations import AllocationMatrix
 
 print("\nThree identical goods:")
 v = ValuationMatrix([ [3,3,3] , [2,2,2] , [1,1,1] ])

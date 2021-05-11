@@ -7,7 +7,7 @@
 """
 
 import doctest as doctest
-from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
+from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
 
 
 

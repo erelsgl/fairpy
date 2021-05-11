@@ -9,7 +9,7 @@ Programmer: Erel Segal-Halevi
 Since: 2021-04
 """
 
-from fairpy.indivisible.agents import AdditiveAgent
+from fairpy.items.agents import AdditiveAgent
 from typing import List, Any
 import numpy as np
 

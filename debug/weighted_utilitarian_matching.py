@@ -16,7 +16,7 @@ IDEA: find a utilitarian (=maximum weight) matching in each category. This guara
 * Is there a vector of weights for which the utilitarian matching is EF1?
 """
 
-from fairpy.indivisible.utilitarian_matching import utilitarian_matching
+from fairpy.items.utilitarian_matching import utilitarian_matching
 from fairpy.allocations import Allocation
 from typing import List,Any,Dict
 

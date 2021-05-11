@@ -14,11 +14,11 @@ import datetime, cvxpy, numpy as np
 from time_limit import time_limit, TimeoutException
 
 from fairpy.valuations import ValuationMatrix
-from fairpy.divisible.allocations import AllocationMatrix
+from fairpy.items.allocations import AllocationMatrix
 
-from fairpy.divisible.min_sharing_impl.FairProportionalAllocationProblem import FairProportionalAllocationProblem
-from fairpy.divisible.min_sharing_impl.FairEnvyFreeAllocationProblem import FairEnvyFreeAllocationProblem
-from fairpy.divisible.min_sharing_impl.FairMaxProductAllocationProblem import FairMaxProductAllocationProblem
+from fairpy.items.min_sharing_impl.FairProportionalAllocationProblem import FairProportionalAllocationProblem
+from fairpy.items.min_sharing_impl.FairEnvyFreeAllocationProblem import FairEnvyFreeAllocationProblem
+from fairpy.items.min_sharing_impl.FairMaxProductAllocationProblem import FairMaxProductAllocationProblem
 
 
 def proportional_allocation_with_min_sharing(valuation_matrix: ValuationMatrix, num_of_decimal_digits=3)->AllocationMatrix:

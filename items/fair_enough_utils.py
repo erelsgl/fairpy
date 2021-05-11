@@ -13,8 +13,8 @@ Programmer: Shai Aharon
 Since:  2021-02
 """
 
-import fairpy.indivisible.partitions as partitions
-from fairpy.indivisible.agents import Agent, AdditiveAgent
+import fairpy.items.partitions as partitions
+from fairpy.items.agents import Agent, AdditiveAgent
 
 from typing import *
 Item = Any

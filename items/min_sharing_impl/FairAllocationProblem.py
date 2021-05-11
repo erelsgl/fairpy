@@ -8,12 +8,12 @@
 
 
 from fairpy.valuations import ValuationMatrix
-from fairpy.divisible.allocations import AllocationMatrix
+from fairpy.items.allocations import AllocationMatrix
 
-from fairpy.divisible.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
-from fairpy.divisible.min_sharing_impl.GraphGenerator import GraphGenerator
+from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
+from fairpy.items.min_sharing_impl.GraphGenerator import GraphGenerator
 
-from fairpy.divisible.min_sharing_impl.time_limit import time_limit, TimeoutException
+from fairpy.items.min_sharing_impl.time_limit import time_limit, TimeoutException
 
 from abc import ABC, abstractmethod
 import datetime, cvxpy

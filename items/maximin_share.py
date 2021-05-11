@@ -6,7 +6,7 @@ Author: Erel Segal-Halevi
 Since : 2021-04
 """
 
-from fairpy.indivisible import partitions 
+from fairpy.items import partitions 
 import pulp
 import cvxpy
 import numbers

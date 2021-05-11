@@ -14,9 +14,9 @@ Since:  2021-02
 """
 
 from fairpy.allocations import Allocation
-import fairpy.indivisible.partitions as partitions
+import fairpy.items.partitions as partitions
 
-from fairpy.indivisible.fair_enough_utils import *
+from fairpy.items.fair_enough_utils import *
 
 import networkx as nx
 

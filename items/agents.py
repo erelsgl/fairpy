@@ -7,7 +7,7 @@ Programmer: Erel Segal-Halevi
 Since: 2020-04
 """
 
-from fairpy.indivisible.valuations import *
+from fairpy.items.valuations import *
 
 from abc import ABC, abstractmethod
 from typing import *

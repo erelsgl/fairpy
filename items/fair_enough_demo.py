@@ -7,8 +7,8 @@ Programmer: Shai Aharon
 Since: 2021-02
 """
 
-from fairpy.indivisible.agents import AdditiveAgent
-from fairpy.indivisible import fair_enough
+from fairpy.items.agents import AdditiveAgent
+from fairpy.items import fair_enough
 
 import logging
 import sys

@@ -7,8 +7,8 @@ Programmer: Erel Segal-Halevi
 Since: 2020-11
 """
 
-from fairpy.indivisible.agents import *
-from fairpy.indivisible import round_robin
+from fairpy.items.agents import *
+from fairpy.items import round_robin
 
 import logging, sys
 round_robin.logger.addHandler(logging.StreamHandler(sys.stdout))
