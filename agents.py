@@ -300,17 +300,17 @@ class AdditiveAgent(Agent):
         Construct a list of additive agents from various input formats.
 
         >>> ### From dict of dicts:
-        >>> the_list = AdditiveAgent.list_from({"Alice":{"x":1,"y":2}, "Bob":{"x":3,"y":4}})
+        >>> the_list = AdditiveAgent.list_from({"Alice":{"x":1,"y":2}, "George":{"x":3,"y":4}})
         >>> the_list[0]
         Alice is an agent with a Additive valuation: x=1 y=2.
         >>> the_list[1].name()
-        'Bob'
+        'George'
         >>> the_list[1].value({"x","y"})
         7
         >>> ### From dict of lists:
-        >>> the_list = AdditiveAgent.list_from({"Alice":[1,2], "Bob":[3,4]})
+        >>> the_list = AdditiveAgent.list_from({"Alice":[1,2], "George":[3,4]})
         >>> the_list[1]
-        Bob is an agent with a Additive valuation: v0=3 v1=4.
+        George is an agent with a Additive valuation: v0=3 v1=4.
         >>> ### From list of dicts:
         >>> the_list = AdditiveAgent.list_from([{"x":1,"y":2}, {"x":3,"y":4}])
         >>> the_list[0]
@@ -397,15 +397,16 @@ def _representative_item(input:Any):
         raise ValueError(f"input should be a list or a dict, but it is {type(input)}")
 
 
-def agents_from(input:Any):
+def agents_from(input:Any)->List[Agent]:
     """
     Attempts to construct a list of agents from various input formats.
+    The returned value is a list of Agent objects.
 
     >>> ### From dict of dicts:
-    >>> agents_from({"Alice":{"x":1,"y":2}, "Bob":{"x":3,"y":4}})[0]
+    >>> agents_from({"Alice":{"x":1,"y":2}, "George":{"x":3,"y":4}})[0]
     Alice is an agent with a Additive valuation: x=1 y=2.
-    >>> agents_from({"Alice":[1,2], "Bob":[3,4]})[1]
-    Bob is an agent with a Additive valuation: v0=3 v1=4.
+    >>> agents_from({"Alice":[1,2], "George":[3,4]})[1]
+    George is an agent with a Additive valuation: v0=3 v1=4.
     >>> ### From list of dicts:
     >>> agents_from([{"x":1,"y":2}, {"x":3,"y":4}])[0]
     Agent #0 is an agent with a Additive valuation: x=1 y=2.
@@ -431,6 +432,50 @@ def agents_from(input:Any):
         ]
     else:
         return AdditiveAgent.list_from(input)
+
+
+def agent_names_from(input:Any)->List[str]:
+    """
+    Attempts to extract a list of agent names from various input formats.
+    The returned value is a list of strings.
+
+    >>> ### From dict:
+    >>> agent_names_from({"Alice":{"x":1,"y":2}, "George":{"x":3,"y":4}})
+    ['Alice', 'George']
+    >>> ### From list of dicts:
+    >>> agent_names_from([{"x":1,"y":2}, {"x":3,"y":4}])
+    ['Agent #0', 'Agent #1']
+    >>> ### From list of lists:
+    >>> agent_names_from([[1,2],[3,4]])
+    ['Agent #0', 'Agent #1']
+    >>> ### From list of valuations:
+    >>> agent_names_from([AdditiveValuation([1,2]), BinaryValuation("xy")])
+    ['Agent #0', 'Agent #1']
+    >>> ### From list of agents:
+    >>> agent_names_from([AdditiveAgent([1,2], name="Alice"), BinaryAgent("xy", name="George")])
+    ['Alice', 'George']
+    >>> d = {"Alice": 123, "George": 456}
+    >>> agent_names_from(d.keys())
+    ['Alice', 'George']
+    """
+    if hasattr(input, "keys"):
+        return sorted(input.keys())
+    elif hasattr(input, 'num_of_agents'):
+        num_of_agents = input.num_of_agents
+        return [f"Agent #{i}" for i in range(num_of_agents)]
+
+    if len(input)==0:
+        return []
+
+    input_0 = next(iter(input))
+    if hasattr(input_0, "name"):  
+        return [agent.name() for agent in input]
+    elif isinstance(input_0, int):
+        return [f"Agent #{index}" for index in input]
+    elif isinstance(input_0, str):
+        return list(input)  # convert to a list; keep the original order
+    else:
+        return [f"Agent #{i}" for i in range(len(input))]
         
 
 if __name__ == "__main__":

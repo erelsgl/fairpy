@@ -428,7 +428,9 @@ class AdditiveValuation(Valuation):
         """
         Calculates the agent's value for the given good or set of goods.
         """
-        if isinstance(bundle, str):
+        if bundle is None:
+            return 0
+        elif isinstance(bundle, str):
             if bundle in self.map_good_to_value:
                 return self.map_good_to_value[bundle]
             else:

@@ -341,7 +341,7 @@ def efCheck(allocation:Allocation, epsilon:float)->str:
     o = (1/(3+(9*epsilon)/len(agents)))
     for i,a in zip(range(len(agents)),agents):
         aPiece = allocation[i][0]
-        for piece in allocation.get_bundles():
+        for piece in allocation:
             if a.eval(aPiece[0],aPiece[1])<o*a.eval(piece[0][0],piece[0][1]):
                 return "The Allocation isn't (3 + 9ε/n)approximately envy-free allocation"
     return "The Allocation is (3 + 9ε/n)approximately envy-free allocation"

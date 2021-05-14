@@ -10,12 +10,12 @@ Since: 2020-1
 
 from fairpy.cake.agents import *
 from fairpy.cake.fe_cake_division_connected_pieces import ALG ,efCheck
-from fairpy.cake import fe_cake_division_connected_pieces
+import fairpy.cake.fe_cake_division_connected_pieces
 
 import logging, sys
 
-fe_cake_division_connected_pieces.logger.addHandler(logging.StreamHandler(sys.stdout))
-fe_cake_division_connected_pieces.logger.setLevel(logging.INFO)
+# fe_cake_division_connected_pieces.logger.addHandler(logging.StreamHandler(sys.stdout))
+# fe_cake_division_connected_pieces.logger.setLevel(logging.INFO)
 
 Alice = PiecewiseConstantAgent([3, 6, 3], name="Alice")
 George = PiecewiseConstantAgent([0, 2, 4, 6], name="George")

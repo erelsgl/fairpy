@@ -16,8 +16,9 @@ Since : 2021-04
 
 import networkx
 from typing import *
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from dicttools import stringify
+from fairpy.allocations import Allocation
 
 import logging
 logger = logging.getLogger(__name__)
@@ -69,17 +70,17 @@ def matching_to_allocation(matching: list, agent_names:list, agent_weights: Dict
     :return two maps: the first maps an agent to the (single) item he got, and the second maps an item to the list of agents who got units of that item.
 
     >>> matching = [("a", "xxx"), ("b", "yyy"), ("c", "yyy")]
-    >>> (map_agent_to_matched_good, map_good_to_matched_agents) = matching_to_allocation(matching, ["a","b","c"])
-    >>> stringify(map_agent_to_matched_good)
-    '{a:xxx, b:yyy, c:yyy}'
-    >>> stringify(map_good_to_matched_agents)
+    >>> alloc = matching_to_allocation(matching, ["a","b","c"])
+    >>> stringify(alloc.map_agent_to_bundle())
+    "{a:['xxx'], b:['yyy'], c:['yyy']}"
+    >>> stringify(alloc.map_item_to_agents())
     "{xxx:['a'], yyy:['b', 'c']}"
     >>> matching = [("a", "xxx"), ("b", "yyy"), ("c", "yyy")]
-    >>> (map_agent_to_matched_good, map_good_to_matched_agents) = matching_to_allocation(matching, ["a","b","c"], agent_weights={"a":1, "b":10, "c":100})
-    >>> stringify(map_agent_to_matched_good)
-    '{a:xxx, b:yyy, c:yyy}'
-    >>> stringify(map_good_to_matched_agents)
-    "{xxx:['a'], yyy:['c', 'b']}"
+    >>> alloc = matching_to_allocation(matching, ["a","b","c"], agent_weights={"a":1, "b":10, "c":100})
+    >>> stringify(alloc.map_agent_to_bundle())
+    "{a:['xxx'], b:['yyy'], c:['yyy']}"
+    >>> stringify(alloc.map_item_to_agents())
+    "{xxx:['a'], yyy:['b', 'c']}"
     """
     map_agent_to_matched_good = {}
     map_good_to_matched_agents = defaultdict(list)
@@ -98,7 +99,8 @@ def matching_to_allocation(matching: list, agent_names:list, agent_weights: Dict
         winners.sort(key=sortkey)
         if agent_weights is not None:
             winners.sort(key=lambda agent: -agent_weights.get(agent, 1))
-    return (map_agent_to_matched_good, map_good_to_matched_agents)
+    map_agent_to_bundle = {agent:[good] for agent,good in map_agent_to_matched_good.items()}
+    return Allocation(agent_names, map_agent_to_bundle)
 
 
 
@@ -115,21 +117,25 @@ def utilitarian_matching(agents: AgentsDict, agent_weights: Dict[str, int]=None,
     :return two maps: the first maps an agent to the (single) item he got, and the second maps an item to the list of agents who got units of that item.
 
     >>> prefs = {"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}}
-    >>> (map_agent_to_matched_good, map_good_to_matched_agent) = utilitarian_matching(prefs)
-    >>> stringify(map_agent_to_matched_good)
-    '{avi:x, beni:y}'
-    >>> stringify(map_good_to_matched_agent)
+    >>> alloc = utilitarian_matching(prefs)
+    >>> stringify(alloc.map_agent_to_bundle())
+    "{avi:['x'], beni:['y']}"
+    >>> stringify(alloc.map_item_to_agents())
     "{x:['avi'], y:['beni']}"
     >>> prefs = {"avi": {"x":5, "y": -2}, "beni": {"x":2, "y":-3}}
-    >>> stringify(utilitarian_matching(prefs, maxcardinality=True)[0])
-    '{avi:x, beni:y}'
-    >>> stringify(utilitarian_matching(prefs, maxcardinality=False)[0])
-    '{avi:x}'
+    >>> utilitarian_matching(prefs, maxcardinality=True)
+    avi gets {x} with value nan.
+    beni gets {y} with value nan.
+    <BLANKLINE>
+    >>> utilitarian_matching(prefs, maxcardinality=False)
+    avi gets {x} with value nan.
+    beni gets None with value nan.
+    <BLANKLINE>
     >>> prefs = {"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}, "gadi": {"x":3, "y":2}}
-    >>> (map_agent_to_matched_good, map_good_to_matched_agents) = utilitarian_matching(prefs, item_capacities={"x":2, "y":2})
-    >>> stringify(map_agent_to_matched_good)
-    '{avi:x, beni:y, gadi:x}'
-    >>> stringify(map_good_to_matched_agents)
+    >>> alloc = utilitarian_matching(prefs, item_capacities={"x":2, "y":2})
+    >>> stringify(alloc.map_agent_to_bundle())
+    "{avi:['x'], beni:['y'], gadi:['x']}"
+    >>> stringify(alloc.map_item_to_agents())
     "{x:['avi', 'gadi'], y:['beni']}"
     """
     graph = instance_to_graph(agents, agent_weights=agent_weights, item_capacities=item_capacities)
