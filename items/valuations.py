@@ -16,7 +16,7 @@ from dicttools import stringify
 import math, itertools
 from fractions import Fraction
 
-import fairpy.items.partitions as partitions
+from fairpy.items import partitions  # Works in Python 3.8
 
 from typing import *
 Item = Any
@@ -403,7 +403,8 @@ class AdditiveValuation(Valuation):
     11
     >>> a.value_1_of_c_MMS(c=2)
     33
-
+    >>> a.all_items()
+    {0, 1, 2, 3}
     """
     def __init__(self, map_good_to_value, name:str=None, duplicity:int=1):
         """
@@ -414,14 +415,18 @@ class AdditiveValuation(Valuation):
         if isinstance(map_good_to_value, AdditiveValuation):
             map_good_to_value = map_good_to_value.map_good_to_value
             desired_items = map_good_to_value.desired_items
+            all_items = map_good_to_value._all_items
         elif isinstance(map_good_to_value, dict):
-            desired_items = set([g for g,v in map_good_to_value.items() if v>0])
+            all_items = map_good_to_value.keys()
+            desired_items = set([g for g in all_items if map_good_to_value[g]>0])
         elif isinstance(map_good_to_value, list):
-            desired_items = set(range(len(map_good_to_value)))
+            all_items =  set(range(len(map_good_to_value)))
+            desired_items = set([g for g in all_items if map_good_to_value[g]>0])
         else:
             raise ValueError(f"Input to AdditiveValuation should be a dict or a list, but it is {type(map_good_to_value)}")
 
         self.map_good_to_value = map_good_to_value
+        self._all_items = all_items
         super().__init__(desired_items)
 
     def value(self, bundle:Bundle)->int:
@@ -441,7 +446,7 @@ class AdditiveValuation(Valuation):
             return self.map_good_to_value[bundle]
 
     def all_items(self):
-        return self.map_good_to_value.keys()
+        return self._all_items
 
     def value_except_best_c_goods(self, bundle:Bundle, c:int=1)->int:
         """

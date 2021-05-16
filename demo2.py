@@ -14,16 +14,16 @@ agents = {
     "Avram": {"green": 8, "red":7, "blue": 6, "yellow": 5},
     "Sarah": {"green": 12, "red":8, "blue": 4, "yellow": 2} }
 
-# print(fairpy.items.round_robin(agents))
-# print(fairpy.items.round_robin(agents, agent_order=[1,0], items={"green", "red", "yellow"}))
+print(fairpy.items.round_robin(agents))
+print(fairpy.items.round_robin(agents, agent_order=[1,0], items={"green", "red", "yellow"}))
 
-# print(fairpy.items.max_product_allocation(agents))
-# print(fairpy.items.bidirectional_bag_filling(agents, thresholds=[13,12]))
+print(fairpy.items.max_product_allocation(agents))
+print(fairpy.items.bidirectional_bag_filling(agents, thresholds=[13,12]))
 print(fairpy.items.utilitarian_matching(agents))
 
 
-# import sys, logging
-# fairpy.items.round_robin.logger.addHandler(logging.StreamHandler(sys.stdout))
-# fairpy.items.round_robin.logger.setLevel(logging.INFO)
-# print(fairpy.items.round_robin(agents))
+import sys, logging
+fairpy.items.round_robin.logger.addHandler(logging.StreamHandler(sys.stdout))
+fairpy.items.round_robin.logger.setLevel(logging.INFO)
+print(fairpy.items.round_robin(agents))
 
