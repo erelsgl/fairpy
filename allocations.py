@@ -65,15 +65,17 @@ class Allocation:
     >>> stringify(a.map_item_to_agents())
     "{x:['Alice'], z:['Alice']}"
     >>> ### Initialize from list of agents and a dict of bundles:
-    >>> a = Allocation(agents=["Alice","George"], bundles =  {"Alice":["x","z"], "George":["y"]})
+    >>> a = Allocation(agents=["Alice","George"], bundles =  {"Alice":["x","z"], "George":["x", "y"]})
     >>> a
     Alice gets {x,z} with value nan.
-    George gets {y} with value nan.
+    George gets {x,y} with value nan.
     <BLANKLINE>
     >>> stringify(a.map_item_to_agents())
-    "{x:['Alice'], y:['George'], z:['Alice']}"
+    "{x:['Alice', 'George'], y:['George'], z:['Alice']}"
+    >>> stringify(a.map_item_to_agents(sortkey=lambda name: -a.map_agent_to_name.index(name)))
+    "{x:['George', 'Alice'], y:['George'], z:['Alice']}"
     >>> stringify(a.map_agent_to_bundle())
-    "{Alice:['x', 'z'], George:['y']}"
+    "{Alice:['x', 'z'], George:['x', 'y']}"
     >>> from fairpy.valuations import ValuationMatrix
     >>> ### Initialize from valuation matrix and list of bundles:
     >>> a = Allocation(agents=ValuationMatrix([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=[[0,4],None,[1,2]])
@@ -178,7 +180,7 @@ class Allocation:
             for i_agent in range(self.num_of_agents)
         }
     
-    def map_item_to_agents(self)->Dict[str,Any]:
+    def map_item_to_agents(self, sortkey=None)->Dict[str,Any]:
         """
         Return a mapping from each item to the agent/s who receive this item (may be more than one if there are multiple copies)
         """
@@ -188,6 +190,9 @@ class Allocation:
                 continue
             for item in bundle:
                 result[item].append(self.map_agent_to_name[i_agent])
+        if sortkey is not None:
+            for item,winners in result.items():
+                winners.sort(key=sortkey)
         return result
 
 

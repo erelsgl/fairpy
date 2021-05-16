@@ -60,30 +60,25 @@ def instance_to_graph(agents: AgentsDict,  agent_weights: Dict[str, int]=None, i
     return graph
 
 
-def matching_to_allocation(matching: list, agent_names:list, agent_weights: Dict[str, int]=None, sortkey=None)->Tuple[Dict[str,str], Dict[str,List[str]]]:
+def matching_to_allocation(matching: list, agent_names:list, agent_weights: Dict[str, int]=None)->Dict[str,str]:
     """
-    Converts a one-to-many matching in a bipartite graph (output of networkx) to an allocation (given as two equivalent maps).
+    Converts a one-to-many matching in a bipartite graph (output of networkx) to an allocation (given as a dict)
     :param matching: a list of pairs (agent,item).
     :param agent_weights [optional]: maps each agent to an integer priority. Used for sorting the agents in the list for each item.
-    :param sortkey [optional]: a key for additional sorting of the agents in the list for each item.
 
-    :return two maps: the first maps an agent to the (single) item he got, and the second maps an item to the list of agents who got units of that item.
+    :return a dict, mapping an agent to its bundle.
 
     >>> matching = [("a", "xxx"), ("b", "yyy"), ("c", "yyy")]
-    >>> alloc = matching_to_allocation(matching, ["a","b","c"])
-    >>> stringify(alloc.map_agent_to_bundle())
+    >>> map_agent_to_bundle = matching_to_allocation(matching, ["a","b","c"])
+    >>> stringify(map_agent_to_bundle)
     "{a:['xxx'], b:['yyy'], c:['yyy']}"
-    >>> stringify(alloc.map_item_to_agents())
-    "{xxx:['a'], yyy:['b', 'c']}"
     >>> matching = [("a", "xxx"), ("b", "yyy"), ("c", "yyy")]
-    >>> alloc = matching_to_allocation(matching, ["a","b","c"], agent_weights={"a":1, "b":10, "c":100})
-    >>> stringify(alloc.map_agent_to_bundle())
+    >>> agent_weights = {"a":1, "b":10, "c":100}
+    >>> map_agent_to_bundle = matching_to_allocation(matching, ["a","b","c"], agent_weights=agent_weights)
+    >>> stringify(map_agent_to_bundle)
     "{a:['xxx'], b:['yyy'], c:['yyy']}"
-    >>> stringify(alloc.map_item_to_agents())
-    "{xxx:['a'], yyy:['b', 'c']}"
     """
     map_agent_to_matched_good = {}
-    map_good_to_matched_agents = defaultdict(list)
     for edge in matching:
         if edge[0] in agent_names:  
             (agent,good)=edge
@@ -93,28 +88,20 @@ def matching_to_allocation(matching: list, agent_names:list, agent_weights: Dict
             raise ValueError(f"Cannot find an agent in {edge}")
         if isinstance(good, tuple):  # when there are several units of the same good...
             good = good[0]           # ... 0 is the good, 1 is the unit-number. 
-        map_good_to_matched_agents[good].append(agent)
         map_agent_to_matched_good[agent] = good
-    for good,winners in map_good_to_matched_agents.items():
-        winners.sort(key=sortkey)
-        if agent_weights is not None:
-            winners.sort(key=lambda agent: -agent_weights.get(agent, 1))
     map_agent_to_bundle = {agent:[good] for agent,good in map_agent_to_matched_good.items()}
-    return Allocation(agent_names, map_agent_to_bundle)
+    return map_agent_to_bundle
+    
 
 
 
-
-def utilitarian_matching(agents: AgentsDict, agent_weights: Dict[str, int]=None, item_capacities: Dict[str,int]=None, sortkey=None, maxcardinality=True):
+def utilitarian_matching(agents: AgentsDict, agent_weights: Dict[str, int]=None, item_capacities: Dict[str,int]=None, maxcardinality=True):
     """
     Finds a maximum-weight matching with the given preferences, agent_weights and capacities.
     :param agents: maps each agent to a map from an item's name to its value for the agent.
     :param agent_weights [optional]: maps each agent to an integer priority. The weights of each agent are multiplied by WEIGHT_BASE^priority.
     :param item_capacities [optional]: maps each item to its number of units. Default is 1.
-    :param sortkey [optional]: a key for additional sorting of the agents in the list for each item.
     :param maxcardinality: True to require maximum weight subject to maximum cardinality. False to require only maximum weight.
-
-    :return two maps: the first maps an agent to the (single) item he got, and the second maps an item to the list of agents who got units of that item.
 
     >>> prefs = {"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}}
     >>> alloc = utilitarian_matching(prefs)
@@ -124,12 +111,12 @@ def utilitarian_matching(agents: AgentsDict, agent_weights: Dict[str, int]=None,
     "{x:['avi'], y:['beni']}"
     >>> prefs = {"avi": {"x":5, "y": -2}, "beni": {"x":2, "y":-3}}
     >>> utilitarian_matching(prefs, maxcardinality=True)
-    avi gets {x} with value nan.
-    beni gets {y} with value nan.
+    avi gets {x} with value 5.
+    beni gets {y} with value -3.
     <BLANKLINE>
     >>> utilitarian_matching(prefs, maxcardinality=False)
-    avi gets {x} with value nan.
-    beni gets None with value nan.
+    avi gets {x} with value 5.
+    beni gets None with value 0.
     <BLANKLINE>
     >>> prefs = {"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}, "gadi": {"x":3, "y":2}}
     >>> alloc = utilitarian_matching(prefs, item_capacities={"x":2, "y":2})
@@ -137,12 +124,16 @@ def utilitarian_matching(agents: AgentsDict, agent_weights: Dict[str, int]=None,
     "{avi:['x'], beni:['y'], gadi:['x']}"
     >>> stringify(alloc.map_item_to_agents())
     "{x:['avi', 'gadi'], y:['beni']}"
+    >>> agent_weights = {"avi":1, "gadi":10, "beni":100}
+    >>> stringify(alloc.map_item_to_agents(sortkey=lambda name: -agent_weights[name]))
+    "{x:['gadi', 'avi'], y:['beni']}"
     """
     graph = instance_to_graph(agents, agent_weights=agent_weights, item_capacities=item_capacities)
     logger.info("Graph edges: %s", list(graph.edges.data()))
     matching = networkx.max_weight_matching(graph, maxcardinality=maxcardinality)
     logger.info("Matching: %s", matching)
-    return matching_to_allocation(matching, agent_names=agents.keys(), agent_weights=agent_weights, sortkey=sortkey)
+    map_agent_to_bundle = matching_to_allocation(matching, agent_names=agents.keys(), agent_weights=agent_weights)
+    return Allocation(agents, map_agent_to_bundle)
 
 
 if __name__ == "__main__":
