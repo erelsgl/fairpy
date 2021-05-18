@@ -54,17 +54,26 @@ def iterated_maximum_matching(agents: AgentsDict, agent_weights: Dict[str, int]=
     "{avi:['x', 'y'], beni:['w', 'z']}"
     >>> stringify(alloc.map_item_to_agents())
     "{w:['beni'], x:['avi'], y:['avi'], z:['beni']}"
+
+    >>> prefs = [[5,4,3,2],[2,3,4,5]]
+    >>> alloc = iterated_maximum_matching(prefs)
+    >>> stringify(alloc.map_agent_to_bundle())
+    '{Agent #0:[0, 1], Agent #1:[3, 2]}'
+    >>> stringify(alloc.map_item_to_agents())
+    "{0:['Agent #0'], 1:['Agent #0'], 2:['Agent #1'], 3:['Agent #1']}"
     """
     agents_list = fairpy.agents_from(agents)
+    agent_names = fairpy.agent_names_from(agents)
+    all_items = agents_list[0].all_items()
     if item_capacities is None:
-        item_capacities = {item:1 for item in agents_list[0].all_items()}
+        item_capacities = {item:1 for item in all_items}
     map_agent_to_final_bundle = {agent.name(): [] for agent in agents_list}
     while len(item_capacities)>0:
         graph = instance_to_graph(agents, agent_weights=agent_weights, item_capacities=item_capacities)
         logger.info("Graph edges: %s", list(graph.edges.data()))
         matching = networkx.max_weight_matching(graph, maxcardinality=False)
         logger.info("Matching: %s", matching)
-        map_agent_to_bundle = matching_to_allocation(matching, agent_names=agents.keys(), agent_weights=agent_weights)
+        map_agent_to_bundle = matching_to_allocation(matching, agent_names=agent_names)
         for agent,bundle in map_agent_to_bundle.items():
             map_agent_to_final_bundle[agent] += bundle
         allocated_items = sum([bundle for bundle in map_agent_to_bundle.values()], [])
@@ -73,9 +82,9 @@ def iterated_maximum_matching(agents: AgentsDict, agent_weights: Dict[str, int]=
 
 
 if __name__ == "__main__":
-    import sys
-    logger.addHandler(logging.StreamHandler(sys.stdout))
-    logger.setLevel(logging.INFO)
+    # import sys
+    # logger.addHandler(logging.StreamHandler(sys.stdout))
+    # logger.setLevel(logging.INFO)
 
     import doctest
     (failures, tests) = doctest.testmod(report=True,optionflags=doctest.NORMALIZE_WHITESPACE)

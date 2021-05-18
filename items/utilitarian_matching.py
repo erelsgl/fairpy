@@ -16,8 +16,8 @@ Since : 2021-04
 
 import networkx
 from typing import *
-from collections import defaultdict
 from dicttools import stringify
+import fairpy
 from fairpy.allocations import Allocation
 
 import logging
@@ -42,29 +42,35 @@ def instance_to_graph(agents: AgentsDict,  agent_weights: Dict[str, int]=None, i
     >>> graph = instance_to_graph(prefs, agent_weights={"avi":1, "beni":100}) 
     >>> list(graph.edges.data())
     [('avi', 'x', {'weight': 5}), ('avi', 'y', {'weight': 4}), ('x', 'beni', {'weight': 200}), ('y', 'beni', {'weight': 300})]
+    >>> prefs = [[5,4],[2,3]]
+    >>> graph = instance_to_graph(prefs) 
+    >>> list(graph.edges.data())
+    [('Agent #0', 0, {'weight': 5}), ('Agent #0', 1, {'weight': 4}), (0, 'Agent #1', {'weight': 2}), (1, 'Agent #1', {'weight': 3})]
     """
+    agents_list = fairpy.agents_from(agents)
     graph = networkx.Graph()
-    for agent,agentprefs in agents.items():
-        for good,value in agentprefs.items():
-            weight=value
+    for agent in agents_list:
+        agent_name = agent.name()
+        for item in agent.all_items():
+            weight = agent.value(item)
             if agent_weights is not None:
-                weight *= agent_weights.get(agent,1)
+                weight *= agent_weights.get(agent_name,1)
             num_of_units = 1 # default capacity
             if item_capacities is not None:
-                num_of_units = item_capacities.get(good, 0)  # get the capacity from the map. If it is not in the map, the capacity is 0.
+                num_of_units = item_capacities.get(item, 0)  # get the capacity from the map. If it is not in the map, the capacity is 0.
             if num_of_units==1:
-                graph.add_edge(agent, good, weight=weight)
+                graph.add_edge(agent_name, item, weight=weight)
             else:
                 for c in range(num_of_units):
-                    graph.add_edge(agent, (good,c), weight=weight)
+                    graph.add_edge(agent_name, (item,c), weight=weight)
     return graph
 
 
-def matching_to_allocation(matching: list, agent_names:list, agent_weights: Dict[str, int]=None)->Dict[str,str]:
+def matching_to_allocation(matching: list, agent_names:list)->Dict[str,str]:
     """
     Converts a one-to-many matching in a bipartite graph (output of networkx) to an allocation (given as a dict)
     :param matching: a list of pairs (agent,item).
-    :param agent_weights [optional]: maps each agent to an integer priority. Used for sorting the agents in the list for each item.
+    :param agent_names: the names of the agents. Used for distinguishing, in each edge, between the agent and the item (since the edges are not ordered).
 
     :return a dict, mapping an agent to its bundle.
 
@@ -73,8 +79,7 @@ def matching_to_allocation(matching: list, agent_names:list, agent_weights: Dict
     >>> stringify(map_agent_to_bundle)
     "{a:['xxx'], b:['yyy'], c:['yyy']}"
     >>> matching = [("a", "xxx"), ("b", "yyy"), ("c", "yyy")]
-    >>> agent_weights = {"a":1, "b":10, "c":100}
-    >>> map_agent_to_bundle = matching_to_allocation(matching, ["a","b","c"], agent_weights=agent_weights)
+    >>> map_agent_to_bundle = matching_to_allocation(matching, ["a","b","c"])
     >>> stringify(map_agent_to_bundle)
     "{a:['xxx'], b:['yyy'], c:['yyy']}"
     """
@@ -127,12 +132,19 @@ def utilitarian_matching(agents: AgentsDict, agent_weights: Dict[str, int]=None,
     >>> agent_weights = {"avi":1, "gadi":10, "beni":100}
     >>> stringify(alloc.map_item_to_agents(sortkey=lambda name: -agent_weights[name]))
     "{x:['gadi', 'avi'], y:['beni']}"
+    >>> prefs = [[5,4],[3,2]]
+    >>> alloc = utilitarian_matching(prefs)
+    >>> stringify(alloc.map_agent_to_bundle())
+    '{Agent #0:[1], Agent #1:[0]}'
+    >>> stringify(alloc.map_item_to_agents())
+    "{0:['Agent #1'], 1:['Agent #0']}"
     """
     graph = instance_to_graph(agents, agent_weights=agent_weights, item_capacities=item_capacities)
     logger.info("Graph edges: %s", list(graph.edges.data()))
     matching = networkx.max_weight_matching(graph, maxcardinality=maxcardinality)
     logger.info("Matching: %s", matching)
-    map_agent_to_bundle = matching_to_allocation(matching, agent_names=agents.keys(), agent_weights=agent_weights)
+    agent_names = fairpy.agent_names_from(agents)
+    map_agent_to_bundle = matching_to_allocation(matching, agent_names=agent_names)
     return Allocation(agents, map_agent_to_bundle)
 
 

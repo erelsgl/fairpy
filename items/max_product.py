@@ -46,6 +46,7 @@ def max_product_allocation(agents, num_of_decimal_digits=3) -> AllocationMatrix:
 		cvxpy.Maximize(sum_of_logs),
 		feasibility_constraints + positivity_constraints)
 	solver1 = cvxpy.XPRESS
+	# solver1 = cvxpy.OSQP
 	solver2 = cvxpy.SCS
 	# See here https://www.cvxpy.org/tutorial/advanced/index.html for a list of supported solvers
 	try:
@@ -79,6 +80,7 @@ def product_of_utilities(z:AllocationMatrix, v)->float:
 	utility_profile = z.utility_profile(v)
 	sum_of_logs = sum([np.log(u) for u in utility_profile])
 	return np.exp(sum_of_logs)
+
 
 if __name__ == '__main__':
     import doctest
