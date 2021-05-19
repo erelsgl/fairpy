@@ -153,6 +153,8 @@ def value_1_of_c_MMS(c:int, valuation:list, **kwargs)->int:
 	>>> int(value_1_of_c_MMS(c=3, valuation=[10,20,40,0], numerator=2))
 	30
 	"""
+	if len(valuation)==0:
+		raise ValueError("Valuation is empty")
 	# return value_1_of_c_MMS__bruteforce(c, valuation, items=items)
 	# return value_1_of_c_MMS__pulp(c, valuation, **kwargs)
 	return value_1_of_c_MMS__cvxpy(c, valuation, **kwargs)
