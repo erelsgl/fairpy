@@ -1,3 +1,4 @@
+#!python3
 """
 Demonstration of the socially efficient cake divisions
 
@@ -5,7 +6,7 @@ Programmer: Jonathan Diamant
 Since: 2019-12
 """
 
-from fairpy.cake.agents import *
+from fairpy.agents import *
 from fairpy.cake import socially_efficient_cake_divisions
 
 import logging, sys

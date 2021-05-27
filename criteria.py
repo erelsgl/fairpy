@@ -14,7 +14,7 @@ def is_envyfree(agents, bundles, roundAcc:int=2)->bool:
 	:param roundAcc: the accuracy in digits of the envy free check.
 	:return: True is the allocation is envy free, otherwise False.
 
-	>>> from fairpy.cake.agents import PiecewiseUniformAgent
+	>>> from fairpy.agents import PiecewiseUniformAgent
 	>>> agents = [PiecewiseUniformAgent([(2,3)], "Alice"), PiecewiseUniformAgent([(0,10)], "George")]
 	>>> pieces = [[(1,2),(2,3)], [(4,5),(0,1)]]
 	>>> is_envyfree(agents, pieces, roundAcc=2)

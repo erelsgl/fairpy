@@ -1,6 +1,8 @@
+#!python3
+
 from typing import *
 
-from fairpy.cake.agents import Agent, PiecewiseConstantAgent
+from fairpy.agents import Agent, PiecewiseConstantAgent
 
 
 class CakeSlice(object):

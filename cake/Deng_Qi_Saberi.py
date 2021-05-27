@@ -10,7 +10,7 @@ Programmer: Dvir Fried
 Since: 2020-01
 """
 
-from fairpy.cake.agents import *
+from fairpy.agents import *
 from fairpy import Allocation
 
 from typing import *

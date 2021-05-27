@@ -1,3 +1,4 @@
+#!python3
 """
 Demonstration of the envy free piecewise linear protocol.
 
@@ -5,7 +6,7 @@ Programmer: Guy Wolf
 Since: 2020-2
 """
 
-from fairpy.cake.agents import *
+from fairpy.agents import *
 from fairpy.cake import piecewise_linear_cake_division
 
 import logging, sys

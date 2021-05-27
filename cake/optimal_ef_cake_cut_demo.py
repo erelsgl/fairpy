@@ -6,7 +6,7 @@ Programmer: Tom Goldenberg
 Since: 2020-06
 """
 
-from fairpy.cake.agents import *
+from fairpy.agents import *
 from fairpy.cake import optimal_ef_cake_cut
 
 import logging, sys

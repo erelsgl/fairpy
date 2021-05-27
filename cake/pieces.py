@@ -36,7 +36,7 @@ def merge_allocations(self:Allocation, other:Allocation):
     :param self: this allocation.
     :param other: the other allocation to merge with.
 
-    >>> from fairpy.cake.agents import PiecewiseUniformAgent
+    >>> from fairpy.agents import PiecewiseUniformAgent
     >>> Allocation.default_separator=", "
     >>> Alice = PiecewiseUniformAgent([(2,3)], "Alice")
     >>> George = PiecewiseUniformAgent([(0,10)], "George")

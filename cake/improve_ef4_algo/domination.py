@@ -1,6 +1,8 @@
+#!python3
+
 from typing import List
 
-from fairpy.cake.agents import Agent, PiecewiseConstantAgent
+from fairpy.agents import Agent, PiecewiseConstantAgent
 from fairpy.cake.improve_ef4_algo.allocation import CakeAllocation
 from fairpy.cake.improve_ef4_algo.cake import CakeSlice
 

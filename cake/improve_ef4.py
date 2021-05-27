@@ -16,7 +16,7 @@ import logging
 from typing import List
 
 from fairpy import Allocation
-from fairpy.cake.agents import Agent
+from fairpy.agents import Agent
 import fairpy.cake.improve_ef4_algo.improve_ef4_impl as impl
 
 from fairpy.cake.pieces import round_allocation
@@ -37,7 +37,7 @@ def improve_ef4_protocol(agents: List[Agent]) -> Allocation:
     :throws ValueError: if the agents list given does not contain 4 agents
 
     >>> from fairpy.cake.pieces import round_allocation 
-    >>> from fairpy.cake.agents import PiecewiseConstantAgent 
+    >>> from fairpy.agents import PiecewiseConstantAgent 
     >>> agents = [PiecewiseConstantAgent([3, 6, 3], "agent1"), PiecewiseConstantAgent([0, 2, 4], "agent2"), PiecewiseConstantAgent([6, 4, 2], "agent3"), PiecewiseConstantAgent([3, 3, 3], "agent4")]
     >>> allocation = improve_ef4_protocol(agents)
     >>> round_allocation(allocation)

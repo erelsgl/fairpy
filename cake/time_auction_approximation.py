@@ -13,7 +13,7 @@ Programmers: Naama Berman and Yonatan Lifshitz
 Since: 2019-12
 """
 
-from fairpy.cake.agents import *
+from fairpy.agents import *
 from fairpy import Allocation
 
 import random, logging
@@ -314,7 +314,7 @@ def fix_edges(edges_set: Set[Tuple[Agent, Tuple[float, float]]]) -> Set[Tuple[Ag
     >>> partitions = [(0, 1), (1, 2)]
     >>> edges_set = {(Alice, (0, 1.4889))}
     >>> fix_edges(edges_set)
-    [(Alice is a piecewise-constant agent with values [100   1] and total value=101, (0, 1.4889))]
+    [(Alice is an agent with a Piecewise-constant valuation with values [100   1] and total value=101, (0, 1.4889))]
     """
     ret = []
     # Go over all the edges and check if they are in the right order
@@ -390,7 +390,7 @@ def create_matching_graph(left: List[Agent], right: List[Tuple[float, float]],
     >>> partitions = [(0, 1), (1, 2)]
     >>> g = create_matching_graph([Alice, Bob], partitions, {(Alice, (0, 1)): 100.0, (Bob, (0, 1)): 2.0, (Alice, (1, 2)): 1.0, (Bob, (1, 2)): 90.0})
     >>> list(g.edges(data=True))
-    [(Alice is a piecewise-constant agent with values [100   1] and total value=101, (0, 1), {'weight': 100.0}), (Alice is a piecewise-constant agent with values [100   1] and total value=101, (1, 2), {'weight': 1.0}), (Bob is a piecewise-constant agent with values [ 2 90] and total value=92, (0, 1), {'weight': 2.0}), (Bob is a piecewise-constant agent with values [ 2 90] and total value=92, (1, 2), {'weight': 90.0})]
+    [(Alice is an agent with a Piecewise-constant valuation with values [100   1] and total value=101, (0, 1), {'weight': 100.0}), (Alice is an agent with a Piecewise-constant valuation with values [100   1] and total value=101, (1, 2), {'weight': 1.0}), (Bob is an agent with a Piecewise-constant valuation with values [ 2 90] and total value=92, (0, 1), {'weight': 2.0}), (Bob is an agent with a Piecewise-constant valuation with values [ 2 90] and total value=92, (1, 2), {'weight': 90.0})]
 
     """
 

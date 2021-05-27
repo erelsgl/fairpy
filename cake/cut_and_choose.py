@@ -11,7 +11,7 @@ Programmer: Erel Segal-Halevi
 Since: 2019-11
 """
 
-from fairpy.cake.agents import *
+from fairpy.agents import *
 from fairpy import Allocation
 from typing import *
 

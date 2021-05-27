@@ -9,7 +9,7 @@ Since: 2019-11
 import sys
 if __name__ == "__main__" and (len(sys.argv) < 2 or sys.argv[1] != "quiet"):
 
-    from fairpy.cake.agents import *
+    from fairpy.agents import *
     from fairpy.cake import partition_simplex
 
     import matplotlib.pyplot as pyplot

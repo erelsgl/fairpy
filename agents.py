@@ -8,6 +8,7 @@ Since: 2020-04
 """
 
 from fairpy.items.valuations import *
+from fairpy.cake.valuations  import *
 
 from abc import ABC, abstractmethod
 from typing import *
@@ -46,6 +47,18 @@ class Agent(ABC):
 
     def total_value(self)->float:
         return self.valuation.total_value()
+
+    def mark(self, start:float, target_value:float)->float:
+        return self.valuation.mark(start, target_value)
+
+    def eval(self, start:float, end:float)->float:
+        return self.valuation.eval(start, end)
+
+    def cake_length(self)->float:
+        return self.valuation.cake_length()
+
+    def partition_values(self, partition:list)->float:
+        return self.valuation.partition_values(partition)
 
     def all_items(self):
         return self.valuation.all_items()
@@ -248,7 +261,6 @@ class MonotoneAgent(Agent):
 class AdditiveAgent(Agent):
     """
     Represents an agent or several agents with an additive valuation function.
-
     >>> a = AdditiveAgent({"x": 1, "y": 2, "z": 4, "w":0}, name="Alice")
     >>> a
     Alice is an agent with a Additive valuation: w=0 x=1 y=2 z=4.
@@ -298,7 +310,6 @@ class AdditiveAgent(Agent):
     def list_from(input: Any)->List[Agent]:
         """
         Construct a list of additive agents from various input formats.
-
         >>> ### From dict of dicts:
         >>> the_list = AdditiveAgent.list_from({"Alice":{"x":1,"y":2}, "George":{"x":3,"y":4}})
         >>> the_list[0]
@@ -347,7 +358,6 @@ class AdditiveAgent(Agent):
 class BinaryAgent(Agent):
     """
     Represents an agent with binary valuations, or several agents with the same binary valuations.
-
     >>> a = BinaryAgent({"x","y","z"}, name="Alice")
     >>> a
     Alice is an agent with a Binary valuation who wants ['x', 'y', 'z'].
@@ -372,14 +382,148 @@ class BinaryAgent(Agent):
     >>> BinaryAgent({"x","y","z"}, duplicity=2)
     Anonymous are 2 agents with a Binary valuation who wants ['x', 'y', 'z'].
     """
-
     def __init__(self, desired_items:Bundle, name:str=None, duplicity:int=1):
-        """
-        Initializes an agent with a given set of desired goods.
-        :param desired_items: a set of strings - each string is a good.
-        :param duplicity: the number of agents with the same set of desired goods.
-        """
         super().__init__(BinaryValuation(desired_items), name=name, duplicity=duplicity)
+
+
+
+######## CAKE AGENTS #######
+
+class PiecewiseConstantAgent(Agent):
+    """
+    A PiecewiseConstantAgent is an Agent whose value function has a constant density on a finite number of intervals.
+
+    >>> a = PiecewiseConstantAgent([11,22,33,44]) # Four desired intervals: the leftmost has value 11, the second one 22, etc.
+    >>> a.total_value()
+    110
+    >>> a.cake_length()
+    4
+    >>> a.eval(1,3)
+    55.0
+    >>> a.mark(1, 77)
+    3.5
+    >>> a.name()
+    'Anonymous'
+    >>> a.value([(0,1),(2,3)])
+    44.0
+    >>> Alice = PiecewiseConstantAgent([11,22,33,44], "Alice")
+    >>> Alice.name()
+    'Alice'
+    """
+    def __init__(self, values:list, name:str=None, duplicity:int=1):
+        super().__init__(PiecewiseConstantValuation(values), name=name, duplicity=1)
+
+
+
+class PiecewiseConstantAgentNormalized(Agent):
+    """
+    >>> a = PiecewiseConstantAgentNormalized([11,22,33,44])
+    >>> a.eval(0.5,1)
+    0.7
+    >>> np.round(a.eval(0.25,1),3)
+    0.9
+    >>> np.round(a.eval(0,0.25),3)
+    0.1
+    >>> np.round(a.eval(0,0.375),3)
+    0.2
+    >>> np.round(a.mark(0.5, 0.7),3)
+    1.0
+    >>> np.round(a.mark(0.375, 0.1),3)
+    0.5
+    >>> np.round(a.mark(0, 0.2),3)
+    0.375
+    >>> np.round(a.mark(0.25, 0.2),3)
+    0.5
+    >>> np.round(a.mark(0, 0.9),4)
+    0.9375
+    """
+    def __init__(self, values:list, name:str=None, duplicity:int=1):
+        super().__init__(PiecewiseConstantValuationNormalized(values), name=name, duplicity=1)
+
+
+
+class PiecewiseConstantAgent1Segment(Agent):
+    """
+    """
+    def __init__(self, values:list, name:str=None, duplicity:int=1):
+        super().__init__(PiecewiseConstantValuation1Segment(values), name=name, duplicity=1)
+
+
+
+
+class PiecewiseUniformAgent(Agent):
+    """
+    A PiecewiseUniformAgent is an Agent with a finite number of desired intervals, all of which have the same value-density (1).
+
+    >>> a = PiecewiseUniformAgent([(0,1),(2,4),(6,9)])   # Three desired intervals: (0..1) and (2..4) and (6..9).
+    >>> a.total_value()
+    6
+    >>> a.cake_length()
+    9
+    >>> a.eval(0,1.5)
+    1.0
+    >>> a.mark(0, 2)
+    3
+    >>> a.name()
+    'Anonymous'
+    >>> George = PiecewiseUniformAgent([(0,1),(2,4),(6,9)], "George")
+    >>> George.name()
+    'George'
+    """
+    def __init__(self, desired_regions:List[tuple], name:str=None, duplicity:int=1):
+        super().__init__(PiecewiseUniformValuation(desired_regions), name=name, duplicity=1)
+
+
+class PiecewiseLinearAgent(Agent):
+    """
+    Author: Tom Goldenberg
+    Since:  2020-06
+
+    A PiecewiseLinearAgent is an Agent whose value function has a piecewise linear density.
+    PiecewiseLinearAgent([11,22],[1,0])
+    the first list ([11,22]) is the value of pieces e.g. 1st piece has a value of 11 and the second has a value of 22
+    the second list ([1,0]) are the slopes of the piece value, meaning: for each piece the corresponding lists will be used
+     to build the equation y = mx + c => (y = 1*x + c, y = 0*x + c) and the 11 and 22 are the integral value of the equation
+     from x_0 = 0 -> x_1 = 1
+    >>> a = PiecewiseLinearAgent([11,22,33,44],[1,2,3,-2]) # Four desired intervals: the leftmost has value 11, the second one 22,  etc.
+    >>> a.total_value()
+    110
+    >>> a.cake_length()
+    4
+    >>> a.eval(1,3)
+    55.0
+    >>> a.value([(0,1),(2,3)])
+    44.0
+    >>> a = PiecewiseLinearAgent([2],[1])
+    >>> a.cake_length()
+    1
+    >>> a.total_value()
+    2
+    >>> a.value([(0,1)])
+    2.0
+    >>> a.eval(0,1)
+    2.0
+    >>> a = PiecewiseLinearAgent([2,2],[1,0])
+    >>> a.total_value()
+    4
+    >>> a.value([(0,1)])
+    2.0
+    >>> a.value([(1,1.5)])
+    1.0
+    >>> a.value([(1,2)])
+    2.0
+    >>> a.value([(0.5,2)])
+    3.125
+    """
+    def __init__(self, values: list, slopes: list, name:str=None, duplicity:int=1):
+        super().__init__(PiecewiseLinearValuation(values,slopes), name=name, duplicity=1)
+
+
+
+
+
+
+######## UTILITY FUNCTIONS #######
 
 
 def _representative_item(input:Any):
@@ -414,7 +558,8 @@ def agents_from(input:Any)->List[Agent]:
     >>> agents_from([[1,2],[3,4]])[1]
     Agent #1 is an agent with a Additive valuation: v0=3 v1=4.
     >>> ### From list of valuations:
-    >>> agents_from([AdditiveValuation([1,2]), BinaryValuation("xy")])[0]
+    >>> l = agents_from([AdditiveValuation([1,2]), BinaryValuation("xy")])
+    >>> l[0]
     Agent #0 is an agent with a Additive valuation: v0=1 v1=2.
     >>> ### From list of agents:
     >>> agents_from([AdditiveAgent([1,2]), BinaryAgent("xy")])[0]
@@ -425,13 +570,15 @@ def agents_from(input:Any)->List[Agent]:
         return []
     elif isinstance(input_0, Agent):  # The input is already a list of Agent objects - nothing more to do.
         return input
-    elif isinstance(input_0, Valuation):  # The input is a list of Valuation objects - we just need to add names.
+    elif hasattr(input_0, "value"):   # The input is a list of Valuation objects - we just need to add names.
         return [
             Agent(valuation, name=f"Agent #{index}")
             for index,valuation in enumerate(input)
         ]
     else:
         return AdditiveAgent.list_from(input)
+
+
 
 
 def agent_names_from(input:Any)->List[str]:

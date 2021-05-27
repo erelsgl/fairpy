@@ -8,9 +8,9 @@ Since: 2019-12
 """
 
 from fairpy import Allocation
-from fairpy.cake.agents import *
-import numpy as np
+from fairpy.agents import *
 import random
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -18,12 +18,12 @@ logger = logging.getLogger(__name__)
 
 def agentNormalize(agents: List[Agent])->List[Agent]:
     """
-    replace all the agents with PiecewiseConstantAgent1Sgement that normalize to (0,1) segment
+    replace all the agents with PiecewiseConstantAgent1Segment that normalize to (0,1) segment
     :param agents: a list of agents that need to be normalized
     :return: a list of normalized agents
     """
     for agent,i in zip(agents,range(len(agents))):
-        agents[i] = PiecewiseConstantAgent1Sgement(agent)
+        agents[i] = PiecewiseConstantAgent1Segment(agent.valuation.values, name=agent.name())
     return agents
 
 

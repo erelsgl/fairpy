@@ -3,7 +3,7 @@ import logging
 import sys
 
 from fairpy.cake import improve_ef4
-from fairpy.cake.agents import PiecewiseConstantAgent
+from fairpy.agents import PiecewiseConstantAgent
 from fairpy.cake.pieces import round_allocation
 
 cases = [

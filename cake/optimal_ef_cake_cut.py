@@ -10,8 +10,7 @@ Since: 2020-05
 """
 
 from fairpy import Allocation
-import fairpy.cake.pieces 
-from fairpy.cake.agents import *
+from fairpy.agents import *
 
 import operator
 from logging import Logger
@@ -56,7 +55,7 @@ def opt_piecewise_constant(agents: List[Agent]) -> Allocation:
     <BLANKLINE>
    """
 
-    value_matrix = [list(agent.values) for agent in agents]
+    value_matrix = [list(agent.valuation.values) for agent in agents]
     num_of_agents = len(value_matrix)
     num_of_pieces = len(value_matrix[0])
 
@@ -247,7 +246,7 @@ def opt_piecewise_linear(agents: List[Agent]) -> Allocation:
         allocs = [[], []]
         for piece, (start, end) in enumerate(intervals):
             logger.debug(f'get_optimal_allocation: piece={piece}, start={start}, end={end}')
-            mid = isIntersect(agents[0].piece_poly[piece], agents[1].piece_poly[piece])
+            mid = isIntersect(agents[0].valuation.piece_poly[piece], agents[1].valuation.piece_poly[piece])
             if 0 < mid < 1:
                 logger.debug(f'mid={mid}')
                 new_intervals.append((start, start + mid))

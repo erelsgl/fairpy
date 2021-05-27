@@ -1,7 +1,9 @@
+#!python3
+
 import itertools
 from typing import List
 
-from fairpy.cake.agents import Agent, PiecewiseConstantAgent
+from fairpy.agents import Agent, PiecewiseConstantAgent
 from fairpy.cake.improve_ef4_algo.allocation import CakeAllocation, CakeSlice
 from fairpy.cake.improve_ef4_algo.domination import get_agent_satisfaction, value_for_slices
 from fairpy.cake.improve_ef4_algo.util import exclude_from_list

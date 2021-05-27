@@ -8,7 +8,7 @@ Since: 2019-12
 """
 
 from fairpy import Allocation
-from fairpy.cake.agents import *
+from fairpy.agents import *
 from fairpy.cake.fe_cake_division_connected_pieces_utils import *
 import numpy as np
 import logging

@@ -1,6 +1,8 @@
+#!python3
+
 from typing import List, Set, Optional, Tuple, Dict
 
-from fairpy.cake.agents import PiecewiseConstantAgent, Agent
+from fairpy.agents import PiecewiseConstantAgent, Agent
 from fairpy.cake.improve_ef4_algo.cake import CakeSlice
 from fairpy.cake.improve_ef4_algo.util import exclude_from_list
 

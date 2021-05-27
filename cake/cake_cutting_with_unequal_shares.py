@@ -19,7 +19,7 @@ Since:  2021-02
 
 
 from fairpy import Allocation
-from fairpy.cake.agents import Agent
+from fairpy.agents import Agent
 from typing import List, Dict
 import logging
 
@@ -37,7 +37,7 @@ def proportional_division_with_unequal_shares(agents: List[Agent], agents_demand
     :return: nothing - the allocation is modified in place.
 
     *Simple example - 2 agents with same demands and value functions
-    >>> from fairpy.cake.agents import PiecewiseConstantAgent
+    >>> from fairpy.agents import PiecewiseConstantAgent
     >>> Alice = PiecewiseConstantAgent([1,1], "Alice")
     >>> Bob = PiecewiseConstantAgent([1,1], "Bob")
     >>> _agents_demands = {"Alice":1, "Bob":1}

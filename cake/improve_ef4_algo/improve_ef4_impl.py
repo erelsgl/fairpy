@@ -1,7 +1,9 @@
+#!python3
+
 import logging
 from typing import *
 
-from fairpy.cake.agents import PiecewiseConstantAgent, Agent
+from fairpy.agents import PiecewiseConstantAgent, Agent
 from fairpy.cake.improve_ef4_algo.allocation import CakeAllocation
 from fairpy.cake.improve_ef4_algo.cake import CakeSlice, full_cake_slice, slice_equally
 from fairpy.cake.improve_ef4_algo.domination import get_most_satisfied_agent, get_least_satisfied_agent, is_dominated_by_all

@@ -13,7 +13,7 @@ Since: 2020-03
 """
 
 from fairpy import Allocation
-from fairpy.cake.agents import *
+from fairpy.agents import *
 
 import logging
 logger = logging.getLogger(__name__)

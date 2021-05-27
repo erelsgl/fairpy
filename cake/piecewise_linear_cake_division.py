@@ -14,7 +14,7 @@ Since: 2020-2
 from fairpy.criteria import is_envyfree
 from fairpy import Allocation
 from fairpy.cake.pieces import merge_allocations
-from fairpy.cake.agents import Agent
+from fairpy.agents import Agent
 from typing import *
 
 from itertools import permutations
@@ -47,7 +47,7 @@ def Cover(a: float, b: float, agents: List[Agent], roundAcc = 6)->List:
     :param roundAcc: the rounding accuracy of the algorithm in decimal digits.
     :return: a cover of [a,b].
 
-    >>> from fairpy.cake.agents import PiecewiseUniformAgent
+    >>> from fairpy.agents import PiecewiseUniformAgent
     >>> Alice = PiecewiseUniformAgent([(0.5,0.7)], "Alice")
     >>> George = PiecewiseUniformAgent([(0.4,0.9)], "George")
     >>> print(str(Cover(0,1,[Alice,George])))
@@ -118,7 +118,7 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
 
     >>> Allocation.default_separator=", "
     >>> Allocation.default_precision=3
-    >>> from fairpy.cake.agents import PiecewiseUniformAgent
+    >>> from fairpy.agents import PiecewiseUniformAgent
     >>> Alice = PiecewiseUniformAgent([(5,7)], "Alice")
     >>> George = PiecewiseUniformAgent([(4,9)], "George")
     >>> print(str(EFAllocate([Alice,George])))

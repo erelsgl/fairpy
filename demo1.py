@@ -8,7 +8,7 @@ Since: 2020-10
 """
 
 
-from fairpy.cake.agents import PiecewiseUniformAgent, PiecewiseConstantAgent
+from fairpy.agents import PiecewiseUniformAgent, PiecewiseConstantAgent
 from fairpy.cake import cut_and_choose, last_diminisher
 
 import logging, sys

@@ -7,7 +7,7 @@ Programmer: Erel Segal-Halevi
 Since: 2019-12
 """
 
-from fairpy.cake.agents import *
+from fairpy.agents import *
 from fairpy.cake import last_diminisher
 
 import logging, sys
