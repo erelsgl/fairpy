@@ -1,7 +1,8 @@
 #!python3
 
 """ 
-Find the fractional max-product (aka Max Nash Welfare) allocation.
+Find the fractional max-product (aka Max Nash Welfare) allocation
+     for agents with additive valuations.
 
 Author: Erel Segal-Halevi
 Since:  2021-03
@@ -10,8 +11,9 @@ Since:  2021-03
 import numpy as np, cvxpy
 from fairpy import valuations
 from fairpy.items.allocations import AllocationMatrix
+from fairpy.items.solvers import solve
 
-def max_product_allocation(agents, num_of_decimal_digits=3) -> AllocationMatrix:
+def max_product_allocation(agents) -> AllocationMatrix:
 	"""
 	Find the max-product (aka Max Nash Welfare) allocation.
 	:param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
@@ -38,27 +40,13 @@ def max_product_allocation(agents, num_of_decimal_digits=3) -> AllocationMatrix:
 		z[i][o] >= 0 for i in v.agents()
 		for o in v.objects()
 	]
-	sum_of_logs = sum([
-		cvxpy.log( sum([z[i][o]*v[i][o] for o in v.objects()]) )
-		for i in v.agents()
-	])
+	utilities = [sum([z[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
+	sum_of_logs = sum([cvxpy.log(utility) for utility in utilities])
 	prob = cvxpy.Problem(
 		cvxpy.Maximize(sum_of_logs),
 		feasibility_constraints + positivity_constraints)
-	solver1 = cvxpy.XPRESS
-	# solver1 = cvxpy.OSQP
-	solver2 = cvxpy.SCS
-	# See here https://www.cvxpy.org/tutorial/advanced/index.html for a list of supported solvers
-	try:
-		prob.solve(solver=solver1)
-	except cvxpy.SolverError:
-		prob.solve(solver=solver2)
-	if prob.status == "infeasible":
-		raise ValueError("Problem is infeasible")
-	elif prob.status == "unbounded":
-		raise ValueError("Problem is unbounded")
-	else:
-		return AllocationMatrix(z.value).round(num_of_decimal_digits)
+	solve(prob, solvers=[cvxpy.XPRESS,cvxpy.OSQP,cvxpy.SCS])
+	return AllocationMatrix(z.value)
 
 
 
@@ -78,7 +66,8 @@ def product_of_utilities(z:AllocationMatrix, v)->float:
 	0.0
 	"""
 	utility_profile = z.utility_profile(v)
-	sum_of_logs = sum([np.log(u) for u in utility_profile])
+	with np.errstate(divide='ignore'): # ignore errors caused by log(0):
+		sum_of_logs = sum([np.log(u) for u in utility_profile])
 	return np.exp(sum_of_logs)
 
 
