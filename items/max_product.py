@@ -16,7 +16,7 @@ from fairpy.items.solvers import solve
 def max_product_allocation(agents) -> AllocationMatrix:
 	"""
 	Find the max-product (aka Max Nash Welfare) allocation.
-	:param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+	:param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
 	:return allocation_matrix:  a matrix z of a similar shape in which z[i][j] is the fraction allocated to agent i from object j.
 	The allocation should maximize the product (= sum of logs) of utilities

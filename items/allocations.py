@@ -80,6 +80,25 @@ class AllocationMatrix:
 		return np.array([np.dot(valuation_matrix[i],self[i]) for i in self.agents()])
 
 
+	def utility_profile_for_families(self, valuation_matrix, families:list)->np.array:
+		"""
+		Returns a vector that maps each agent to its utility (=sum of values) under this allocation,
+		which is considered an allocation for families.
+
+		>>> z = AllocationMatrix([[.2,.3,.5],[.8,.7,.5]])
+		>>> v = valuations.matrix_from([[0.5,1,0],[0.5,0,1]])
+		>>> z.utility_profile_for_families(v, families=[[0],[1]])
+		array([0.4, 0.9])
+		>>> z.utility_profile_for_families(v, families=[[1],[0]])
+		array([1.1, 0.6])
+		"""
+		map_agent_to_family = [None]*valuation_matrix.num_of_agents
+		for f,family in enumerate(families):
+			for agent in family:
+				map_agent_to_family[agent] = f
+		return np.array([np.dot(valuation_matrix[i],self[map_agent_to_family[i]]) for i in valuation_matrix.agents()])
+
+
 	def __getitem__(self, key):
 		if isinstance(key,tuple):
 			return self._z[key[0]][key[1]]

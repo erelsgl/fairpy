@@ -1,16 +1,14 @@
 #!python3
 
 """ 
-A demo program for finding the fractional max-product (aka Max Nash Welfare) allocation.
+A demo program for finding egalitarian (maximin / leximin) allocations.
 
 Author: Erel Segal-Halevi
-Since:  2021-03
+Since:  2021-05
 """
 
-import numpy as np, cvxpy
 from fairpy.items.max_product import *
 import fairpy.valuations as valuations
-from fairpy.items.allocations import AllocationMatrix
 
 print("\nThree identical goods:")
 v = valuations.matrix_from([ [3,3,3] , [2,2,2] , [1,1,1] ])
