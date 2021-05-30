@@ -1,24 +1,27 @@
 #!python3
 
 """ 
-A demo program for finding the fractional max-product (aka Max Nash Welfare) allocation.
+A demo program for finding the maximin (aka egalitarian) allocation.
 
 Author: Erel Segal-Halevi
-Since:  2021-03
+Since:  2021-05
 """
 
-from fairpy.items.egalitarian import maximin_optimal_allocation, maximin_optimal_allocation_for_families
+from fairpy.items.egalitarian import maximin_optimal_allocation
 import fairpy.valuations as valuations
 
-print("\nThree different goods:")
-v = valuations.matrix_from({"Alice": [3,2,1] , "Bob": [1,2,3] , "Carl": [2,2,2] })
+print("\nThree identical goods:")
+v = valuations.matrix_from([ [3,3,3] , [2,2,2] , [1,1,1] ])
 print("v = \n",v)
-z = maximin_optimal_allocation(v).round(3)
-print("z = \n",z, "utility profile = ", z.utility_profile(v))
+z = maximin_optimal_allocation(v)
+print("z = \n",z, "profile = ", z.utility_profile(v))
 
-families = [[0,1],[2]] 
-z = maximin_optimal_allocation_for_families(v,families).round(3)
-print("z = \n",z, "utility profile = ", z.utility_profile_for_families(v, families))
+
+print("\nThree different goods:")
+v = valuations.matrix_from({"Alice": [3,2,2] , "Bob": [1,2,1] , "Carl": [0,0,1] })
+print("v = \n",v)
+z = maximin_optimal_allocation(v)
+print("z = \n",z, "profile = ", z.utility_profile(v))
 
 
 

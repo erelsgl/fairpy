@@ -9,14 +9,8 @@
 import cvxpy
 
 from fairpy import valuations
-from fairpy.items.allocations import AllocationMatrix
-from fairpy.items.max_product import max_product_allocation
-
-from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
+from fairpy.items.max_welfare import max_product_allocation
 from fairpy.items.min_sharing_impl.FairThresholdAllocationProblem import FairThresholdAllocationProblem
-
-
-from cvxpy.constraints.constraint import Constraint
 
 import logging
 logger = logging.getLogger(__name__)
@@ -26,6 +20,7 @@ class FairMaxProductAllocationProblem(FairThresholdAllocationProblem):
     """
     Finds a Nash-optimal (aka max-product) allocation with minimum sharing.
 
+    >>> from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
     >>> v = [[1, 2, 3,4], [4, 5, 6,5], [7, 8, 9,6]]
     >>> fpap =FairMaxProductAllocationProblem(v)
     >>> g1 = [[0.0, 0.0, 0.0, 1], [1, 1, 1, 1], [0.0, 0.0, 0.0, 1]]
@@ -92,12 +87,6 @@ if __name__ == '__main__':
     # import logging, sys
     # logger.addHandler(logging.StreamHandler(sys.stdout))
     # logger.setLevel(logging.INFO)
-
-    # v = [ [465,0,535] , [0,0,1000]  ]
-    # fpap =FairMaxProductAllocationProblem(v)
-    # g1 = [[1,1,1],[0,0,1]]
-    # g = ConsumptionGraph(g1)
-    # print(fpap.find_allocation_for_graph(g).round(3))
 
     import doctest
     (failures, tests) = doctest.testmod(report=True)

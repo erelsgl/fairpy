@@ -10,7 +10,7 @@ from fairpy.agents import *
 
 class items:
 	from fairpy.items.round_robin import round_robin
-	from fairpy.items.max_product import max_product_allocation
+	from fairpy.items.max_welfare import max_sum_allocation, max_power_sum_allocation, max_product_allocation, max_minimum_allocation
 	from fairpy.items.one_of_threehalves_mms import bidirectional_bag_filling
 	from fairpy.items.utilitarian_matching import utilitarian_matching
 	from fairpy.items.iterated_maximum_matching import iterated_maximum_matching

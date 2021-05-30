@@ -10,14 +10,13 @@ Since:  2021-03
 import logging
 import sys
 
-import cvxpy
 import numpy as np
 
 from fairpy.items.min_sharing_impl import FairAllocationProblem
 from fairpy.items.allocations import AllocationMatrix
 from fairpy.items.min_sharing import proportional_allocation_with_min_sharing, envyfree_allocation_with_min_sharing, maxproduct_allocation_with_min_sharing
 from fairpy import valuations
-from fairpy.items.max_product import max_product_allocation
+from fairpy.items.max_welfare import max_product_allocation
 
 from datetime import datetime;  now = datetime.now
 

@@ -1,3 +1,4 @@
+#!python3
 """
 A context for running functions with a time-limit.
 Throws an exception if the function does not finish within the limit.
