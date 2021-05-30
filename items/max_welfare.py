@@ -112,9 +112,6 @@ def max_power_sum_allocation(agents, power:float, solvers=DEFAULT_SOLVERS) -> Al
 	>>> max_power_sum_allocation([ [3] , [5] ], -1).round(3)   
 	[[0.564]
 	 [0.436]]
-	>>> max_power_sum_allocation([ [3] , [5] ], -100).round(3)   
-	[[0.613]
-	 [0.387]]
 	"""
 	if power>0:
 		welfare_function=lambda utilities: sum([utility**power for utility in utilities])
