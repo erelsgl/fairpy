@@ -92,6 +92,7 @@ class AllocationMatrix:
 		>>> z.utility_profile_for_families(v, families=[[1],[0]])
 		array([1.1, 0.6])
 		"""
+		valuation_matrix = valuations.matrix_from(valuation_matrix)
 		map_agent_to_family = [None]*valuation_matrix.num_of_agents
 		for f,family in enumerate(families):
 			for agent in family:

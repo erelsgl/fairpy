@@ -6,50 +6,13 @@ Author: Erel Segal-Halevi
 Since : 2021-04
 """
 
-from fairpy.items import partitions 
-import pulp
 import cvxpy
+from fairpy.items import partitions 
+from fairpy.solve import *
 import numbers
 
 import logging
 logger = logging.getLogger(__name__)
-
-def value_1_of_c_MMS__pulp(c:int, valuation:list, capacity=1, items:set=None, show_solver_log=False)->int:
-	"""
-	Computes the 1-of-c MMS by solving an integer linear program, using PULP.
-	Credit: Rob Pratt, https://or.stackexchange.com/a/6115/2576
-
-	:param c: number of parts.
-	:param valuation: maps an item to its value.
-	:param capacity: The capacity of all items (int), or a map from an item to its capacity (list). Default: 1.
-	:param items: a set of items. Default: all items.
-	:return the value off the 1-out-of-c MMS of the given items.
-	"""
-	parts = range(c)
-	num_of_items = len(valuation)
-	if items is None:
-		items = range(num_of_items)
-	if isinstance(capacity,numbers.Number):
-		capacity = [capacity]*num_of_items
-	min_value = pulp.LpVariable("min_value", cat=pulp.LpContinuous)
-	vars:dict = {
-		item:
-		[pulp.LpVariable(f"x_{item}_{part}", lowBound=0, cat=pulp.LpInteger) for part in parts]
-		for item in items
-	}	# vars[i][j] is 1 iff item i is in part j.
-	mms_problem = pulp.LpProblem("MMS_problem", pulp.LpMaximize)
-	mms_problem += min_value    # Objective function: maximize min_value
-	parts_values = [
-		pulp.lpSum([vars[item][part]*valuation[item] for item in items])
-		for part in parts]
-	for item in items:  # Constraints: each item must be in exactly one part.
-		mms_problem += (pulp.lpSum([vars[item][part] for part in parts]) == capacity[item])
-	for part in range(c-1):  # Symmetry-breaking constraint: force value of parts to be in descending order
-		mms_problem += (parts_values[part+1] >= parts_values[part])
-	mms_problem += (parts_values[0] >= min_value) # Constraint: the sum of each part must be at least min_value (by definition of min_value).
-	pulp.PULP_CBC_CMD(msg=show_solver_log).solve(mms_problem)
-	return min_value.value()
-
 
 
 def value_1_of_c_MMS__cvxpy(c:int, valuation:list, capacity=1, items:set=None, numerator:int=1, show_solver_log=False)->int:
@@ -90,28 +53,17 @@ def value_1_of_c_MMS__cvxpy(c:int, valuation:list, capacity=1, items:set=None, n
 	# Parts must be in descending order of value (a symmetry-breaker):
 	constraints += [parts_values[part+1] >= parts_values[part] for part in range(c-1)]
 	# The sum of each part must be at least min_value (by definition of min_value):
-	constraints += [sum(parts_values[0:numerator]) >= min_value]  
-	mms_problem = cvxpy.Problem(cvxpy.Maximize(min_value), constraints)
-	mms_problem.solve(solver=cvxpy.XPRESS)  # GLPK_MI is too slow; ECOS_BB gives wrong results even on simple problems; CBC is not installed; XPRESS gives an error
+	constraints += [sum(parts_values[0:numerator]) >= min_value] 
 
-	if mms_problem.status == "infeasible":
-		raise ValueError("Problem is infeasible")
-	elif mms_problem.status == "unbounded":
-		raise ValueError("Problem is unbounded")
-	else:
-		# allocation_matrix = {
-		# 	item:
-		# 	[int(vars[item][part].value) for part in parts]
-		# 	for item in items
-		# }
-		# logger.info("allocation_matrix: %s", allocation_matrix)
-		parts_contents = [
-			sum([int(vars[item][part].value)*[item] for item in items if vars[item][part].value>=1],start=[])
-			for part in parts
-		]
-		logger.info("parts_contents: %s", parts_contents)
-		logger.info("parts_values: %s", [parts_values[part].value for part in parts])
-		return min_value.value
+	maximize(min_value, constraints)  # Solvers info: GLPK_MI is too slow; ECOS_BB gives wrong results even on simple problems; CBC is not installed; XPRESS gives an error
+
+	parts_contents = [
+		sum([int(vars[item][part].value)*[item] for item in items if vars[item][part].value>=1], [])
+		for part in parts
+	]
+	logger.info("parts_contents: %s", parts_contents)
+	logger.info("parts_values: %s", [parts_values[part].value for part in parts])
+	return min_value.value
 
 
 
@@ -156,7 +108,6 @@ def value_1_of_c_MMS(c:int, valuation:list, **kwargs)->int:
 	if len(valuation)==0:
 		raise ValueError("Valuation is empty")
 	# return value_1_of_c_MMS__bruteforce(c, valuation, items=items)
-	# return value_1_of_c_MMS__pulp(c, valuation, **kwargs)
 	return value_1_of_c_MMS__cvxpy(c, valuation, **kwargs)
 
 
@@ -166,6 +117,10 @@ if __name__ == "__main__":
 	import sys
 	logger.addHandler(logging.StreamHandler(sys.stdout))
 	# logger.setLevel(logging.INFO)
+
+	from fairpy import solve
+	solve.logger.addHandler(logging.StreamHandler(sys.stdout))
+	# solve.logger.setLevel(logging.INFO)
 
 	import doctest
 	(failures,tests) = doctest.testmod(report=True,optionflags=doctest.FAIL_FAST + doctest.NORMALIZE_WHITESPACE)
