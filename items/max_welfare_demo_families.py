@@ -10,7 +10,8 @@ Since:  2021-05
 from fairpy.items.max_welfare import *
 import fairpy.valuations as valuations
 
-def show(v, families):
+
+def leximin_utilities(v, families):
 	v = valuations.matrix_from(v)
 	z = leximin_optimal_allocation_for_families(v, families).round(3)  
 	utility_profile = z.utility_profile_for_families(v, families)
@@ -19,15 +20,12 @@ def show(v, families):
 		utilities = [utility_profile[i] for i in family]
 		print(f"    Family {family}: values {values}, allocation {z[f]}, utilities {utilities}")
 	print()
+	return utility_profile
 
 families = [[0,1],[2,3]] 
 
 
-# for i in range(10):
-# 	show([[i+0.5,10-i-0.5],[7.5,2.5], [5,5],[5,5]], families)
+for x in range(10):
+	leximin_utilities([[x+0.5,10-x-0.5],[7.5,2.5], [5,5],[5,5]], families)
 
-
-
-for i in range(10):
-	show([[i+0.5,10-i-0.5],[5.5,4.5], [7,3],[7,3]], families)
 
