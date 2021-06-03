@@ -26,28 +26,28 @@ def max_welfare_allocation(agents, welfare_function, welfare_constraint_function
 	:param welfare_function:   a monotonically-increasing function w: R -> R representing the welfare function to maximize.
 	:param welfare_constraint: a predicate w: R -> {true,false} representing an additional constraint on the utility of each agent.
 
-	:return allocation_matrix:  a matrix z of a similar shape in which z[i][j] is the fraction allocated to agent i from object j.
+	:return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
 
 	For usage examples, see the functions max_sum_allocation, max_product_allocation, max_minimum_allocation.
 	"""
 	v = valuations.matrix_from(agents)
-	z = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
+	alloc = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
 	feasibility_constraints = [
-		sum([z[i][o] for i in v.agents()])==1
+		sum([alloc[i][o] for i in v.agents()])==1
 		for o in v.objects()
 	]
 	positivity_constraints = [
-		z[i][o] >= 0 for i in v.agents()
+		alloc[i][o] >= 0 for i in v.agents()
 		for o in v.objects()
 	]
-	utilities = [sum([z[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
+	utilities = [sum([alloc[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
 	if welfare_constraint_function is not None:
 		welfare_constraints = [welfare_constraint_function(utility) for utility in utilities]
 	else:
 		welfare_constraints = []
 	max_welfare = maximize(welfare_function(utilities), feasibility_constraints+positivity_constraints+welfare_constraints)
 	logger.info("Maximum welfare is %g",max_welfare)
-	return AllocationMatrix(z.value)
+	return AllocationMatrix(alloc.value)
 
 
 def max_welfare_allocation_for_families(agents, families:list, welfare_function, welfare_constraint_function=None) -> AllocationMatrix:
@@ -58,7 +58,7 @@ def max_welfare_allocation_for_families(agents, families:list, welfare_function,
 	:param welfare_function:   a monotonically-increasing function w: R -> R representing the welfare function to maximize.
 	:param welfare_constraint: a predicate w: R -> {true,false} representing an additional constraint on the utility of each agent.
 
-	:return allocation_matrix:  a matrix z of a similar shape in which z[i][j] is the fraction allocated to agent i from object j.
+	:return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
 
 	For usage examples, see the function max_minimum_allocation_for_families.
 	"""
@@ -69,16 +69,16 @@ def max_welfare_allocation_for_families(agents, families:list, welfare_function,
 		for agent in family:
 			map_agent_to_family[agent] = f
 
-	z = cvxpy.Variable((num_of_families, v.num_of_objects))
+	alloc = cvxpy.Variable((num_of_families, v.num_of_objects))
 	feasibility_constraints = [
-		sum([z[f][o] for f in range(num_of_families)])==1
+		sum([alloc[f][o] for f in range(num_of_families)])==1
 		for o in v.objects()
 	]
 	positivity_constraints = [
-		z[f][o] >= 0 for f in range(num_of_families)
+		alloc[f][o] >= 0 for f in range(num_of_families)
 		for o in v.objects()
 	]
-	utilities = [sum([z[map_agent_to_family[i]][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
+	utilities = [sum([alloc[map_agent_to_family[i]][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
 
 	if welfare_constraint_function is not None:
 		welfare_constraints = [welfare_constraint_function(utility) for utility in utilities]
@@ -86,7 +86,7 @@ def max_welfare_allocation_for_families(agents, families:list, welfare_function,
 		welfare_constraints = []
 	max_welfare = maximize(welfare_function(utilities), feasibility_constraints+positivity_constraints+welfare_constraints)
 	logger.info("Maximum welfare is %g",max_welfare)
-	return AllocationMatrix(z.value)
+	return AllocationMatrix(alloc.value)
 
 
 
@@ -96,7 +96,7 @@ def max_sum_allocation(agents) -> AllocationMatrix:
 	Find the max-sum (aka Utilitarian) allocation.
 	:param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
-	:return allocation_matrix:  a matrix z of a similar shape in which z[i][j] is the fraction allocated to agent i from object j.
+	:return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
 	The allocation should maximize the product (= sum of logs) of utilities
 	>>> max_sum_allocation([ [3] , [5] ]).round(3)   # single item
 	[[0.]
@@ -121,7 +121,7 @@ def max_power_sum_allocation(agents, power:float) -> AllocationMatrix:
 	* When power -> -infinity, it converges to leximin.
 	:param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
-	:return allocation_matrix:  a matrix z of a similar shape in which z[i][j] is the fraction allocated to agent i from object j.
+	:return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
 	The allocation should maximize the product (= sum of logs) of utilities
 	>>> max_power_sum_allocation([ [3] , [5] ], 1).round(3)   
 	[[0.]
@@ -155,7 +155,7 @@ def max_product_allocation(agents) -> AllocationMatrix:
 	Find the max-product (aka Max Nash Welfare) allocation.
 	:param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
-	:return allocation_matrix:  a matrix z of a similar shape in which z[i][j] is the fraction allocated to agent i from object j.
+	:return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
 	The allocation should maximize the product (= sum of logs) of utilities
 	>>> max_product_allocation([ [3] , [5] ]).round(3)   # single item
 	[[0.5]
@@ -177,7 +177,7 @@ def max_minimum_allocation(agents) -> AllocationMatrix:
 	Find the max-minimum (aka Egalitarian) allocation.
 	:param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
-	:return allocation_matrix:  a matrix z of a similar shape in which z[i][j] is the fraction allocated to agent i from object j.
+	:return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
 	The allocation should maximize the leximin vector of utilities.
 	>>> max_minimum_allocation([ [3] , [5] ]).round(3)   # single item
 	[[0.625]
@@ -185,8 +185,8 @@ def max_minimum_allocation(agents) -> AllocationMatrix:
 	>>> max_minimum_allocation([ [4,2] , [1,4] ]).round(3)   # two different items
 	[[1. 0.]
 	 [0. 1.]]
-	>>> z = max_minimum_allocation([ [3,3] , [1,1] ]).round(3)   # two identical items
-	>>> [sum(z[i]) for i in z.agents()]
+	>>> alloc = max_minimum_allocation([ [3,3] , [1,1] ]).round(3)   # two identical items
+	>>> [sum(alloc[i]) for i in alloc.agents()]
 	[0.5, 1.5]
 	>>> v = [ [4,2] , [1,3] ]   # two different items
 	>>> a = max_minimum_allocation(v).round(3)
@@ -208,7 +208,7 @@ def max_minimum_allocation_for_families(agents, families) -> AllocationMatrix:
 	:param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 	:param families: a list of lists. Each list represents a family and contains the indices of the agents in the family.
 
-	:return allocation_matrix:  a matrix z of a similar shape in which z[i][j] is the fraction allocated to agent i from object j.
+	:return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
 	The allocation should maximize the leximin vector of utilities.
 	>>> families = [ [0], [1] ]  # two singleton families
 	>>> max_minimum_allocation_for_families([ [3] , [5] ],families).round(3)
@@ -217,8 +217,8 @@ def max_minimum_allocation_for_families(agents, families) -> AllocationMatrix:
 	>>> max_minimum_allocation_for_families([ [4,2] , [1,4] ], families).round(3)   # two different items
 	[[1. 0.]
 	 [0. 1.]]
-	>>> z = max_minimum_allocation_for_families([ [3,3] , [1,1] ], families).round(3)   # two identical items
-	>>> [sum(z[i]) for i in z.agents()]
+	>>> alloc = max_minimum_allocation_for_families([ [3,3] , [1,1] ], families).round(3)   # two identical items
+	>>> [sum(alloc[i]) for i in alloc.agents()]
 	[0.5, 1.5]
 	>>> v = [ [4,2] , [1,3] ]   # two different items
 	>>> a = max_minimum_allocation_for_families(v, families).round(3)
@@ -248,7 +248,7 @@ def leximin_optimal_allocation(agents) -> AllocationMatrix:
 	--- DRAFT ---
 	:param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
-	:return allocation_matrix:  a matrix z of a similar shape in which z[i][j] is the fraction allocated to agent i from object j.
+	:return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
 	The allocation should maximize the leximin vector of utilities.
 	>>> v = [[5,0],[3,3]]
 	>>> print(leximin_optimal_allocation(v).round(3).utility_profile(v))
@@ -261,16 +261,16 @@ def leximin_optimal_allocation(agents) -> AllocationMatrix:
 	[3. 4. 5.]
 	"""
 	v = valuations.matrix_from(agents)
-	z = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
+	alloc = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
 	feasibility_constraints = [
-		sum([z[i][o] for i in v.agents()])==1
+		sum([alloc[i][o] for i in v.agents()])==1
 		for o in v.objects()
 	]
 	positivity_constraints = [
-		z[i][o] >= 0 for i in v.agents()
+		alloc[i][o] >= 0 for i in v.agents()
 		for o in v.objects()
 	]
-	utilities = [sum([z[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
+	utilities = [sum([alloc[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
 
 	def max_minimum_with_fixed_agents(map_fixed_agent_to_fixed_utility:dict):
 		fixed_agents = map_fixed_agent_to_fixed_utility.keys()
@@ -290,10 +290,10 @@ def leximin_optimal_allocation(agents) -> AllocationMatrix:
 	active_agents = list(v.agents())
 	map_fixed_agent_to_fixed_utility = {}
 	min_utility_for_active_agents = max_minimum_with_fixed_agents({})
-	active_allocation = z.value
+	active_allocation = alloc.value
 	logger.info(f"Min utility for all agents {active_agents}: {min_utility_for_active_agents}")
 	if len(active_agents)<=1:
-		return AllocationMatrix(z.value)
+		return AllocationMatrix(alloc.value)
 
 	while True:
 		map_scapegoat_to_minvalue_without_scapegoat = {}
@@ -302,7 +302,7 @@ def leximin_optimal_allocation(agents) -> AllocationMatrix:
 			min_utility_without_scapegoat = max_minimum_with_fixed_agents({**map_fixed_agent_to_fixed_utility, scapegoat:min_utility_for_active_agents})
 			logger.info(f"Min utility without {scapegoat}: {min_utility_without_scapegoat}")
 			map_scapegoat_to_minvalue_without_scapegoat[scapegoat] = min_utility_without_scapegoat
-			map_scapegoat_to_allocation_without_scapegoat[scapegoat] = z.value
+			map_scapegoat_to_allocation_without_scapegoat[scapegoat] = alloc.value
 		best_scapegoat = max(active_agents, key=lambda i: map_scapegoat_to_minvalue_without_scapegoat[i])
 		best_utility_without_scapegoat = map_scapegoat_to_minvalue_without_scapegoat[best_scapegoat]
 		best_allocation_without_scapegoat = map_scapegoat_to_allocation_without_scapegoat[best_scapegoat]
@@ -331,7 +331,7 @@ def leximin_optimal_allocation_for_families(agents, families:list) -> Allocation
 	:param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 	:param families: a list of lists. Each list represents a family and contains the indices of the agents in the family.
 
-	:return allocation_matrix:  a matrix z of a similar shape in which z[i][j] is the fraction allocated to agent i from object j.
+	:return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
 	The allocation should maximize the leximin vector of utilities.
 	>>> families = [ [0], [1] ]  # two singleton families
 	>>> v = [[5,0],[3,3]]
@@ -362,16 +362,16 @@ def leximin_optimal_allocation_for_families(agents, families:list) -> Allocation
 			map_agent_to_family[agent] = f
 
 	logger.info("map_agent_to_family = %s",map_agent_to_family)
-	z = cvxpy.Variable((num_of_families, v.num_of_objects))
+	alloc = cvxpy.Variable((num_of_families, v.num_of_objects))
 	feasibility_constraints = [
-		sum([z[f][o] for f in range(num_of_families)])==1
+		sum([alloc[f][o] for f in range(num_of_families)])==1
 		for o in v.objects()
 	]
 	positivity_constraints = [
-		z[f][o] >= 0 for f in range(num_of_families)
+		alloc[f][o] >= 0 for f in range(num_of_families)
 		for o in v.objects()
 	]
-	utilities = [sum([z[map_agent_to_family[i]][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
+	utilities = [sum([alloc[map_agent_to_family[i]][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
 
 	def max_minimum_with_fixed_agents(map_fixed_agent_to_fixed_utility:dict):
 		fixed_agents = map_fixed_agent_to_fixed_utility.keys()
@@ -391,10 +391,10 @@ def leximin_optimal_allocation_for_families(agents, families:list) -> Allocation
 	active_agents = list(v.agents())
 	map_fixed_agent_to_fixed_utility = {}
 	min_utility_for_active_agents = max_minimum_with_fixed_agents({})
-	active_allocation = z.value
+	active_allocation = alloc.value
 	logger.info(f"Min utility for all agents {active_agents}: {min_utility_for_active_agents}")
 	if len(active_agents)<=1:
-		return AllocationMatrix(z.value)
+		return AllocationMatrix(alloc.value)
 
 	while True:
 		map_scapegoat_to_minvalue_without_scapegoat = {}
@@ -403,7 +403,7 @@ def leximin_optimal_allocation_for_families(agents, families:list) -> Allocation
 			min_utility_without_scapegoat = max_minimum_with_fixed_agents({**map_fixed_agent_to_fixed_utility, scapegoat:min_utility_for_active_agents})
 			logger.info(f"Min utility without {scapegoat}: {min_utility_without_scapegoat}")
 			map_scapegoat_to_minvalue_without_scapegoat[scapegoat] = min_utility_without_scapegoat
-			map_scapegoat_to_allocation_without_scapegoat[scapegoat] = z.value
+			map_scapegoat_to_allocation_without_scapegoat[scapegoat] = alloc.value
 		best_scapegoat = max(active_agents, key=lambda i: map_scapegoat_to_minvalue_without_scapegoat[i])
 		best_utility_without_scapegoat = map_scapegoat_to_minvalue_without_scapegoat[best_scapegoat]
 		best_allocation_without_scapegoat = map_scapegoat_to_allocation_without_scapegoat[best_scapegoat]
