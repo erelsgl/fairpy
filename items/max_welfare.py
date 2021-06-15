@@ -250,6 +250,7 @@ def leximin_optimal_allocation(agents) -> AllocationMatrix:
 
 	:return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
 	The allocation should maximize the leximin vector of utilities.
+	>>> logger.setLevel(logging.WARNING)
 	>>> v = [[5,0],[3,3]]
 	>>> print(leximin_optimal_allocation(v).round(3).utility_profile(v))
 	[3.75 3.75]
@@ -259,6 +260,7 @@ def leximin_optimal_allocation(agents) -> AllocationMatrix:
 	>>> v = [[3,0,0],[0,4,0],[5,5,5]]
 	>>> print(leximin_optimal_allocation(v).round(3).utility_profile(v))
 	[3. 4. 5.]
+	>>> logger.setLevel(logging.WARNING)
 	"""
 	v = valuations.matrix_from(agents)
 	alloc = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
@@ -300,7 +302,7 @@ def leximin_optimal_allocation(agents) -> AllocationMatrix:
 		map_scapegoat_to_allocation_without_scapegoat = {}
 		for scapegoat in active_agents:
 			min_utility_without_scapegoat = max_minimum_with_fixed_agents({**map_fixed_agent_to_fixed_utility, scapegoat:min_utility_for_active_agents})
-			logger.info(f"Min utility without {scapegoat}: {min_utility_without_scapegoat}")
+			logger.info(f"Min utility with {scapegoat} fixed: {min_utility_without_scapegoat}")
 			map_scapegoat_to_minvalue_without_scapegoat[scapegoat] = min_utility_without_scapegoat
 			map_scapegoat_to_allocation_without_scapegoat[scapegoat] = alloc.value
 		best_scapegoat = max(active_agents, key=lambda i: map_scapegoat_to_minvalue_without_scapegoat[i])

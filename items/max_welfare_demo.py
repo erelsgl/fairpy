@@ -11,6 +11,11 @@ from fairpy.items.max_welfare import *
 import numpy as np
 import fairpy.valuations as valuations
 
+import sys
+logger.addHandler(logging.StreamHandler(sys.stdout))
+# logger.setLevel(logging.INFO)
+
+
 def show(title, z, v):
     utility_profile = z.utility_profile(v)
     print(title, " = \n",z, "\nprofile = ", utility_profile, "\nsum = ", sum(utility_profile), "product = ", np.prod(z.utility_profile(v)))
