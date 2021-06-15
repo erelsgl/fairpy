@@ -8,6 +8,7 @@ Since:  2021-05
 """
 
 from fairpy.items.max_welfare import *
+from fairpy.items.leximin import *
 import fairpy.valuations as valuations
 
 
