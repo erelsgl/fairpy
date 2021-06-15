@@ -68,7 +68,7 @@ class ValuationMatrix:
 
         self._v = valuation_matrix
         self.num_of_agents = len(valuation_matrix)
-        self.num_of_objects = len(valuation_matrix[0])
+        self.num_of_objects = 0 if self.num_of_agents == 0 else len(valuation_matrix[0])
 
     def agents(self):
         return range(self.num_of_agents)
@@ -100,6 +100,12 @@ class ValuationMatrix:
         """
         return ValuationMatrix(np.delete(self._v, object, axis=1))
 
+    def submatrix(self, agents: List[int], objects: List[int]):
+        """
+        :return a submatrix of this valuation matrix, containing only specified agents and objects.
+        """
+        return ValuationMatrix(self._v[np.ix_(agents, objects)])
+
     def verify_ordered(self)->bool:
         """
         Verifies that the instance is ordered --- all valuations are ordered by descending value.
@@ -116,7 +122,30 @@ class ValuationMatrix:
             v_i = self._v[i]
             if any(v_i[j] < v_i[j+1] for j in range(self.num_of_objects-1)):
                 raise ValueError(f"Valuations of agent {i} are not ordered: {v_i}")
-    
+
+    def normalize(self) -> int:
+        """
+        Normalize valuation matrix so that each agent has equal total value of all items.
+        In case of integer values they remain integer to avoid floating point mistakes.
+        """
+        total_values = np.sum(self._v, axis=1, keepdims=True)
+
+        if issubclass(self._v.dtype.type, np.integer):
+            total_value = np.lcm.reduce(total_values)
+            self._v *= total_value // total_values
+            return total_value
+
+        self._v /= total_values
+        return 1
+
+    def verify_normalized(self) -> int:
+        """
+        Check if total value of each agent is the same. Return total value.
+        """
+        total_values = np.sum(self._v, axis=1)
+        if not np.all(total_values == total_values[0]):
+            raise ValueError("Valuation matrix is not normalized")
+        return total_values[0]
 
     def equals(self, other)->bool:
         return np.array_equal(self._v, other._v)
