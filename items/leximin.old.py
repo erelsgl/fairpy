@@ -76,50 +76,65 @@ def leximin_optimal_allocation(agents) -> AllocationMatrix:
 	]
 	utilities = [sum([alloc[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
 
-	def leximin_optimal_with_fixed_agents(map_fixed_agent_to_fixed_utility:dict):
+	def max_minimum_with_fixed_agents(map_fixed_agent_to_fixed_utility:dict):
 		"""
 		A subroutine that assumes that, for some subset of the agents, the utility is held fixed,
-		  and subject to this, computes the leximin-optimal allocation for the other ("free") agents.
-		:return an allocation matrix.
+		  and subject to this, computes the largest possible minimum utility of the other agents.
 		"""
-		num_of_fixed_agents = len(map_fixed_agent_to_fixed_utility)
-		spaces = "."*(2*num_of_fixed_agents) # for nice display in logs
-		logger.info("%sComputing leximin-optimal allocation with fixed agents %s", spaces, map_fixed_agent_to_fixed_utility)
+		min_utility_for_non_fixed_agents = cvxpy.Variable()
 		order_constraints_for_fixed_agents = [
 			utilities[i] == fixed_utility
 			for i,fixed_utility in map_fixed_agent_to_fixed_utility.items()
 		]
-		free_agents = [i for i in v.agents() if i not in map_fixed_agent_to_fixed_utility]
-		min_utility_for_free_agents = cvxpy.Variable()
-		order_constraints_for_free_agents = [
-			utilities[i] >= min_utility_for_free_agents
-			for i in free_agents
+		order_constraints_for_non_fixed_agents = [
+			utilities[i] >= min_utility_for_non_fixed_agents
+			for i in v.agents()
+			if i not in map_fixed_agent_to_fixed_utility
 		]
-		order_constraints = order_constraints_for_fixed_agents + order_constraints_for_free_agents
-		max_min_utility_for_free_agents = maximize(min_utility_for_free_agents, feasibility_constraints + positivity_constraints + order_constraints)
-		logger.info("%sMax min value is %g", spaces, max_min_utility_for_free_agents)
-		if len(free_agents) <= 1: 
-			map_fixed_agent_to_fixed_utility[free_agents[0]] = max_min_utility_for_free_agents
-			logger.info("%sNo agents remain free - keeping the utility profile %s.",spaces,map_fixed_agent_to_fixed_utility)
-			return alloc.value
+		order_constraints = order_constraints_for_fixed_agents + order_constraints_for_non_fixed_agents
+		return maximize(min_utility_for_non_fixed_agents, feasibility_constraints + positivity_constraints + order_constraints)
 
-		# Else, find a "scapegoat" - an agent whose utility is kept fixed at the minimum,
-		#       such that the other agents can get higher utilities.
-		map_scapegoat_to_leximin_vector_without_scapegoat = {}
-		map_scapegoat_to_allocation_without_scapegoat     = {}
-		for scapegoat in free_agents:
-			leximin_allocation_without_scapegoat = AllocationMatrix(leximin_optimal_with_fixed_agents({**map_fixed_agent_to_fixed_utility, scapegoat:max_min_utility_for_free_agents}))
-			leximin_vector_without_scapegoat = sorted(leximin_allocation_without_scapegoat.utility_profile(v))
-			logger.info(f"%sLeximin-optimal vector when the utility of %d is fixed at %g: %s", spaces, scapegoat, max_min_utility_for_free_agents ,leximin_vector_without_scapegoat)
-			map_scapegoat_to_leximin_vector_without_scapegoat[scapegoat] = leximin_vector_without_scapegoat
-			map_scapegoat_to_allocation_without_scapegoat[scapegoat] = leximin_allocation_without_scapegoat
-		best_scapegoat = max(free_agents, key=lambda i: map_scapegoat_to_leximin_vector_without_scapegoat[i])
+	active_agents = list(v.agents())
+	map_fixed_agent_to_fixed_utility = {}
+	min_utility_for_active_agents = max_minimum_with_fixed_agents({})
+	active_allocation = alloc.value
+	logger.info(f"Min utility for all agents {active_agents}: {min_utility_for_active_agents}")
+	if len(active_agents)<=1:
+		return AllocationMatrix(alloc.value)
+
+	while True:
+		# A "scapegoat" is an agent whose utility is kept fixed at the minimum, such that the other agents can get higher utilities.
+		map_scapegoat_to_minvalue_without_scapegoat = {}
+		map_scapegoat_to_allocation_without_scapegoat = {}
+		for scapegoat in active_agents:
+			min_utility_without_scapegoat = max_minimum_with_fixed_agents({**map_fixed_agent_to_fixed_utility, scapegoat:min_utility_for_active_agents})
+			logger.info(f"Min utility with {scapegoat} fixed: {min_utility_without_scapegoat}")
+			map_scapegoat_to_minvalue_without_scapegoat[scapegoat] = min_utility_without_scapegoat
+			map_scapegoat_to_allocation_without_scapegoat[scapegoat] = alloc.value
+		best_scapegoat = max(active_agents, key=lambda i: map_scapegoat_to_minvalue_without_scapegoat[i])
+		best_utility_without_scapegoat = map_scapegoat_to_minvalue_without_scapegoat[best_scapegoat]
 		best_allocation_without_scapegoat = map_scapegoat_to_allocation_without_scapegoat[best_scapegoat]
-		logger.info("%sBest scapegoat is %d.",spaces, best_scapegoat)
-		return best_allocation_without_scapegoat
+		if best_utility_without_scapegoat > min_utility_for_active_agents:
+			logger.info(f"Best scapegoat is {best_scapegoat}: fixing its utility to {min_utility_for_active_agents}, and increasing the others' min utility to {best_utility_without_scapegoat}.")
+			map_fixed_agent_to_fixed_utility[best_scapegoat] = min_utility_for_active_agents
+			min_utility_for_active_agents = best_utility_without_scapegoat
+			active_allocation = best_allocation_without_scapegoat
+			active_agents = [i for i in active_agents if i!=best_scapegoat]
+			if len(active_agents)<=1: 
+				map_fixed_agent_to_fixed_utility[active_agents[0]] = best_utility_without_scapegoat
+				logger.info(f"Only one agent remains - keeping the utility profile {map_fixed_agent_to_fixed_utility}.\n")
+				break
+		else:
+			for i in active_agents:
+				map_fixed_agent_to_fixed_utility[i] = min_utility_for_active_agents
+			logger.info(f"No scapegoat improves the current utility - keeping the utility profile {map_fixed_agent_to_fixed_utility}.\n")
+			break
 
-	# Call the recursive function with no fixed agents:
-	return leximin_optimal_with_fixed_agents({})  
+	return AllocationMatrix(active_allocation)
+
+
+
+
 
 
 
@@ -188,38 +203,38 @@ def leximin_optimal_allocation_for_families(agents, families:list) -> Allocation
 		order_constraints = order_constraints_for_fixed_agents + order_constraints_for_non_fixed_agents
 		return maximize(min_utility_for_non_fixed_agents, feasibility_constraints + positivity_constraints + order_constraints)
 
-	free_agents = list(v.agents())
+	active_agents = list(v.agents())
 	map_fixed_agent_to_fixed_utility = {}
-	min_utility_for_free_agents = max_minimum_with_fixed_agents({})
+	min_utility_for_active_agents = max_minimum_with_fixed_agents({})
 	active_allocation = alloc.value
-	logger.info(f"Min utility for all agents {free_agents}: {min_utility_for_free_agents}")
-	if len(free_agents)<=1:
+	logger.info(f"Min utility for all agents {active_agents}: {min_utility_for_active_agents}")
+	if len(active_agents)<=1:
 		return AllocationMatrix(alloc.value)
 
 	while True:
 		map_scapegoat_to_minvalue_without_scapegoat = {}
 		map_scapegoat_to_allocation_without_scapegoat = {}
-		for scapegoat in free_agents:
-			min_utility_without_scapegoat = max_minimum_with_fixed_agents({**map_fixed_agent_to_fixed_utility, scapegoat:min_utility_for_free_agents})
+		for scapegoat in active_agents:
+			min_utility_without_scapegoat = max_minimum_with_fixed_agents({**map_fixed_agent_to_fixed_utility, scapegoat:min_utility_for_active_agents})
 			logger.info(f"Min utility without {scapegoat}: {min_utility_without_scapegoat}")
 			map_scapegoat_to_minvalue_without_scapegoat[scapegoat] = min_utility_without_scapegoat
 			map_scapegoat_to_allocation_without_scapegoat[scapegoat] = alloc.value
-		best_scapegoat = max(free_agents, key=lambda i: map_scapegoat_to_minvalue_without_scapegoat[i])
+		best_scapegoat = max(active_agents, key=lambda i: map_scapegoat_to_minvalue_without_scapegoat[i])
 		best_utility_without_scapegoat = map_scapegoat_to_minvalue_without_scapegoat[best_scapegoat]
 		best_allocation_without_scapegoat = map_scapegoat_to_allocation_without_scapegoat[best_scapegoat]
-		if best_utility_without_scapegoat > min_utility_for_free_agents:
-			logger.info(f"Best scapegoat is {best_scapegoat}: fixing its utility to {min_utility_for_free_agents}, and increasing the others' min utility to {best_utility_without_scapegoat}.")
-			map_fixed_agent_to_fixed_utility[best_scapegoat] = min_utility_for_free_agents
-			min_utility_for_free_agents = best_utility_without_scapegoat
+		if best_utility_without_scapegoat > min_utility_for_active_agents:
+			logger.info(f"Best scapegoat is {best_scapegoat}: fixing its utility to {min_utility_for_active_agents}, and increasing the others' min utility to {best_utility_without_scapegoat}.")
+			map_fixed_agent_to_fixed_utility[best_scapegoat] = min_utility_for_active_agents
+			min_utility_for_active_agents = best_utility_without_scapegoat
 			active_allocation = best_allocation_without_scapegoat
-			free_agents = [i for i in free_agents if i!=best_scapegoat]
-			if len(free_agents)<=1: 
-				map_fixed_agent_to_fixed_utility[free_agents[0]] = best_utility_without_scapegoat
+			active_agents = [i for i in active_agents if i!=best_scapegoat]
+			if len(active_agents)<=1: 
+				map_fixed_agent_to_fixed_utility[active_agents[0]] = best_utility_without_scapegoat
 				logger.info(f"Only one agent remains - keeping the utility profile {map_fixed_agent_to_fixed_utility}.\n")
 				break
 		else:
-			for i in free_agents:
-				map_fixed_agent_to_fixed_utility[i] = min_utility_for_free_agents
+			for i in active_agents:
+				map_fixed_agent_to_fixed_utility[i] = min_utility_for_active_agents
 			logger.info(f"No scapegoat improves the current utility - keeping the utility profile {map_fixed_agent_to_fixed_utility}.\n")
 			break
 
@@ -236,8 +251,8 @@ if __name__ == '__main__':
 	solve.logger.addHandler(logging.StreamHandler(sys.stdout))
 	# solve.logger.setLevel(logging.INFO)
 
-	# v = [[3,0,0],[0,4,0],[5,5,10],[5,5,10]]
-	# print(leximin_optimal_allocation(v).round(3).utility_profile(v))
+	v = [[3,0,0],[0,3,0],[5,5,10],[5,5,10]]
+	print(leximin_optimal_allocation(v).round(3).utility_profile(v))
 
 	import doctest
 	(failures, tests) = doctest.testmod(report=True)
