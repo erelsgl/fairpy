@@ -16,3 +16,4 @@ class items:
 	from fairpy.items.iterated_maximum_matching import iterated_maximum_matching
 	from fairpy.items.partitions import partitions, partitions_to_at_most_c, partitions_to_exactly_c
 	from fairpy.items.min_sharing import proportional_allocation_with_min_sharing, envyfree_allocation_with_min_sharing, maxproduct_allocation_with_min_sharing
+	from fairpy.items.propm_allocation import propm_allocation

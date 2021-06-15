@@ -69,6 +69,7 @@ print("Iterated maximum matching: \n", fairpy.items.iterated_maximum_matching(ag
 print("Max sum (aka utilitarian) allocation: \n", fairpy.items.max_sum_allocation(agents).round(3))
 print("Max product (aka Nash welfare) allocation: \n", fairpy.items.max_product_allocation(agents).round(3))
 print("Leximin allocation: \n", fairpy.items.leximin_optimal_allocation(agents).round(3))
+print("PROPm allocation:"); print(fairpy.items.propm_allocation(agents))
 
 # print("Minimum-sharing envy-free allocation: \n", fairpy.items.envyfree_allocation_with_min_sharing(agents).round(3))
 # print(fairpy.items.bidirectional_bag_filling(agents, thresholds=[13,12]))
