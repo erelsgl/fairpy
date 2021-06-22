@@ -120,11 +120,14 @@ def leximin_optimal_allocation(agents) -> AllocationMatrix:
 			map_saturated_agent_to_saturated_utility[ifree] = max_min_utility_for_free_agents
 			order_constraints_for_saturated_agents.append(utilities[ifree] >= max_min_utility_for_free_agents)
 
-		free_agents = [i for i in v.agents() if map_saturated_agent_to_saturated_utility[i] is None]
-		if len(free_agents)==0:
+		new_free_agents = [i for i in free_agents if map_saturated_agent_to_saturated_utility[i] is None]
+		if len(new_free_agents)==len(free_agents):
+			raise ValueError("No new saturated agents - this contradicts Willson's theorem!")
+		if len(new_free_agents)==0:
 			logger.info("All agents are saturated -- utility profile is %s.",map_saturated_agent_to_saturated_utility)
 			logger.info("%d calls to solver.",leximin_optimal_allocation.num_of_calls_to_solver)
 			return  AllocationMatrix(alloc.value)
+		free_agents = new_free_agents
 
 
 
