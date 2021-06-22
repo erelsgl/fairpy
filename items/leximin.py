@@ -2,11 +2,16 @@
 
 """ 
 Find a fractionl allocation that maximizes the leximin vector.
+Based on:
+
+Stephen J. Willson
+["Fair Division Using Linear Programming"](https://swillson.public.iastate.edu/FairDivisionUsingLPUnpublished6.pdf)
+* Part 6, pages 20--27.
+
+Programmer: Erel Segal-Halevi.
+  I am grateful to Sylvain Bouveret for his help with the algorithm. All errors and bugs are my own.
 
 See also: [max_welfare.py](max_welfare.py).
-
-Author: Erel Segal-Halevi
-  I am grateful to Sylvain Bouveret for his help with the algorithm. All errors and bugs are my own.
 
 Since:  2021-05
 """
@@ -33,9 +38,10 @@ def is_leximin_better(x:list, y:list):
 	return sorted(x) > sorted(y)
 
 
+TOLERANCE_FACTOR=1.001  # for comparing floating-point numbers
+
 
 ##### Find a leximin-optimal allocation for individual agents
-
 
 def leximin_optimal_allocation(agents) -> AllocationMatrix:
 	"""
@@ -80,64 +86,45 @@ def leximin_optimal_allocation(agents) -> AllocationMatrix:
 	utilities = [sum([alloc[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
 	leximin_optimal_allocation.num_of_calls_to_solver = 0  # for performance analysis
 
-	def leximin_optimal_with_fixed_agents(map_fixed_agent_to_fixed_utility:dict, lower_bound_on_max_min_utility_for_free_agents:float)->AllocationMatrix:
-		"""
-		A subroutine that assumes that, for some subset of the agents, the utility is held fixed,
-		  and subject to this, computes the leximin-optimal allocation for the other ("free") agents.
-		:param map_fixed_agent_to_fixed_utility
-		:param lower_bound_on_max_min_utility_for_free_agents: if the max-min-utility we find is smaller than this, we will stop and not proceed with the recursion.
-		:return an AllocationMatrix.
-		"""
-		num_of_fixed_agents = len(map_fixed_agent_to_fixed_utility)
-		spaces = "."*(2*num_of_fixed_agents) # for nice display in logs
-		logger.info("%sComputing leximin-optimal allocation with fixed agents %s and lower-bound %g", spaces, map_fixed_agent_to_fixed_utility, lower_bound_on_max_min_utility_for_free_agents)
-		order_constraints_for_fixed_agents = [
-			utilities[i] == fixed_utility
-			for i,fixed_utility in map_fixed_agent_to_fixed_utility.items()
-		]
-		free_agents = [i for i in v.agents() if i not in map_fixed_agent_to_fixed_utility]
+	# Initially all agents are free - no agent is fixed:
+	free_agents = list(v.agents())
+	map_fixed_agent_to_fixed_utility = v.num_of_agents * [None]
+	order_constraints_for_fixed_agents = []
+
+	while True:
 		min_utility_for_free_agents = cvxpy.Variable()
 		order_constraints_for_free_agents = [
 			utilities[i] >= min_utility_for_free_agents
 			for i in free_agents
 		]
-		order_constraints = order_constraints_for_fixed_agents + order_constraints_for_free_agents
-		max_min_utility_for_free_agents = maximize(min_utility_for_free_agents, feasibility_constraints + positivity_constraints + order_constraints)
+		max_min_utility_for_free_agents = maximize(min_utility_for_free_agents, feasibility_constraints + positivity_constraints + order_constraints_for_fixed_agents + order_constraints_for_free_agents)
+		utilities_in_max_min_allocation = [utilities[i].value for i in v.agents()]
 		leximin_optimal_allocation.num_of_calls_to_solver += 1
-		logger.info("%sMax min value is %g.", spaces, max_min_utility_for_free_agents)
-		if max_min_utility_for_free_agents <= lower_bound_on_max_min_utility_for_free_agents:
-			logger.info("%s  It is smaller than the lower bound -- skipping.",spaces)
-			return None, max_min_utility_for_free_agents
-		if len(free_agents) <= 1: 
-			map_fixed_agent_to_fixed_utility[free_agents[0]] = max_min_utility_for_free_agents
-			logger.info("%sAll agents are fixed -- utility profile %s.",spaces,map_fixed_agent_to_fixed_utility)
-			return AllocationMatrix(alloc.value), max_min_utility_for_free_agents
+		logger.info("Fixed utilities: %s, utilities: %s, max min value: %g.", map_fixed_agent_to_fixed_utility, utilities_in_max_min_allocation, max_min_utility_for_free_agents)
 
-		# Else, find a "scapegoat" - an agent whose utility is kept fixed at the minimum,
-		#       such that the other agents can get higher utilities.
-		map_scapegoat_to_leximin_vector_without_scapegoat = {}
-		map_scapegoat_to_allocation_without_scapegoat     = {}
-		new_lower_bound_on_max_min_utility_for_free_agents = lower_bound_on_max_min_utility_for_free_agents
-		for scapegoat in free_agents:
-			new_map_fixed_agent_to_fixed_utility = {**map_fixed_agent_to_fixed_utility, scapegoat:max_min_utility_for_free_agents}
-			logger.info("%sRecursively computing Leximin-optimal vector when agent #%d is fixed at utility %g:", spaces, scapegoat, max_min_utility_for_free_agents)
-			leximin_allocation_without_scapegoat, max_min_utility_without_scapegoat = leximin_optimal_with_fixed_agents(new_map_fixed_agent_to_fixed_utility, new_lower_bound_on_max_min_utility_for_free_agents)
-			if leximin_allocation_without_scapegoat is not None:
-				new_lower_bound_on_max_min_utility_for_free_agents = max_min_utility_without_scapegoat
-				leximin_vector_without_scapegoat = sorted(leximin_allocation_without_scapegoat.utility_profile(v))
-				logger.info("%sLeximin-optimal vector when agent #%d is fixed at utility %g = %s", spaces, scapegoat, max_min_utility_for_free_agents ,leximin_vector_without_scapegoat)
-				map_scapegoat_to_leximin_vector_without_scapegoat[scapegoat] = leximin_vector_without_scapegoat
-				map_scapegoat_to_allocation_without_scapegoat[scapegoat] = leximin_allocation_without_scapegoat
-		best_scapegoat = max(map_scapegoat_to_leximin_vector_without_scapegoat.keys(), key=lambda i: map_scapegoat_to_leximin_vector_without_scapegoat[i])
-		best_allocation_without_scapegoat = map_scapegoat_to_allocation_without_scapegoat[best_scapegoat]
-		logger.info("%sBest scapegoat is %d, with leximin vector %s",spaces, best_scapegoat, map_scapegoat_to_leximin_vector_without_scapegoat[best_scapegoat])
-		return best_allocation_without_scapegoat, max_min_utility_for_free_agents
+		for ifree in free_agents:  # Find whether i's utility can be improved
+			if utilities_in_max_min_allocation[ifree] > TOLERANCE_FACTOR*max_min_utility_for_free_agents:
+				logger.info("  Max utility of agent #%d is at least %g: agent remains free.", ifree, utilities_in_max_min_allocation[ifree])
+				continue
+			new_order_constraints_for_free_agents = [
+				utilities[i] >= max_min_utility_for_free_agents
+				for i in free_agents if i!=ifree
+			]
+			max_utility_for_ifree = maximize(utilities[ifree], feasibility_constraints + positivity_constraints + order_constraints_for_fixed_agents + new_order_constraints_for_free_agents)
+			leximin_optimal_allocation.num_of_calls_to_solver += 1
+			if max_utility_for_ifree > TOLERANCE_FACTOR*max_min_utility_for_free_agents:
+				logger.info("  Max utility of agent #%d is %g: agent remains free.", ifree, max_utility_for_ifree)
+				continue
+			logger.info("  Max utility of agent #%d is %g: agent becomes fixed.", ifree, max_utility_for_ifree)
+			map_fixed_agent_to_fixed_utility[ifree] = max_min_utility_for_free_agents
+			order_constraints_for_fixed_agents.append(utilities[ifree] >= max_min_utility_for_free_agents)
 
+		free_agents = [i for i in v.agents() if map_fixed_agent_to_fixed_utility[i] is None]
+		if len(free_agents)==0:
+			logger.info("All agents are fixed -- utility profile is %s.",map_fixed_agent_to_fixed_utility)
+			logger.info("%d calls to solver.",leximin_optimal_allocation.num_of_calls_to_solver)
+			return  AllocationMatrix(alloc.value)
 
-	# Call the recursive function with no fixed agents and lower bound = 0:
-	allocation, _ = leximin_optimal_with_fixed_agents({}, 0)  
-	logger.info("%d calls to solver.",leximin_optimal_allocation.num_of_calls_to_solver)
-	return allocation
 
 
 
@@ -246,21 +233,6 @@ def leximin_optimal_allocation_for_families(agents, families:list) -> Allocation
 
 
 if __name__ == '__main__':
-	import sys
-	logger.addHandler(logging.StreamHandler(sys.stdout))
-	logger.setLevel(logging.INFO)
-
-	from fairpy import solve
-	solve.logger.addHandler(logging.StreamHandler(sys.stdout))
-	# solve.logger.setLevel(logging.INFO)
-
-	# v = [[3,0,0],[0,4,0],[5,5,10],[5,5,10],[5,5,10]]
-	# v = [[3,0],[5,5]]
-	# v = [[3,0,0],[0,4,0],[5,5,5]]
-	# v = [[3,0,0],[0,4,0],[5,5,10],[5,5,10]]
-	# v = [[4,0,0],[0,3,0],[5,5,10],[5,5,10]]
-	# print(leximin_optimal_allocation(v).round(3).utility_profile(v))
-
 	import doctest
 	(failures, tests) = doctest.testmod(report=True)
 	print("{} failures, {} tests".format(failures, tests))
