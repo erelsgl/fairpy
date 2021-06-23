@@ -15,6 +15,7 @@ from fairpy.items.min_sharing_impl.GraphGenerator import GraphGenerator
 
 from fairpy.items.min_sharing_impl.time_limit import time_limit, TimeoutException
 
+import numpy as np
 from abc import ABC, abstractmethod
 import datetime, cvxpy
 
@@ -48,7 +49,7 @@ class FairAllocationProblem():
         Find an allocatin that corresponds to the given consumption graph and satisfies the fairness criterion. 
         :return the allocation, or None if none found.
         """
-        pass
+        return None
 
 
     def find_allocation_for_all_graphs_with_numsharings(self, allowed_num_of_sharings:int)->AllocationMatrix:
@@ -128,9 +129,6 @@ class ErrorAllocationMatrix(AllocationMatrix):
 
     def num_of_sharings(self): 
         return self.default_num_of_sharings
-
-    def utility_profile(self, v):
-        return [0]
 
     def __repr__(self):
         return "ErrorAllocationMatrix"

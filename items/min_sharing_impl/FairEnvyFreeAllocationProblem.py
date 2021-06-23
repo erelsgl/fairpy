@@ -7,6 +7,7 @@
 """
 
 
+import numpy as np
 import cvxpy
 
 from fairpy.allocations import AllocationMatrix
@@ -34,7 +35,7 @@ class FairEnvyFreeAllocationProblem(FairAllocationProblem):
     def fairness_adjective(self)->str:
         return "envy-free"
 
-    def find_allocation_for_graph(self, consumption_graph: ConsumptionGraph)->AllocationMatrix:
+    def find_allocation_for_graph(self, consumption_graph: ConsumptionGraph)->np.ndarray:
         """
         Accepts a consumption graph and tries to find an envy free allocation.
         Uses cvxpy to solve a linear program.

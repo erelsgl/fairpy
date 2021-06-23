@@ -76,7 +76,6 @@ class AllocationMatrix:
     def round(self, num_digits:int):
         """
         Rounds the allocation to the given number of digits.
-
         WARNING: The rounding might change the sum of rows and columns.
         See here http://people.mpi-inf.mpg.de/~doerr/papers/unbimatround.pdf 
         for an unbiased matrix rounding algorithm
@@ -88,38 +87,6 @@ class AllocationMatrix:
                     fraction=0   # avoid "negative zero"
                 self._z[i][j] = fraction
         return self
-
-    def utility_profile(self, valuation_matrix)->np.array:
-        """
-        Returns a vector that maps each agent to its utility (=sum of values) under this allocation.
-
-        >>> z = AllocationMatrix([[.2,.3,.5],[.8,.7,.5]])
-        >>> v = valuations.matrix_from([[0.5,1,0],[0.5,0,1]])
-        >>> z.utility_profile(v)
-        array([0.4, 0.9])
-        """
-        return np.array([np.dot(valuation_matrix[i],self[i]) for i in self.agents()])
-
-
-    def utility_profile_for_families(self, valuation_matrix, families:list)->np.array:
-        """
-        Returns a vector that maps each agent to its utility (=sum of values) under this allocation,
-        which is considered an allocation for families.
-
-        >>> z = AllocationMatrix([[.2,.3,.5],[.8,.7,.5]])
-        >>> v = valuations.matrix_from([[0.5,1,0],[0.5,0,1]])
-        >>> z.utility_profile_for_families(v, families=[[0],[1]])
-        array([0.4, 0.9])
-        >>> z.utility_profile_for_families(v, families=[[1],[0]])
-        array([1.1, 0.6])
-        """
-        valuation_matrix = valuations.matrix_from(valuation_matrix)
-        map_agent_to_family = [None]*valuation_matrix.num_of_agents
-        for f,family in enumerate(families):
-            for agent in family:
-                map_agent_to_family[agent] = f
-        return np.array([np.dot(valuation_matrix[i],self[map_agent_to_family[i]]) for i in valuation_matrix.agents()])
-
 
     def __getitem__(self, key):
         if isinstance(key,tuple):
@@ -310,9 +277,6 @@ class Allocation:
 
     def num_of_sharings(self)->int:
         return self.matrix.num_of_sharings()
-
-    def num_of_shared_objects(self)->int:
-        return self.matrix.num_of_shared_objects()
 
     def __getitem__(self, agent_index:int):
         return self.bundles[agent_index]
