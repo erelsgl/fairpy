@@ -6,8 +6,6 @@
     Since:  2020
 """
 
-import cvxpy
-
 from fairpy import valuations
 from fairpy.items.max_welfare import max_product_allocation
 from fairpy.items.min_sharing_impl.FairThresholdAllocationProblem import FairThresholdAllocationProblem
@@ -69,7 +67,7 @@ class FairMaxProductAllocationProblem(FairThresholdAllocationProblem):
     def __init__(self, valuation_matrix, tolerance=0.01):
         valuation_matrix = valuations.matrix_from(valuation_matrix)
         mpa = max_product_allocation(valuation_matrix)
-        mpa_utilities = mpa.utility_profile(valuation_matrix)
+        mpa_utilities = mpa.utility_profile()
         logger.info("The max-product allocation is:\n%s,\nwith utility profile: %s",mpa,mpa_utilities)
         thresholds = mpa_utilities * (1-tolerance)
         logger.info("The thresholds are: %s",thresholds)

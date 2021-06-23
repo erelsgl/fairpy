@@ -9,7 +9,7 @@
 
 import cvxpy
 
-from fairpy.items.allocations import AllocationMatrix
+from fairpy.allocations import AllocationMatrix
 from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
 from fairpy.items.min_sharing_impl.FairAllocationProblem import FairAllocationProblem
 

@@ -225,21 +225,16 @@ def findPiece(reamin:List[tuple], attr:float , leftOrRight:int)->tuple:
 def setRemain(partialAlloc:List[List[tuple]], agents: List[Agent])->List[List[tuple]]:
     """
     Set the remain intervals to the agents
-    :param allocation: An partial allocation of (0,1)
+    :param allocation: A partial allocation of (0,1)
     :param agents: A list of agents
-    :return: A fully allocation of (0,1)
+    :return: A complete allocation of (0,1)
     >>> Alice = PiecewiseConstantAgent([33, 33], "Alice")
     >>> George = PiecewiseConstantAgent([5, 5], "George")
     >>> agents = [Alice, George]
     >>> pieces = 2*[None]
     >>> pieces[0] = [(0.4, 0.73)]
     >>> pieces[1] = [(0.2, 0.3)]
-    >>> alloc = Allocation(agents, pieces)
-    >>> print(alloc)
-    Alice gets {(0.4, 0.73)} with value 10.9.
-    George gets {(0.2, 0.3)} with value 0.5.
-    <BLANKLINE>
-    >>> pieces = setRemain(alloc.get_bundles(),agents)
+    >>> pieces = setRemain(pieces,agents)
     >>> pieces
     [[(0.4, 0.73), (0.73, 1)], [(0.2, 0.3), (0.3, 0.4), (0, 0.2)]]
     >>> print(Allocation(agents,pieces))
@@ -248,8 +243,6 @@ def setRemain(partialAlloc:List[List[tuple]], agents: List[Agent])->List[List[tu
     <BLANKLINE>
     """
     remain = findRemainIntervals(partialAlloc)
-    choice = random.choice(('Left', 'Right'))
-
     for i,pieces in zip(range(len(partialAlloc)),partialAlloc):
         if(pieces==None):
             maxPiece , maxEval = 0,0

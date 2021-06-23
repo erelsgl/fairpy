@@ -13,7 +13,6 @@ Since: 2020-2
 
 from fairpy.criteria import is_envyfree
 from fairpy import Allocation
-from fairpy.cake.pieces import merge_allocations
 from fairpy.agents import Agent
 from typing import *
 
@@ -116,24 +115,23 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
     :param roundAcc: the rounding accuracy of the algorithm in decimal digits.
     :return: an envy-free allocation.
 
-    >>> Allocation.default_separator=", "
-    >>> Allocation.default_precision=3
     >>> from fairpy.agents import PiecewiseUniformAgent
     >>> Alice = PiecewiseUniformAgent([(5,7)], "Alice")
     >>> George = PiecewiseUniformAgent([(4,9)], "George")
     >>> print(str(EFAllocate([Alice,George])))
     Alice gets {(0, 6.0)} with value 1.
-    George gets {(6.0, 7.5), (7.5, 9.0)} with value 3.
+    George gets {(6.0, 7.5),(7.5, 9.0)} with value 3.
     <BLANKLINE>
     >>> Alice = PiecewiseUniformAgent([(2,3), (9,10)], "Alice")
     >>> George = PiecewiseUniformAgent([(1,2), (6,7)], "George")
     >>> print(str(EFAllocate([Alice,George])))
+    Alice gets {(2.0, 6.0),(6.0, 10.0)} with value 2.
     George gets {(0, 2.0)} with value 1.
-    Alice gets {(2.0, 6.0), (6.0, 10.0)} with value 2.
     <BLANKLINE>
     """
+    num_of_agents = len(agents)
 
-    def sandwichAllocation(a, b, alpha, beta, n):
+    def sandwichAllocation(a, b, alpha, beta, n)->List[List[Tuple[float,float]]]:
         """
         creates a sandwich allocation using the specified paramaters.
         :param a: starting point of the section to split.
@@ -166,7 +164,7 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
                     ret[-1].append(inter)
         return ret
 
-    def EFAllocateRec(a: float, b: float)->Allocation:
+    def EFAllocateRec(a: float, b: float)->List[List[Tuple[float,float]]]:
         """
         exactly the same as EFAllocate, but creates the envy free allocation
         within a given interval.
@@ -187,10 +185,10 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
         #2
         for inter in cover:
             pieces = sandwichAllocation(a,b,inter[0],inter[1],numAgents)
-            for perm in permutations(agents):
-                if is_envyfree(perm, pieces, roundAcc):
+            for permuted_pieces in permutations(pieces):
+                if is_envyfree(agents, permuted_pieces, roundAcc):
                     logger.info("allocation from %f to %f completed with sandwich allocation.",a,b)
-                    return Allocation(perm, pieces)
+                    return permuted_pieces
 
         #3
         logger.info("no valid allocation without recursion from %f to %f.", a, b)
@@ -199,16 +197,19 @@ def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
         for interval in cover:
             points.append(interval[1])
         points.sort()
-        ret = Allocation(agents, len(agents)*[[]])
+        ret = num_of_agents*[[]]
         for i in range(1, len(points)):
             logger.info("creating allocation from %f to %f:", points[i-1], points[i])
             alloc = EFAllocateRec(points[i-1], points[i])
-            ret = merge_allocations(ret, alloc)
+            # merge the existing allocation with the new allocation:
+            merged_alloc = [ret[i_agent]+alloc[i_agent] for i_agent in range(num_of_agents)]
+            ret = merged_alloc
         logger.info("covered allocation from %f to %f using merging.",a,b)
         return ret
 
     #run the bounded function over the whole area - from 0 to 1.
-    return EFAllocateRec(0, max([agent.cake_length() for agent in agents]))
+    alloc = EFAllocateRec(0, max([agent.cake_length() for agent in agents]))
+    return Allocation(agents, alloc)
 
 
 if __name__ == "__main__":

@@ -48,7 +48,6 @@ def iterated_maximum_matching(agents: AgentsDict, item_capacities: Dict[str,int]
     :param item_capacities [optional]: maps each item to its number of units. Default is 1.
     :param agent_weights [optional]: maps each agent to an integer priority. The weights of each agent are multiplied by WEIGHT_BASE^priority.
 
-    >>> Allocation.default_separator=","
     >>> prefs = {"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}}
     >>> alloc = iterated_maximum_matching(prefs, item_capacities={"x":1,"y":1,"z":1,"w":1})
     >>> stringify(alloc.map_agent_to_bundle())

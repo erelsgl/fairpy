@@ -20,7 +20,6 @@ def bidirectional_bag_filling(valuation_matrix, thresholds:List[float]) -> Alloc
 	Runs a bi-directional bag-filling algorithm.
 	Assumes that the instance is ordered: item 0 is the highest-valued for all agents, then item 1, etc.
 
-	>>> Allocation.default_separator=","
 	>>> identical_valuations = [97,96,90,12,3,2,1,1,1]
 	>>> valuation_matrix = valuations.matrix_from(3*[identical_valuations])
 	>>> bidirectional_bag_filling(valuation_matrix, thresholds=[100,100,100])
@@ -31,7 +30,7 @@ def bidirectional_bag_filling(valuation_matrix, thresholds:List[float]) -> Alloc
 	>>> bidirectional_bag_filling(valuation_matrix, thresholds=[101,101,101])
 	Agent #0 gets {0,5,6,7,8} with value 102.
 	Agent #1 gets {1,3,4} with value 111.
-	Agent #2 gets None with value 0.
+	Agent #2 gets {} with value 0.
 	<BLANKLINE>
 	"""
 	valuation_matrix = valuations.matrix_from(valuation_matrix)

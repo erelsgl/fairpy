@@ -13,6 +13,9 @@ Since:  2021-03
 import numpy as np
 from typing import *
 
+from numpy.lib.arraysetops import isin
+from fairpy.bundles import *
+
 class ValuationMatrix:
     """
     A valuation matrix is a matrix v in which each row represents an agent, 
@@ -25,11 +28,11 @@ class ValuationMatrix:
     * Another ValuationMatrix.
 
     >>> v = ValuationMatrix([[1,4,7],[6,3,0]])    # Initialize from a list of lists
-    >>> v[0,1]
+    >>> v[0,1]   # value for agent 0 of item 1
     4
-    >>> v[0][1]
+    >>> v[0][1]  # value for agent 0 of item 1
     4
-    >>> v[0]
+    >>> v[0]     # values for agent 0
     array([1, 4, 7])
     >>> v
     [[1 4 7]
@@ -39,6 +42,10 @@ class ValuationMatrix:
     [6 3 0]
     >>> v.agent_value_for_bundle(0, [0,2])
     8
+    >>> v.agent_value_for_bundle(0, FractionalBundle([1,0,1]))  # equivalent to the above
+    8
+    >>> v.agent_value_for_bundle(0, FractionalBundle([0.5,0,1.5]))
+    11.0
     >>> v.agent_value_for_bundle(1, [1,0])
     9
     >>> v.agent_value_for_bundle(1, None)
@@ -59,7 +66,7 @@ class ValuationMatrix:
     [[1. 1. 1.]
      [1. 1. 1.]]
     """
-    
+
     def __init__(self, valuation_matrix: np.ndarray):
         if isinstance(valuation_matrix, list):
             valuation_matrix = np.array(valuation_matrix)
@@ -82,11 +89,14 @@ class ValuationMatrix:
         else:
             return self._v[key]             # agent's values for all objects
 
-    def agent_value_for_bundle(self, agent:int, bundle:List[int])->float:
+    def agent_value_for_bundle(self, agent:int, bundle:Bundle)->float:
         if bundle is None:
             return 0
+        elif isinstance(bundle,FractionalBundle):
+            return sum([self._v[agent][object] * fraction for object,fraction in enumerate(bundle.fractions)])
         else:
             return sum([self._v[agent][object] for object in bundle])
+
 
     def without_agent(self, agent:int)->'ValuationMatrix':
         """

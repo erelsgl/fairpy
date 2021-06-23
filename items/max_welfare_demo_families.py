@@ -15,7 +15,7 @@ import fairpy.valuations as valuations
 def leximin_utilities(v, families):
 	v = valuations.matrix_from(v)
 	z = leximin_optimal_allocation_for_families(v, families).round(3)  
-	utility_profile = z.utility_profile_for_families(v, families)
+	utility_profile = np.round(z.utility_profile(),3)
 	for f,family in enumerate(families):
 		values = [list(v[i]) for i in family]
 		utilities = [utility_profile[i] for i in family]

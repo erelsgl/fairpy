@@ -23,7 +23,7 @@ solve.logger.addHandler(logging.StreamHandler(sys.stdout))
 def show(title, v):
     print("\n", "###", title)
     z = leximin_optimal_allocation(v).round(3)
-    utility_profile = z.utility_profile(v)
+    utility_profile = z.utility_profile()
     print("allocation = \n",z, "\nprofile = ", utility_profile)
 
 

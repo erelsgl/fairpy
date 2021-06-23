@@ -163,7 +163,7 @@ def utilitarian_matching(agents: AgentsDict, agent_weights: Dict[str, int]=None,
     <BLANKLINE>
     >>> utilitarian_matching(prefs, maxcardinality=False)
     avi gets {x} with value 5.
-    beni gets None with value 0.
+    beni gets {} with value 0.
     <BLANKLINE>
     >>> prefs = {"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}, "gadi": {"x":3, "y":2}}
     >>> alloc = utilitarian_matching(prefs, item_capacities={"x":2, "y":2})

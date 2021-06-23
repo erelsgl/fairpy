@@ -18,8 +18,8 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
 def show(title, z, v):
-    utility_profile = z.utility_profile(v)
-    print(title, " = \n",z, "\nprofile = ", utility_profile, "\nsum = ", sum(utility_profile), "product = ", np.prod(z.utility_profile(v)))
+    utility_profile = z.utility_profile()
+    print(title, " = \n",z, "\nprofile = ", utility_profile, "\nsum = ", sum(utility_profile), "product = ", np.prod(utility_profile))
 
 
 print("\nThree identical goods:")

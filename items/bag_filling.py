@@ -179,7 +179,7 @@ def one_directional_bag_filling(values, thresholds:List[float]):
 	Agent #1 gets {1} with value 22.
 	<BLANKLINE>
 	>>> one_directional_bag_filling(values=[[11,33],[44,22]], thresholds=[40,30])
-	Agent #0 gets None with value 0.
+	Agent #0 gets {} with value 0.
 	Agent #1 gets {0} with value 44.
 	<BLANKLINE>
 	"""
