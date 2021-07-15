@@ -23,7 +23,7 @@ def leximin_utilities(v, families):
 	print()
 	return utility_profile
 
-families = [[0,1],[2,3]] 
+families = [[0,1],[2,3]]
 
 
 for x in range(10):

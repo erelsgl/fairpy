@@ -17,8 +17,7 @@ Since:  2021-05
 """
 
 import numpy as np, cvxpy
-from fairpy import valuations
-from fairpy.allocations import Allocation, AllocationToFamilies
+from fairpy import valuations, Allocation, AllocationToFamilies, map_agent_to_family
 from fairpy.solve import maximize
 from typing import List
 
@@ -41,12 +40,74 @@ def is_leximin_better(x:list, y:list):
 TOLERANCE_FACTOR=1.001  # for comparing floating-point numbers
 
 
+#### Generic leximin solver:
+
+def leximin_optimal_solution(variables, utilities, constraints) -> np.ndarray:
+    """
+    Find a leximin-optimal vector of utilities, subject to the given constraints.
+    :param variables: an array of cvxpy variables, over which the optimization is done.
+    :param utilities: a list of cvxpy expressions using these variables, representing the agents' utilities.
+    :param constraints: a list of cvxpy constraints.
+    :return an ndarray with the optimal values of the given variables.
+
+    For usage examples and doctests, see the functions below: leximin_optimal_allocation, leximin_optimal_allocation_for_families.
+    """
+    leximin_optimal_solution.num_of_calls_to_solver = 0  # for performance analysis
+    num_of_agents = len(utilities)
+
+    # Initially all agents are free - no agent is saturated:
+    free_agents = list(range(num_of_agents))
+    map_saturated_agent_to_saturated_utility = num_of_agents * [None]
+    order_constraints_for_saturated_agents = []
+
+    while True:
+        logger.info("Saturated utilities: %s.", map_saturated_agent_to_saturated_utility)
+        min_utility_for_free_agents = cvxpy.Variable()
+        order_constraints_for_free_agents = [
+            utilities[i] >= min_utility_for_free_agents
+            for i in free_agents
+        ]
+        max_min_utility_for_free_agents = maximize(min_utility_for_free_agents, constraints + order_constraints_for_saturated_agents + order_constraints_for_free_agents)
+        leximin_optimal_solution.num_of_calls_to_solver += 1
+        utilities_in_max_min_allocation = [utility.value for utility in utilities]
+        logger.info("  max min value: %g, utility-profile: %s", max_min_utility_for_free_agents, utilities_in_max_min_allocation)
+
+        for ifree in free_agents:  # Find whether i's utility can be improved
+            if utilities_in_max_min_allocation[ifree] > TOLERANCE_FACTOR*max_min_utility_for_free_agents:
+                logger.info("  Max utility of agent #%d is at least %g, so agent remains free.", ifree, utilities_in_max_min_allocation[ifree])
+                continue
+            new_order_constraints_for_free_agents = [
+                utilities[i] >= max_min_utility_for_free_agents
+                for i in free_agents if i!=ifree
+            ]
+            max_utility_for_ifree = maximize(utilities[ifree], constraints + order_constraints_for_saturated_agents + new_order_constraints_for_free_agents)
+            leximin_optimal_solution.num_of_calls_to_solver += 1
+            if max_utility_for_ifree > TOLERANCE_FACTOR*max_min_utility_for_free_agents:
+                logger.info("  Max utility of agent #%d is %g, so agent remains free.", ifree, max_utility_for_ifree)
+                continue
+            logger.info("  Max utility of agent #%d is %g, so agent becomes saturated.", ifree, max_utility_for_ifree)
+            map_saturated_agent_to_saturated_utility[ifree] = max_min_utility_for_free_agents
+            order_constraints_for_saturated_agents.append(utilities[ifree] >= max_min_utility_for_free_agents)
+
+        new_free_agents = [i for i in free_agents if map_saturated_agent_to_saturated_utility[i] is None]
+        if len(new_free_agents)==len(free_agents):
+            raise ValueError("No new saturated agents - this contradicts Willson's theorem!")
+        elif len(new_free_agents)==0:
+            logger.info("All agents are saturated -- utility profile is %s.", map_saturated_agent_to_saturated_utility)
+            logger.info("%d calls to solver.", leximin_optimal_solution.num_of_calls_to_solver)
+            return variables.value
+        else:
+            free_agents = new_free_agents
+            continue
+
+
+
+
 ##### Find a leximin-optimal allocation for individual agents
 
 def leximin_optimal_allocation(agents) -> Allocation:
     """
     Find the leximin-optimal (aka Egalitarian) allocation.
-    --- DRAFT ---
     :param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
@@ -92,55 +153,13 @@ def leximin_optimal_allocation(agents) -> Allocation:
         for o in v.objects()
     ]
     utilities = [sum([alloc[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
-    leximin_optimal_allocation.num_of_calls_to_solver = 0  # for performance analysis
 
-    # Initially all agents are free - no agent is saturated:
-    free_agents = list(v.agents())
-    map_saturated_agent_to_saturated_utility = v.num_of_agents * [None]
-    order_constraints_for_saturated_agents = []
-
-    while True:
-        logger.info("Saturated utilities: %s.", map_saturated_agent_to_saturated_utility)
-        min_utility_for_free_agents = cvxpy.Variable()
-        order_constraints_for_free_agents = [
-            utilities[i] >= min_utility_for_free_agents
-            for i in free_agents
-        ]
-        max_min_utility_for_free_agents = maximize(min_utility_for_free_agents, feasibility_constraints + positivity_constraints + order_constraints_for_saturated_agents + order_constraints_for_free_agents)
-        utilities_in_max_min_allocation = [utilities[i].value for i in v.agents()]
-        leximin_optimal_allocation.num_of_calls_to_solver += 1
-        logger.info("  max min value: %g, utility-profile: %s", max_min_utility_for_free_agents, utilities_in_max_min_allocation)
-
-        for ifree in free_agents:  # Find whether i's utility can be improved
-            if utilities_in_max_min_allocation[ifree] > TOLERANCE_FACTOR*max_min_utility_for_free_agents:
-                logger.info("  Max utility of agent #%d is at least %g: agent remains free.", ifree, utilities_in_max_min_allocation[ifree])
-                continue
-            new_order_constraints_for_free_agents = [
-                utilities[i] >= max_min_utility_for_free_agents
-                for i in free_agents if i!=ifree
-            ]
-            max_utility_for_ifree = maximize(utilities[ifree], feasibility_constraints + positivity_constraints + order_constraints_for_saturated_agents + new_order_constraints_for_free_agents)
-            leximin_optimal_allocation.num_of_calls_to_solver += 1
-            if max_utility_for_ifree > TOLERANCE_FACTOR*max_min_utility_for_free_agents:
-                logger.info("  Max utility of agent #%d is %g: agent remains free.", ifree, max_utility_for_ifree)
-                continue
-            logger.info("  Max utility of agent #%d is %g: agent becomes saturated.", ifree, max_utility_for_ifree)
-            map_saturated_agent_to_saturated_utility[ifree] = max_min_utility_for_free_agents
-            order_constraints_for_saturated_agents.append(utilities[ifree] >= max_min_utility_for_free_agents)
-
-        new_free_agents = [i for i in free_agents if map_saturated_agent_to_saturated_utility[i] is None]
-        if len(new_free_agents)==len(free_agents):
-            raise ValueError("No new saturated agents - this contradicts Willson's theorem!")
-        if len(new_free_agents)==0:
-            logger.info("All agents are saturated -- utility profile is %s.",map_saturated_agent_to_saturated_utility)
-            logger.info("%d calls to solver.",leximin_optimal_allocation.num_of_calls_to_solver)
-            return Allocation(v, alloc.value)
-        free_agents = new_free_agents
+    allocation_matrix = leximin_optimal_solution(alloc, utilities, feasibility_constraints+positivity_constraints)
+    return Allocation(v, allocation_matrix)
 
 
+##### leximin for families
 
-
-##### leximin for families - DRAFT - does not work in all cases
 
 def leximin_optimal_allocation_for_families(agents, families:list) -> AllocationToFamilies:
     """
@@ -173,12 +192,9 @@ def leximin_optimal_allocation_for_families(agents, families:list) -> Allocation
     """
     v = valuations.matrix_from(agents)
     num_of_families = len(families)
-    map_agent_to_family = [None]*v.num_of_agents
-    for f,family in enumerate(families):
-        for agent in family:
-            map_agent_to_family[agent] = f
+    agent_to_family = map_agent_to_family(families, v.num_of_agents)
+    logger.info("map_agent_to_family = %s",agent_to_family)
 
-    logger.info("map_agent_to_family = %s",map_agent_to_family)
     alloc = cvxpy.Variable((num_of_families, v.num_of_objects))
     feasibility_constraints = [
         sum([alloc[f][o] for f in range(num_of_families)])==1
@@ -188,59 +204,9 @@ def leximin_optimal_allocation_for_families(agents, families:list) -> Allocation
         alloc[f][o] >= 0 for f in range(num_of_families)
         for o in v.objects()
     ]
-    utilities = [sum([alloc[map_agent_to_family[i]][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
-
-    def max_minimum_with_saturated_agents(map_saturated_agent_to_saturated_utility:dict):
-        saturated_agents = map_saturated_agent_to_saturated_utility.keys()
-        non_saturated_agents = [i for i in v.agents() if i not in saturated_agents]
-        min_utility_for_non_saturated_agents = cvxpy.Variable()
-        order_constraints_for_saturated_agents = [
-            utilities[i] >= map_saturated_agent_to_saturated_utility[i]
-            for i in saturated_agents
-        ]
-        order_constraints_for_non_saturated_agents = [
-            utilities[i] >= min_utility_for_non_saturated_agents
-            for i in non_saturated_agents
-        ]
-        order_constraints = order_constraints_for_saturated_agents + order_constraints_for_non_saturated_agents
-        return maximize(min_utility_for_non_saturated_agents, feasibility_constraints + positivity_constraints + order_constraints)
-
-    free_agents = list(v.agents())
-    map_saturated_agent_to_saturated_utility = {}
-    min_utility_for_free_agents = max_minimum_with_saturated_agents({})
-    active_allocation = alloc.value
-    logger.info(f"Min utility for all agents {free_agents}: {min_utility_for_free_agents}")
-    if len(free_agents)<=1:
-        return AllocationToFamilies(v, alloc.value, families)
-
-    while True:
-        map_scapegoat_to_minvalue_without_scapegoat = {}
-        map_scapegoat_to_allocation_without_scapegoat = {}
-        for scapegoat in free_agents:
-            min_utility_without_scapegoat = max_minimum_with_saturated_agents({**map_saturated_agent_to_saturated_utility, scapegoat:min_utility_for_free_agents})
-            logger.info(f"Min utility without {scapegoat}: {min_utility_without_scapegoat}")
-            map_scapegoat_to_minvalue_without_scapegoat[scapegoat] = min_utility_without_scapegoat
-            map_scapegoat_to_allocation_without_scapegoat[scapegoat] = alloc.value
-        best_scapegoat = max(free_agents, key=lambda i: map_scapegoat_to_minvalue_without_scapegoat[i])
-        best_utility_without_scapegoat = map_scapegoat_to_minvalue_without_scapegoat[best_scapegoat]
-        best_allocation_without_scapegoat = map_scapegoat_to_allocation_without_scapegoat[best_scapegoat]
-        if best_utility_without_scapegoat > min_utility_for_free_agents:
-            logger.info(f"Best scapegoat is {best_scapegoat}: fixing its utility to {min_utility_for_free_agents}, and increasing the others' min utility to {best_utility_without_scapegoat}.")
-            map_saturated_agent_to_saturated_utility[best_scapegoat] = min_utility_for_free_agents
-            min_utility_for_free_agents = best_utility_without_scapegoat
-            active_allocation = best_allocation_without_scapegoat
-            free_agents = [i for i in free_agents if i!=best_scapegoat]
-            if len(free_agents)<=1: 
-                map_saturated_agent_to_saturated_utility[free_agents[0]] = best_utility_without_scapegoat
-                logger.info(f"Only one agent remains - keeping the utility profile {map_saturated_agent_to_saturated_utility}.\n")
-                break
-        else:
-            for i in free_agents:
-                map_saturated_agent_to_saturated_utility[i] = min_utility_for_free_agents
-            logger.info(f"No scapegoat improves the current utility - keeping the utility profile {map_saturated_agent_to_saturated_utility}.\n")
-            break
-
-    return AllocationToFamilies(v, active_allocation, families)
+    utilities = [sum([alloc[agent_to_family[i]][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
+    allocation_matrix = leximin_optimal_solution(alloc, utilities, feasibility_constraints+positivity_constraints)
+    return AllocationToFamilies(v, allocation_matrix, families)
 
 
 

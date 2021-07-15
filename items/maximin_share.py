@@ -120,14 +120,14 @@ if __name__ == "__main__":
 
 	from fairpy import solve
 	solve.logger.addHandler(logging.StreamHandler(sys.stdout))
-	# solve.logger.setLevel(logging.INFO)
+	# solve.logger.setLevel(logging.INFO)			
 
 	import doctest
 	(failures,tests) = doctest.testmod(report=True,optionflags=doctest.FAIL_FAST + doctest.NORMALIZE_WHITESPACE)
 	print ("{} failures, {} tests".format(failures,tests))
 
-	# valuation = [1, 8, 8, 8, 9, 13, 14, 14, 16, 17, 17, 19, 20, 23, 25, 28, 31, 33, 34, 36, 43, 51, 53, 56, 59, 61, 63, 64, 67, 69, 70, 71, 71, 71, 75, 75, 77, 77, 85, 86, 87, 87, 88, 90, 90, 93, 94, 94, 94, 97]
-	# c = 3
-	# print(value_1_of_c_MMS__cvxpy(c, valuation, show_solver_log=True))
+	valuation = [5, 5, 5, 7, 7, 7, 11, 17, 23, 23, 23, 31, 31, 31, 65]  # The APS example of Babaioff, Ezra and Feige (2021), Lemma C.3.
+	c = 3
+	print(value_1_of_c_MMS__cvxpy(c, valuation, show_solver_log=True))
 
 

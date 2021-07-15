@@ -1,6 +1,6 @@
 #!python3
 
-""" 
+"""
 Find a fractionl allocation that maximizes a social welfare function (- a monotone function of the utilities),
      for agents with additive valuations.
 
@@ -12,8 +12,7 @@ Since:  2021-05
 """
 
 import numpy as np, cvxpy
-from fairpy import valuations
-from fairpy.allocations import Allocation, AllocationToFamilies
+from fairpy import valuations, Allocation, AllocationToFamilies
 from fairpy.solve import maximize
 
 import logging
@@ -51,6 +50,9 @@ def max_welfare_allocation(agents, welfare_function, welfare_constraint_function
     return Allocation(v, alloc.value)
 
 
+
+from fairpy.families import AllocationToFamilies, map_agent_to_family
+
 def max_welfare_allocation_for_families(agents, families:list, welfare_function, welfare_constraint_function=None) -> AllocationToFamilies:
     """
     Find an allocation maximizing a given social welfare function. (aka Max Nash Welfare) allocation.
@@ -65,10 +67,7 @@ def max_welfare_allocation_for_families(agents, families:list, welfare_function,
     """
     v = valuations.matrix_from(agents)
     num_of_families = len(families)
-    map_agent_to_family = [None]*v.num_of_agents
-    for f,family in enumerate(families):
-        for agent in family:
-            map_agent_to_family[agent] = f
+    agent_to_family = map_agent_to_family(families, v.num_of_agents)
 
     alloc = cvxpy.Variable((num_of_families, v.num_of_objects))
     feasibility_constraints = [
@@ -79,7 +78,7 @@ def max_welfare_allocation_for_families(agents, families:list, welfare_function,
         alloc[f][o] >= 0 for f in range(num_of_families)
         for o in v.objects()
     ]
-    utilities = [sum([alloc[map_agent_to_family[i]][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
+    utilities = [sum([alloc[agent_to_family[i]][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
 
     if welfare_constraint_function is not None:
         welfare_constraints = [welfare_constraint_function(utility) for utility in utilities]
