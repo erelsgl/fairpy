@@ -1,28 +1,58 @@
 #!python3
-
 """
-Utilities for generating partitions of a given subset.
+Utilities related to partitioning sets of numbers.
 
 Programmer: Erel Segal-Halevi
 Since: 2019-07
 """
 
 import itertools
-from typing import List
+from typing import List, Any, Collection, Generator
+from numbers import Number
 
-def partitions(collection:set):
+Partition = List[List[Any]]
+
+
+
+
+####  ENUMERATING ALL OR SOME OF THE PARTITIONS ####
+
+def powerset(items: Collection[Any]) -> Generator[tuple,None,None]:
+    """
+    Generates all subsets of the given iterable.
+    Based on code from https://docs.python.org/3.7/library/itertools.html.
+    :param items: an iterable.
+    >>> for s in powerset([1,2,3]): print(s)
+    ()
+    (1,)
+    (2,)
+    (3,)
+    (1, 2)
+    (1, 3)
+    (2, 3)
+    (1, 2, 3)
+    """
+    s = list(items)
+    return itertools.chain.from_iterable(itertools.combinations(s, r) for r in range(len(s)+1))
+
+
+def all_partitions(items: Collection[Any]) -> Generator[Partition,None,None]:
     """
     Generates all partitions of the given set.
     Based on code by alexis, https://stackoverflow.com/a/30134039/827927
 
-    >>> list(partitions([1,2,3]))
-    [[[1, 2, 3]], [[1], [2, 3]], [[1, 2], [3]], [[2], [1, 3]], [[1], [2], [3]]]
+    >>> for p in all_partitions([1,2,3]): print(p)
+    [[1, 2, 3]]
+    [[1], [2, 3]]
+    [[1, 2], [3]]
+    [[2], [1, 3]]
+    [[1], [2], [3]]
     """
-    if len(collection) == 1:
-        yield [ collection ]
+    if len(items) == 1:
+        yield [ items ]
         return
-    first = collection[0]
-    for smaller in partitions(collection[1:]):
+    first = items[0]
+    for smaller in all_partitions(items[1:]):
         # insert `first` in each of the subpartition's subsets
         for n, subset in enumerate(smaller):
             yield smaller[:n] + [[ first ] + subset]  + smaller[n+1:]
@@ -30,18 +60,21 @@ def partitions(collection:set):
         yield [ [ first ] ] + smaller
 
 
-def partitions_to_at_most_c(collection:list, c:int):
+def partitions_to_at_most_c_subsets(c:int, items: Collection[Any]) -> Generator[Partition,None,None]:
     """
     Generates all partitions of the given set whose size is at most c subsets.
 
-    >>> list(partitions_to_at_most_c([1,2,3], 2))
-    [[[1, 2, 3]], [[1], [2, 3]], [[1, 2], [3]], [[2], [1, 3]]]
+    >>> for p in partitions_to_at_most_c_subsets(2, [1,2,3]): print(p)
+    [[1, 2, 3]]
+    [[1], [2, 3]]
+    [[1, 2], [3]]
+    [[2], [1, 3]]
     """
-    if len(collection) == 1:
-        yield [ collection ]
+    if len(items) == 1:
+        yield [ items ]
         return
-    first = collection[0]
-    for smaller in partitions(collection[1:]):
+    first = items[0]
+    for smaller in all_partitions(items[1:]):
         # insert `first` in each of the subpartition's subsets
         for n, subset in enumerate(smaller):
             yield smaller[:n] + [[ first ] + subset]  + smaller[n+1:]
@@ -50,49 +83,67 @@ def partitions_to_at_most_c(collection:list, c:int):
             yield [ [ first ] ] + smaller
 
 
-def partitions_to_exactly_c(collection: list, c: int):
+def partitions_to_exactly_c_subsets(c: int, items: Collection[Any]) -> Generator[Partition,None,None]:
     """
     Generates all partitions of the given set whose size is exactly c subsets.
     NOTE: This is very inefficient - better to use powerset.
 
-    >>> list(partitions_to_exactly_c([1,2,3], 2))
-    [[[1], [2, 3]], [[1, 2], [3]], [[2], [1, 3]]]
-    >>> list(partitions_to_exactly_c([1,2], 3))
+    >>> for p in partitions_to_exactly_c_subsets(2, [1,2,3]): print(p)
+    [[1], [2, 3]]
+    [[1, 2], [3]]
+    [[2], [1, 3]]
+    >>> list(partitions_to_exactly_c_subsets(3, [1,2]))
     []
     """
-    for p in partitions_to_at_most_c(collection, c):
+    for p in partitions_to_at_most_c_subsets(c, items):
         if len(p)==c:
             yield p
 
-def powerset(iterable):
-    """
-    Returns all subsets of the given iterable.
-    Based on code from https://docs.python.org/3.7/library/itertools.html .
-
-    >>> list(powerset([1,2,3]))
-    [(), (1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 2, 3)]
-    """
-    s = list(iterable)
-    return itertools.chain.from_iterable(itertools.combinations(s, r) for r in range(len(s)+1))
 
 
-def bidirectional_balanced_partition(num_of_parts:int, item_sizes:List[int])->List[List[int]]:
+
+
+
+#### COMPUTING A BALANCED PARTITION OF NUMBERS ####
+
+
+def greedy_partition(c:int, items:Collection[Number]) -> Partition:
     """
-    Partition the numbers using "bidirectional balanced partition" (ABCCBA order)
-    >>> bidirectional_balanced_partition(2, [1,2,3,4,5,6])
-    [[6, 3, 2], [5, 4, 1]]
-    >>> bidirectional_balanced_partition(3, [1,2,3,4,5,6])
-    [[6, 1], [5, 2], [4, 3]]
+    Partition the numbers using the greedy number partitioning algorithm:
+       https://en.wikipedia.org/wiki/Greedy_number_partitioning
+    >>> greedy_partition(2, [1,2,3,4,5,9])
+    [[9, 3], [5, 4, 2, 1]]
+    >>> greedy_partition(3, [1,2,3,4,5,9])
+    [[9], [5, 2, 1], [4, 3]]
     """
-    values = sorted(item_sizes, reverse=True)
-    parts = [ [] for i in range(num_of_parts) ]
+    values = sorted(items, reverse=True)
+    parts = [ [] for i in range(c) ]
+    sums  = [ 0 for i in range(c)  ]
+    for v in values:
+        index_of_part_with_smallest_sum = min(range(c), key=lambda i:sums[i])
+        parts[index_of_part_with_smallest_sum].append(v)
+        sums [index_of_part_with_smallest_sum] += v
+    return parts
+
+
+def bidirectional_balanced_partition(c:int, items:Collection[Number]) -> Partition:
+    """
+    Partition the numbers using "bidirectional balanced partition" (ABCCBA order).
+
+    >>> bidirectional_balanced_partition(2, [1,2,3,4,5,9])
+    [[9, 3, 2], [5, 4, 1]]
+    >>> bidirectional_balanced_partition(3, [1,2,3,4,5,9])
+    [[9, 1], [5, 2], [4, 3]]
+    """
+    values = sorted(items, reverse=True)
+    parts = [ [] for i in range(c) ]
     current_bundle = 0
     current_direction = +1
     for v in values:
         parts[current_bundle].append(v)
         current_bundle += current_direction
-        if current_bundle > num_of_parts-1:
-            current_bundle = num_of_parts-1
+        if current_bundle > c-1:
+            current_bundle = c-1
             current_direction = -1
         if current_bundle < 0:
             current_bundle = 0
@@ -100,25 +151,130 @@ def bidirectional_balanced_partition(num_of_parts:int, item_sizes:List[int])->Li
     return parts
 
 
-def greedy_partition(num_of_parts:int, item_sizes:List[int])->List[List[int]]:
-    """
-    Partition the numbers using the greedy algorithm: https://en.wikipedia.org/wiki/Greedy_number_partitioning
-    >>> greedy_partition(2, [1,2,3,4,5,6])
-    [[6, 3, 2], [5, 4, 1]]
-    >>> greedy_partition(3, [1,2,3,4,5,6])
-    [[6, 1], [5, 2], [4, 3]]
-    """
-    values = sorted(item_sizes, reverse=True)
-    parts = [ [] for i in range(num_of_parts) ]
-    sums  = [ 0 for i in range(num_of_parts)  ]
-    for v in values:
-        index_of_part_with_smallest_sum = min(range(num_of_parts), key=lambda i:sums[i])
-        parts[index_of_part_with_smallest_sum].append(v)
-        sums [index_of_part_with_smallest_sum] += v
-    return parts
 
 
-def smallest_sums(parts:list, num_of_sums:int=1):
+
+#### EXACT COMPUTATION OF THE MAXIMIN PARTITION ####
+
+
+import cvxpy
+from fairpy.solve import *
+
+import logging
+logger = logging.getLogger(__name__)
+
+
+def value_1_of_c_MMS__cvxpy(c:int, valuation:list, items:Collection[Any], capacity=1, numerator:int=1)->int:
+    """
+    Computes the 1-of-c maximin share by solving an integer linear program, using CVXPY.
+    Credit: Rob Pratt, https://or.stackexchange.com/a/6115/2576
+
+    :param c: number of parts in the partition.
+    :param numerator: number of parts that the agent is allowed to take (default: 1).
+    :param valuation: maps an item to its value.
+    :param capacity: The capacity of all items (int), or a map from an item to its capacity (list). Default: 1.
+    :param items: a set of items. Default: all items.
+    :return the value off the 1-out-of-c MMS of the given items.
+    """
+    parts = range(c)
+    num_of_items = len(valuation)
+    if isinstance(capacity, Number):
+        capacity = [capacity]*num_of_items
+
+    min_value = cvxpy.Variable(nonneg=True)
+    vars:dict = {
+        item:
+        [cvxpy.Variable(integer=True) for part in parts]
+        for item in items
+    }	# vars[i][j] is 1 iff item i is in part j.
+    constraints = []
+    parts_values = [
+        sum([vars[item][part]*valuation[item] for item in items])
+        for part in parts]
+
+    constraints = []
+    # Each variable must be non-negative
+    constraints += [vars[item][part]  >= 0 for part in parts for item in items] 	
+    # Each item must be in exactly one part:
+    constraints += [sum([vars[item][part] for part in parts]) == capacity[item] for item in items] 	
+    # Parts must be in descending order of value (a symmetry-breaker):
+    constraints += [parts_values[part+1] >= parts_values[part] for part in range(c-1)]
+    # The sum of each part must be at least min_value (by definition of min_value):
+    constraints += [sum(parts_values[0:numerator]) >= min_value] 
+
+    maximize(min_value, constraints)  # Solvers info: GLPK_MI is too slow; ECOS_BB gives wrong results even on simple problems; CBC is not installed; XPRESS gives an error
+
+    parts_contents = [
+        sum([int(vars[item][part].value)*[item] for item in items if vars[item][part].value>=1], [])
+        for part in parts
+    ]
+    logger.info("parts_contents: %s", parts_contents)
+    logger.info("parts_values: %s", [parts_values[part].value for part in parts])
+    return min_value.value
+
+
+
+def value_of_bundle(valuation:list, bundle:list):
+    return sum([valuation[item] for item in bundle])
+
+
+def value_1_of_c_MMS__bruteforce(c:int, valuation:list, items:Collection[Any])->int:
+    """
+    Computes the 1-of-c MMS by brute force - enumerating all partitions.
+    """
+    best_partition_value = -1
+    for partition in partitions_to_exactly_c_subsets(c, items):
+        partition_value = min([value_of_bundle(valuation,bundle) for bundle in partition])
+        if best_partition_value < partition_value:
+            best_partition_value = partition_value
+    return best_partition_value
+
+
+
+def value_1_of_c_MMS(c:int, valuation:list, items:Collection[Any]=None, engine="cvxpy", **kwargs)->int:
+    """	
+    Compute the of 1-of-c MMS of the given items, by the given valuation.
+    >>> int(value_1_of_c_MMS(c=1, valuation=[10,20,40,0]))
+    70
+    >>> int(value_1_of_c_MMS(c=2, valuation=[10,20,40,0]))
+    30
+    >>> int(value_1_of_c_MMS(c=2, valuation=[10,20,40,0], engine="bruteforce"))
+    30
+    >>> int(value_1_of_c_MMS(c=3, valuation=[10,20,40,0]))
+    10
+    >>> int(value_1_of_c_MMS(c=4, valuation=[10,20,40,0]))
+    0
+    >>> int(value_1_of_c_MMS(c=5, valuation=[10,20,40,0]))
+    0
+    >>> int(value_1_of_c_MMS(c=2, valuation=[10,20,40,0], items=[1,2]))
+    20
+    >>> int(value_1_of_c_MMS(c=2, valuation=[10,20,40,0], capacity=2))
+    70
+    >>> int(value_1_of_c_MMS(c=2, valuation=[10,20,40,0], capacity=[2,1,1,0]))
+    40
+    >>> int(value_1_of_c_MMS(c=3, valuation=[10,20,40,0], numerator=2))
+    30
+    """
+    if len(valuation)==0:
+        raise ValueError("Valuation is empty")
+    num_of_items = len(valuation)
+    if items is None:
+        items = list(range(num_of_items))
+
+    if engine=="cvxpy":
+        return value_1_of_c_MMS__cvxpy(c, valuation, items, **kwargs)
+    elif engine=="bruteforce":
+        return value_1_of_c_MMS__bruteforce(c, valuation, items, **kwargs)
+    else:
+        raise ValueError("Unknown engine "+engine)
+    
+
+
+
+
+#### OTHER UTILITIES ####
+
+def smallest_sums(partition:Partition, num_of_sums:int=1)->Number:
     """
     Given a partition, return the sum of the smallest k parts (k = num_of_sums)
     
@@ -127,7 +283,7 @@ def smallest_sums(parts:list, num_of_sums:int=1):
     >>> smallest_sums([[1,2],[3,4],[5,6]], num_of_sums=2)
     10
     """
-    sorted_sums = sorted([sum(part) for part in parts])
+    sorted_sums = sorted([sum(part) for part in partition])
     return sum(sorted_sums[:num_of_sums])
 
 

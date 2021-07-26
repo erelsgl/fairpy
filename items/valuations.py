@@ -144,7 +144,7 @@ class Valuation(ABC):
         maxi_min = -1
         partition = []
         # Iterate over all possible partitions
-        for tmp_partition in partitions.partitions_to_exactly_c(items, c):
+        for tmp_partition in partitions.partitions_to_exactly_c_subsets(c, items):
             min_val = min([self.value(bundle) for bundle in tmp_partition])
             # Update maximin value
             if maxi_min < min_val:
@@ -162,7 +162,7 @@ class Valuation(ABC):
         [1, 2, 3]
 
         """
-        for partition in partitions.partitions_to_exactly_c(self.desired_items_list, c):
+        for partition in partitions.partitions_to_exactly_c_subsets(c, self.desired_items_list):
             yield min([self.value(bundle) for bundle in partition])
 
 

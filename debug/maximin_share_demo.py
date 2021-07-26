@@ -6,7 +6,7 @@ Author: Erel Segal-Halevi
 Since : 2021-04
 """
 
-from fairpy.items.maximin_share import *
+from fairpy.items.partitions import *
 from numpy.random import randint
 from timeit import timeit
 
