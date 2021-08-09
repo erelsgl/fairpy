@@ -7,7 +7,7 @@ Since: 2019-07
 """
 
 import itertools
-from typing import List, Any, Collection, Generator
+from typing import *
 from numbers import Number
 
 Partition = List[List[Any]]
@@ -164,7 +164,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def value_1_of_c_MMS__cvxpy(c:int, valuation:list, items:Collection[Any], capacity=1, numerator:int=1)->int:
+def maximin_share_partition__cvxpy(c:int, valuation:list, items:Collection[Any], capacity=1, numerator:int=1, fix_smallest_part_value:Number=None)->Tuple[Partition, List[Number], Number]:
     """
     Computes the 1-of-c maximin share by solving an integer linear program, using CVXPY.
     Credit: Rob Pratt, https://or.stackexchange.com/a/6115/2576
@@ -174,7 +174,8 @@ def value_1_of_c_MMS__cvxpy(c:int, valuation:list, items:Collection[Any], capaci
     :param valuation: maps an item to its value.
     :param capacity: The capacity of all items (int), or a map from an item to its capacity (list). Default: 1.
     :param items: a set of items. Default: all items.
-    :return the value off the 1-out-of-c MMS of the given items.
+
+    :return (partition, part_values, maximin-share value)
     """
     parts = range(c)
     num_of_items = len(valuation)
@@ -193,24 +194,25 @@ def value_1_of_c_MMS__cvxpy(c:int, valuation:list, items:Collection[Any], capaci
         for part in parts]
 
     constraints = []
-    # Each variable must be non-negative
+    # Each variable must be non-negative:
     constraints += [vars[item][part]  >= 0 for part in parts for item in items] 	
     # Each item must be in exactly one part:
     constraints += [sum([vars[item][part] for part in parts]) == capacity[item] for item in items] 	
-    # Parts must be in descending order of value (a symmetry-breaker):
+    # Parts must be in ascending order of value (a symmetry-breaker):
     constraints += [parts_values[part+1] >= parts_values[part] for part in range(c-1)]
     # The sum of each part must be at least min_value (by definition of min_value):
     constraints += [sum(parts_values[0:numerator]) >= min_value] 
+    if fix_smallest_part_value is not None:
+        constraints += [parts_values[0] == fix_smallest_part_value]
 
     maximize(min_value, constraints)  # Solvers info: GLPK_MI is too slow; ECOS_BB gives wrong results even on simple problems; CBC is not installed; XPRESS gives an error
 
-    parts_contents = [
+    partition = [
         sum([int(vars[item][part].value)*[item] for item in items if vars[item][part].value>=1], [])
         for part in parts
     ]
-    logger.info("parts_contents: %s", parts_contents)
-    logger.info("parts_values: %s", [parts_values[part].value for part in parts])
-    return min_value.value
+    part_values = [parts_values[part].value for part in parts]
+    return (partition, part_values, min_value.value)
 
 
 
@@ -218,42 +220,49 @@ def value_of_bundle(valuation:list, bundle:list):
     return sum([valuation[item] for item in bundle])
 
 
-def value_1_of_c_MMS__bruteforce(c:int, valuation:list, items:Collection[Any])->int:
+def maximin_share_partition__bruteforce(c:int, valuation:list, items:Collection[Any])->int:
     """
     Computes the 1-of-c MMS by brute force - enumerating all partitions.
     """
     best_partition_value = -1
+    best_partition = None
     for partition in partitions_to_exactly_c_subsets(c, items):
         partition_value = min([value_of_bundle(valuation,bundle) for bundle in partition])
         if best_partition_value < partition_value:
             best_partition_value = partition_value
-    return best_partition_value
+            best_partition = partition
+    part_values = [value_of_bundle(valuation, part) for part in best_partition]
+    return (best_partition, part_values, best_partition_value)
 
 
 
-def value_1_of_c_MMS(c:int, valuation:list, items:Collection[Any]=None, engine="cvxpy", **kwargs)->int:
+def maximin_share_partition(c:int, valuation:list, items:Collection[Any]=None, engine="cvxpy", **kwargs)->int:
     """	
     Compute the of 1-of-c MMS of the given items, by the given valuation.
-    >>> int(value_1_of_c_MMS(c=1, valuation=[10,20,40,0]))
-    70
-    >>> int(value_1_of_c_MMS(c=2, valuation=[10,20,40,0]))
-    30
-    >>> int(value_1_of_c_MMS(c=2, valuation=[10,20,40,0], engine="bruteforce"))
-    30
-    >>> int(value_1_of_c_MMS(c=3, valuation=[10,20,40,0]))
+    :return (partition, part_values, maximin-share value)
+
+    >>> maximin_share_partition(c=1, valuation=[10,20,40,0])
+    ([[0, 1, 2, 3]], [70.0], 70.0)
+    >>> maximin_share_partition(c=2, valuation=[10,20,40,0])
+    ([[0, 1, 3], [2]], [30.0, 40.0], 30.0)
+    >>> maximin_share_partition(c=2, valuation=[10,20,40,0], engine="bruteforce")
+    ([[0, 1], [2, 3]], [30, 40], 30)
+    >>> int(maximin_share_partition(c=3, valuation=[10,20,40,0])[2])
     10
-    >>> int(value_1_of_c_MMS(c=4, valuation=[10,20,40,0]))
+    >>> int(maximin_share_partition(c=4, valuation=[10,20,40,0])[2])
     0
-    >>> int(value_1_of_c_MMS(c=5, valuation=[10,20,40,0]))
+    >>> int(maximin_share_partition(c=5, valuation=[10,20,40,0])[2])
     0
-    >>> int(value_1_of_c_MMS(c=2, valuation=[10,20,40,0], items=[1,2]))
-    20
-    >>> int(value_1_of_c_MMS(c=2, valuation=[10,20,40,0], capacity=2))
-    70
-    >>> int(value_1_of_c_MMS(c=2, valuation=[10,20,40,0], capacity=[2,1,1,0]))
-    40
-    >>> int(value_1_of_c_MMS(c=3, valuation=[10,20,40,0], numerator=2))
-    30
+    >>> maximin_share_partition(c=2, valuation=[10,20,40,0], items=[1,2])
+    ([[1], [2]], [20.0, 40.0], 20.0)
+    >>> maximin_share_partition(c=2, valuation=[10,20,40,0], capacity=2)
+    ([[0, 1, 2, 3, 3], [0, 1, 2]], [70.0, 70.0], 70.0)
+    >>> maximin_share_partition(c=2, valuation=[10,20,40,0], capacity=[2,1,1,0])
+    ([[0, 0, 1], [2]], [40.0, 40.0], 40.0)
+    >>> maximin_share_partition(c=3, valuation=[10,20,40,0], numerator=2)
+    ([[0, 3], [1], [2]], [10.0, 20.0, 40.0], 30.0)
+    >>> maximin_share_partition(c=3, valuation=[10,20,40,0], numerator=2, fix_smallest_part_value=0)
+    ([[3], [0, 1], [2]], [0.0, 30.0, 40.0], 30.0)
     """
     if len(valuation)==0:
         raise ValueError("Valuation is empty")
@@ -262,9 +271,9 @@ def value_1_of_c_MMS(c:int, valuation:list, items:Collection[Any]=None, engine="
         items = list(range(num_of_items))
 
     if engine=="cvxpy":
-        return value_1_of_c_MMS__cvxpy(c, valuation, items, **kwargs)
+        return maximin_share_partition__cvxpy(c, valuation, items, **kwargs)
     elif engine=="bruteforce":
-        return value_1_of_c_MMS__bruteforce(c, valuation, items, **kwargs)
+        return maximin_share_partition__bruteforce(c, valuation, items, **kwargs)
     else:
         raise ValueError("Unknown engine "+engine)
     
