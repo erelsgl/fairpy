@@ -376,7 +376,7 @@ def calculate_weight(g: Graph, edges_set: Set[Tuple[Agent, Tuple[float, float]]]
 
 
 def create_matching_graph(left: List[Agent], right: List[Tuple[float, float]],
-                          weights: Dict[Tuple[Agent, Tuple[float, float]], float])-> nx.Graph:
+                          weights: Dict[Tuple[Agent, Tuple[float, float]], float])-> Graph:
     """
     Used in algorithm 2 and 3.
     Creating a weighted bi-partition graph that represents agents, cake pieces and values.
@@ -395,7 +395,7 @@ def create_matching_graph(left: List[Agent], right: List[Tuple[float, float]],
     """
 
     # Create the graph
-    g = nx.DiGraph()
+    g = DiGraph()
     # g.edges(data = True)
     # Set the left side of the graph to be the Agents
     g.add_nodes_from(left, bipartite=0)
