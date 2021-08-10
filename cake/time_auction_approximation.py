@@ -395,7 +395,7 @@ def create_matching_graph(left: List[Agent], right: List[Tuple[float, float]],
     """
 
     # Create the graph
-    g = DiGraph()
+    g = Graph()
     # g.edges(data = True)
     # Set the left side of the graph to be the Agents
     g.add_nodes_from(left, bipartite=0)
