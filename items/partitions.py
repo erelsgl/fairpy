@@ -176,7 +176,7 @@ def maximin_share_partition__cvxpy(
     :param c: number of parts in the partition.
     :param numerator: number of parts that the agent is allowed to take (default: 1).
     :param valuation: maps an item to its value.
-    :param capacity: The capacity of all items (int), or a map from an item to its capacity (list). Default: 1.
+    :param multiplicity: The multiplicity of all items (int), or a map from an item to its multiplicity (list). Default: 1.
     :param items: a set of items. Default: all items.
 
     :return (partition, part_values, maximin-share value)
@@ -260,9 +260,9 @@ def maximin_share_partition(c:int, valuation:list, items:Collection[Any]=None, e
     0
     >>> maximin_share_partition(c=2, valuation=[10,20,40,0], items=[1,2])
     ([[1], [2]], [20.0, 40.0], 20.0)
-    >>> maximin_share_partition(c=2, valuation=[10,20,40,0], capacity=2)
+    >>> maximin_share_partition(c=2, valuation=[10,20,40,0], multiplicity=2)
     ([[0, 1, 2, 3, 3], [0, 1, 2]], [70.0, 70.0], 70.0)
-    >>> maximin_share_partition(c=2, valuation=[10,20,40,0], capacity=[2,1,1,0])
+    >>> maximin_share_partition(c=2, valuation=[10,20,40,0], multiplicity=[2,1,1,0])
     ([[0, 0, 1], [2]], [40.0, 40.0], 40.0)
     >>> maximin_share_partition(c=3, valuation=[10,20,40,0], numerator=2)
     ([[0, 3], [1], [2]], [10.0, 20.0, 40.0], 30.0)
