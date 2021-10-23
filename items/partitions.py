@@ -164,7 +164,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def maximin_share_partition__cvxpy(c:int, valuation:list, items:Collection[Any], capacity=1, numerator:int=1, fix_smallest_part_value:Number=None)->Tuple[Partition, List[Number], Number]:
+def maximin_share_partition__cvxpy(
+    c:int, valuation:list, items:Collection[Any], 
+    multiplicity=1, numerator:int=1, 
+    fix_smallest_part_value:Number=None
+) -> Tuple[Partition, List[Number], Number]:
     """
     Computes the 1-of-c maximin share by solving an integer linear program, using CVXPY.
     Credit: Rob Pratt, https://or.stackexchange.com/a/6115/2576
@@ -179,8 +183,8 @@ def maximin_share_partition__cvxpy(c:int, valuation:list, items:Collection[Any],
     """
     parts = range(c)
     num_of_items = len(valuation)
-    if isinstance(capacity, Number):
-        capacity = [capacity]*num_of_items
+    if isinstance(multiplicity, Number):
+        multiplicity = [multiplicity]*num_of_items
 
     min_value = cvxpy.Variable(nonneg=True)
     vars:dict = {
@@ -197,13 +201,14 @@ def maximin_share_partition__cvxpy(c:int, valuation:list, items:Collection[Any],
     # Each variable must be non-negative:
     constraints += [vars[item][part]  >= 0 for part in parts for item in items] 	
     # Each item must be in exactly one part:
-    constraints += [sum([vars[item][part] for part in parts]) == capacity[item] for item in items] 	
+    constraints += [sum([vars[item][part] for part in parts]) == multiplicity[item] for item in items] 	
     # Parts must be in ascending order of value (a symmetry-breaker):
     constraints += [parts_values[part+1] >= parts_values[part] for part in range(c-1)]
     # The sum of each part must be at least min_value (by definition of min_value):
     constraints += [sum(parts_values[0:numerator]) >= min_value] 
     if fix_smallest_part_value is not None:
         constraints += [parts_values[0] == fix_smallest_part_value]
+
 
     maximize(min_value, constraints)  # Solvers info: GLPK_MI is too slow; ECOS_BB gives wrong results even on simple problems; CBC is not installed; XPRESS gives an error
 
