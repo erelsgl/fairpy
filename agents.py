@@ -557,6 +557,7 @@ def agents_from(input:Any)->List[Agent]:
     >>> ### From list of lists:
     >>> agents_from([[1,2],[3,4]])[1]
     Agent #1 is an agent with a Additive valuation: v0=3 v1=4.
+    
     >>> ### From list of valuations:
     >>> l = agents_from([AdditiveValuation([1,2]), BinaryValuation("xy")])
     >>> l[0]

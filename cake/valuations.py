@@ -86,86 +86,6 @@ class Valuation(ABC):
         return values
 
 
-
-class PiecewiseConstantValuation1Segment(Valuation):
-
-    def __init__(self, values:list):
-        super().__init__()
-        self.values = np.array(values)
-        self.length = len(values)
-        self.total_value_cache = sum(values)
-
-    def total_value(self):
-        return self.total_value_cache
-
-    def __repr__(self):
-        return f"Piecewise-constant valuation with values {self.values} and total value={self.total_value_cache}"
-
-    def cake_length(self):
-        return self.length
-
-    def eval(self, start: float, end: float):
-        """
-        Answer an Eval query: return the value of the interval [start,end].
-
-        :param start: Location on cake where the calculation starts.
-        :param end:   Location on cake where the calculation ends.
-        :return: Value of [start,end]
-        """
-        start = start*self.cake_length()
-        end = end*self.cake_length()
-        # the cake to the left of 0 and to the right of length is considered worthless.
-        start = max(0, min(start, self.length))
-        end = max(0, min(end, self.length))
-        if end <= start:
-            return 0.0  # special case not covered by loop below
-
-        fromFloor = int(np.floor(start))
-        fromFraction = (fromFloor + 1 - start)
-        toCeiling = int(np.ceil(end))
-        toCeilingRemovedFraction = (toCeiling - end)
-
-        val = 0.0
-        val += (self.values[fromFloor] * fromFraction)
-        val += self.values[fromFloor + 1:toCeiling].sum()
-        val -= (self.values[toCeiling - 1] * toCeilingRemovedFraction)
-
-        return val/self.total_value()
-
-    def mark(self, start: float, target_value: float):
-        """
-        Answer a Mark query: return "end" such that the value of the interval [start,end] is target_value.
-
-        :param start: Location on cake where the calculation starts.
-        :param targetValue: required value for the piece [start,end]
-        :return: the end of an interval with a value of target_value.
-        If the value is too high - returns None.
-        """
-        start = start*self.cake_length()
-        target_value = target_value*self.total_value()
-        # the cake to the left of 0 and to the right of length is considered worthless.
-        start = max(0, min(start, self.length))
-        if target_value < 0:
-            raise ValueError("sum out of range (should be positive): {}".format(sum))
-
-        start_floor = int(np.floor(start))
-        start_fraction = (start_floor + 1 - start)
-
-        value = self.values[start_floor]
-        if value * start_fraction >= target_value:
-            return (start + (target_value / value))/self.cake_length()
-        target_value -= (value * start_fraction)
-        for i in range(start_floor + 1, self.length):
-            value = self.values[i]
-            if target_value <= value:
-                return (i + (target_value / value))/self.cake_length()
-            target_value -= value
-
-        # Value is too high: return None
-        return None
-
-
-
 class PiecewiseConstantValuation(Valuation):
     """
     A PiecewiseConstantValuation is a valuation with a constant density on a finite number of intervals.
@@ -289,6 +209,88 @@ class PiecewiseConstantValuation(Valuation):
 
         # Value is too high: return None
         return None
+
+
+
+
+
+class PiecewiseConstantValuation1Segment(Valuation):
+
+    def __init__(self, values:list):
+        super().__init__()
+        self.values = np.array(values)
+        self.length = len(values)
+        self.total_value_cache = sum(values)
+
+    def total_value(self):
+        return self.total_value_cache
+
+    def __repr__(self):
+        return f"Piecewise-constant valuation with values {self.values} and total value={self.total_value_cache}"
+
+    def cake_length(self):
+        return self.length
+
+    def eval(self, start: float, end: float):
+        """
+        Answer an Eval query: return the value of the interval [start,end].
+
+        :param start: Location on cake where the calculation starts.
+        :param end:   Location on cake where the calculation ends.
+        :return: Value of [start,end]
+        """
+        start = start*self.cake_length()
+        end = end*self.cake_length()
+        # the cake to the left of 0 and to the right of length is considered worthless.
+        start = max(0, min(start, self.length))
+        end = max(0, min(end, self.length))
+        if end <= start:
+            return 0.0  # special case not covered by loop below
+
+        fromFloor = int(np.floor(start))
+        fromFraction = (fromFloor + 1 - start)
+        toCeiling = int(np.ceil(end))
+        toCeilingRemovedFraction = (toCeiling - end)
+
+        val = 0.0
+        val += (self.values[fromFloor] * fromFraction)
+        val += self.values[fromFloor + 1:toCeiling].sum()
+        val -= (self.values[toCeiling - 1] * toCeilingRemovedFraction)
+
+        return val/self.total_value()
+
+    def mark(self, start: float, target_value: float):
+        """
+        Answer a Mark query: return "end" such that the value of the interval [start,end] is target_value.
+
+        :param start: Location on cake where the calculation starts.
+        :param targetValue: required value for the piece [start,end]
+        :return: the end of an interval with a value of target_value.
+        If the value is too high - returns None.
+        """
+        start = start*self.cake_length()
+        target_value = target_value*self.total_value()
+        # the cake to the left of 0 and to the right of length is considered worthless.
+        start = max(0, min(start, self.length))
+        if target_value < 0:
+            raise ValueError("sum out of range (should be positive): {}".format(sum))
+
+        start_floor = int(np.floor(start))
+        start_fraction = (start_floor + 1 - start)
+
+        value = self.values[start_floor]
+        if value * start_fraction >= target_value:
+            return (start + (target_value / value))/self.cake_length()
+        target_value -= (value * start_fraction)
+        for i in range(start_floor + 1, self.length):
+            value = self.values[i]
+            if target_value <= value:
+                return (i + (target_value / value))/self.cake_length()
+            target_value -= value
+
+        # Value is too high: return None
+        return None
+
 
 
 class PiecewiseUniformValuation(Valuation):
