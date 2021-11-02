@@ -8,6 +8,7 @@ from fairpy.valuations import *
 from fairpy.allocations import *
 from fairpy.families import *
 from fairpy.agents import *
+from fairpy.adaptors import *
 
 class items:
 	from fairpy.items.round_robin import round_robin

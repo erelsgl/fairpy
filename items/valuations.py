@@ -17,6 +17,7 @@ import math, itertools
 from fractions import Fraction
 
 from fairpy.items import partitions  # Works in Python 3.8
+from fairpy.bundles import FractionalBundle
 
 from typing import *
 Item = Any
@@ -387,6 +388,8 @@ class AdditiveValuation(Valuation):
     66
     >>> a.value({1,2,0})
     77
+    >>> a.value(FractionalBundle(fractions=[0,0.5,0.5]))
+    33.0
     >>> a.is_PROP({1}, 4)
     True
     >>> a.is_PROP({1}, 3)
@@ -410,7 +413,7 @@ class AdditiveValuation(Valuation):
         """
         Initializes an agent with a given additive valuation function.
         :param map_good_to_value: a dict that maps each single good to its value, or a list that lists the values of individual items.
-        :param duplicity: the number of agents with the same valuation.
+        :param duplicity: the number of agents with the same valuation  (optional, default=1)
         """
         if isinstance(map_good_to_value, AdditiveValuation):
             map_good_to_value = map_good_to_value.map_good_to_value
@@ -435,6 +438,8 @@ class AdditiveValuation(Valuation):
         """
         if bundle is None:
             return 0
+        elif isinstance(bundle,FractionalBundle):
+            return sum([self.map_good_to_value[g] * fraction for g,fraction in bundle.enumerate_fractions()])
         elif isinstance(bundle, str):
             if bundle in self.map_good_to_value:
                 return self.map_good_to_value[bundle]

@@ -1,7 +1,7 @@
 #!python3
 
 """
-Defines agents with various kinds of valuation functions over indivisible items.
+Defines agents with various kinds of valuation functions.
 
 Programmer: Erel Segal-Halevi
 Since: 2020-04

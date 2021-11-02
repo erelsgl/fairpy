@@ -109,10 +109,10 @@ class Allocation:
     This is the output of a fair allocation algorithm.
     It is an immutable object. It is used mainly to display the allocation in a nice way.
 
-    >>> agents = {"Alice":{"x":1,"y":2,"z":3},"George":{"x":4,"y":5,"z":6}}
+    >>> agent_dict = {"Alice":{"x":1,"y":2,"z":3},"George":{"x":4,"y":5,"z":6}}
 
     >>> ### A dict of agents and a dict of bundles:
-    >>> a = Allocation(agents=agents, bundles =  {"Alice":{"x","z"}, "George":{"y"}})
+    >>> a = Allocation(agents=agent_dict, bundles =  {"Alice":{"x","z"}, "George":{"y"}})
     >>> a
     Alice gets {x,z} with value 4.
     George gets {y} with value 5.
@@ -121,7 +121,7 @@ class Allocation:
     "{x:['Alice'], y:['George'], z:['Alice']}"
 
     >>> ### A dict of agents and a partial dict of bundles:
-    >>> a = Allocation(agents=agents, bundles =  {"Alice":{"x","z"}})
+    >>> a = Allocation(agents=agent_dict, bundles =  {"Alice":{"x","z"}})
     >>> a
     Alice gets {x,z} with value 4.
     George gets {} with value 0.
@@ -129,7 +129,7 @@ class Allocation:
     >>> stringify(a.map_item_to_agents())
     "{x:['Alice'], z:['Alice']}"
 
-    >>> ### A list of agents and a dict of bundles:
+    >>> ### A list of agents and a dict of bundles (Note there is no value information here):
     >>> a = Allocation(agents=["Alice","George"], bundles =  {"Alice":["x","z"], "George":["x", "y"]})
     >>> a
     Alice gets {x,z} with value nan.
@@ -142,8 +142,8 @@ class Allocation:
     >>> stringify(a.map_agent_to_bundle())
     "{Alice:['x', 'z'], George:['x', 'y']}"
 
-    >>> ### A valuation matrix and a list of bundles:
-    >>> a = Allocation(agents=valuations.matrix_from([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=[[0,4],None,[1,2]])
+    >>> ### A valuation list-of-lists and a list of bundles:
+    >>> a = Allocation(agents=[[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]], bundles=[[0,4],None,[1,2]])
     >>> a
     Agent #0 gets {0,4} with value 60.
     Agent #1 gets {} with value 0.
@@ -181,7 +181,7 @@ class Allocation:
      [0.67 0.   0.   0.   0.  ]
      [0.   1.   1.   0.   0.  ]]
 
-    >>> ### A valuation matrix and a numpy array
+    >>> ### A valuation matrix and a numpy array as allocation matrix
     >>> Allocation(agents=valuations.matrix_from([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=np.array([[1/3,0,0,0,1],[2/3,0,0,0,0],[0,1,1,0,0]]))
     Agent #0 gets { 33.333% of 0, 100.0% of 4} with value 53.3.
     Agent #1 gets { 66.667% of 0} with value 666.
@@ -216,9 +216,9 @@ class Allocation:
             self.matrix = bundles
             bundles = [FractionalBundle(bundles[i]) for i in bundles.agents()]
         else:
-            bundles = [ListBundle(bundles[i]) for i in range(len(bundles))]
+            bundles = [bundle_from(bundles[i]) for i in range(len(bundles))]
 
-        if isinstance(agents,dict):       # If "agents" is a dict mapping an agent name to its valuation...
+        if isinstance(agents,dict) or (isinstance(agents,list) and isinstance(agents[0],list)):       # If "agents" is a dict mapping an agent name to its valuation...
             agents = fairpy.agents_from(agents)  # ... convert it to a list mapping an agent index to its valuation.
 
         # Compute num_of_agents:
@@ -272,8 +272,11 @@ class Allocation:
         return result
 
     def round(self, num_digits:int):
-        self.matrix.round(num_digits)
-        self.bundles = [FractionalBundle(self.matrix[i]) for i in self.matrix.agents()]
+        if hasattr(self,'matrix'):
+            self.matrix.round(num_digits)
+        if isinstance(self.bundles[0],FractionalBundle):
+            for bundle in self.bundles:
+                bundle.round(num_digits)
         return self
 
     def num_of_sharings(self)->int:
@@ -364,7 +367,14 @@ def compute_agent_bundle_value_matrix(agents, bundles, num_of_agents, num_of_bun
     elif hasattr(next(iter(agents)), 'value'):              # E.g. when agents is a list of Agent objects
         for i_agent in range(num_of_agents):
             for i_bundle in range(num_of_bundles):
-                agent_bundle_value_matrix[i_agent,i_bundle] = agents[i_agent].value(bundles[i_bundle])
+                agent = agents[i_agent]
+                bundle = bundles[i_bundle]
+                try:
+                    value = agent.value(bundle)
+                except TypeError as err:
+                    raise TypeError(f"Cannot compute the value of agent {type(agent)} for bundle {bundle} of type {type(bundle)}") from err
+                agent_bundle_value_matrix[i_agent,i_bundle] = value
+                    
     else:
         # WARNING: Cannot compute agents' values at all
         for i_agent in range(num_of_agents):

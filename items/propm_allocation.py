@@ -12,7 +12,7 @@ Since:  2021-05
 
 import networkx as nx
 import numpy as np
-from fairpy import valuations, ValuationMatrix, Allocation
+from fairpy import valuations, adaptors, ValuationMatrix, Allocation
 from typing import List
 from copy import deepcopy
 import logging
@@ -214,6 +214,8 @@ def solve(agents) -> List[List[int]]:
     if v.num_of_agents == 0 or v.num_of_objects == 0:
         return []
 
+    logger.info("Looking for PROPm allocation for %d agents and %d items", 
+        v.num_of_agents, v.num_of_objects)
     logger.info("Solving a problem defined by valuation matrix\n %s", str(np.array(agents)))
 
     total_value = v.normalize()
@@ -224,7 +226,7 @@ def solve(agents) -> List[List[int]]:
                 logger.info("Allocating item %d to agent %d as she values it as %f > 1/n", item, agent,
                             v[agent][item] / total_value)
 
-                allocation = solve(v.without_agent(agent).without_object(object))
+                allocation = solve(v.without_agent(agent).without_object(item))
                 insert_agent_into_allocation(agent, item, allocation)
                 return allocation
 
@@ -293,13 +295,18 @@ def propm_allocation(agents) -> Allocation:
     Agent #1 gets {0,1} with value 0.51.
     Agent #2 gets {4,5} with value 0.51.
     <BLANKLINE>
-    """
 
-    values = valuations.matrix_from(deepcopy(agents))
-    logger.info("Looking for PROPm allocation for %d agents and %d items", values.num_of_agents,
-                values.num_of_objects)
-    bundles = solve(agents)
-    return Allocation(values, bundles)
+    >>> v = {"Alice":  {"z":12, "y":10, "x":8, "w":7, "v":4, "u":1},\
+            "Dina":   {"z":14, "y":9, "x":15, "w":4, "v":9, "u":12},\
+            "George": {"z":19, "y":16, "x":8, "w":6, "v":5, "u":1},\
+            }
+    >>> propm_allocation(v)
+    Alice gets {x,y} with value 18.
+    Dina gets {u,v,w} with value 25.
+    George gets {z} with value 19.
+    <BLANKLINE>
+    """
+    return adaptors.adapt_list_algorithm(solve, agents)
 
 
 if __name__ == "__main__":

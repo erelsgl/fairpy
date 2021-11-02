@@ -59,9 +59,9 @@ def round_robin(agents, agent_order:List[int]=None, items:List[Any]=None) -> All
 
     if items is None: items = agents[0].all_items()
     
-    logger.info("\nRound Robin with agent-order %s and items %s", agent_order, items)
-    allocations = [[] for _ in agents]
     remaining_items = list(items)
+    logger.info("\nRound Robin with agent-order %s and items %s", agent_order, remaining_items)
+    allocations = [[] for _ in agents]
     while True:
         for agent_index in agent_order:
             if len(remaining_items)==0:

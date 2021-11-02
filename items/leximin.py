@@ -17,9 +17,9 @@ Since:  2021-05
 """
 
 import numpy as np, cvxpy
-from fairpy import valuations, Allocation, AllocationToFamilies, map_agent_to_family
-from fairpy.solve import maximize
-from typing import List
+from fairpy import adaptors, valuations, Allocation, AllocationToFamilies, map_agent_to_family, solve
+from fairpy.items.leximin_generic import leximin_solve
+from fairpy.allocations import AllocationMatrix
 
 import logging
 logger = logging.getLogger(__name__)
@@ -40,75 +40,12 @@ def is_leximin_better(x:list, y:list):
 TOLERANCE_FACTOR=1.001  # for comparing floating-point numbers
 
 
-#### Generic leximin solver:
-
-def leximin_optimal_solution(variables, utilities, constraints) -> np.ndarray:
-    """
-    Find a leximin-optimal vector of utilities, subject to the given constraints.
-    :param variables: an array of cvxpy variables, over which the optimization is done.
-    :param utilities: a list of cvxpy expressions using these variables, representing the agents' utilities.
-    :param constraints: a list of cvxpy constraints.
-    :return an ndarray with the optimal values of the given variables.
-
-    For usage examples and doctests, see the functions below: leximin_optimal_allocation, leximin_optimal_allocation_for_families.
-    """
-    leximin_optimal_solution.num_of_calls_to_solver = 0  # for performance analysis
-    num_of_agents = len(utilities)
-
-    # Initially all agents are free - no agent is saturated:
-    free_agents = list(range(num_of_agents))
-    map_saturated_agent_to_saturated_utility = num_of_agents * [None]
-    order_constraints_for_saturated_agents = []
-
-    while True:
-        logger.info("Saturated utilities: %s.", map_saturated_agent_to_saturated_utility)
-        min_utility_for_free_agents = cvxpy.Variable()
-        order_constraints_for_free_agents = [
-            utilities[i] >= min_utility_for_free_agents
-            for i in free_agents
-        ]
-        max_min_utility_for_free_agents = maximize(min_utility_for_free_agents, constraints + order_constraints_for_saturated_agents + order_constraints_for_free_agents)
-        leximin_optimal_solution.num_of_calls_to_solver += 1
-        utilities_in_max_min_allocation = [utility.value for utility in utilities]
-        logger.info("  max min value: %g, utility-profile: %s", max_min_utility_for_free_agents, utilities_in_max_min_allocation)
-
-        for ifree in free_agents:  # Find whether i's utility can be improved
-            if utilities_in_max_min_allocation[ifree] > TOLERANCE_FACTOR*max_min_utility_for_free_agents:
-                logger.info("  Max utility of agent #%d is at least %g, so agent remains free.", ifree, utilities_in_max_min_allocation[ifree])
-                continue
-            new_order_constraints_for_free_agents = [
-                utilities[i] >= max_min_utility_for_free_agents
-                for i in free_agents if i!=ifree
-            ]
-            max_utility_for_ifree = maximize(utilities[ifree], constraints + order_constraints_for_saturated_agents + new_order_constraints_for_free_agents)
-            leximin_optimal_solution.num_of_calls_to_solver += 1
-            if max_utility_for_ifree > TOLERANCE_FACTOR*max_min_utility_for_free_agents:
-                logger.info("  Max utility of agent #%d is %g, so agent remains free.", ifree, max_utility_for_ifree)
-                continue
-            logger.info("  Max utility of agent #%d is %g, so agent becomes saturated.", ifree, max_utility_for_ifree)
-            map_saturated_agent_to_saturated_utility[ifree] = max_min_utility_for_free_agents
-            order_constraints_for_saturated_agents.append(utilities[ifree] >= max_min_utility_for_free_agents)
-
-        new_free_agents = [i for i in free_agents if map_saturated_agent_to_saturated_utility[i] is None]
-        if len(new_free_agents)==len(free_agents):
-            raise ValueError("No new saturated agents - this contradicts Willson's theorem!")
-        elif len(new_free_agents)==0:
-            logger.info("All agents are saturated -- utility profile is %s.", map_saturated_agent_to_saturated_utility)
-            logger.info("%d calls to solver.", leximin_optimal_solution.num_of_calls_to_solver)
-            return variables.value
-        else:
-            free_agents = new_free_agents
-            continue
-
-
-
-
 ##### Find a leximin-optimal allocation for individual agents
 
-def leximin_optimal_allocation(agents) -> Allocation:
+def leximin_optimal_allocation(instance) -> Allocation:
     """
     Find the leximin-optimal (aka Egalitarian) allocation.
-    :param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
     The allocation should maximize the leximin vector of utilities.
@@ -141,21 +78,23 @@ def leximin_optimal_allocation(agents) -> Allocation:
     [3. 3. 5. 5.]
     >>> logger.setLevel(logging.WARNING)
     """
-    v = valuations.matrix_from(agents)
 
-    alloc = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
-    feasibility_constraints = [
-        sum([alloc[i][o] for i in v.agents()])==1
-        for o in v.objects()
-    ]
-    positivity_constraints = [
-        alloc[i][o] >= 0 for i in v.agents()
-        for o in v.objects()
-    ]
-    utilities = [sum([alloc[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
-
-    allocation_matrix = leximin_optimal_solution(alloc, utilities, feasibility_constraints+positivity_constraints)
-    return Allocation(v, allocation_matrix)
+    def implementation_with_matrix_input(v):
+        allocation_vars = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
+        feasibility_constraints = [
+            sum([allocation_vars[i][o] for i in v.agents()])==1
+            for o in v.objects()
+        ]
+        positivity_constraints = [
+            allocation_vars[i][o] >= 0 for i in v.agents()
+            for o in v.objects()
+        ]
+        utilities = [sum([allocation_vars[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
+        leximin_solve(objectives=utilities, constraints=feasibility_constraints+positivity_constraints, solver=solve.DEFAULT_SOLVERS[0])
+        allocation_matrix = allocation_vars.value
+        # return Allocation(v, allocation_matrix)
+        return AllocationMatrix(allocation_matrix)
+    return adaptors.adapt_matrix_algorithm(implementation_with_matrix_input, instance)
 
 
 ##### leximin for families
@@ -195,17 +134,21 @@ def leximin_optimal_allocation_for_families(agents, families:list) -> Allocation
     agent_to_family = map_agent_to_family(families, v.num_of_agents)
     logger.info("map_agent_to_family = %s",agent_to_family)
 
-    alloc = cvxpy.Variable((num_of_families, v.num_of_objects))
+    allocation_vars = cvxpy.Variable((num_of_families, v.num_of_objects))
     feasibility_constraints = [
-        sum([alloc[f][o] for f in range(num_of_families)])==1
+        sum([allocation_vars[f][o] for f in range(num_of_families)])==1
         for o in v.objects()
     ]
     positivity_constraints = [
-        alloc[f][o] >= 0 for f in range(num_of_families)
+        allocation_vars[f][o] >= 0 for f in range(num_of_families)
         for o in v.objects()
     ]
-    utilities = [sum([alloc[agent_to_family[i]][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
-    allocation_matrix = leximin_optimal_solution(alloc, utilities, feasibility_constraints+positivity_constraints)
+    utilities = [sum([allocation_vars[agent_to_family[i]][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
+
+    # allocation_matrix = leximin_optimal_solution(alloc, utilities, feasibility_constraints+positivity_constraints)
+    leximin_solve(objectives=utilities, constraints=feasibility_constraints+positivity_constraints, solver=solve.DEFAULT_SOLVERS[0])
+    allocation_matrix = allocation_vars.value
+
     return AllocationToFamilies(v, allocation_matrix, families)
 
 

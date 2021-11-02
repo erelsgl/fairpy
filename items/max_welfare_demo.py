@@ -36,7 +36,7 @@ show("leximin-optimal",z,v)
 
 
 print("\nThree different goods:")
-v = valuations.matrix_from({"Alice": [3,2,2] , "Bob": [1,2,1] , "Carl": [0,0,1] })
+v = {"Alice": [3,2,2] , "Bob": [1,2,1] , "Carl": [0,0,1] }
 print("v = \n",v)
 z = max_sum_allocation(v).round(3)
 show("max-sum",z,v)

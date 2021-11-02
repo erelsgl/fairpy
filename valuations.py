@@ -11,6 +11,7 @@ Since:  2021-03
 """
 
 import numpy as np
+from numbers import Number
 from typing import *
 
 from numpy.lib.arraysetops import isin
@@ -102,13 +103,20 @@ class ValuationMatrix:
         """
         :return a copy of this valuation matrix, in which the given agent is removed.
         """
-        return ValuationMatrix(np.delete(self._v, agent, axis=0))
+        if isinstance(agent,int):
+            return ValuationMatrix(np.delete(self._v, agent, axis=0))
+        else:
+            raise IndexError(f"agent index should be an integer, but it is {agent}")
+            
 
     def without_object(self, object:int)->'ValuationMatrix':
         """
         :return a copy of this valuation matrix, in which the given object is removed.
         """
-        return ValuationMatrix(np.delete(self._v, object, axis=1))
+        if isinstance(object,int):
+            return ValuationMatrix(np.delete(self._v, object, axis=1))
+        else:
+            raise IndexError(f"object index should be an integer, but it is {object}")
 
     def submatrix(self, agents: List[int], objects: List[int]):
         """
@@ -167,7 +175,10 @@ class ValuationMatrix:
 
 def matrix_from(input:Any):
     """
-    Attempts to construct a list of agents from various input formats.
+    Attempts to construct a valuation matrix from various input formats.
+
+    :param input: a representation of a valuation profile. Can be a numpy array, a list of lists, a dict of lists, or a dict of dicts.
+    :return a valuation matrix.
 
     >>> matrix_from(np.ones([2,3]))        # Initialize from a numpy array.
     [[1. 1. 1.]
@@ -192,7 +203,8 @@ def matrix_from(input:Any):
             if isinstance(input[i], dict):
                 input[i] = list(input[i].values())
         input = np.array(input)
-    return ValuationMatrix(input)
+    matrix = ValuationMatrix(input)
+    return matrix
 
 
 if __name__ == '__main__':

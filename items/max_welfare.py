@@ -12,14 +12,14 @@ Since:  2021-05
 """
 
 import numpy as np, cvxpy
-from fairpy import valuations, Allocation, AllocationToFamilies
+from fairpy import valuations, Allocation, AllocationToFamilies, AllocationMatrix, adaptors
 from fairpy.solve import maximize
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-def max_welfare_allocation(agents, welfare_function, welfare_constraint_function=None) -> Allocation:
+def max_welfare_allocation(instance, welfare_function, welfare_constraint_function=None) -> Allocation:
     """
     Find an allocation maximizing a given social welfare function. (aka Max Nash Welfare) allocation.
     :param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
@@ -30,24 +30,26 @@ def max_welfare_allocation(agents, welfare_function, welfare_constraint_function
 
     For usage examples, see the functions max_sum_allocation, max_product_allocation, max_minimum_allocation.
     """
-    v = valuations.matrix_from(agents)
-    alloc = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
-    feasibility_constraints = [
-        sum([alloc[i][o] for i in v.agents()])==1
-        for o in v.objects()
-    ]
-    positivity_constraints = [
-        alloc[i][o] >= 0 for i in v.agents()
-        for o in v.objects()
-    ]
-    utilities = [sum([alloc[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
-    if welfare_constraint_function is not None:
-        welfare_constraints = [welfare_constraint_function(utility) for utility in utilities]
-    else:
-        welfare_constraints = []
-    max_welfare = maximize(welfare_function(utilities), feasibility_constraints+positivity_constraints+welfare_constraints)
-    logger.info("Maximum welfare is %g",max_welfare)
-    return Allocation(v, alloc.value)
+    def implementation_with_matrix_input(v):
+        allocation_vars = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
+        feasibility_constraints = [
+            sum([allocation_vars[i][o] for i in v.agents()])==1
+            for o in v.objects()
+        ]
+        positivity_constraints = [
+            allocation_vars[i][o] >= 0 for i in v.agents()
+            for o in v.objects()
+        ]
+        utilities = [sum([allocation_vars[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
+        if welfare_constraint_function is not None:
+            welfare_constraints = [welfare_constraint_function(utility) for utility in utilities]
+        else:
+            welfare_constraints = []
+        max_welfare = maximize(welfare_function(utilities), feasibility_constraints+positivity_constraints+welfare_constraints)
+        logger.info("Maximum welfare is %g",max_welfare)
+        allocation_matrix = allocation_vars.value
+        return AllocationMatrix(allocation_matrix)
+    return adaptors.adapt_matrix_algorithm(implementation_with_matrix_input, instance)
 
 
 
