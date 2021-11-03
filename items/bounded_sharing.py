@@ -8,9 +8,10 @@ Since:  2021-10
 """
 
 from typing import *
-import cvxpy, logging
+import cvxpy, logging, numpy as np
 from fairpy import adapt_matrix_algorithm, Allocation, ValuationMatrix
 from fairpy.solve import solve
+from fairpy.items.max_welfare import max_sum_allocation, max_product_allocation
 
 logger = logging.getLogger(__name__)
 
@@ -71,9 +72,61 @@ def dominating_allocation_with_bounded_sharing(instance:Any, thresholds:List) ->
     return adapt_matrix_algorithm(implementation_with_matrix_input, instance)
 
 
+def proportional_allocation_with_bounded_sharing(instance:Any, entitlements:List=None) -> Allocation:
+    """
+    Finds a Pareto-optimal and proportional allocation
+          with at most n-1 sharings, where n is the number of agents.
+
+    :param instance: a valuation profile in any supported format.
+    :param entitlements: the entitlement of each agent. Optional, default is (1,...,1) which means equal entitlements.
+
+    IDEA: find a Basic Feasible Solution (BFS) of a linear program.
+    NOTE: some solvers return a BFS by default (particularly, those running Simplex).
+
+    >>> logger.setLevel(logging.WARNING)
+    >>> instance = [[8,2],[5,5]]
+    >>> proportional_allocation_with_bounded_sharing(instance).round(3)
+    Agent #0 gets { 62.5% of 0} with value 5.
+    Agent #1 gets { 37.5% of 0, 100.0% of 1} with value 6.88.
+    <BLANKLINE>
+    >>> proportional_allocation_with_bounded_sharing(instance, entitlements=[4,1]).round(3)
+    Agent #0 gets { 100.0% of 0} with value 8.
+    Agent #1 gets { 100.0% of 1} with value 5.
+    <BLANKLINE>
+    >>> proportional_allocation_with_bounded_sharing(instance, entitlements=[3,2]).round(3)
+    Agent #0 gets { 75.0% of 0} with value 6.
+    Agent #1 gets { 25.0% of 0, 100.0% of 1} with value 6.25.
+    <BLANKLINE>
+    """
+    def implementation_with_matrix_input(v:ValuationMatrix, entitlements:List=None):
+        if entitlements is None:
+            entitlements = np.ones(v.num_of_agents)
+        else:
+            entitlements = np.array(entitlements)
+        entitlements = entitlements/sum(entitlements)  # normalize
+        thresholds = v.total_values() * entitlements
+        return dominating_allocation_with_bounded_sharing(v, thresholds)
+    return adapt_matrix_algorithm(implementation_with_matrix_input, instance, entitlements=entitlements)
 
 
 
+def efficient_envyfree_allocation_with_bounded_sharing(instance:Any) -> Allocation:
+    """
+    Finds a max-product allocation, which is known to be envy-free and Pareto-optimal.
+          and has at most n-1 sharings, where n is the number of agents.
+
+    :param instance: a valuation profile in any supported format.
+
+    >>> logger.setLevel(logging.WARNING)
+    >>> instance = [[8,2],[5,5]]
+    >>> efficient_envyfree_allocation_with_bounded_sharing(instance).round(3)
+    Agent #0 gets { 100.0% of 0} with value 8.
+    Agent #1 gets { 100.0% of 1} with value 5.
+    <BLANKLINE>
+    """
+    max_prod_allocation = max_product_allocation(instance)
+    thresholds = max_prod_allocation.utility_profile()
+    return dominating_allocation_with_bounded_sharing(instance, thresholds)
 
 
 if __name__ == '__main__':

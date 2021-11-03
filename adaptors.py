@@ -12,7 +12,7 @@ from fairpy import ValuationMatrix, AllocationMatrix, Allocation
 from fairpy.bundles import FractionalBundle
 
 
-def adapt_list_algorithm(algorithm: Callable, input: Any)->Allocation:
+def adapt_list_algorithm(algorithm: Callable, input: Any, **kwargs)->Allocation:
     """
     Adapts an algorithm, that accepts as input a list of lists,
     to accept various other input formats.
@@ -38,6 +38,10 @@ def adapt_list_algorithm(algorithm: Callable, input: Any)->Allocation:
     Agent #0 gets { 100.0% of 0, 100.0% of 2} with value 8.
     Agent #1 gets { 100.0% of 1} with value 3.
     <BLANKLINE> 
+    >>> adapt_list_algorithm(dummy_list_matrix_algorithm, input_list_of_lists, first_agent=1)
+    Agent #0 gets { 100.0% of 1} with value 4.
+    Agent #1 gets { 100.0% of 0, 100.0% of 2} with value 6.
+    <BLANKLINE>
 
     >>> input_valuation_matrix = ValuationMatrix(input_list_of_lists)
     >>> adapt_list_algorithm(dummy_list_list_algorithm, input_valuation_matrix)
@@ -68,12 +72,16 @@ def adapt_list_algorithm(algorithm: Callable, input: Any)->Allocation:
     a gets { 100.0% of x, 100.0% of z} with value 4.
     b gets { 100.0% of y} with value 5.
     <BLANKLINE>
+    >>> adapt_list_algorithm(dummy_list_matrix_algorithm, input_dict_of_dicts, first_agent=1)
+    a gets { 100.0% of y} with value 2.
+    b gets { 100.0% of x, 100.0% of z} with value 10.
+    <BLANKLINE>
     """
     # Step 1. Adapt the input:
     object_names = agent_names = None
     if isinstance(input, list) and isinstance(input[0], list):  # list of lists
-        output = algorithm(input)
-        return Allocation(input, output)
+        output = algorithm(input, **kwargs)
+        return output if isinstance(output,Allocation) else Allocation(input, output)
     elif isinstance(input, dict):  
         agent_names = list(input.keys())
         list_of_valuations = list(input.values())
@@ -92,7 +100,7 @@ def adapt_list_algorithm(algorithm: Callable, input: Any)->Allocation:
         raise TypeError(f"Unsupported input type: {type(input)}")
 
     # Step 2. Run the algorithm:
-    output = algorithm(list_of_valuations)
+    output = algorithm(list_of_valuations, **kwargs)
 
     # Step 3. Adapt the output:
     if isinstance(output, np.ndarray) or isinstance(output, AllocationMatrix):  # allocation matrix
@@ -118,12 +126,13 @@ def adapt_list_algorithm(algorithm: Callable, input: Any)->Allocation:
 
 
 
-def adapt_matrix_algorithm(algorithm: Callable, input: Any)->Allocation:
+def adapt_matrix_algorithm(algorithm: Callable, input: Any, **kwargs)->Allocation:
     """
     Adapts an algorithm, that accepts as input a ValuationMatrix object,
     to accept various other input formats.
 
     >>> # Available input formats:
+
     >>> input_matrix = np.ones([2,3])        # a numpy array of valuations.
     >>> adapt_matrix_algorithm(dummy_matrix_list_algorithm, input_matrix)
     Agent #0 gets {0,2} with value 2.
@@ -133,6 +142,7 @@ def adapt_matrix_algorithm(algorithm: Callable, input: Any)->Allocation:
     Agent #0 gets { 100.0% of 0, 100.0% of 2} with value 2.
     Agent #1 gets { 100.0% of 1} with value 1.
     <BLANKLINE>
+
     >>> input_list_of_lists = [[1,4,7],[6,3,0]]     # a list of lists.
     >>> adapt_matrix_algorithm(dummy_matrix_list_algorithm, input_list_of_lists)
     Agent #0 gets {0,2} with value 8.
@@ -142,6 +152,7 @@ def adapt_matrix_algorithm(algorithm: Callable, input: Any)->Allocation:
     Agent #0 gets { 100.0% of 0, 100.0% of 2} with value 8.
     Agent #1 gets { 100.0% of 1} with value 3.
     <BLANKLINE>
+
     >>> input_dict_of_lists = {"a": [1,2,3], "b": [4,5,6]}      # a dict mapping agent names to list of values.
     >>> adapt_matrix_algorithm(dummy_matrix_list_algorithm, input_dict_of_lists)
     a gets {0,2} with value 4.
@@ -151,6 +162,7 @@ def adapt_matrix_algorithm(algorithm: Callable, input: Any)->Allocation:
     a gets { 100.0% of 0, 100.0% of 2} with value 4.
     b gets { 100.0% of 1} with value 5.
     <BLANKLINE>
+
     >>> input_dict_of_dicts = {"a": {"x":1,"y":2,"z":3}, "b": {"x":4,"y":5,"z":6}}       # a dict mapping agent names to dict of values.
     >>> adapt_matrix_algorithm(dummy_matrix_list_algorithm, input_dict_of_dicts)
     a gets {x,z} with value 4.
@@ -160,14 +172,19 @@ def adapt_matrix_algorithm(algorithm: Callable, input: Any)->Allocation:
     a gets { 100.0% of x, 100.0% of z} with value 4.
     b gets { 100.0% of y} with value 5.
     <BLANKLINE>
+    >>> adapt_matrix_algorithm(dummy_matrix_matrix_algorithm, input_dict_of_dicts, first_agent=1)
+    a gets { 100.0% of y} with value 2.
+    b gets { 100.0% of x, 100.0% of z} with value 10.
+    <BLANKLINE>
     """
     if isinstance(input, np.ndarray) or isinstance(input, ValuationMatrix):
         valuation_matrix = ValuationMatrix(input)
-        output = algorithm(valuation_matrix)
-        return Allocation(valuation_matrix, output)
+        output = algorithm(valuation_matrix, **kwargs)
+        return output if isinstance(output,Allocation) else Allocation(valuation_matrix, output)
     else:
-        list_algorithm = lambda list_input: algorithm(ValuationMatrix(list_input))
-        return adapt_list_algorithm(list_algorithm, input)
+        def list_algorithm(list_input, **kwargs):
+            return algorithm(ValuationMatrix(list_input), **kwargs)
+        return adapt_list_algorithm(list_algorithm, input, **kwargs)
 
 
 
@@ -195,16 +212,19 @@ def dummy_list_list_algorithm(valuations:List[List])->List[List]:
     return bundles
 
 
-def dummy_list_matrix_algorithm(valuations:List[List])->np.ndarray:
+def dummy_list_matrix_algorithm(valuations:List[List], first_agent:int=0)->np.ndarray:
     """ 
     >>> dummy_list_matrix_algorithm([[11,22,33],[44,55,66]])
     array([[1., 0., 1.],
            [0., 1., 0.]])
+    >>> dummy_list_matrix_algorithm([[11,22,33],[44,55,66]], first_agent=1)
+    array([[0., 1., 0.],
+           [1., 0., 1.]])
     """
     num_agents = len(valuations)
     num_objects = len(valuations[0])
     bundles = np.zeros([num_agents,num_objects])
-    i_agent = 0
+    i_agent = first_agent
     for i_object in range(num_objects):
         bundles[i_agent][i_object] = 1
         i_agent += 1
@@ -228,16 +248,19 @@ def dummy_matrix_list_algorithm(valuations:ValuationMatrix)->List[List]:
             i_agent = 0
     return bundles
 
-def dummy_matrix_matrix_algorithm(valuations:ValuationMatrix)->np.ndarray:
+def dummy_matrix_matrix_algorithm(valuations:ValuationMatrix, first_agent:int=0)->np.ndarray:
     """ 
     >>> dummy_matrix_matrix_algorithm(ValuationMatrix([[11,22,33],[44,55,66]]))
     array([[1., 0., 1.],
            [0., 1., 0.]])
+    >>> dummy_matrix_matrix_algorithm(ValuationMatrix([[11,22,33],[44,55,66]]), first_agent=1)
+    array([[0., 1., 0.],
+           [1., 0., 1.]])
     """
     num_agents = valuations.num_of_agents
     num_objects = valuations.num_of_objects
     bundles = np.zeros([num_agents,num_objects])
-    i_agent = 0
+    i_agent = first_agent
     for i_object in range(num_objects):
         bundles[i_agent][i_object] = 1
         i_agent += 1

@@ -138,12 +138,20 @@ class ValuationMatrix:
             if any(v_i[j] < v_i[j+1] for j in range(self.num_of_objects-1)):
                 raise ValueError(f"Valuations of agent {i} are not ordered: {v_i}")
 
+    def total_values(self) -> np.ndarray:
+        """
+        Return a 1-dimensional array in which elemenet i is the total value of agent i for all items.
+        """
+        return np.sum(self._v, axis=1, keepdims=True)
+
     def normalize(self) -> int:
         """
         Normalize valuation matrix so that each agent has equal total value of all items.
         In case of integer values they remain integer to avoid floating point mistakes.
+
+        :return the common value after normalization.
         """
-        total_values = np.sum(self._v, axis=1, keepdims=True)
+        total_values = self.total_values()
 
         if issubclass(self._v.dtype.type, np.integer):
             total_value = np.lcm.reduce(total_values)
