@@ -11,10 +11,7 @@ Since:  2021-03
 """
 
 import numpy as np
-from numbers import Number
 from typing import *
-
-from numpy.lib.arraysetops import isin
 from fairpy.bundles import *
 
 class ValuationMatrix:
@@ -172,39 +169,6 @@ class ValuationMatrix:
         return np.array2string (self._v, max_line_width=100)		
 
 
-
-def matrix_from(input:Any):
-    """
-    Attempts to construct a valuation matrix from various input formats.
-
-    :param input: a representation of a valuation profile. Can be a numpy array, a list of lists, a dict of lists, or a dict of dicts.
-    :return a valuation matrix.
-
-    >>> matrix_from(np.ones([2,3]))        # Initialize from a numpy array.
-    [[1. 1. 1.]
-     [1. 1. 1.]]
-    >>> matrix_from([[1,4,7],[6,3,0]])     # Initialize from a list of lists.
-    [[1 4 7]
-     [6 3 0]]
-    >>> matrix_from({"a": [1,2,3], "b": [4,5,6]})        # Initialize from a dict.
-    [[1 2 3]
-     [4 5 6]]
-    >>> matrix_from({"a": {"x":1,"y":2,"z":3}, "b": {"x":4,"y":5,"z":6}})        # Initialize from a dict.
-    [[1 2 3]
-     [4 5 6]]
-    """
-    if isinstance(input, ValuationMatrix):
-        return input
-
-    if isinstance(input, dict):  # 1. Convert dict to list
-        input = list(input.values())
-    if isinstance(input, list):  # 2. Convert list to np.ndarray
-        for i in range(len(input)):
-            if isinstance(input[i], dict):
-                input[i] = list(input[i].values())
-        input = np.array(input)
-    matrix = ValuationMatrix(input)
-    return matrix
 
 
 if __name__ == '__main__':

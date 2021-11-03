@@ -7,8 +7,7 @@
 """
 
 
-import fairpy.valuations as valuations
-from fairpy.allocations import AllocationMatrix, Allocation
+from fairpy import ValuationMatrix, AllocationMatrix, Allocation
 
 from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
 from fairpy.items.min_sharing_impl.GraphGenerator import GraphGenerator
@@ -28,12 +27,12 @@ class FairAllocationProblem():
     ‎This is an abstract class for solving a fair allocation problem.
     """
 
-    def __init__(self ,valuation):
-        valuation = valuations.matrix_from(valuation)
-        self.valuation = valuation
-        self.min_sharing_number = valuation.num_of_agents
+    def __init__(self ,valuation_matrix):
+        valuation_matrix = ValuationMatrix(valuation_matrix)
+        self.valuation = valuation_matrix
+        self.min_sharing_number = valuation_matrix.num_of_agents
         self.min_sharing_allocation = None
-        self.graph_generator = GraphGenerator(valuation)
+        self.graph_generator = GraphGenerator(valuation_matrix)
         self.find = False
 
     @abstractmethod
@@ -67,7 +66,7 @@ class FairAllocationProblem():
         return allocation
 
 
-    def find_allocation_with_min_sharing(self, num_of_decimal_digits:int=3)->Allocation:
+    def find_allocation_with_min_sharing(self, num_of_decimal_digits:int=3)->AllocationMatrix:
         """
         Runs the min-sharing algorithm on this valuation matrix.
 
@@ -86,7 +85,7 @@ class FairAllocationProblem():
         allocation.round(num_of_decimal_digits)
         if allocation.num_of_sharings() >= self.valuation.num_of_agents:
             raise AssertionError("Num of sharings is {} but it should be at most {}.\n{}".format(self.min_sharing_number, self.valuation.num_of_agents-1,allocation))
-        return Allocation(self.valuation, allocation)
+        return allocation
 
 
     def find_min_sharing_allocation_with_time_limit(self, num_of_decimal_digits:int=3, time_limit_in_seconds=999)->(str,float,AllocationMatrix,float):

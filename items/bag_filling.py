@@ -8,7 +8,7 @@ Programmer: Erel Segal-Halevi
 Since:  2021-04
 """
 
-from fairpy import Allocation, valuations
+from fairpy import Allocation, ValuationMatrix
 from typing import List
 import numpy as np
 
@@ -48,13 +48,13 @@ class Bag:
 	Bag objects: [0, 1], values: [44. 66.]
 	"""
 
-	def __init__(self, values, thresholds:List[float]):
+	def __init__(self, values:ValuationMatrix, thresholds:List[float]):
 		"""
 		Initialize an empty bag.
 		:param values: a matrix representing additive valuations (a row for each agent, a column for each object).
 		:param thresholds: determines, for each agent, the minimum value that should be in a bag before the agent accepts it.
 		"""
-		self.values = valuations.matrix_from(values)
+		self.values = ValuationMatrix(values)
 		self.thresholds = thresholds
 		self.reset()
 
@@ -183,7 +183,7 @@ def one_directional_bag_filling(values, thresholds:List[float]):
 	Agent #1 gets {0} with value 44.
 	<BLANKLINE>
 	"""
-	values = valuations.matrix_from(values)
+	values = ValuationMatrix(values)
 	if len(thresholds) != values.num_of_agents:
 		raise ValueError(f"Number of valuations {values.num_of_agents} differs from number of thresholds {len(thresholds)}")
 

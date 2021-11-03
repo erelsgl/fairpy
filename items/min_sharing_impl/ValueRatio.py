@@ -8,7 +8,7 @@
 
 import numpy as np
 from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
-import fairpy.valuations as valuations
+from fairpy import ValuationMatrix
 
 
 
@@ -19,7 +19,7 @@ class ValueRatio():
 
 
     def __init__(self, valuation_matrix):
-        valuation_matrix = valuations.matrix_from(valuation_matrix)
+        valuation_matrix = ValuationMatrix(valuation_matrix)
         self.valuation_matrix = valuation_matrix
         self.all_ratios = compute_all_ratios(valuation_matrix)
 
@@ -109,7 +109,7 @@ def compute_all_ratios(valuation_matrix)->list:
     >>> compute_all_ratios(v)
     [[[(0, 1.0), (1, 1.0), (2, 1.0)], [(0, 0.3333333333333333), (1, 0.0), (2, 0.8)], [(0, 0.25), (1, 0.0), (2, inf)]], [[(0, 3.0), (1, inf), (2, 1.25)], [(0, 1.0), (1, 1.0), (2, 1.0)], [(0, 0.75), (1, 3.5), (2, inf)]], [[(0, 4.0), (1, inf), (2, 0.0)], [(0, 1.3333333333333333), (1, 0.2857142857142857), (2, 0.0)], [(0, 1.0), (1, 1.0), (2, 1.0)]]]
     """
-    valuation_matrix = valuations.matrix_from(valuation_matrix)
+    valuation_matrix = ValuationMatrix(valuation_matrix)
     ans = []
     for i in valuation_matrix.agents():
         mat = np.zeros((valuation_matrix.num_of_agents, valuation_matrix.num_of_objects)).tolist()

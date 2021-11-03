@@ -19,11 +19,11 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 
 def show(title, z, v):
     utility_profile = z.utility_profile()
-    print(title, " = \n",z, "\nprofile = ", utility_profile, "\nsum = ", sum(utility_profile), "product = ", np.prod(utility_profile))
+    print("\n", title, " = \n",z, "\nprofile = ", utility_profile, "\nsum = ", sum(utility_profile), "product = ", np.prod(utility_profile))
 
 
 print("\nThree identical goods:")
-v = valuations.matrix_from([ [3,3,3] , [2,2,2] , [1,1,1] ])
+v = [ [3,3,3] , [2,2,2] , [1,1,1] ]
 print("v = \n",v)
 z = max_sum_allocation(v).round(3)
 show("max-sum",z,v)

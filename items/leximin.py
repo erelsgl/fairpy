@@ -16,10 +16,9 @@ See also: [max_welfare.py](max_welfare.py).
 Since:  2021-05
 """
 
-import numpy as np, cvxpy
-from fairpy import adaptors, valuations, Allocation, AllocationToFamilies, map_agent_to_family, solve
+import cvxpy
+from fairpy import adaptors, Allocation, AllocationToFamilies, map_agent_to_family, solve, ValuationMatrix
 from fairpy.items.leximin_generic import leximin_solve
-from fairpy.allocations import AllocationMatrix
 
 import logging
 logger = logging.getLogger(__name__)
@@ -92,8 +91,7 @@ def leximin_optimal_allocation(instance) -> Allocation:
         utilities = [sum([allocation_vars[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
         leximin_solve(objectives=utilities, constraints=feasibility_constraints+positivity_constraints, solver=solve.DEFAULT_SOLVERS[0])
         allocation_matrix = allocation_vars.value
-        # return Allocation(v, allocation_matrix)
-        return AllocationMatrix(allocation_matrix)
+        return allocation_matrix
     return adaptors.adapt_matrix_algorithm(implementation_with_matrix_input, instance)
 
 
@@ -129,7 +127,7 @@ def leximin_optimal_allocation_for_families(agents, families:list) -> Allocation
     >>> print(leximin_optimal_allocation_for_families(v,families).round(3).utility_profile())
     [ 3.  4. 10.]
     """
-    v = valuations.matrix_from(agents)
+    v = ValuationMatrix(agents)
     num_of_families = len(families)
     agent_to_family = map_agent_to_family(families, v.num_of_agents)
     logger.info("map_agent_to_family = %s",agent_to_family)

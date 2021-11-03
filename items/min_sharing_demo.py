@@ -23,7 +23,6 @@ FairAllocationProblem.logger.setLevel(logging.INFO)
 
 def demo(title:str, v):
 	print(f"\n## {title} ##")
-	v = valuations.matrix_from(v)
 	print("v = \n",v)
 	start = now()
 	z = proportional_allocation_with_min_sharing(v).round(3)

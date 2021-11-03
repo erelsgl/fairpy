@@ -6,7 +6,6 @@ Adapts algorithms, using a specific input and output formats, to accept various 
 Programmer: Erel Segal-Halevi
 Since: 2021-11
 """
-
 import numpy as np
 from typing import Any, Callable, List
 from fairpy import ValuationMatrix, AllocationMatrix, Allocation
@@ -72,7 +71,10 @@ def adapt_list_algorithm(algorithm: Callable, input: Any):
     """
     # Step 1. Adapt the input:
     object_names = agent_names = None
-    if isinstance(input, dict):  
+    if isinstance(input, list) and isinstance(input[0], list):  # list of lists
+        output = algorithm(input)
+        return Allocation(input, output)
+    elif isinstance(input, dict):  
         agent_names = list(input.keys())
         list_of_valuations = list(input.values())
         if isinstance(list_of_valuations[0], dict): # maps agent names to dicts of valuations
@@ -82,10 +84,6 @@ def adapt_list_algorithm(algorithm: Callable, input: Any):
                 for valuation in list_of_valuations
             ]
         valuation_matrix = input
-    elif isinstance(input, list) and isinstance(input[0], list):  # list of lists
-        agent_names = [f"Agent #{i}" for i in range(len(input))]
-        list_of_valuations = input
-        valuation_matrix = ValuationMatrix(input)
     elif isinstance(input, np.ndarray) or isinstance(input, ValuationMatrix):
         valuation_matrix = ValuationMatrix(input)
         agent_names = [f"Agent #{i}" for i in valuation_matrix.agents()]
@@ -163,13 +161,13 @@ def adapt_matrix_algorithm(algorithm: Callable, input: Any):
     b gets { 100.0% of y} with value 5.
     <BLANKLINE>
     """
-    def list_algorithm(list_input:List):
-        matrix_input = ValuationMatrix(list_input)
-        return algorithm(matrix_input)
-    return adapt_list_algorithm(list_algorithm, input)
-
-
-
+    if isinstance(input, np.ndarray) or isinstance(input, ValuationMatrix):
+        valuation_matrix = ValuationMatrix(input)
+        output = algorithm(valuation_matrix)
+        return Allocation(valuation_matrix, output)
+    else:
+        list_algorithm = lambda list_input: algorithm(ValuationMatrix(list_input))
+        return adapt_list_algorithm(list_algorithm, input)
 
 
 

@@ -6,11 +6,12 @@
     Since:  2020
 """
 
-from fairpy import valuations
+from fairpy import ValuationMatrix
 from fairpy.items.max_welfare import max_product_allocation
 from fairpy.items.min_sharing_impl.FairThresholdAllocationProblem import FairThresholdAllocationProblem
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -71,7 +72,7 @@ class FairMaxProductAllocationProblem(FairThresholdAllocationProblem):
     """
 
     def __init__(self, valuation_matrix, tolerance=0.01):
-        valuation_matrix = valuations.matrix_from(valuation_matrix)
+        valuation_matrix = ValuationMatrix(valuation_matrix)
         mpa = max_product_allocation(valuation_matrix)
         mpa_utilities = mpa.utility_profile()
         logger.info("The max-product allocation is:\n%s,\nwith utility profile: %s",mpa,mpa_utilities)

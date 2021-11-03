@@ -8,7 +8,7 @@
 
 
 import itertools
-import fairpy.valuations as valuations
+from fairpy import ValuationMatrix
 
 class ConsumptionGraph():
     """
@@ -83,7 +83,6 @@ class ConsumptionGraph():
         >>> g.can_be_proportional(v)
         False
         """
-        valuation_matrix = valuations.matrix_from(valuation_matrix)
         if self.__calculate_prop == False:
             self.__calculate_prop == True
             flag = True
@@ -134,7 +133,7 @@ class ConsumptionGraph():
         >>> g.is_single_proportional(v,2)
         False
         """
-        valuation_matrix = valuations.matrix_from(valuation_matrix)
+        valuation_matrix = ValuationMatrix(valuation_matrix)
         sum = 0
         part = 0
         for i in range(0, self.num_of_objects):

@@ -6,11 +6,10 @@
     Since:  2020
 """
 
-import fairpy.valuations as valuations
+from fairpy import ValuationMatrix
 
 from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
 from fairpy.items.min_sharing_impl.FairThresholdAllocationProblem import FairThresholdAllocationProblem
-
 
 from cvxpy.constraints.constraint import Constraint
 
@@ -79,7 +78,7 @@ class FairProportionalAllocationProblem(FairThresholdAllocationProblem):
     """
 
     def __init__(self, valuation_matrix):
-        valuation_matrix = valuations.matrix_from(valuation_matrix)
+        valuation_matrix = ValuationMatrix(valuation_matrix)
         thresholds = [
             sum(valuation_matrix[i]) / valuation_matrix.num_of_agents 
             for i in valuation_matrix.agents()]

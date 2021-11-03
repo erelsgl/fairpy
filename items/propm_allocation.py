@@ -12,7 +12,7 @@ Since:  2021-05
 
 import networkx as nx
 import numpy as np
-from fairpy import valuations, adaptors, ValuationMatrix, Allocation
+from fairpy import adaptors, ValuationMatrix, Allocation
 from typing import List
 from copy import deepcopy
 import logging
@@ -210,7 +210,7 @@ def solve(agents) -> List[List[int]]:
     >>> solve(v[np.ix_([0, 1, 2], [0, 2, 1, 3, 4, 5])])
     [[2, 3], [0, 1], [4, 5]]
     """
-    v = valuations.matrix_from(agents)
+    v = ValuationMatrix(agents)
     if v.num_of_agents == 0 or v.num_of_objects == 0:
         return []
 
@@ -306,7 +306,7 @@ def propm_allocation(agents) -> Allocation:
     George gets {z} with value 19.
     <BLANKLINE>
     """
-    return adaptors.adapt_list_algorithm(solve, agents)
+    return adaptors.adapt_matrix_algorithm(solve, agents)
 
 
 if __name__ == "__main__":

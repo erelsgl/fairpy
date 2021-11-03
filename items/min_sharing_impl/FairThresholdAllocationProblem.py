@@ -33,12 +33,12 @@ class FairThresholdAllocationProblem(FairAllocationProblem):
     For all i: Vi(Xi) ≥ Ti
     """
 
-    def __init__(self, valuations:ValuationMatrix, thresholds:list):
+    def __init__(self, valuation_matrix:ValuationMatrix, thresholds:list):
         """
         :param valuations: the agents' valuations, V[i][o] for each agent i and object o
         :param thresholds: the agents' value-thresholds, T[i] for each agent i.
         """
-        super().__init__(valuations)
+        super().__init__(valuation_matrix)
         self.thresholds = thresholds
 
 

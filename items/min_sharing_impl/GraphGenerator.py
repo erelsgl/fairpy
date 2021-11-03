@@ -9,7 +9,7 @@
 
 from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
 from fairpy.items.min_sharing_impl.ValueRatio import ValueRatio
-import fairpy.valuations as valuations
+from fairpy import ValuationMatrix
 import numpy as np
 import math
 
@@ -21,7 +21,7 @@ class GraphGenerator():
     """
 
     def __init__(self, valuation_matrix):
-        self.valuation_matrix = valuations.matrix_from(valuation_matrix)
+        self.valuation_matrix = ValuationMatrix(valuation_matrix)
         self.valuation_ratios = ValueRatio(valuation_matrix)
         self.num_of_sharing_is_allowed = self.valuation_matrix.num_of_agents
 
