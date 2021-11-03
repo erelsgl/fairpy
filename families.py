@@ -7,7 +7,7 @@ Programmer: Erel Segal-Halevi
 Since: 2021-07
 """
 
-from fairpy import valuations
+from fairpy import ValuationMatrix
 from fairpy.allocations import *
 from typing import List, Any
 import numpy as np
@@ -37,7 +37,7 @@ class AllocationToFamilies:
     It is an immutable object. It is used mainly to display the allocation in a nice way.
 
     >>> ### A valuation matrix and an allocation matrix:
-    >>> agents = valuations.matrix_from([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]])
+    >>> agents = ValuationMatrix([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]])
     >>> bundles = AllocationMatrix([[1,0,0,1,0],[0,1,1,0,0]])
     >>> families = [[0,2],[1]]  # agents 0,2 are a couple; agent 1 is a singleton.
     >>> a = AllocationToFamilies(agents=agents, bundles=bundles, families=families)
@@ -52,7 +52,7 @@ class AllocationToFamilies:
     array([  50., 1998.,   70.])
 
     >>> ### A valuation matrix and a numpy array
-    >>> AllocationToFamilies(agents=valuations.matrix_from([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=np.array([[1/3,0,0,0,1],[2/3,1,1,0,0]]), families=families)
+    >>> AllocationToFamilies(agents=ValuationMatrix([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=np.array([[1/3,0,0,0,1],[2/3,1,1,0,0]]), families=families)
     Family #0 with members [0, 2] gets { 33.333% of 0, 100.0% of 4} with values [53.333, 26.667].
     Family #1 with members [1] gets { 66.667% of 0, 100.0% of 1, 100.0% of 2} with values [2664.0].
     <BLANKLINE>
@@ -144,7 +144,7 @@ class AllocationToFamilies:
         Returns a vector that maps each agent to its utility (=sum of values) under this allocation,
         which is considered an allocation for families.
 
-        >>> v = valuations.matrix_from([[0.5,1,0],[0.5,0,1]])
+        >>> v = ValuationMatrix([[0.5,1,0],[0.5,0,1]])
         >>> z = AllocationToFamilies(v, np.array([[.2,.3,.5],[.8,.7,.5]]), families=[[0],[1]])
         >>> z.utility_profile()
         array([0.4, 0.9])

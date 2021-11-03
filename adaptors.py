@@ -9,10 +9,10 @@ Since: 2021-11
 import numpy as np
 from typing import Any, Callable, List
 from fairpy import ValuationMatrix, AllocationMatrix, Allocation
-from fairpy.bundles import FractionalBundle, ListBundle
+from fairpy.bundles import FractionalBundle
 
 
-def adapt_list_algorithm(algorithm: Callable, input: Any):
+def adapt_list_algorithm(algorithm: Callable, input: Any)->Allocation:
     """
     Adapts an algorithm, that accepts as input a list of lists,
     to accept various other input formats.
@@ -118,7 +118,7 @@ def adapt_list_algorithm(algorithm: Callable, input: Any):
 
 
 
-def adapt_matrix_algorithm(algorithm: Callable, input: Any):
+def adapt_matrix_algorithm(algorithm: Callable, input: Any)->Allocation:
     """
     Adapts an algorithm, that accepts as input a ValuationMatrix object,
     to accept various other input formats.

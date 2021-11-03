@@ -9,7 +9,6 @@ Since:  2021-06
 
 from fairpy.items.leximin import *
 import numpy as np
-import fairpy.valuations as valuations
 
 import sys
 logger.addHandler(logging.StreamHandler(sys.stdout))
@@ -17,7 +16,7 @@ logger.setLevel(logging.INFO)
 
 from fairpy import solve
 solve.logger.addHandler(logging.StreamHandler(sys.stdout))
-# solve.logger.setLevel(logging.INFO)
+solve.logger.setLevel(logging.INFO)
 
 
 def show(title, v):

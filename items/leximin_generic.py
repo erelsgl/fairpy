@@ -17,27 +17,55 @@ Acknowledgments: I am grateful to Sylvain Bouveret for his help with the algorit
 Since:  2021-05
 """
 
-import cvxpy
-
-import logging
+import cvxpy, logging
 logger = logging.getLogger(__name__)
+
+from typing import *
 
 TOLERANCE_FACTOR=1.001  # for comparing floating-point numbers
 
-def maximize(objective, constraints, **kwargs):
-    """
-    A shortcut function for maximizing a single objective. Raises an error if no solution is found.
-    :param objective: a cvxpy expression that should be maximized.
-    :param constraints: a list of cvxpy constraints.
-    :param kwargs: keyword arguments passed on to cvxpy.Problem.solve().
-    :return the obtained maximum value of the objective.
-    """
-    problem = cvxpy.Problem(cvxpy.Maximize(objective), constraints)
-    problem.solve(**kwargs)
-    if problem.status=="optimal":
-        return objective.value.item()
-    else:
-        raise cvxpy.SolverError(f"Could not solve the maximization problem: status is {problem.status}")
+DEFAULT_SOLVERS= [
+	(cvxpy.XPRESS, {}),
+	(cvxpy.OSQP, {}),
+	(cvxpy.SCS, {}),
+]
+
+
+def solve(problem:cvxpy.Problem, solvers:List[Tuple[str, Dict]] = DEFAULT_SOLVERS):
+	"""
+	Try to solve the given cvxpy problem using the given solvers, in order, until one succeeds.
+    See here https://www.cvxpy.org/tutorial/advanced/index.html for a list of supported solvers.
+
+	:param solvers list of tuples. Each tuple is (name-of-solver, keyword-arguments-to-solver)
+	"""
+	is_solved=False
+	for (solver,kwargs) in solvers:  # Try the first n-1 solvers.
+		try:
+			problem.solve(solver=solver, **kwargs)
+			logger.info("Solver %s succeeds",solver)
+			is_solved = True
+			break
+		except cvxpy.SolverError as err:
+			logger.info("Solver %s fails: %s", solver, err)
+	if not is_solved:
+		raise cvxpy.SolverError(f"All solvers failed: {solvers}")
+	if problem.status == "infeasible":
+		raise ValueError("Problem is infeasible")
+	elif problem.status == "unbounded":
+		raise ValueError("Problem is unbounded")
+
+def maximize(objective, constraints, solvers:list=DEFAULT_SOLVERS):
+	"""
+	A utility function for finding the maximum of a general objective function.
+
+	>>> import numpy as np
+	>>> x = cvxpy.Variable()
+	>>> np.round(maximize(x, [x>=1, x<=3]),3)
+	3.0
+	"""
+	problem = cvxpy.Problem(cvxpy.Maximize(objective), constraints)
+	solve(problem, solvers=solvers)
+	return objective.value.item()
 
 
 def leximin_solve(objectives:list, constraints:list, **kwargs):

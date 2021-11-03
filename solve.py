@@ -8,28 +8,35 @@ Since:  2021-05
 """
 
 import cvxpy
+from typing import List, Dict, Tuple
 
-DEFAULT_SOLVERS=[cvxpy.XPRESS, cvxpy.OSQP, cvxpy.SCS]
+DEFAULT_SOLVERS= [
+	(cvxpy.XPRESS, {}),
+	(cvxpy.OSQP, {}),
+	(cvxpy.SCS, {}),
+]
 
 import logging
 logger = logging.getLogger(__name__)
 
-def solve(problem:cvxpy.Problem, solvers:list=DEFAULT_SOLVERS):
+def solve(problem:cvxpy.Problem, solvers:List[Tuple[str, Dict]] = DEFAULT_SOLVERS):
 	"""
 	Try to solve the given cvxpy problem using the given solvers, in order, until one succeeds.
     See here https://www.cvxpy.org/tutorial/advanced/index.html for a list of supported solvers.
+
+	:param solvers list of tuples. Each tuple is (name-of-solver, keyword-arguments-to-solver)
 	"""
 	is_solved=False
-	for solver in solvers[:-1]:  # Try the first n-1 solvers.
+	for (solver,kwargs) in solvers:  # Try the first n-1 solvers.
 		try:
-			problem.solve(solver=solver)
+			problem.solve(solver=solver, **kwargs)
 			logger.info("Solver %s succeeds",solver)
 			is_solved = True
 			break
 		except cvxpy.SolverError as err:
 			logger.info("Solver %s fails: %s", solver, err)
 	if not is_solved:
-		problem.solve(solver=solvers[-1])   # If the first n-1 fail, try the last one.
+		raise cvxpy.SolverError(f"All solvers failed: {solvers}")
 	if problem.status == "infeasible":
 		raise ValueError("Problem is infeasible")
 	elif problem.status == "unbounded":
@@ -54,7 +61,13 @@ def minimize(objective, constraints, solvers:list=DEFAULT_SOLVERS):
 
 	>>> import numpy as np
 	>>> x = cvxpy.Variable()
-	>>> np.round(minimize(x, [x>=1, x<=3]),3)
+	>>> minimize(x, [x>=1, x<=3])
+	1.0
+	>>> minimize(x, [x>=1, x<=3], solvers=[(cvxpy.OSQP,{}),(cvxpy.XPRESS,{})])
+	1.0
+	>>> np.round(minimize(x, [x>=1, x<=3], solvers=[(cvxpy.SCS,{}),(cvxpy.OSQP,{})]),2)
+	1.0
+	>>> minimize(x, [x>=1, x<=3], solvers=[(cvxpy.MOSEK,{}),(cvxpy.OSQP,{})])
 	1.0
 	"""
 	problem = cvxpy.Problem(cvxpy.Minimize(objective), constraints)

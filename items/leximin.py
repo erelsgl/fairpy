@@ -89,7 +89,7 @@ def leximin_optimal_allocation(instance) -> Allocation:
             for o in v.objects()
         ]
         utilities = [sum([allocation_vars[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
-        leximin_solve(objectives=utilities, constraints=feasibility_constraints+positivity_constraints, solver=solve.DEFAULT_SOLVERS[0])
+        leximin_solve(objectives=utilities, constraints=feasibility_constraints+positivity_constraints)
         allocation_matrix = allocation_vars.value
         return allocation_matrix
     return adaptors.adapt_matrix_algorithm(implementation_with_matrix_input, instance)
@@ -144,7 +144,7 @@ def leximin_optimal_allocation_for_families(agents, families:list) -> Allocation
     utilities = [sum([allocation_vars[agent_to_family[i]][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
 
     # allocation_matrix = leximin_optimal_solution(alloc, utilities, feasibility_constraints+positivity_constraints)
-    leximin_solve(objectives=utilities, constraints=feasibility_constraints+positivity_constraints, solver=solve.DEFAULT_SOLVERS[0])
+    leximin_solve(objectives=utilities, constraints=feasibility_constraints+positivity_constraints)
     allocation_matrix = allocation_vars.value
 
     return AllocationToFamilies(v, allocation_matrix, families)

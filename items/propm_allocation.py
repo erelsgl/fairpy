@@ -45,9 +45,9 @@ def divide(v: ValuationMatrix) -> List[List[int]]:
     """"
     In stage 1 the divider agent having index 0 partitions the goods into bundles.
     >>> from fairpy import valuations
-    >>> divide(valuations.matrix_from([[0.5, 0, 0.5], [1/3, 1/3, 1/3]]))
+    >>> divide(ValuationMatrix([[0.5, 0, 0.5], [1/3, 1/3, 1/3]]))
     [[1, 0], [2]]
-    >>> divide(valuations.matrix_from([[0.25, 0.25, 0.25, 0.25, 0, 0], [0.25, 0, 0.26, 0, 0.25, 0.24], [0.25, 0, 0.24, 0, 0.25, 0.26]]))
+    >>> divide(ValuationMatrix([[0.25, 0.25, 0.25, 0.25, 0, 0], [0.25, 0, 0.26, 0, 0.25, 0.24], [0.25, 0, 0.24, 0, 0.25, 0.26]]))
     [[4, 5, 0], [1], [2, 3]]
     """
     total_value = v.verify_normalized()

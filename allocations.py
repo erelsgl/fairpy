@@ -11,14 +11,14 @@ Programmer: Erel Segal-Halevi
 Since: 2021-04
 """
 
-import fairpy
 from typing import List, Any, Dict
 import numpy as np
 from collections import defaultdict
 from collections.abc import Iterable
 from dicttools import stringify
+import fairpy
+from fairpy import ValuationMatrix
 from fairpy.bundles import *
-from fairpy import valuations
 
 
 DEFAULT_PRECISION = 3     # number of significant digits in printing
@@ -155,7 +155,7 @@ class Allocation:
     [1, 2]
 
     >>> ### A valuation matrix and an allocation matrix:
-    >>> a = Allocation(agents=valuations.matrix_from([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=AllocationMatrix([[1,0,0,0,1],[0,0,0,0,0],[0,1,1,0,0]]))
+    >>> a = Allocation(agents=ValuationMatrix([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=AllocationMatrix([[1,0,0,0,1],[0,0,0,0,0],[0,1,1,0,0]]))
     >>> a
     Agent #0 gets { 100% of 0, 100% of 4} with value 60.
     Agent #1 gets {} with value 0.
@@ -165,7 +165,7 @@ class Allocation:
     { 100% of 0, 100% of 4}
     {}
     { 100% of 1, 100% of 2}
-    >>> a = Allocation(agents=valuations.matrix_from([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=AllocationMatrix([[1/3,0,0,0,1],[2/3,0,0,0,0],[0,1,1,0,0]]))
+    >>> a = Allocation(agents=ValuationMatrix([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=AllocationMatrix([[1/3,0,0,0,1],[2/3,0,0,0,0],[0,1,1,0,0]]))
     >>> a
     Agent #0 gets { 33.333% of 0, 100.0% of 4} with value 53.3.
     Agent #1 gets { 66.667% of 0} with value 666.
@@ -173,7 +173,7 @@ class Allocation:
     <BLANKLINE>
     >>> a.round(2)
     Agent #0 gets { 33.0% of 0, 100.0% of 4} with value 53.3.
-    Agent #1 gets { 67.0% of 0} with value 666.
+    Agent #1 gets { 67.0% of 0} with value 669.
     Agent #2 gets { 100.0% of 1, 100.0% of 2} with value 70.
     <BLANKLINE>
     >>> a.matrix
@@ -182,7 +182,7 @@ class Allocation:
      [0.   1.   1.   0.   0.  ]]
 
     >>> ### A valuation matrix and a numpy array as allocation matrix
-    >>> Allocation(agents=valuations.matrix_from([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=np.array([[1/3,0,0,0,1],[2/3,0,0,0,0],[0,1,1,0,0]]))
+    >>> Allocation(agents=ValuationMatrix([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=np.array([[1/3,0,0,0,1],[2/3,0,0,0,0],[0,1,1,0,0]]))
     Agent #0 gets { 33.333% of 0, 100.0% of 4} with value 53.3.
     Agent #1 gets { 66.667% of 0} with value 666.
     Agent #2 gets { 100.0% of 1, 100.0% of 2} with value 70.
@@ -277,6 +277,7 @@ class Allocation:
         if isinstance(self.bundles[0],FractionalBundle):
             for bundle in self.bundles:
                 bundle.round(num_digits)
+        self.agent_bundle_value_matrix = compute_agent_bundle_value_matrix(self.agents, self.bundles, self.num_of_agents, self.num_of_bundles)
         return self
 
     def num_of_sharings(self)->int:
@@ -291,7 +292,7 @@ class Allocation:
     def utility_profile(self)->list:
         """
         Returns a vector that maps each agent index to its utility (=sum of values) under this allocation.
-        >>> v = valuations.matrix_from([[0.5,1,0],[0.5,0,1]])
+        >>> v = ValuationMatrix([[0.5,1,0],[0.5,0,1]])
         >>> z = AllocationMatrix([[.2,.3,.5],[.8,.7,.5]])
         >>> Allocation(v,z).utility_profile()
         array([0.4, 0.9])

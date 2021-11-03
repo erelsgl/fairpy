@@ -7,9 +7,8 @@ Author: Erel Segal-Halevi
 Since:  2021-05
 """
 
-from fairpy.items.max_welfare import *
-from fairpy.items.leximin import *
-import fairpy.valuations as valuations
+import numpy as np
+from fairpy.items.leximin import leximin_optimal_allocation_for_families
 
 
 def leximin_utilities(v, families):
