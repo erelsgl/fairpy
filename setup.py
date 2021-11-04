@@ -9,25 +9,31 @@ https://github.com/pypa/sampleproject
 from setuptools import setup, find_packages   # Always prefer setuptools over distutils
 from codecs import open     # To use a consistent encoding
 from os import path
+import warnings
 
 here = path.abspath(path.dirname(__file__))
+readme_path = path.join(here, 'README.md')
+requirements_path = path.join(here, 'requirements.txt')
 
 # Get the long description from the README file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+with open(readme_path, encoding='utf-8') as f:
     long_description = f.read()
 
-# # Get the list of requirements from requirements.txt
-# with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
-#     requirements = f.read().splitlines()
-#     requirements = [r for r in requirements if "git+" not in r]
-    # NOTE: The above code fails in GitHub actions:
-    #   File "/tmp/pip-req-build-kwpxjwjf/setup.py", line 20, in <module>
-    #     with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
-    #   File "/usr/lib/python3.6/codecs.py", line 897, in open
-    #     file = builtins.open(filename, mode, buffering)
-    # FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pip-req-build-kwpxjwjf/requirements.txt'
+# Get the list of requirements from requirements.txt
+try:
+    with open(requirements_path, encoding='utf-8') as f:
+        requirements = f.read().splitlines()
+        requirements = [r for r in requirements if "git+" not in r]
+except FileNotFoundError as err:
+    warnings.warn(f"Requirements file {requirements_path} not found: {err}")
+        # NOTE: The above code fails in GitHub actions:
+        #   File "/tmp/pip-req-build-kwpxjwjf/setup.py", line 20, in <module>
+        #     with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
+        #   File "/usr/lib/python3.6/codecs.py", line 897, in open
+        #     file = builtins.open(filename, mode, buffering)
+        # FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pip-req-build-kwpxjwjf/requirements.txt'
+    requirements = ["numpy>=1.21.3","cvxpy>=1.1.17","scipy>=1.6.1","networkx","matplotlib"]  # use default requirements
 
-requirements = ["numpy","cvxpy","networkx","matplotlib"]
 
 setup(
     name='fairpy',  # Required. Enables intallation with "pip install fairpy".
@@ -56,6 +62,7 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=requirements,         # Optional
+    setup_requires=requirements,         # Optional
 
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow

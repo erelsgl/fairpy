@@ -71,6 +71,6 @@ print("PROPm allocation:\n", fairpy.items.propm_allocation(agents))
 print("Max sum (aka utilitarian) fractional allocation:\n", fairpy.items.max_sum_allocation(agents).round(3))
 print("Max product (aka Nash optimal) fractional allocation:\n", fairpy.items.max_product_allocation(agents).round(3))
 print("Leximin (aka egalitarian) fractional allocation:\n", fairpy.items.leximin_optimal_allocation(agents).round(3))
-print("Minimum-sharing envy-free allocation: \n", fairpy.items.envyfree_allocation_with_min_sharing(agents).round(3))
-
+print("Efficient envy-free allocation with bounded sharing: \n", fairpy.items.efficient_envyfree_allocation_with_bounded_sharing(agents).round(3))
+print("Efficient Envy-free allocation with minimum-sharing: \n", fairpy.items.envyfree_allocation_with_min_sharing(agents).round(3))
 

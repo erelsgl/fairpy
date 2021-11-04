@@ -6,7 +6,8 @@ An open-source library of [fair division algorithms](https://en.wikipedia.org/wi
 To install:
     
     clone https://github.com/erelsgl/fairpy.git
-    python3 setup.py install
+    cd fairpy
+    pip install -e .
 
 Then add the parent of the cloned folder to the `PYTHONPATH` environment variable.
     

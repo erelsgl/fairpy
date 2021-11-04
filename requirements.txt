@@ -1,7 +1,8 @@
 cmake
-numpy
+numpy>=1.21.3
 osqp
-cvxpy
+cvxpy>=1.1.17
+scipy>=1.6.1
 networkx
 matplotlib
 pytest

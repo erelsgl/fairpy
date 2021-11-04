@@ -13,6 +13,7 @@ from typing import List, Dict, Tuple
 DEFAULT_SOLVERS= [
 	(cvxpy.XPRESS, {}),
 	(cvxpy.OSQP, {}),
+	(cvxpy.SCIPY, {}),
 	(cvxpy.SCS, {}),
 ]
 
@@ -29,7 +30,10 @@ def solve(problem:cvxpy.Problem, solvers:List[Tuple[str, Dict]] = DEFAULT_SOLVER
 	is_solved=False
 	for (solver,kwargs) in solvers:  # Try the first n-1 solvers.
 		try:
-			problem.solve(solver=solver, **kwargs)
+			if solver==cvxpy.SCIPY:
+				problem.solve(solver=solver, scipy_options=kwargs)
+			else:
+				problem.solve(solver=solver, **kwargs)
 			logger.info("Solver %s succeeds",solver)
 			is_solved = True
 			break
@@ -67,14 +71,14 @@ def minimize(objective, constraints, solvers:list=DEFAULT_SOLVERS):
 	1.0
 	>>> np.round(minimize(x, [x>=1, x<=3], solvers=[(cvxpy.SCS,{}),(cvxpy.OSQP,{})]),2)
 	1.0
-	>>> minimize(x, [x>=1, x<=3], solvers=[(cvxpy.MOSEK,{}),(cvxpy.OSQP,{})])
+	>>> minimize(x, [x>=1, x<=3], solvers=[(cvxpy.MOSEK,{'bfs':True}),(cvxpy.SCIPY,{'method':'highs'})])
 	1.0
 	"""
 	problem = cvxpy.Problem(cvxpy.Minimize(objective), constraints)
 	solve(problem, solvers=solvers)
 	return objective.value.item()
 
-
+solve.logger = logger
 
 
 if __name__ == '__main__':

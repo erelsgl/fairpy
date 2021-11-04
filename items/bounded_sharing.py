@@ -11,7 +11,7 @@ from typing import *
 import cvxpy, logging, numpy as np
 from fairpy import adapt_matrix_algorithm, Allocation, ValuationMatrix
 from fairpy.solve import solve
-from fairpy.items.max_welfare import max_sum_allocation, max_product_allocation
+from fairpy.items.max_welfare import max_product_allocation
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +60,10 @@ def dominating_allocation_with_bounded_sharing(instance:Any, thresholds:List) ->
         constraints = feasibility_constraints+positivity_constraints+utility_constraints
         problem = cvxpy.Problem(cvxpy.Maximize(utilities[v.num_of_agents-1]), constraints)
         solvers = [
-            (cvxpy.MOSEK, {"bfs":True}),     # Always finds a 
-            (cvxpy.OSQP, {})                 # I am not sure it returns a Basic Feasible Solution!
+            (cvxpy.SCIPY, {'method': 'highs-ds'}),        # Always finds a BFS
+            (cvxpy.MOSEK, {"bfs":True}),                  # Always finds a BFS
+            (cvxpy.OSQP, {}),                             # Default - not sure it returns a BFS
+            (cvxpy.SCIPY, {}),                            # Default - not sure it returns a BFS
         ]
         solve(problem, solvers=solvers)
         if problem.status=="optimal":
@@ -130,6 +132,10 @@ def efficient_envyfree_allocation_with_bounded_sharing(instance:Any) -> Allocati
 
 
 if __name__ == '__main__':
+    import sys
+    solve.logger.addHandler(logging.StreamHandler(sys.stdout))
+    solve.logger.setLevel(logging.INFO)
+
     import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
