@@ -6,7 +6,7 @@ Programmer: Erel Segal-Halevi
 Since:  2021-04
 """
 
-from fairpy import adaptors, valuations, Allocation
+from fairpy import adaptors, Allocation
 from fairpy.items.bag_filling import Bag, SequentialAllocation
 
 from typing import List

@@ -4,7 +4,7 @@
 # sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 
-from fairpy.valuations import *
+from fairpy.items.valuations import *
 from fairpy.allocations import *
 from fairpy.families import *
 from fairpy.agents import *

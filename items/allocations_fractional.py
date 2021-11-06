@@ -9,7 +9,7 @@ Since: 2021-02
 """
 
 from typing import *
-from fairpy.agents import Agent, AdditiveAgent, Item, Bundle
+from fairpy.agents import AdditiveAgent, Bundle
 
 
 '''

@@ -10,7 +10,6 @@ Since:  2021-05
 from fairpy.items.max_welfare import *
 from fairpy.items.leximin import *
 import numpy as np
-import fairpy.valuations as valuations
 
 import sys
 logger.addHandler(logging.StreamHandler(sys.stdout))

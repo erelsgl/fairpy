@@ -5,12 +5,16 @@ The following algorithms are implemented in this folder:
 * Round-robin.
   * [round_robin.py](round_robin.py), by Erel Segal-Halevi.
 
-* Welfare-maximizing allocations: utilitarian, Nash-maximal, leximin.
+* Welfare-maximizing fractional allocations: utilitarian, Nash-maximal, etc.
   * [max_welfare.py](max_welfare.py), by Erel Segal-Halevi.
+
+* Leximin-optimal fractional allocations.
+  * [leximin.py](leximin.py), by Erel Segal-Halevi.
 
 * Fedor Sandomirskiy and Erel Segal-Halevi (2020).
 ["Efficient Fair Division with Minimal Sharing"](https://arxiv.org/abs/1908.01669).
   * [min_sharing.py](min_sharing.py), by Eliyahu Sattat.
+  * [bounded_sharing.py](bounded_sharing.py), by Erel Segal-Halevi.
 
 * Artem Baklanov, Pranav Garimidi, Vasilis Gkatzelis, and Daniel Schoepflin (2021).
   ["PROPm Allocations of Indivisible Goods to Multiple Agents"](https://arxiv.org/abs/2105.11348).
