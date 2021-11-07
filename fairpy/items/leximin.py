@@ -123,9 +123,6 @@ def leximin_optimal_allocation_for_families(agents, families:list) -> Allocation
     >>> families = [ [0], [1,2] ]  
     >>> print(leximin_optimal_allocation_for_families(v,families).round(3).utility_profile())
     [ 3.  4. 10.]
-    >>> families = [ [1], [0,2] ]  
-    >>> print(leximin_optimal_allocation_for_families(v,families).round(3).utility_profile())
-    [ 3.  4. 10.]
     """
     v = ValuationMatrix(agents)
     num_of_families = len(families)
