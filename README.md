@@ -4,20 +4,17 @@
 
 An open-source library of [fair division algorithms](https://en.wikipedia.org/wiki/Fair_division) in Python.
 To install:
-    
+
     clone https://github.com/erelsgl/fairpy.git
     cd fairpy
     pip install -e .
 
-Then add the parent of the cloned folder to the `PYTHONPATH` environment variable.
+Then add the cloned folder to the `PYTHONPATH` environment variable.
     
-To test the installation, run the [demo program for item allocation](demo.py):
+To test the installation, run one of the [example programs](example/):
 
-    python3 demo.py
-
-Or the [demo program for cake-cutting](demo_cake.py):
-
-    python3 demo_cake.py
+    python3 examples/items.py
+    python3 examples/cake.py
 
 For each algorithm in file `x.py` there is also a demo program `x_demo.py`. For example, try:
 
@@ -26,7 +23,7 @@ For each algorithm in file `x.py` there is also a demo program `x_demo.py`. For 
 
 For a partial list of algorithms and their implementation status, see the subfolders:
 
-* [Cake-cutting algorithms](cake/README.md)  
-* [Item allocation algorithms (divisible and indivisible)](items/README.md)
+* [Cake-cutting algorithms](fairpy/cake/README.md)  
+* [Item allocation algorithms (divisible and indivisible)](fairpy/items/README.md)
 
 

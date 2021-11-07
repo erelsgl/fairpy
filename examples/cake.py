@@ -9,7 +9,7 @@ This demo shows how to use cake-cutting algorithms in fairpy.
 First, let us define some agents.
 """
 
-from cake.valuations import PiecewiseConstantValuation
+from fairpy.cake.valuations import PiecewiseConstantValuation
 from fairpy.agents import PiecewiseUniformAgent, PiecewiseConstantAgent, agents_from
 
 Alice = PiecewiseUniformAgent ([(0,1),(3,6)], name="Alice")   # Alice has two desired intervals, 0..1 and 3..6. Each interval has value 1.
