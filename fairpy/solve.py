@@ -10,7 +10,7 @@ Since:  2021-05
 import cvxpy
 from typing import List, Dict, Tuple
 
-DEFAULT_SOLVERS= [
+DEFAULT_SOLVERS = [
 	(cvxpy.SCIPY, {'method':'highs'}),
 	(cvxpy.OSQP, {}),
 	(cvxpy.SCS, {}),
@@ -27,17 +27,17 @@ def solve(problem:cvxpy.Problem, solvers:List[Tuple[str, Dict]] = DEFAULT_SOLVER
 	:param solvers list of tuples. Each tuple is (name-of-solver, keyword-arguments-to-solver)
 	"""
 	is_solved=False
-	for (solver,kwargs) in solvers:  # Try the first n-1 solvers.
+	for (solver, solver_kwargs) in solvers:  # Try the first n-1 solvers.
 		try:
 			if solver==cvxpy.SCIPY:
-				problem.solve(solver=solver, scipy_options=kwargs)
+				problem.solve(solver=solver, scipy_options=dict(solver_kwargs))  # WARNING: solve changes both its arguments!
 			else:
-				problem.solve(solver=solver, **kwargs)
-			logger.info("Solver %s succeeds",solver)
+				problem.solve(solver=solver, **solver_kwargs)
+			logger.info("Solver %s [%s] succeeds", solver, solver_kwargs)
 			is_solved = True
 			break
 		except cvxpy.SolverError as err:
-			logger.info("Solver %s fails: %s", solver, err)
+			logger.info("Solver %s [%s] fails: %s", solver, solver_kwargs, err)
 	if not is_solved:
 		raise cvxpy.SolverError(f"All solvers failed: {solvers}")
 	if problem.status == "infeasible":
@@ -83,7 +83,7 @@ solve.logger = logger
 if __name__ == '__main__':
 	import sys
 	logger.addHandler(logging.StreamHandler(sys.stdout))
-	logger.setLevel(logging.INFO)
+	# logger.setLevel(logging.INFO)
 
 	import doctest
 	(failures, tests) = doctest.testmod(report=True)

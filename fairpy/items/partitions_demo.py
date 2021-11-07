@@ -16,7 +16,7 @@ logger.setLevel(logging.INFO)
 
 from fairpy import solve
 solve.logger.addHandler(logging.StreamHandler(sys.stdout))
-# solve.logger.setLevel(logging.INFO)	
+solve.logger.setLevel(logging.INFO)	
 
 import numpy as np
 

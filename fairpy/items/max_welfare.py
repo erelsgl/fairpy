@@ -125,7 +125,7 @@ def max_power_sum_allocation(instance, power:float) -> Allocation:
 
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
     The allocation should maximize the product (= sum of logs) of utilities
-    >>> max_power_sum_allocation([ [3] , [5] ], 1).matrix
+    >>> max_power_sum_allocation([ [3] , [5] ], 1).round(3).matrix
     [[0.]
      [1.]]
     >>> max_power_sum_allocation([ [3] , [5] ], 0.1).round(3).matrix
@@ -196,7 +196,7 @@ def max_minimum_allocation(instance) -> Allocation:
     >>> [sum(alloc[i]) for i in alloc.agents()]
     [0.5, 1.5]
     >>> v = [ [4,2] , [1,3] ]   # two different items
-    >>> a = max_minimum_allocation(v)
+    >>> a = max_minimum_allocation(v).round(3)
     >>> a.matrix
     [[0.8 0. ]
      [0.2 1. ]]

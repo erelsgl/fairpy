@@ -122,9 +122,14 @@ class AllocationToFamilies:
 
 
     def round(self, num_digits:int):
-        self.matrix.round(num_digits)
-        self.bundles = [FractionalBundle(self.matrix[i]) for i in self.matrix.agents()]
+        if hasattr(self,'matrix'):
+            self.matrix.round(num_digits)
+        if isinstance(self.bundles[0],FractionalBundle):
+            for bundle in self.bundles:
+                bundle.round(num_digits)
+        self.agent_bundle_value_matrix = compute_agent_bundle_value_matrix(self.agents, self.bundles, self.num_of_agents, self.num_of_bundles)
         return self
+
 
     def num_of_sharings(self)->int:
         return self.matrix.num_of_sharings()

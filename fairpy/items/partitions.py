@@ -210,7 +210,12 @@ def maximin_share_partition__cvxpy(
         constraints += [parts_values[0] == fix_smallest_part_value]
 
 
-    maximize(min_value, constraints)  # Solvers info: GLPK_MI is too slow; ECOS_BB gives wrong results even on simple problems; CBC is not installed; XPRESS gives an error
+    solvers = [(cvxpy.SCIP, {}),(cvxpy.GLPK_MI, {})] 
+        # GLPK_MI is very slow; 
+        # ECOS_BB gives wrong results even on simple problems - not recommended;
+        # CBC is not installed; 
+        # XPRESS works well, but it is not free.
+    maximize(min_value, constraints, solvers=solvers)
 
     partition = [
         sum([int(vars[item][part].value)*[item] for item in items if vars[item][part].value>=1], [])
@@ -246,28 +251,28 @@ def maximin_share_partition(c:int, valuation:list, items:Collection[Any]=None, e
     Compute the of 1-of-c MMS of the given items, by the given valuation.
     :return (partition, part_values, maximin-share value)
 
-    >>> maximin_share_partition(c=1, valuation=[10,20,40,0])
-    ([[0, 1, 2, 3]], [70.0], 70.0)
-    >>> maximin_share_partition(c=2, valuation=[10,20,40,0])
-    ([[0, 1, 3], [2]], [30.0, 40.0], 30.0)
-    >>> maximin_share_partition(c=2, valuation=[10,20,40,0], engine="bruteforce")
-    ([[0, 1], [2, 3]], [30, 40], 30)
-    >>> int(maximin_share_partition(c=3, valuation=[10,20,40,0])[2])
-    10
-    >>> int(maximin_share_partition(c=4, valuation=[10,20,40,0])[2])
+    >>> maximin_share_partition(c=1, valuation=[10,20,40,1])
+    ([[0, 1, 2, 3]], [71.0], 71.0)
+    >>> maximin_share_partition(c=2, valuation=[10,20,40,1])
+    ([[0, 1, 3], [2]], [31.0, 40.0], 31.0)
+    >>> maximin_share_partition(c=2, valuation=[10,20,40,1], engine="bruteforce")
+    ([[2], [0, 1, 3]], [40, 31], 31)
+    >>> int(maximin_share_partition(c=3, valuation=[10,20,40,1])[2])
+    11
+    >>> int(maximin_share_partition(c=4, valuation=[10,20,40,1])[2])
+    1
+    >>> int(maximin_share_partition(c=5, valuation=[10,20,40,1])[2])
     0
-    >>> int(maximin_share_partition(c=5, valuation=[10,20,40,0])[2])
-    0
-    >>> maximin_share_partition(c=2, valuation=[10,20,40,0], items=[1,2])
+    >>> maximin_share_partition(c=2, valuation=[10,20,40,1], items=[1,2])
     ([[1], [2]], [20.0, 40.0], 20.0)
-    >>> maximin_share_partition(c=2, valuation=[10,20,40,0], multiplicity=2)
-    ([[0, 1, 2, 3, 3], [0, 1, 2]], [70.0, 70.0], 70.0)
-    >>> maximin_share_partition(c=2, valuation=[10,20,40,0], multiplicity=[2,1,1,0])
+    >>> maximin_share_partition(c=2, valuation=[10,20,40,1], multiplicity=2)
+    ([[0, 1, 2, 3], [0, 1, 2, 3]], [71.0, 71.0], 71.0)
+    >>> maximin_share_partition(c=2, valuation=[10,20,40,1], multiplicity=[2,1,1,0])
     ([[0, 0, 1], [2]], [40.0, 40.0], 40.0)
-    >>> maximin_share_partition(c=3, valuation=[10,20,40,0], numerator=2)
-    ([[0, 3], [1], [2]], [10.0, 20.0, 40.0], 30.0)
-    >>> maximin_share_partition(c=3, valuation=[10,20,40,0], numerator=2, fix_smallest_part_value=0)
-    ([[3], [0, 1], [2]], [0.0, 30.0, 40.0], 30.0)
+    >>> maximin_share_partition(c=3, valuation=[10,20,40,1], numerator=2)
+    ([[0, 3], [1], [2]], [11.0, 20.0, 40.0], 31.0)
+    >>> maximin_share_partition(c=3, valuation=[10,20,40,1], numerator=2, fix_smallest_part_value=0)
+    ([[], [0, 1, 3], [2]], [0.0, 31.0, 40.0], 31.0)
     """
     if len(valuation)==0:
         raise ValueError("Valuation is empty")
@@ -307,3 +312,8 @@ if __name__ == "__main__":
     import doctest
     (failures,tests) = doctest.testmod(report=True)
     print ("{} failures, {} tests".format(failures,tests))
+
+    from fairpy import solve
+    import sys
+    solve.logger.addHandler(logging.StreamHandler(sys.stdout))
+    solve.logger.setLevel(logging.INFO)	

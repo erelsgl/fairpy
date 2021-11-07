@@ -49,7 +49,7 @@ def leximin_optimal_allocation(instance) -> Allocation:
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
     The allocation should maximize the leximin vector of utilities.
     >>> logger.setLevel(logging.WARNING)
-    >>> a = leximin_optimal_allocation([[5,0],[3,3]])
+    >>> a = leximin_optimal_allocation([[5,0],[3,3]]).round(3)
     >>> a
     Agent #0 gets { 75.0% of 0} with value 3.75.
     Agent #1 gets { 25.0% of 0, 100.0% of 1} with value 3.75.
