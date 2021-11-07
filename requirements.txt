@@ -8,5 +8,4 @@ matplotlib
 pytest
 repackage
 pulp
-xpress
 git+git://github.com/trzemecki/dicttools.git

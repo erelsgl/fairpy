@@ -8,10 +8,9 @@ An open-source library of [fair division algorithms](https://en.wikipedia.org/wi
 
     clone https://github.com/erelsgl/fairpy.git
     cd fairpy
+    pip install -r requirements.txt
     pip install -e .
 
-Then add the cloned folder to the `PYTHONPATH` environment variable.
-    
 To test the installation, run one of the [example programs](example/):
 
     python3 examples/items.py

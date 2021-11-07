@@ -11,9 +11,8 @@ import cvxpy
 from typing import List, Dict, Tuple
 
 DEFAULT_SOLVERS= [
-	(cvxpy.XPRESS, {}),
+	(cvxpy.SCIPY, {'method':'highs'}),
 	(cvxpy.OSQP, {}),
-	(cvxpy.SCIPY, {}),
 	(cvxpy.SCS, {}),
 ]
 
@@ -67,7 +66,7 @@ def minimize(objective, constraints, solvers:list=DEFAULT_SOLVERS):
 	>>> x = cvxpy.Variable()
 	>>> minimize(x, [x>=1, x<=3])
 	1.0
-	>>> minimize(x, [x>=1, x<=3], solvers=[(cvxpy.OSQP,{}),(cvxpy.XPRESS,{})])
+	>>> minimize(x, [x>=1, x<=3], solvers=[(cvxpy.OSQP,{}),(cvxpy.SCS,{})])
 	1.0
 	>>> np.round(minimize(x, [x>=1, x<=3], solvers=[(cvxpy.SCS,{}),(cvxpy.OSQP,{})]),2)
 	1.0
