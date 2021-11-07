@@ -557,7 +557,10 @@ def agents_from(input:Any)->List[Agent]:
     >>> ### From list of lists:
     >>> agents_from([[1,2],[3,4]])[1]
     Agent #1 is an agent with a Additive valuation: v0=3 v1=4.
-    
+    >>> ### From numpy array:
+    >>> agents_from(np.ones([2,4]))[1]
+    Agent #1 is an agent with a Additive valuation: v0=1.0 v1=1.0 v2=1.0 v3=1.0.
+
     >>> ### From list of valuations:
     >>> l = agents_from([AdditiveValuation([1,2]), BinaryValuation("xy")])
     >>> l[0]
@@ -566,6 +569,13 @@ def agents_from(input:Any)->List[Agent]:
     >>> agents_from([AdditiveAgent([1,2]), BinaryAgent("xy")])[0]
     Anonymous is an agent with a Additive valuation: v0=1 v1=2.
     """
+    if isinstance(input,np.ndarray):
+        input = ValuationMatrix(input)
+    if isinstance(input,ValuationMatrix):
+        return [
+            Agent(AdditiveValuation(input[index]), name=f"Agent #{index}")
+            for index in input.agents()
+        ]
     input_0 = _representative_item(input)
     if input_0 is None:
         return []

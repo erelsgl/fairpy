@@ -428,7 +428,7 @@ class AdditiveValuation(Valuation):
         elif isinstance(map_good_to_value, dict):
             all_items = map_good_to_value.keys()
             desired_items = set([g for g in all_items if map_good_to_value[g]>0])
-        elif isinstance(map_good_to_value, list):
+        elif isinstance(map_good_to_value, list) or isinstance(map_good_to_value, np.ndarray):
             all_items =  set(range(len(map_good_to_value)))
             desired_items = set([g for g in all_items if map_good_to_value[g]>0])
         else:
@@ -533,7 +533,7 @@ class AdditiveValuation(Valuation):
     def __repr__(self):
         if isinstance(self.map_good_to_value,dict):
             values_as_string = " ".join([f"{k}={v}" for k,v in sorted(self.map_good_to_value.items())])
-        elif isinstance(self.map_good_to_value,list):
+        elif isinstance(self.map_good_to_value,list) or isinstance(self.map_good_to_value,np.ndarray):
             values_as_string = " ".join([f"v{i}={self.map_good_to_value[i]}" for i in range(len(self.map_good_to_value))])
         return f"Additive valuation: {values_as_string}."
 
