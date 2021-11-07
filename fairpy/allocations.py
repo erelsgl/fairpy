@@ -269,7 +269,7 @@ class Allocation:
         if sortkey is not None:
             for item,winners in result.items():
                 winners.sort(key=sortkey)
-        return result
+        return dict(result)
 
     def round(self, num_digits:int):
         if hasattr(self,'matrix'):
