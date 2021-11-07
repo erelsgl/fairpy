@@ -1,7 +1,6 @@
 #!python3
 
 import fairpy
-import numpy as np
 
 print("""
 fairpy allows various input formats, so that you can easily use it on your own data,
@@ -31,6 +30,8 @@ print(fairpy.items.round_robin([[8,7,6,5], [12,8,4,2]]))
 print("""
 For experiments, you can use a numpy random matrix:
 """)
+import numpy as np
 instance = np.random.randint(1,100,[2,4])
 print(instance)
-print(fairpy.items.round_robin(instance))
+allocation = fairpy.items.round_robin(instance)
+print(allocation)
