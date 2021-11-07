@@ -22,7 +22,7 @@ To test the installation, run one of the [example programs](example/):
 
 2. [Various output formats](examples/output_formats.md).
 
-3. [Optional logging](examples/logging.md), making it easy to learn and understand how the algorithms work.
+3. [Optional logging](examples/loggers.md), making it easy to learn and understand how the algorithms work.
 
 
 
