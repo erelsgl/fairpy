@@ -48,3 +48,8 @@ print(last_diminisher.last_diminisher(agents_from([
 #' To turn off logging:
 
 cut_and_choose.logger.setLevel(logging.WARNING)
+
+#' For more information see:
+#'
+#' * [List of cake-cutting algorithms currently implemented](../fairpy/cake/README.md).
+#' * [List of cake-cutting algorithms for future work](../fairpy/cake/README-future.md).

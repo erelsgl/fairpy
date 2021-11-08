@@ -140,17 +140,14 @@ To turn off logging:
 
 
 ```python
-cut_and_choose.logger.logger.setLevel(logging.WARNING)
+cut_and_choose.logger.setLevel(logging.WARNING)
 ```
 
-```
----------------------------------------------------------------------------AttributeError
-Traceback (most recent call
-last)~\AppData\Local\Temp/ipykernel_9436/1620946758.py in <module>
-----> 1 cut_and_choose.logger.logger.setLevel(logging.WARNING)
-AttributeError: 'Logger' object has no attribute 'logger'
-```
 
+For more information see:
+
+* [List of cake-cutting algorithms currently implemented](../fairpy/cake/README.md).
+* [List of cake-cutting algorithms for future work](../fairpy/cake/README-future.md).
 
 ---
 Markdown generated automatically from [cake.py](cake.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2021-11-08.

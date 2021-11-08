@@ -60,10 +60,10 @@ print(allocation)
 ```
 
 ```
-[[23 12 96 87]
- [77 86 41  8]]
-Agent #0 gets {2,3} with value 183.
-Agent #1 gets {0,1} with value 163.
+[[55 57 38 23]
+ [76 12 38 53]]
+Agent #0 gets {1,2} with value 95.
+Agent #1 gets {0,3} with value 129.
 ```
 
 

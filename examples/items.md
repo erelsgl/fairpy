@@ -139,5 +139,10 @@ George gets { 100.0% of z, 100.0% of v} with value 24.
 ```
 
 
+For more information see:
+
+* [List of item allocation algorithms currently implemented](../fairpy/items/README.md).
+* [List of item allocation algorithms for future work](../fairpy/items/README-future.md).
+
 ---
 Markdown generated automatically from [items.py](items.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2021-11-08.

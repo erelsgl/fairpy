@@ -27,3 +27,7 @@ print(fairpy.items.efficient_envyfree_allocation_with_bounded_sharing(instance).
 #' Efficient Envy-free allocation with minimum-sharing:
 print(fairpy.items.envyfree_allocation_with_min_sharing(instance).round(3))
 
+#' For more information see:
+#'
+#' * [List of item allocation algorithms currently implemented](../fairpy/items/README.md).
+#' * [List of item allocation algorithms for future work](../fairpy/items/README-future.md).
