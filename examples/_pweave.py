@@ -1,9 +1,29 @@
 """
-Run all the examples in the markdown files and insert the output into the files.
+Run all the example files and convert them to markdown files containing the output.
 Uses `pweave`.
 """
 
-import pweave
+import pweave, datetime, glob, os
 
-# pweave.weave('input_formats.source.md', output="input_formats.md")
-pweave.publish("input_formats.source.py", doc_format="html", output="input_formats.html")  # markdown not supported
+def publish_to_markdown(python_file:str, output_file:str):
+    doc = pweave.Pweb(
+        python_file, 
+        kernel="python3", 
+        doctype="markdown",
+        output=output_file)
+
+    doc.theme = "skeleton" # The default option is skeleton , other options are pweave (the old theme), bootstrap , cerulean and journal. All look the same for me.
+
+    doc.read()
+    doc.run()
+    doc.format()
+    doc.formatted += f"\n---\nMarkdown generated automatically from [{python_file}]({python_file}) using [Pweave](http://mpastell.com/pweave) {pweave.__version__} on {datetime.date.today()}.\n"
+    doc.write()
+
+
+if __name__=="__main__":
+    for python_file in glob.glob("*.py"):
+        print(python_file)
+        if python_file!=os.path.basename(__file__):
+            output_file = python_file.replace(".py",".md")
+            publish_to_markdown(python_file,output_file)
