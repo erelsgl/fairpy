@@ -299,6 +299,17 @@ class Allocation:
         """
         return np.array([self.agent_bundle_value_matrix[i_agent,i_agent] for i_agent in range(self.num_of_agents)])
 
+    def utility_profile_matrix(self)->list:
+        """
+        Returns a vector that maps each agent index to its utility (=sum of values) under this allocation.
+        >>> v = ValuationMatrix([[0.5,1,0],[0.5,0,1]])
+        >>> z = AllocationMatrix([[.2,.3,.5],[.8,.7,.5]])
+        >>> Allocation(v,z).utility_profile_matrix()
+        array([[0.4, 1.1],
+               [0.6, 0.9]])
+        """
+        return self.agent_bundle_value_matrix
+
 
     def str_with_values(self, precision=None)->str:
         """
