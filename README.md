@@ -11,10 +11,10 @@ An open-source library of [fair division algorithms](https://en.wikipedia.org/wi
     pip install -r requirements.txt
     pip install -e .
 
-To test the installation, run one of the [example programs](example/):
+To verify that everything was installed correctly, run one of the [example programs](example/):
 
-    python3 examples/items.py
-    python3 examples/cake.py
+    python examples/items.py
+    python examples/cake.py
 
 ## Features
 
@@ -32,3 +32,15 @@ For a partial list of algorithms and their implementation status, see the subfol
 
 * [Cake-cutting algorithms](fairpy/cake/README.md)  
 * [Item allocation algorithms (divisible and indivisible)](fairpy/items/README.md)
+
+
+
+## Development
+
+You can run all doctests by:
+
+    pytest --doctest-modules
+
+or:
+
+    tox
