@@ -47,4 +47,4 @@ print(last_diminisher.last_diminisher(agents_from([
 
 #' To turn off logging:
 
-cut_and_choose.logger.logger.setLevel(logging.WARNING)
+cut_and_choose.logger.setLevel(logging.WARNING)
