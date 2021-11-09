@@ -108,7 +108,7 @@ def adapt_list_algorithm(algorithm: Callable, input: Any, **kwargs)->Allocation:
         if isinstance(input, dict):
             list_of_bundles = [FractionalBundle(allocation_matrix[i], object_names) for i in allocation_matrix.agents()]
             dict_of_bundles = dict(zip(agent_names,list_of_bundles))
-            return Allocation(input, dict_of_bundles)
+            return Allocation(input, dict_of_bundles, matrix=allocation_matrix)
         else:
             return Allocation(valuation_matrix, allocation_matrix)
     elif isinstance(output, list):

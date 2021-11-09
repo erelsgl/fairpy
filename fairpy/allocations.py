@@ -188,7 +188,7 @@ class Allocation:
     Agent #2 gets { 100.0% of 1, 100.0% of 2} with value 70.
     <BLANKLINE>
     """
-    def __init__(self, agents: List[Any], bundles: List[List[Any]]):
+    def __init__(self, agents: List[Any], bundles: List[List[Any]], matrix=None):
         """
         Initializes an allocation to the given agents, of the given bundles, with the given values.
 
@@ -217,6 +217,8 @@ class Allocation:
             bundles = [FractionalBundle(bundles[i]) for i in bundles.agents()]
         else:
             bundles = [bundle_from(bundles[i]) for i in range(len(bundles))]
+        if matrix is not None:
+            self.matrix = AllocationMatrix(matrix)
 
         if isinstance(agents,dict) or (isinstance(agents,list) and isinstance(agents[0],list)):       # If "agents" is a dict mapping an agent name to its valuation...
             agents = fairpy.agents_from(agents)  # ... convert it to a list mapping an agent index to its valuation.

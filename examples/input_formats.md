@@ -60,12 +60,12 @@ print(allocation)
 ```
 
 ```
-[[55 57 38 23]
- [76 12 38 53]]
-Agent #0 gets {1,2} with value 95.
-Agent #1 gets {0,3} with value 129.
+[[30 18 42 76]
+ [91 47 79  3]]
+Agent #0 gets {2,3} with value 118.
+Agent #1 gets {0,1} with value 138.
 ```
 
 
 ---
-Markdown generated automatically from [input_formats.py](input_formats.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2021-11-08.
+Markdown generated automatically from [input_formats.py](input_formats.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2021-11-09.
