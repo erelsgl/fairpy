@@ -52,11 +52,31 @@ Operations Research Letters. *Algorithm 2.* (Algorithm 1 is already implemented)
 ["Equitable Allocations of Indivisible Goods"](https://arxiv.org/abs/1905.10656).
 arXiv preprint. *Theorem 2 (EQ+PO for binary valuations). Theorem 3 (EQ1+PO for positive valuations)*.
 
+* Andreas Darmann and Christian Klamler (2016).
+["Proportional Borda allocations"](https://link.springer.com/article/10.1007/s00355-016-0982-z).   
+Social choice and Welfare. *All algorithms.*
+
+* Steven J. Brams and Marc D. Kilgour and Christian Klamler (2014).
+["An algorithm for the proportional division of indivisible items"](https://mpra.ub.uni-muenchen.de/56587/).
+*All algorithms.*
+
+* Steven J. Brams and Marc D. Kilgour and Christian Klamler (2014).
+["Two-Person Fair Division of Indivisible Items: An Efficient, Envy-Free Algorithm"](https://www.ams.org/journals/notices/201402/rnoti-p130.pdf/).
+Notices of the AMS. *All algorithms.*
+
+* Erel Segal-Halevi, Avinatan Hassidim, Haris Aziz
+["Fair Allocation with Diminishing Differences"](https://www.jair.org/index.php/jair/article/view/11994).   
+*Algorithms 1, 2 (and their analogues for chores).*
+
 ### For two programmers
 
 * Eric Budish (2011). 
 ["The Combinatorial Assignment Problem: Approximate Competitive Equilibrium from Equal Incomes"](https://doi.org/10.1086%2F664613).
 Journal of Political Economy. *All algorithms*.
+
+* Steven J. Brams and Marc D. Kilgour and Christian Klamler (2012): ["The undercut procedure: an algorithm for the envy-free division of indivisible items"](https://link.springer.com/article/10.1007/s00355-011-0599-1).
+* Haris Aziz (2015): ["A note on the undercut procedure"](https://link.springer.com/article/10.1007/s00355-015-0877-4).
+Social choice and welfare. *All algorithms*.
 
 * Trung Thanh Nguyen, Jörg Rothe (2014).
 [ "Minimizing envy and maximizing average Nash social welfare in the allocation of indivisible goods"](https://doi.org/10.1137%2F0117039).
