@@ -48,3 +48,4 @@ You can run all doctests by either one of these commands:
     pytest --doctest-modules --ignore=examples/_pweave.py
     tox
 
+**See also**: [other open-source projects related to fairness](related.md).

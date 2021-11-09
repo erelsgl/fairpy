@@ -4,9 +4,9 @@
 
 from fairpy.agents import PiecewiseUniformAgent, PiecewiseConstantAgent, agents_from
 
-# 'Alice has two desired intervals, 0..1 and 3..6. Each interval has value 1:
+#' Alice has two desired intervals, 0..1 and 3..6. Each interval has value 1:
 Alice = PiecewiseUniformAgent ([(0,1),(3,6)], name="Alice")   
-# 'George has four desired intervals: 0..1 with value 1, 1..2 with value 3, etc:
+#' George has four desired intervals: 0..1 with value 1, 1..2 with value 3, etc:
 George = PiecewiseConstantAgent([1,3,5,7],    name="George")  
 print(Alice)
 print(George)
