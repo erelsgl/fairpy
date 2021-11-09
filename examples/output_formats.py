@@ -17,3 +17,5 @@ print(allocation.map_item_to_agents())
 print(allocation.utility_profile())
 #' and the utility matrix:
 print(allocation.utility_profile_matrix())
+#' With this information, you can compute various metrics on the allocation, such as:
+#' its utilitarian value, egalitarian value, number of envy-pairs or largest envy magnitude.

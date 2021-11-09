@@ -45,6 +45,6 @@ Many algorithms can be added to `fairpy`. See:
 
 You can run all doctests by either one of these commands:
 
-    pytest --doctest-modules
+    pytest --doctest-modules --ignore=examples/_pweave.py
     tox
 
