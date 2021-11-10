@@ -8,6 +8,10 @@
 ["On Approximately Fair Allocations of Indivisible Goods"](https://dl.acm.org/doi/pdf/10.1145/988772.988792). 
 Proceedings of EC'04.  *Theorem 2.1 (envy-graph). Theorem 3 (PTAS for minimizing envy-ratio).*.
 
+* Evangelos Markakis, Christos-Alexandros Psomas (2011).
+["On Worst-Case Allocations in the Presence of Indivisible Goods"](https://link.springer.com/chapter/10.1007/978-3-642-25510-6_24).
+Proceedings of WINE'11. *Algorithm 1*.
+
 * Ioannis Caragiannis, David Kurokawa, Hervé Moulin, Ariel D. Procaccia, Nisarg Shah, Junxing Wang.
 ["The Unreasonable Fairness of Maximum Nash Welfare"](http://eprints.gla.ac.uk/123283/1/123283.pdf).
 Proceedings of EC'16. *All algorithms*.
@@ -121,10 +125,17 @@ SIAM Journal of Computing.  *All algorithms.*
 ["High-Multiplicity Fair Allocation Made More Practical"](https://dl.acm.org/doi/abs/10.5555/3463952.3463988).
 Proceedings of AAMAS'21. *All algorithms*.
 
+* Stephen Demko, Theodore P. Hill (1988).
+["Equitable distribution of indivisible objects"](https://www.sciencedirect.com/science/article/abs/pii/0165489688900479).
+Mathematical Social Sciences. *Algorithms: deterministic and randomized.*
+
+* Laurent Gourvès, Jérôme Monnot, Lydia Tlilane (2015).
+["Worst case compromises in matroids with applications to the allocation of indivisible goods"](https://www.sciencedirect.com/science/article/pii/S0304397515003722#br0150).
+Theoretical Computer Science. *Algorithms 2 and 3.*
+
 * Elad Aigner-Horev, Erel Segal-Halevi
 ["Envy-free matchings and their applications"](https://arxiv.org/abs/1901.09527).   
 *Algorithms 1, 2, 3, 4; subsections 5.2--5.4.*
-
 
 
 ## 2. [Fair allocation of items and money](https://en.wikipedia.org/wiki/Fair_allocation_of_items_and_money)
