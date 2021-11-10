@@ -99,7 +99,7 @@ Proceedings of EC'18.  *All algorithms*.
 arXiv preprint. *Algorithms 1 (double RR), 2 (generalized AW), 3 (generalized MK).
 
 * Jugal Garg, Setareh Taki (2020--2021). 
-["An improved approximation algorithm for maximin shares"](https://dl.acm.org/doi/abs/10.1145/3381525). Artificial Intelligence.  *Algorithms 1--3* and *Algorithms 4--6*.
+["An improved approximation algorithm for maximin shares"](https://www.sciencedirect.com/science/article/pii/S0004370221000989). Artificial Intelligence.  *Algorithms 1--3* and *Algorithms 4--6*.
 
 *  Vittorio Bilò, Ioannis Caragiannis, Michele Flammini, Ayumi Igarashi, Gianpiero Monaco, Dominik Peters, Cosimo Vinci, William S. Zwicker.
 ["Almost Envy-Free Allocations with Connected Bundles"](https://arxiv.org/abs/1808.09406).
