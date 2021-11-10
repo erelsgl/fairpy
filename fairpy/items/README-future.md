@@ -133,9 +133,19 @@ Mathematical Social Sciences. *Algorithms: deterministic and randomized.*
 ["Worst case compromises in matroids with applications to the allocation of indivisible goods"](https://www.sciencedirect.com/science/article/pii/S0304397515003722#br0150).
 Theoretical Computer Science. *Algorithms 2 and 3.*
 
+* Marco Dall'Aglio (2021).
+["Fair Division of Goods in the Shadow of Market Values"](https://arxiv.org/abs/1910.01615).
+arXiv preprint. *Implement the algorithm and adapt to negative utilities.*
+
+* Mithun Chakraborty, Ulrike Schmidt-Kraepelin, Warut Suksompong (2021).
+["Picking Sequences and Monotonicity in Weighted Fair Division"](https://arxiv.org/abs/2104.14347).
+Proceedings of IJCAI'21. *All algorithms*.
+
 * Elad Aigner-Horev, Erel Segal-Halevi
 ["Envy-free matchings and their applications"](https://arxiv.org/abs/1901.09527).   
 *Algorithms 1, 2, 3, 4; subsections 5.2--5.4.*
+
+**See also**: [Egalitarian item allocation](https://en.wikipedia.org/wiki/Egalitarian_item_allocation).
 
 
 ## 2. [Fair allocation of items and money](https://en.wikipedia.org/wiki/Fair_allocation_of_items_and_money)
