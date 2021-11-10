@@ -8,19 +8,43 @@
 ["On Approximately Fair Allocations of Indivisible Goods"](https://dl.acm.org/doi/pdf/10.1145/988772.988792). 
 Proceedings of EC'04.  *Theorem 2.1 (envy-graph). Theorem 3 (PTAS for minimizing envy-ratio).*.
 
+* Sylvain Bouveret, Ulle Endriss, Jérôme Lang (2010).
+["Fair Division under Ordinal Preferences: Computing Envy-Free Allocations of Indivisible Goods"](https://ebooks.iospress.nl/doi/10.3233/978-1-60750-606-5-387).
+Proceedings of ECAI'10.
+
 * Evangelos Markakis, Christos-Alexandros Psomas (2011).
 ["On Worst-Case Allocations in the Presence of Indivisible Goods"](https://link.springer.com/chapter/10.1007/978-3-642-25510-6_24).
 Proceedings of WINE'11. *Algorithm 1*.
 
-* Ioannis Caragiannis, David Kurokawa, Hervé Moulin, Ariel D. Procaccia, Nisarg Shah, Junxing Wang.
+* Steven J. Brams and Marc D. Kilgour and Christian Klamler (2014).
+["An algorithm for the proportional division of indivisible items"](https://mpra.ub.uni-muenchen.de/56587/).
+*All algorithms.*
+
+* Steven J. Brams and Marc D. Kilgour and Christian Klamler (2014).
+["Two-Person Fair Division of Indivisible Items: An Efficient, Envy-Free Algorithm"](https://www.ams.org/journals/notices/201402/rnoti-p130.pdf/).
+Notices of the AMS. *All algorithms.*
+
+* Andreas Darmann and Christian Klamler (2016).
+["Proportional Borda allocations"](https://link.springer.com/article/10.1007/s00355-016-0982-z).   
+Social choice and Welfare. *All algorithms.*
+
+* Sylvain Bouveret, Katarína Cechlárová, Edith Elkind, Ayumi Igarashi, Dominik Peters (2017).
+["Fair division of a graph"](https://arxiv.org/abs/1705.10239).
+Proceedings of IJCAI'17. *Algorithm 1 (MMS-fair allocation for acyclic graphs)*.
+
+* Sylvain Bouveret, Katarína Cechlárová, Julien Lesca (2019).
+["Chore division on a graph"](https://link.springer.com/article/10.1007/s10458-019-09415-z).
+Proceedings of AAMAS'19.
+
+* Ioannis Caragiannis, David Kurokawa, Hervé Moulin, Ariel D. Procaccia, Nisarg Shah, Junxing Wang (2016--2019).
 ["The Unreasonable Fairness of Maximum Nash Welfare"](http://eprints.gla.ac.uk/123283/1/123283.pdf).
 Proceedings of EC'16. *All algorithms*.
 
-* Hoon Oh, Ariel D. Procaccia, Warut Suksompong. 
+* Hoon Oh, Ariel D. Procaccia, Warut Suksompong (2019). 
 ["Fairly Allocating Many Goods with Few Queries"](https://doi.org/10.1609%2Faaai.v33i01.33012141).
 Proceedings of AAAI'19. *All algorithms*.
 
-* Hau Chan, Jing Chen, Bo Li, Xiaowei Wu.
+* Hau Chan, Jing Chen, Bo Li, Xiaowei Wu (2019).
 ["Maximin-Aware Allocations of Indivisible Goods"](https://arxiv.org/abs/1905.09969).
 *All algorithms*.
 
@@ -36,10 +60,6 @@ Proceedings of EC'19. *All algorithms*.
 ["Approximation Algorithms for Maximin Fair Division"](https://dl.acm.org/doi/abs/10.1145/3381525). 
 ACM Transactions on Economics and Computation.  *Algorithms 1, 2, 5*.
 
-* Benjamin Plaut, Tim Roughgarden (2020).
-["Almost Envy-Freeness with General Valuations"](https://dl.acm.org/doi/abs/10.1145/3140756).
-SIAM Journal on Discrete Mathematics.  *Algorithms 1, 2.*
-
 * Siddharth Barman, Arpita Biswas (2018).
 ["Fair Division Under Cardinality Constraints"](https://arxiv.org/abs/1804.09521).
 Proceedings of IJCAI 2018.    *Algorithms 1, 2.*
@@ -48,29 +68,25 @@ Proceedings of IJCAI 2018.    *Algorithms 1, 2.*
 ["Approximation Algorithms for Computing Maximin Share Allocations"](https://arxiv.org/abs/1503.00941).
 ACM Transactions on Algorithms.   *Algorithms 1, 2.*
 
-* Haris Aziz, Herve Moulin and Fedor Sandomirskiy (2020).
-["A polynomial-time algorithm for computing a Pareto optimal and almost proportional allocation"](https://www.sciencedirect.com/science/article/pii/S0167637720301024).
-Operations Research Letters. *Algorithm 2.* (Algorithm 1 is already implemented).
-
 * Rupert Freeman, Sujoy Sikdar, Rohit Vaish, Lirong Xia (2019).
 ["Equitable Allocations of Indivisible Goods"](https://arxiv.org/abs/1905.10656).
 arXiv preprint. *Theorem 2 (EQ+PO for binary valuations). Theorem 3 (EQ1+PO for positive valuations)*.
 
-* Andreas Darmann and Christian Klamler (2016).
-["Proportional Borda allocations"](https://link.springer.com/article/10.1007/s00355-016-0982-z).   
-Social choice and Welfare. *All algorithms.*
+* Haris Aziz, Herve Moulin and Fedor Sandomirskiy (2020).
+["A polynomial-time algorithm for computing a Pareto optimal and almost proportional allocation"](https://www.sciencedirect.com/science/article/pii/S0167637720301024).
+Operations Research Letters. *Algorithm 2.* (Algorithm 1 is already implemented).
 
-* Steven J. Brams and Marc D. Kilgour and Christian Klamler (2014).
-["An algorithm for the proportional division of indivisible items"](https://mpra.ub.uni-muenchen.de/56587/).
-*All algorithms.*
+* Benjamin Plaut, Tim Roughgarden (2020).
+["Almost Envy-Freeness with General Valuations"](https://dl.acm.org/doi/abs/10.1145/3140756).
+SIAM Journal on Discrete Mathematics.  *Algorithms 1, 2.*
 
-* Steven J. Brams and Marc D. Kilgour and Christian Klamler (2014).
-["Two-Person Fair Division of Indivisible Items: An Efficient, Envy-Free Algorithm"](https://www.ams.org/journals/notices/201402/rnoti-p130.pdf/).
-Notices of the AMS. *All algorithms.*
+* Sylvain Bouveret, Michel Lemaître (2020).
+["An algorithm to calculates an allocation maximizing the leximin order on the utility profiles of the agents"](https://woasjournals.com/index.php/ijitas/article/view/13).
+IJITAS. One algorithm.
 
-* Erel Segal-Halevi, Avinatan Hassidim, Haris Aziz
+* Erel Segal-Halevi, Avinatan Hassidim, Haris Aziz (2020).
 ["Fair Allocation with Diminishing Differences"](https://www.jair.org/index.php/jair/article/view/11994).   
-*Algorithms 1, 2 (and their analogues for chores).*
+JAIR. *Algorithms 1, 2 (and their analogues for chores).*
 
 ### For two programmers
 
