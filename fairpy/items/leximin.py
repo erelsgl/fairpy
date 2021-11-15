@@ -17,8 +17,9 @@ Since:  2021-05
 """
 
 import cvxpy
-from fairpy import adaptors, Allocation, AllocationToFamilies, map_agent_to_family, solve, ValuationMatrix
+from fairpy import adaptors, Allocation, AllocationToFamilies, map_agent_to_family, ValuationMatrix, Agent, AdditiveValuation
 from fairpy.items.leximin_generic import leximin_solve
+from typing import List
 
 import logging
 logger = logging.getLogger(__name__)
@@ -125,22 +126,23 @@ def leximin_optimal_allocation_for_families(agents, families:list) -> Allocation
     [ 3.  4. 10.]
     """
     v = ValuationMatrix(agents)
+    num_of_objects  = v.num_of_objects
+    num_of_agents   = v.num_of_agents
     num_of_families = len(families)
-    agent_to_family = map_agent_to_family(families, v.num_of_agents)
+    agent_to_family = map_agent_to_family(families, num_of_agents)
     logger.info("map_agent_to_family = %s",agent_to_family)
-
-    allocation_vars = cvxpy.Variable((num_of_families, v.num_of_objects))
+    allocation_vars = cvxpy.Variable((num_of_families, num_of_objects))
     feasibility_constraints = [
         sum([allocation_vars[f][o] for f in range(num_of_families)])==1
-        for o in v.objects()
+        for o in range(num_of_objects)
     ]
     positivity_constraints = [
         allocation_vars[f][o] >= 0 for f in range(num_of_families)
-        for o in v.objects()
+        for o in range(num_of_objects)
     ]
-    utilities = [sum([allocation_vars[agent_to_family[i]][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
-
-    # allocation_matrix = leximin_optimal_solution(alloc, utilities, feasibility_constraints+positivity_constraints)
+    utilities = [sum([allocation_vars[agent_to_family[i]][o]*v[i][o] 
+        for o in range(num_of_objects)]) 
+        for i in range(num_of_agents)]
     leximin_solve(objectives=utilities, constraints=feasibility_constraints+positivity_constraints)
     allocation_matrix = allocation_vars.value
 
