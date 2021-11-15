@@ -14,6 +14,7 @@ Since: 2021-04
 
 
 from abc import ABC, abstractmethod
+from numbers import Number
 from collections.abc import Iterable
 import numpy as np
 
@@ -39,8 +40,6 @@ class Valuation(ABC):
     def __init__(self, desired_items:Bundle):
         """
         :param desired_items: the set of all goods that are desired by this agent/s.
-        :param name [optional]: a display-name for the agent in logs and printouts.
-        :param duplicity [optional]: the number of agent/s with the same valuation function.
         """
         self.desired_items_list = sorted(desired_items)
         self.desired_items = set(desired_items)
@@ -297,11 +296,10 @@ class MonotoneValuation(Valuation):
     >>> a.is_EFx({"x"}, [{"y"}])
     True
     """
-    def __init__(self, map_bundle_to_value:Dict[Bundle,float], name:str=None, duplicity:int=1):
+    def __init__(self, map_bundle_to_value:Dict[Bundle,float]):
         """
         Initializes an agent with a given valuation function.
         :param map_bundle_to_value: a dict that maps each subset of goods to its value.
-        :param duplicity: the number of agents with the same valuation.
         """
         self.map_bundle_to_value = {frozenset(bundle):value for bundle,value in  map_bundle_to_value.items()}
         self.map_bundle_to_value[frozenset()] = 0   # normalization: the value of the empty bundle is always 0
@@ -415,11 +413,10 @@ class AdditiveValuation(Valuation):
     >>> a.all_items()
     {0, 1, 2, 3}
     """
-    def __init__(self, map_good_to_value, name:str=None, duplicity:int=1):
+    def __init__(self, map_good_to_value):
         """
         Initializes an agent with a given additive valuation function.
         :param map_good_to_value: a dict that maps each single good to its value, or a list that lists the values of individual items.
-        :param duplicity: the number of agents with the same valuation  (optional, default=1)
         """
         if isinstance(map_good_to_value, AdditiveValuation):
             map_good_to_value = map_good_to_value.map_good_to_value
@@ -453,8 +450,10 @@ class AdditiveValuation(Valuation):
                 return sum([self.map_good_to_value[g] for g in bundle])
         elif isinstance(bundle, Iterable):   # set, list, str, etc.
             return sum([self.map_good_to_value[g] for g in bundle])
-        else:                              # individual item
+        elif isinstance(bundle,Number):                              # individual item
             return self.map_good_to_value[bundle]
+        else:
+            raise TypeError(f"Unsupported bundle type: {type(bundle)}")
 
     def all_items(self):
         return self._all_items
@@ -566,11 +565,10 @@ class BinaryValuation(Valuation):
     False
     """
 
-    def __init__(self, desired_items:Bundle, name:str=None, duplicity:int=1):
+    def __init__(self, desired_items:Bundle):
         """
         Initializes an agent with a given set of desired goods.
         :param desired_items: a set of strings - each string is a good.
-        :param duplicity: the number of agents with the same set of desired goods.
         """
         super().__init__(desired_items)
 
@@ -773,7 +771,6 @@ class ValuationMatrix:
 
     def __repr__(self):
         return np.array2string (self._v, max_line_width=100)		
-
 
 
 
