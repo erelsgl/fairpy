@@ -14,6 +14,7 @@ DEFAULT_SOLVERS = [
 	(cvxpy.SCIPY, {'method':'highs'}),
 	(cvxpy.OSQP, {}),
 	(cvxpy.SCS, {}),
+	(cvxpy.XPRESS, {}),
 ]
 
 import logging

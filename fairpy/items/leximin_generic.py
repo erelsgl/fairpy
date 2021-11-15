@@ -21,52 +21,10 @@ import cvxpy, logging
 logger = logging.getLogger(__name__)
 
 from typing import *
+from fairpy.solve import maximize
 
-TOLERANCE_FACTOR=1.001  # for comparing floating-point numbers
-
-DEFAULT_SOLVERS= [
-	(cvxpy.XPRESS, {}),
-	(cvxpy.OSQP, {}),
-	(cvxpy.SCS, {}),
-]
-
-
-def solve(problem:cvxpy.Problem, solvers:List[Tuple[str, Dict]] = DEFAULT_SOLVERS):
-	"""
-	Try to solve the given cvxpy problem using the given solvers, in order, until one succeeds.
-    See here https://www.cvxpy.org/tutorial/advanced/index.html for a list of supported solvers.
-
-	:param solvers list of tuples. Each tuple is (name-of-solver, keyword-arguments-to-solver)
-	"""
-	is_solved=False
-	for (solver,kwargs) in solvers:  # Try the first n-1 solvers.
-		try:
-			problem.solve(solver=solver, **kwargs)
-			logger.info("Solver %s succeeds",solver)
-			is_solved = True
-			break
-		except cvxpy.SolverError as err:
-			logger.info("Solver %s fails: %s", solver, err)
-	if not is_solved:
-		raise cvxpy.SolverError(f"All solvers failed: {solvers}")
-	if problem.status == "infeasible":
-		raise ValueError("Problem is infeasible")
-	elif problem.status == "unbounded":
-		raise ValueError("Problem is unbounded")
-
-def maximize(objective, constraints, solvers:list=DEFAULT_SOLVERS):
-	"""
-	A utility function for finding the maximum of a general objective function.
-
-	>>> import numpy as np
-	>>> x = cvxpy.Variable()
-	>>> np.round(maximize(x, [x>=1, x<=3]),3)
-	3.0
-	"""
-	problem = cvxpy.Problem(cvxpy.Maximize(objective), constraints)
-	solve(problem, solvers=solvers)
-	return objective.value.item()
-
+UPPER_TOLERANCE=1.01  # for comparing floating-point numbers
+LOWER_TOLERANCE=0.9999
 
 def leximin_solve(objectives:list, constraints:list, **kwargs):
     """
@@ -82,6 +40,7 @@ def leximin_solve(objectives:list, constraints:list, **kwargs):
     Bob values the resources at 2, 4, 9.
     The variables a[0], a[1], a[2] denote the fraction of each resource given to Alice.
     >>> a = cvxpy.Variable(3)
+
     >>> utility_Alice = a[0]*5 + a[1]*3 + a[2]*0
     >>> utility_Bob   = (1-a[0])*2 + (1-a[1])*4 + (1-a[2])*9
     >>> feasible_allocation = [x>=0 for x in a] + [x<=1 for x in a]
@@ -90,6 +49,15 @@ def leximin_solve(objectives:list, constraints:list, **kwargs):
     (8, 9)
     >>> [round(x.value) for x in a]  # Alice gets all of resources 0 and 1; Bob gets all of resource 2.
     [1, 1, 0]
+
+    >>> utility_Alice = -5*a[0]  -3*a[1] -0*a[2]
+    >>> utility_Bob   = -2*(1-a[0])  -4*(1-a[1])  -9*(1-a[2])
+    >>> feasible_allocation = [x>=0 for x in a] + [x<=1 for x in a]
+    >>> leximin_solve(objectives=[utility_Alice, utility_Bob],  constraints=feasible_allocation)
+    >>> round(utility_Alice.value,3), round(utility_Bob.value,3)
+    (-2.571, -2.571)
+    >>> [round(x.value,3) for x in a]
+    [-0.0, 0.857, 1.0]
     """
     num_of_objectives = len(objectives)
 
@@ -112,39 +80,46 @@ def leximin_solve(objectives:list, constraints:list, **kwargs):
 
         values_in_max_min_allocation = [objective.value for objective in objectives]
         logger.info("  max min value: %g, value-profile: %s", max_min_value_for_free_objectives, values_in_max_min_allocation)
+        max_min_value_upper_threshold = UPPER_TOLERANCE*max_min_value_for_free_objectives if max_min_value_for_free_objectives>0 else (2-UPPER_TOLERANCE)*max_min_value_for_free_objectives
+        max_min_value_lower_threshold = LOWER_TOLERANCE*max_min_value_for_free_objectives if max_min_value_for_free_objectives>0 else (2-LOWER_TOLERANCE)*max_min_value_for_free_objectives
 
         for ifree in free_objectives:  # Find whether i's value can be improved
-            if values_in_max_min_allocation[ifree] > TOLERANCE_FACTOR*max_min_value_for_free_objectives:
-                logger.info("  Max value of objective #%d is at least %g, so objective remains free.", ifree, values_in_max_min_allocation[ifree])
+            if values_in_max_min_allocation[ifree] > max_min_value_upper_threshold:
+                logger.info("  Max value of objective #%d is %g, which is above %g, so objective remains free.", ifree, values_in_max_min_allocation[ifree], max_min_value_upper_threshold)
                 continue
             new_inequalities_for_free_objectives = [
-                objectives[i] >= max_min_value_for_free_objectives
+                objectives[i] >= max_min_value_lower_threshold
                 for i in free_objectives if i!=ifree
             ]
             max_value_for_ifree = maximize(objectives[ifree], constraints + inequalities_for_saturated_objectives + new_inequalities_for_free_objectives, **kwargs)
-            if max_value_for_ifree > TOLERANCE_FACTOR*max_min_value_for_free_objectives:
-                logger.info("  Max utility of agent #%d is %g, so agent remains free.", ifree, max_value_for_ifree)
+            if max_value_for_ifree > max_min_value_upper_threshold:
+                logger.info("  Max value of objective #%d is %g, which is above %g, so objective remains free.", ifree, max_value_for_ifree, max_min_value_upper_threshold)
                 continue
-            logger.info("  Max utility of agent #%d is %g, so agent becomes saturated.", ifree, max_value_for_ifree)
+            logger.info("  Max value of objective #%d is %g, which is below %g, so objective becomes saturated.", ifree, max_value_for_ifree, max_min_value_upper_threshold)
             map_saturated_objective_to_saturated_value[ifree] = max_min_value_for_free_objectives
             inequalities_for_saturated_objectives.append(objectives[ifree] >= max_min_value_for_free_objectives)
 
         new_free_agents = [i for i in free_objectives if map_saturated_objective_to_saturated_value[i] is None]
         if len(new_free_agents)==len(free_objectives):
-            raise ValueError("No new saturated agents - this contradicts Willson's theorem! Are you sure the domain is convex?")
+            raise ValueError("No new saturated objectives - this contradicts Willson's theorem! Are you sure the domain is convex?")
         elif len(new_free_agents)==0:
-            logger.info("All agents are saturated -- values are %s.", map_saturated_objective_to_saturated_value)
+            logger.info("All objectives are saturated -- values are %s.", map_saturated_objective_to_saturated_value)
             return
         else:
             free_objectives = new_free_agents
             continue
 
+leximin_solve.logger = logger
 
 
 
 
 
 if __name__ == '__main__':
+    import sys
+    logger.addHandler(logging.StreamHandler(sys.stdout))
+    logger.setLevel(logging.INFO)
+
     import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))

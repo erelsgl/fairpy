@@ -387,6 +387,8 @@ class BinaryAgent(Agent):
 
 
 
+
+
 ######## CAKE AGENTS #######
 
 class PiecewiseConstantAgent(Agent):

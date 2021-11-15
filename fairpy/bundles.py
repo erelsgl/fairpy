@@ -80,7 +80,7 @@ class FractionalBundle(Bundle):
         self.items = [
             f" {np.round(fraction*100, precision)}% of {item}"
             for item,fraction in self.enumerate_fractions()
-            if fraction > 0
+            if fraction != 0
         ]
 
     def round(self, num_digits:int):
