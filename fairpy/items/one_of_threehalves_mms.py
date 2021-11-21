@@ -6,7 +6,7 @@ Programmer: Erel Segal-Halevi
 Since:  2021-04
 """
 
-from fairpy import adaptors, Allocation
+from fairpy import adapt_matrix_algorithm, Allocation
 from fairpy.items.bag_filling import Bag, SequentialAllocation
 
 from typing import List
@@ -14,6 +14,7 @@ from typing import List
 import logging
 logger = logging.getLogger(__name__)
 
+@adapt_matrix_algorithm
 def bidirectional_bag_filling(instance, thresholds:List[float]) -> Allocation:
 	"""
 	Runs a bi-directional bag-filling algorithm.
@@ -32,28 +33,27 @@ def bidirectional_bag_filling(instance, thresholds:List[float]) -> Allocation:
 	Agent #2 gets {} with value 0.
 	<BLANKLINE>
 	"""
-	def implementation_with_matrix_input(valuation_matrix):
-		valuation_matrix.verify_ordered()
-		if len(thresholds) != valuation_matrix.num_of_agents:
-			raise ValueError(f"Number of valuations {valuation_matrix.num_of_agents} differs from number of thresholds {len(thresholds)}")
-		allocation = SequentialAllocation(valuation_matrix.agents(), valuation_matrix.objects(), logger)
-		bag = Bag(valuation_matrix, thresholds)
-		while True:
-			if len(allocation.remaining_objects)==0:  break
+	valuation_matrix = instance
+	valuation_matrix.verify_ordered()
+	if len(thresholds) != valuation_matrix.num_of_agents:
+		raise ValueError(f"Number of valuations {valuation_matrix.num_of_agents} differs from number of thresholds {len(thresholds)}")
+	allocation = SequentialAllocation(valuation_matrix.agents(), valuation_matrix.objects(), logger)
+	bag = Bag(valuation_matrix, thresholds)
+	while True:
+		if len(allocation.remaining_objects)==0:  break
 
-			# Initialize a bag with the highest-valued object:
-			highest_valued_object = allocation.remaining_objects[0]
-			bag.append(highest_valued_object)
+		# Initialize a bag with the highest-valued object:
+		highest_valued_object = allocation.remaining_objects[0]
+		bag.append(highest_valued_object)
 
-			# Fill the bag with the lowest-valued objects:
-			lowest_valued_objects = reversed(allocation.remaining_objects[1:])
-			(willing_agent, allocated_objects) = bag.fill(lowest_valued_objects, allocation.remaining_agents)
-			if willing_agent is None: break
-			allocation.let_agent_get_objects(willing_agent, allocated_objects)
-			bag.reset()
-		return allocation.bundles
-	return adaptors.adapt_matrix_algorithm(implementation_with_matrix_input, instance)
-
+		# Fill the bag with the lowest-valued objects:
+		lowest_valued_objects = reversed(allocation.remaining_objects[1:])
+		(willing_agent, allocated_objects) = bag.fill(lowest_valued_objects, allocation.remaining_agents)
+		if willing_agent is None: break
+		allocation.let_agent_get_objects(willing_agent, allocated_objects)
+		bag.reset()
+	return allocation.bundles
+	
 
 
 

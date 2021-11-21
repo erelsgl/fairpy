@@ -275,7 +275,7 @@ def solve(agents) -> List[List[int]]:
             return allocation
 
 
-def propm_allocation(agents) -> Allocation:
+def propm_allocation(instance) -> Allocation:
     """
     Function that takes a valuation matrix and returns PROPm allocation of goods.
     >>> import numpy as np
@@ -305,7 +305,7 @@ def propm_allocation(agents) -> Allocation:
     George gets {z} with value 19.
     <BLANKLINE>
     """
-    return adaptors.adapt_matrix_algorithm(solve, agents)
+    return adaptors.adapt_matrix_algorithm(solve)(instance)
 
 
 if __name__ == "__main__":

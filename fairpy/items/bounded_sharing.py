@@ -15,7 +15,7 @@ from fairpy.items.max_welfare import max_product_allocation
 
 logger = logging.getLogger(__name__)
 
-
+@adapt_matrix_algorithm
 def dominating_allocation_with_bounded_sharing(instance:Any, thresholds:List) -> Allocation:
     """
     Finds an allocation in which each agent i gets value at least thresholds[i],
@@ -43,37 +43,38 @@ def dominating_allocation_with_bounded_sharing(instance:Any, thresholds:List) ->
     Agent #1 gets { 37.5% of 0, 100.0% of 1} with value 6.88.
     <BLANKLINE>
     """
-    def implementation_with_matrix_input(v:ValuationMatrix):
-        allocation_vars = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
-        feasibility_constraints = [
-            sum([allocation_vars[i][o] for i in v.agents()])==1
-            for o in v.objects()
-        ]
-        positivity_constraints = [
-            allocation_vars[i][o] >= 0 for i in v.agents()
-            for o in v.objects()
-        ]
-        utilities = [sum([allocation_vars[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
-        utility_constraints = [
-            utilities[i] >= thresholds[i] for i in range(v.num_of_agents-1)
-        ]
-        constraints = feasibility_constraints+positivity_constraints+utility_constraints
-        problem = cvxpy.Problem(cvxpy.Maximize(utilities[v.num_of_agents-1]), constraints)
-        solvers = [
-            (cvxpy.SCIPY, {'method': 'highs-ds'}),        # Always finds a BFS
-            (cvxpy.MOSEK, {"bfs":True}),                  # Always finds a BFS
-            (cvxpy.OSQP, {}),                             # Default - not sure it returns a BFS
-            (cvxpy.SCIPY, {}),                            # Default - not sure it returns a BFS
-        ]
-        solve(problem, solvers=solvers)
-        if problem.status=="optimal":
-            allocation_matrix = allocation_vars.value
-            return allocation_matrix
-        else:
-            raise cvxpy.SolverError(f"No optimal solution found: status is {problem.status}")
-    return adapt_matrix_algorithm(implementation_with_matrix_input, instance)
+    v = ValuationMatrix(instance)
+    allocation_vars = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
+    feasibility_constraints = [
+        sum([allocation_vars[i][o] for i in v.agents()])==1
+        for o in v.objects()
+    ]
+    positivity_constraints = [
+        allocation_vars[i][o] >= 0 for i in v.agents()
+        for o in v.objects()
+    ]
+    utilities = [sum([allocation_vars[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
+    utility_constraints = [
+        utilities[i] >= thresholds[i] for i in range(v.num_of_agents-1)
+    ]
+    constraints = feasibility_constraints+positivity_constraints+utility_constraints
+    problem = cvxpy.Problem(cvxpy.Maximize(utilities[v.num_of_agents-1]), constraints)
+    solvers = [
+        (cvxpy.SCIPY, {'method': 'highs-ds'}),        # Always finds a BFS
+        (cvxpy.MOSEK, {"bfs":True}),                  # Always finds a BFS
+        (cvxpy.OSQP, {}),                             # Default - not sure it returns a BFS
+        (cvxpy.SCIPY, {}),                            # Default - not sure it returns a BFS
+    ]
+    solve(problem, solvers=solvers)
+    if problem.status=="optimal":
+        allocation_matrix = allocation_vars.value
+        return allocation_matrix
+    else:
+        raise cvxpy.SolverError(f"No optimal solution found: status is {problem.status}")
 
 
+
+@adapt_matrix_algorithm
 def proportional_allocation_with_bounded_sharing(instance:Any, entitlements:List=None) -> Allocation:
     """
     Finds a Pareto-optimal and proportional allocation
@@ -100,15 +101,14 @@ def proportional_allocation_with_bounded_sharing(instance:Any, entitlements:List
     Agent #1 gets { 25.0% of 0, 100.0% of 1} with value 6.25.
     <BLANKLINE>
     """
-    def implementation_with_matrix_input(v:ValuationMatrix, entitlements:List=None):
-        if entitlements is None:
-            entitlements = np.ones(v.num_of_agents)
-        else:
-            entitlements = np.array(entitlements)
-        entitlements = entitlements/sum(entitlements)  # normalize
-        thresholds = v.total_values() * entitlements
-        return dominating_allocation_with_bounded_sharing(v, thresholds)
-    return adapt_matrix_algorithm(implementation_with_matrix_input, instance, entitlements=entitlements)
+    v = ValuationMatrix(instance)
+    if entitlements is None:
+        entitlements = np.ones(v.num_of_agents)
+    else:
+        entitlements = np.array(entitlements)
+    entitlements = entitlements/sum(entitlements)  # normalize
+    thresholds = v.total_values() * entitlements
+    return dominating_allocation_with_bounded_sharing(v, thresholds)
 
 
 
