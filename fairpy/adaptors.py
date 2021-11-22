@@ -13,78 +13,69 @@ from fairpy.bundles import FractionalBundle
 from functools import wraps
 
 
-def adapt_list_algorithm(algorithm: Callable)->Allocation:
+def convert_input_to_valuation_matrix(algorithm: Callable)->Allocation:
     """
-    Adapts an algorithm, that accepts as input a list of lists,
+    Adapts an algorithm, that accepts as input a ValuationMatrix object,
     to accept various other input formats.
 
     >>> # Available input formats:
 
     >>> input_matrix = np.ones([2,3])        # a numpy array of valuations.
-    >>> adapt_list_algorithm(dummy_list_list_algorithm)(input_matrix)
+    >>> convert_input_to_valuation_matrix(dummy_matrix_list_algorithm)(input_matrix)
     Agent #0 gets {0,2} with value 2.
     Agent #1 gets {1} with value 1.
     <BLANKLINE>
-    >>> adapt_list_algorithm(dummy_list_matrix_algorithm)(input_matrix)
+    >>> convert_input_to_valuation_matrix(dummy_matrix_matrix_algorithm)(input_matrix)
     Agent #0 gets { 100.0% of 0, 100.0% of 2} with value 2.
     Agent #1 gets { 100.0% of 1} with value 1.
     <BLANKLINE>
 
     >>> input_list_of_lists = [[1,4,7],[6,3,0]]     # a list of lists.
-    >>> adapt_list_algorithm(dummy_list_list_algorithm)(input_list_of_lists)
+    >>> convert_input_to_valuation_matrix(dummy_matrix_list_algorithm)(input_list_of_lists)
     Agent #0 gets {0,2} with value 8.
     Agent #1 gets {1} with value 3.
     <BLANKLINE>
-    >>> adapt_list_algorithm(dummy_list_matrix_algorithm)(input_list_of_lists)
+    >>> convert_input_to_valuation_matrix(dummy_matrix_matrix_algorithm)(input_list_of_lists)
     Agent #0 gets { 100.0% of 0, 100.0% of 2} with value 8.
     Agent #1 gets { 100.0% of 1} with value 3.
-    <BLANKLINE> 
-    >>> adapt_list_algorithm(dummy_list_matrix_algorithm)(input_list_of_lists, first_agent=1)
-    Agent #0 gets { 100.0% of 1} with value 4.
-    Agent #1 gets { 100.0% of 0, 100.0% of 2} with value 6.
     <BLANKLINE>
-
-    >>> input_valuation_matrix = ValuationMatrix(input_list_of_lists)
-    >>> adapt_list_algorithm(dummy_list_list_algorithm)(input_valuation_matrix)
-    Agent #0 gets {0,2} with value 8.
-    Agent #1 gets {1} with value 3.
-    <BLANKLINE>
-    >>> adapt_list_algorithm(dummy_list_matrix_algorithm)(input_valuation_matrix)
-    Agent #0 gets { 100.0% of 0, 100.0% of 2} with value 8.
-    Agent #1 gets { 100.0% of 1} with value 3.
-    <BLANKLINE> 
 
     >>> input_dict_of_lists = {"a": [1,2,3], "b": [4,5,6]}      # a dict mapping agent names to list of values.
-    >>> adapt_list_algorithm(dummy_list_list_algorithm)(input_dict_of_lists)
+    >>> convert_input_to_valuation_matrix(dummy_matrix_list_algorithm)(input_dict_of_lists)
     a gets {0,2} with value 4.
     b gets {1} with value 5.
     <BLANKLINE>
-    >>> adapt_list_algorithm(dummy_list_matrix_algorithm)(input_dict_of_lists)
+    >>> convert_input_to_valuation_matrix(dummy_matrix_matrix_algorithm)(input_dict_of_lists)
     a gets { 100.0% of 0, 100.0% of 2} with value 4.
     b gets { 100.0% of 1} with value 5.
     <BLANKLINE>
 
     >>> input_dict_of_dicts = {"a": {"x":1,"y":2,"z":3}, "b": {"x":4,"y":5,"z":6}}       # a dict mapping agent names to dict of values.
-    >>> adapt_list_algorithm(dummy_list_list_algorithm)(input_dict_of_dicts)
+    >>> convert_input_to_valuation_matrix(dummy_matrix_list_algorithm)(input_dict_of_dicts)
     a gets {x,z} with value 4.
     b gets {y} with value 5.
     <BLANKLINE>
-    >>> adapt_list_algorithm(dummy_list_matrix_algorithm)(input_dict_of_dicts)
+    >>> convert_input_to_valuation_matrix(dummy_matrix_matrix_algorithm)(input_dict_of_dicts)
     a gets { 100.0% of x, 100.0% of z} with value 4.
     b gets { 100.0% of y} with value 5.
     <BLANKLINE>
-    >>> adapt_list_algorithm(dummy_list_matrix_algorithm)(input_dict_of_dicts, first_agent=1)
+    >>> convert_input_to_valuation_matrix(dummy_matrix_matrix_algorithm)(input_dict_of_dicts, first_agent=1)
     a gets { 100.0% of y} with value 2.
     b gets { 100.0% of x, 100.0% of z} with value 10.
     <BLANKLINE>
     """
     @wraps(algorithm)
     def adapted_algorithm(input, *args, **kwargs):
+
         # Step 1. Adapt the input:
-        object_names = agent_names = None
-        if isinstance(input, list) and isinstance(input[0], list):  # list of lists
-            output = algorithm(input, *args, **kwargs)
-            return output if isinstance(output,Allocation) else Allocation(input, output)
+        valuation_matrix = list_of_valuations = object_names = agent_names = None
+        if isinstance(input, ValuationMatrix): # instance is already a valuation matrix
+            valuation_matrix = input
+        elif isinstance(input, np.ndarray):    # instance is a numpy valuation matrix
+            valuation_matrix = ValuationMatrix(input)
+        elif isinstance(input, list) and isinstance(input[0], list):            # list of lists
+            list_of_valuations = input
+            valuation_matrix = ValuationMatrix(list_of_valuations)
         elif isinstance(input, dict):  
             agent_names = list(input.keys())
             list_of_valuations = list(input.values())
@@ -94,18 +85,23 @@ def adapt_list_algorithm(algorithm: Callable)->Allocation:
                     [valuation[object] for object in object_names]
                     for valuation in list_of_valuations
                 ]
-            valuation_matrix = input
-        elif isinstance(input, np.ndarray) or isinstance(input, ValuationMatrix):
-            valuation_matrix = ValuationMatrix(input)
-            agent_names = [f"Agent #{i}" for i in valuation_matrix.agents()]
-            list_of_valuations = [valuation_matrix[i] for i in valuation_matrix.agents()]
+            valuation_matrix = ValuationMatrix(list_of_valuations)
         else:
             raise TypeError(f"Unsupported input type: {type(input)}")
 
         # Step 2. Run the algorithm:
-        output = algorithm(list_of_valuations, *args, **kwargs)
+        output = algorithm(valuation_matrix, *args, **kwargs)
+        # return output if isinstance(output,Allocation) else Allocation(valuation_matrix, output)
 
         # Step 3. Adapt the output:
+        if isinstance(output,Allocation):
+            return output
+
+        if agent_names is None:
+            agent_names = [f"Agent #{i}" for i in valuation_matrix.agents()]
+
+        # print("agent_names", agent_names, "object_names", object_names,"output", output)
+
         if isinstance(output, np.ndarray) or isinstance(output, AllocationMatrix):  # allocation matrix
             allocation_matrix = AllocationMatrix(output)
             if isinstance(input, dict):
@@ -123,75 +119,9 @@ def adapt_list_algorithm(algorithm: Callable)->Allocation:
                     for bundle in output
                 ]
             dict_of_bundles = dict(zip(agent_names,list_of_bundles))
-            return Allocation(valuation_matrix, dict_of_bundles)
+            return Allocation(input if isinstance(input,dict) else valuation_matrix, dict_of_bundles)
         else:
             raise TypeError(f"Unsupported output type: {type(output)}")
-    return adapted_algorithm
-
-
-
-def adapt_matrix_algorithm(algorithm: Callable)->Allocation:
-    """
-    Adapts an algorithm, that accepts as input a ValuationMatrix object,
-    to accept various other input formats.
-
-    >>> # Available input formats:
-
-    >>> input_matrix = np.ones([2,3])        # a numpy array of valuations.
-    >>> adapt_matrix_algorithm(dummy_matrix_list_algorithm)(input_matrix)
-    Agent #0 gets {0,2} with value 2.
-    Agent #1 gets {1} with value 1.
-    <BLANKLINE>
-    >>> adapt_matrix_algorithm(dummy_matrix_matrix_algorithm)(input_matrix)
-    Agent #0 gets { 100.0% of 0, 100.0% of 2} with value 2.
-    Agent #1 gets { 100.0% of 1} with value 1.
-    <BLANKLINE>
-
-    >>> input_list_of_lists = [[1,4,7],[6,3,0]]     # a list of lists.
-    >>> adapt_matrix_algorithm(dummy_matrix_list_algorithm)(input_list_of_lists)
-    Agent #0 gets {0,2} with value 8.
-    Agent #1 gets {1} with value 3.
-    <BLANKLINE>
-    >>> adapt_matrix_algorithm(dummy_matrix_matrix_algorithm)(input_list_of_lists)
-    Agent #0 gets { 100.0% of 0, 100.0% of 2} with value 8.
-    Agent #1 gets { 100.0% of 1} with value 3.
-    <BLANKLINE>
-
-    >>> input_dict_of_lists = {"a": [1,2,3], "b": [4,5,6]}      # a dict mapping agent names to list of values.
-    >>> adapt_matrix_algorithm(dummy_matrix_list_algorithm)(input_dict_of_lists)
-    a gets {0,2} with value 4.
-    b gets {1} with value 5.
-    <BLANKLINE>
-    >>> adapt_matrix_algorithm(dummy_matrix_matrix_algorithm)(input_dict_of_lists)
-    a gets { 100.0% of 0, 100.0% of 2} with value 4.
-    b gets { 100.0% of 1} with value 5.
-    <BLANKLINE>
-
-    >>> input_dict_of_dicts = {"a": {"x":1,"y":2,"z":3}, "b": {"x":4,"y":5,"z":6}}       # a dict mapping agent names to dict of values.
-    >>> adapt_matrix_algorithm(dummy_matrix_list_algorithm)(input_dict_of_dicts)
-    a gets {x,z} with value 4.
-    b gets {y} with value 5.
-    <BLANKLINE>
-    >>> adapt_matrix_algorithm(dummy_matrix_matrix_algorithm)(input_dict_of_dicts)
-    a gets { 100.0% of x, 100.0% of z} with value 4.
-    b gets { 100.0% of y} with value 5.
-    <BLANKLINE>
-    >>> adapt_matrix_algorithm(dummy_matrix_matrix_algorithm)(input_dict_of_dicts, first_agent=1)
-    a gets { 100.0% of y} with value 2.
-    b gets { 100.0% of x, 100.0% of z} with value 10.
-    <BLANKLINE>
-    """
-    @wraps(algorithm)
-    def adapted_algorithm(input, *args, **kwargs):
-        if isinstance(input, np.ndarray) or isinstance(input, ValuationMatrix):
-            valuation_matrix = ValuationMatrix(input)
-            output = algorithm(valuation_matrix, *args, **kwargs)
-            return output if isinstance(output,Allocation) else Allocation(valuation_matrix, output)
-        else:
-            @adapt_list_algorithm
-            def list_algorithm(list_input, *args, **kwargs):
-                return algorithm(ValuationMatrix(list_input), *args, **kwargs)
-            return list_algorithm(input, *args, **kwargs)
     return adapted_algorithm
 
 
@@ -280,3 +210,6 @@ if __name__ == "__main__":
     import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
+    # input_dict_of_lists = {"a": [1,2,3], "b": [4,5,6]}
+    # print(convert_input_to_valuation_matrix(dummy_matrix_list_algorithm)(input_dict_of_lists))
+

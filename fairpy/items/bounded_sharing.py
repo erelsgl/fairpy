@@ -9,13 +9,13 @@ Since:  2021-10
 
 from typing import *
 import cvxpy, logging, numpy as np
-from fairpy import adapt_matrix_algorithm, Allocation, ValuationMatrix
+from fairpy import convert_input_to_valuation_matrix, Allocation, ValuationMatrix
 from fairpy.solve import solve
 from fairpy.items.max_welfare import max_product_allocation
 
 logger = logging.getLogger(__name__)
 
-@adapt_matrix_algorithm
+@convert_input_to_valuation_matrix
 def dominating_allocation_with_bounded_sharing(instance:Any, thresholds:List) -> Allocation:
     """
     Finds an allocation in which each agent i gets value at least thresholds[i],
@@ -74,7 +74,7 @@ def dominating_allocation_with_bounded_sharing(instance:Any, thresholds:List) ->
 
 
 
-@adapt_matrix_algorithm
+@convert_input_to_valuation_matrix
 def proportional_allocation_with_bounded_sharing(instance:Any, entitlements:List=None) -> Allocation:
     """
     Finds a Pareto-optimal and proportional allocation

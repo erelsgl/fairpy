@@ -6,7 +6,7 @@ Programmer: Erel Segal-Halevi
 Since:  2021-04
 """
 
-from fairpy import adapt_matrix_algorithm, Allocation
+from fairpy import convert_input_to_valuation_matrix, Allocation
 from fairpy.items.bag_filling import Bag, SequentialAllocation
 
 from typing import List
@@ -14,7 +14,7 @@ from typing import List
 import logging
 logger = logging.getLogger(__name__)
 
-@adapt_matrix_algorithm
+@convert_input_to_valuation_matrix
 def bidirectional_bag_filling(instance, thresholds:List[float]) -> Allocation:
 	"""
 	Runs a bi-directional bag-filling algorithm.

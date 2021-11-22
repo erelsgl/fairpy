@@ -5,10 +5,21 @@ Some such Agent objects are already defined.
 
 ```python
 from fairpy.agents import PiecewiseUniformAgent, PiecewiseConstantAgent, agents_from
+```
 
-# 'Alice has two desired intervals, 0..1 and 3..6. Each interval has value 1:
-Alice = PiecewiseUniformAgent ([(0,1),(3,6)], name="Alice")   
-# 'George has four desired intervals: 0..1 with value 1, 1..2 with value 3, etc:
+
+
+Alice has two desired intervals, 0..1 and 3..6. Each interval has value 1:
+
+```python
+Alice = PiecewiseUniformAgent ([(0,1),(3,6)], name="Alice")
+```
+
+
+
+George has four desired intervals: 0..1 with value 1, 1..2 with value 3, etc:
+
+```python
 George = PiecewiseConstantAgent([1,3,5,7],    name="George")  
 print(Alice)
 print(George)
@@ -150,4 +161,4 @@ For more information see:
 * [List of cake-cutting algorithms for future work](../fairpy/cake/README-future.md).
 
 ---
-Markdown generated automatically from [cake.py](cake.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2021-11-09.
+Markdown generated automatically from [cake.py](cake.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2021-11-22.

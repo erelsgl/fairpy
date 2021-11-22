@@ -20,13 +20,16 @@ To verify that everything was installed correctly, run one of the example progra
 
 1. [Various input formats](examples/input_formats.md), making it easy to use for both researchers and end-users.
 
-2. [Various output formats](examples/output_formats.md).
+1. [Various output formats](examples/output_formats.md).
 
-3. [Optional logging](examples/loggers.md), making it easy to learn and understand how the algorithms work.
+1. [Optional logging](examples/loggers.md), making it easy to learn and understand how the algorithms work.
 
-4. [Item allocation algorithms](examples/items.md), for both divisible and indivisible items.
+1. [Decorators for easier implementation of algorithm](examples/decorators.md).
 
-5. [Cake-cutting algorithms](examples/cake.md).
+1. [Item allocation algorithms](examples/items.md), for both divisible and indivisible items.
+
+1. [Cake-cutting algorithms](examples/cake.md).
+
 
 ## Implemented algorithms
 

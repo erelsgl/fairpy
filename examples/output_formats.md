@@ -75,9 +75,9 @@ print(allocation.matrix)
 ```
 
 ```
-[[ 2.50000000e-01  2.50000000e-01]
- [ 1.11876031e-22  7.50000000e-01]
- [ 7.50000000e-01 -7.74837813e-23]]
+[[ 0.25  0.25]
+ [-0.    0.75]
+ [ 0.75 -0.  ]]
 ```
 
 
@@ -102,4 +102,4 @@ gadi gets { 75.0% of x} with value 2.25.
 
 
 ---
-Markdown generated automatically from [output_formats.py](output_formats.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2021-11-09.
+Markdown generated automatically from [output_formats.py](output_formats.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2021-11-22.

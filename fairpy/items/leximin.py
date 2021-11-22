@@ -17,7 +17,7 @@ Since:  2021-05
 """
 
 import cvxpy
-from fairpy import adaptors, Allocation, AllocationToFamilies, map_agent_to_family, ValuationMatrix, Agent, AdditiveValuation, adapt_matrix_algorithm
+from fairpy import adaptors, Allocation, AllocationToFamilies, map_agent_to_family, ValuationMatrix, Agent, AdditiveValuation, convert_input_to_valuation_matrix
 from fairpy.items.leximin_generic import leximin_solve
 from typing import List, Any
 
@@ -42,7 +42,7 @@ TOLERANCE_FACTOR=1.001  # for comparing floating-point numbers
 
 ##### Find a leximin-optimal allocation for individual agents
 
-@adapt_matrix_algorithm
+@convert_input_to_valuation_matrix
 def leximin_optimal_allocation(instance:Any) -> Allocation:
     """
     Find the leximin-optimal (aka Egalitarian) allocation.

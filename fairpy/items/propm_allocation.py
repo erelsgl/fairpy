@@ -305,7 +305,7 @@ def propm_allocation(instance) -> Allocation:
     George gets {z} with value 19.
     <BLANKLINE>
     """
-    return adaptors.adapt_matrix_algorithm(solve)(instance)
+    return adaptors.convert_input_to_valuation_matrix(solve)(instance)
 
 
 if __name__ == "__main__":

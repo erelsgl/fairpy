@@ -12,14 +12,14 @@ Since:  2021-05
 """
 
 import cvxpy
-from fairpy import ValuationMatrix, Allocation, AllocationToFamilies, adapt_matrix_algorithm
+from fairpy import ValuationMatrix, Allocation, AllocationToFamilies, convert_input_to_valuation_matrix
 from fairpy.solve import maximize
 from typing import Any
 
 import logging
 logger = logging.getLogger(__name__)
 
-@adapt_matrix_algorithm
+@convert_input_to_valuation_matrix
 def max_welfare_allocation(instance:Any, welfare_function, welfare_constraint_function=None) -> Allocation:
     """
     Find an allocation maximizing a given social welfare function. (aka Max Nash Welfare) allocation.
