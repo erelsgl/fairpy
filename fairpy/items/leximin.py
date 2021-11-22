@@ -17,9 +17,9 @@ Since:  2021-05
 """
 
 import cvxpy
-from fairpy import adaptors, Allocation, AllocationToFamilies, map_agent_to_family, ValuationMatrix, Agent, AdditiveValuation, convert_input_to_valuation_matrix
+from fairpy import Allocation, AllocationToFamilies, map_agent_to_family, ValuationMatrix, Agent, AdditiveValuation, convert_input_to_valuation_matrix
 from fairpy.items.leximin_generic import leximin_solve
-from typing import List, Any
+from typing import Any
 
 import logging
 logger = logging.getLogger(__name__)

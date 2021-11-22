@@ -12,7 +12,7 @@ Since:  2021-05
 
 import networkx as nx
 import numpy as np
-from fairpy import adaptors, ValuationMatrix, Allocation
+from fairpy import ValuationMatrix, Allocation, convert_input_to_valuation_matrix
 from typing import List
 from copy import deepcopy
 import logging
@@ -305,7 +305,7 @@ def propm_allocation(instance) -> Allocation:
     George gets {z} with value 19.
     <BLANKLINE>
     """
-    return adaptors.convert_input_to_valuation_matrix(solve)(instance)
+    return convert_input_to_valuation_matrix(solve)(instance)
 
 
 if __name__ == "__main__":
