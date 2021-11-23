@@ -3,6 +3,11 @@
 ![Tox result](https://github.com/erelsgl/fairpy/workflows/tox/badge.svg)
 
 An open-source library of [fair division algorithms](https://en.wikipedia.org/wiki/Fair_division) in Python.
+Designed for three target audiences:
+
+* Laypeople, who want to use existing fair division algorithms for real-life problems.
+* Researchers, who develop new fair division algorithms and want to quickly implement them and compare to existing algorithms.
+* Students, who want to trace the execution of algorithms to understand how they work.
 
 ## Installation
 
@@ -18,13 +23,13 @@ To verify that everything was installed correctly, run one of the example progra
 
 ## Features and Examples
 
-1. [Various input formats](examples/input_formats.md), making it easy to use for both researchers and end-users.
+1. [Various input formats](examples/input_formats.md), to easily use by both researchers and end-users.
 
 1. [Various output formats](examples/output_formats.md).
 
-1. [Optional logging](examples/loggers.md), making it easy to learn and understand how the algorithms work.
+1. [Optional logging](examples/loggers.md), to learn and understand how the algorithms work.
 
-1. [Decorators for easier implementation of algorithm](examples/decorators.md).
+1. [Decorators](examples/decorators.md), to easily code new algorithms.
 
 1. [Item allocation algorithms](examples/items.md), for both divisible and indivisible items.
 

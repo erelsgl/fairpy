@@ -101,5 +101,11 @@ b gets { 100.0% of x, 100.0% of z} with value 110.
 ```
 
 
+## TODO
+Some decorators that can be useful for implementing new algorithms are:
+
+* Normalizing an instance.
+* Ordering an instance (useful for maximin-share approximation algorithms).
+
 ---
-Markdown generated automatically from [adaptors.py](adaptors.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2021-11-22.
+Markdown generated automatically from [decorators.py](decorators.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2021-11-23.

@@ -145,4 +145,4 @@ For more information see:
 * [List of item allocation algorithms for future work](../fairpy/items/README-future.md).
 
 ---
-Markdown generated automatically from [items.py](items.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2021-11-22.
+Markdown generated automatically from [items.py](items.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2021-11-23.

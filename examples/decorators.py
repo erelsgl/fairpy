@@ -43,3 +43,8 @@ input_dict_of_dicts = {"a": {"x":11,"y":22,"z":33}, "b": {"x":44,"y":55,"z":66}}
 print(dummy_matrix_matrix_algorithm(input_dict_of_dicts, first_agent=0))
 print(dummy_matrix_matrix_algorithm(input_dict_of_dicts, first_agent=1))
 
+#' ## TODO
+#' Some decorators that can be useful for implementing new algorithms are:
+#'
+#' * Normalizing an instance.
+#' * Ordering an instance (useful for maximin-share approximation algorithms).
