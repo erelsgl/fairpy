@@ -30,8 +30,25 @@ logger = logging.getLogger(__name__)
 
 def initial_assignment_alfa_MSS(agents: List[AdditiveAgent], alfa:float):
     """
+<<<<<<< HEAD
+    Trying to alloctaion agent according to their ALFA-MMS by initial division.
+    :param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param alfa: parameter for how much to approximate MMS allocation
+    :return allocation: alloctaion agent.
+    :return agent: array of unassigned value.
+
+    allocation for one agent, one object
+    >>> a = AdditiveAgent({"x": 2}, name="Alice")
+    >>> agents=[a]
+    >>> print(alfa_MMS_allocation(agents,0.75))
+    Alice gets {x} with value 2.
+    <BLANKLINE>
+=======
+>>>>>>> 74a19a8ac1c9ee548f6ca8d752ff4991c974e724
     """
-    return agents, Allocation # TODO- check if need to return agants
+    allocation=Allocation(agents=agents, bundles =  {"Alice":{"x"}})
+    agent = [AdditiveAgent({"x": 1, "y": 2}, name="Alice")];
+    return allocation, agent 
 
 
 
@@ -39,11 +56,20 @@ def initial_assignment_alfa_MSS(agents: List[AdditiveAgent], alfa:float):
 
 def bag_filling_algorithm_alfa_MMS(agents: List[AdditiveAgent], alfa:float) -> Allocation:
     """
+    The algorithm allocates the remaining objects into the remaining agents so that each received at least α from his MMS.
+    :param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param alfa: parameter for how much to approximate MMS allocation
+    :return allocation: alloctaion agent.
 
-    >>> logger.setLevel(logging.WARNING)
-
+    >>> a = AdditiveAgent({"x": 2}, name="Alice")
+    >>> agents=[a]
+    >>> print(alfa_MMS_allocation(agents,0.75))
+    Alice gets {x} with value 2.
+    <BLANKLINE>
     """
-    return agents, Allocation()
+
+    allocation = Allocation(agents=agents, bundles =  {"Alice":{"x"}})
+    return allocation
 
 
 ##### algo 1
@@ -52,8 +78,7 @@ def alfa_MMS_allocation(agents: List[AdditiveAgent], alfa:float) :
     Find alfa_MMS_allocation for the given agents and valuations.
     :param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
     :param alfa: parameter for how much to approximate MMS allocation
-
-    :return allocation_matrix: ---
+    :return allocation: Alloctaion agent.
 
     allocation for one agent, one object
     >>> a = AdditiveAgent({"x": 2}, name="Alice")
@@ -74,8 +99,8 @@ def alfa_MMS_allocation(agents: List[AdditiveAgent], alfa:float) :
     <BLANKLINE>
     """
  
-    a=Allocation(agents=agents, bundles =  {"Alice":{"x"}})
-    return a
+    allocation = Allocation(agents=agents, bundles =  {"Alice":{"x"}})
+    return allocation
 
 ##### Algo 5
 ##MMS <=1 for all agents, all  
@@ -107,11 +132,14 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent], alfa:float) :
 ##### algo 7
 def agents_conversion_to_ordered_instance(agents: List[AdditiveAgent]) :
     """
+    The function sorted the list of additive agents such that their valuations for objects are unordered will become ordered.
+    :param agents: A list of additive agents such that their valuations for objects are unordered.
+    :return agents_sorted: A list of additive agents such that their valuations for objects are in ascending order.
 
 
     """
 
-    return agents #sorted
+    return agents_sorted #sorted
 
     
 ##### algo 8
