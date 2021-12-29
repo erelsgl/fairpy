@@ -3,7 +3,7 @@
 """ 
 Find an approximate MMS allocation.
 Based on:
-
+1
 Stephen J. Willson
 ["Fair Division Using Linear Programming"](https://swillson.public.iastate.edu/FairDivisionUsingLPUnpublished6.pdf)
 * Part 6, pages 20--27.
