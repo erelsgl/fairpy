@@ -22,6 +22,7 @@ from fairpy.agents import AdditiveAgent
 from typing import Any, List
 
 import logging
+import copy
 logger = logging.getLogger(__name__)
 
 
@@ -29,7 +30,6 @@ logger = logging.getLogger(__name__)
 
 def initial_assignment_alfa_MSS(agents: List[AdditiveAgent], alfa:float):
     """
-  
     """
     return agents, Allocation # TODO- check if need to return agants
 
@@ -39,13 +39,9 @@ def initial_assignment_alfa_MSS(agents: List[AdditiveAgent], alfa:float):
 
 def bag_filling_algorithm_alfa_MMS(agents: List[AdditiveAgent], alfa:float) -> Allocation:
     """
-    Find the leximin-optimal (aka Egalitarian) allocation.
-    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
-    :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
-    The allocation should maximize the leximin vector of utilities.
     >>> logger.setLevel(logging.WARNING)
-    
+
     """
     return agents, Allocation()
 
@@ -60,24 +56,31 @@ def alfa_MMS_allocation(agents: List[AdditiveAgent], alfa:float) :
     :return allocation_matrix: ---
 
     allocation for one agent, one object
-    >>> a = AdditiveAgent({"x": 2}, name="a")  # one agent with one item
-    >>> print(a)
+    >>> a = AdditiveAgent({"x": 2}, name="Alice")
     >>> agents=[a]
     >>> print(alfa_MMS_allocation(agents,0.75))
-    a gets {x} with value 2.
-    >>> print(agents[0].all_items())
-    >>> print(agents==[])
-    True
+    Alice gets {x} with value 2.
+    <BLANKLINE>
+    >>> b = AdditiveAgent({"x": 1, "y": 2}, name="Blice")
+    >>> agents=[b]
+    >>> print(alfa_MMS_allocation(agents,0.75))
+    Blice gets {x,y} with value 3.
+    <BLANKLINE>
+    >>> a = AdditiveAgent({"x": 1, "y": 2}, name="Alice") ### TODO chack
+    >>> agents=[a, b]
+    >>> print(alfa_MMS_allocation(agents,1))
+    Alice gets {x} with value 1.
+    Blice gets {y} with value 2.
+    <BLANKLINE>
     """
  
-
-    return Allocation(agents={"a"},bundles={{"a":{"x"}}})
+    a=Allocation(agents=agents, bundles =  {"Alice":{"x"}})
+    return a
 
 ##### Algo 5
 ##MMS <=1 for all agents, all  
 def fixed_assignment(agents: List[AdditiveAgent], alfa:float):
     """
-    
     """
     return agents, Allocation # TODO- check if need to return agants
 
@@ -86,7 +89,6 @@ def fixed_assignment(agents: List[AdditiveAgent], alfa:float):
 ##### Algo 6
 def tentative_assignment(agents: List[AdditiveAgent], alfa:float):
     """
-    
     """
     return agents, Allocation # TODO- check if need to return agants
 
@@ -96,13 +98,7 @@ def tentative_assignment(agents: List[AdditiveAgent], alfa:float):
 ##### algo 4
 def three_quarters_MMS_allocation(agents: List[AdditiveAgent], alfa:float) :
     """
-    Find the leximin-optimal (aka Egalitarian) allocation among families.
-    :param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
-    :param families: a list of lists. Each list represents a family and contains the indices of the agents in the family.
 
-    :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
-    The allocation should maximize the leximin vector of utilities.
-    
 
     """
 
@@ -111,13 +107,7 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent], alfa:float) :
 ##### algo 7
 def agents_conversion_to_ordered_instance(agents: List[AdditiveAgent]) :
     """
-    Find the leximin-optimal (aka Egalitarian) allocation among families.
-    :param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
-    :param families: a list of lists. Each list represents a family and contains the indices of the agents in the family.
 
-    :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
-    The allocation should maximize the leximin vector of utilities.
-    
 
     """
 
@@ -125,15 +115,26 @@ def agents_conversion_to_ordered_instance(agents: List[AdditiveAgent]) :
 
     
 ##### algo 8
-def get_alfa_MMS_allocation_to_unordered_instance(agents_unordered: List[AdditiveAgent],agents_orders:List[AdditiveAgent],ordered_allocation:Allocation) :
+def get_alfa_MMS_allocation_to_unordered_instance(agents_unordered: List[AdditiveAgent],agents_ordered:List[AdditiveAgent],ordered_allocation:Allocation) :
     """
-    Find the leximin-optimal (aka Egalitarian) allocation among families.
-    :param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
-    :param families: a list of lists. Each list represents a family and contains the indices of the agents in the family.
+    Get the MMS allocation for agents unordered valuations.
+    :param agents_unordered: Unordered valuations agents.
+    :param agents_ordered: Ordered valuations agents.
+    :param ordered_allocation: MMS allocation for ordered valuations agents.
+    :return allocation_matrix: ---
 
-    :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
-    The allocation should maximize the leximin vector of utilities.
-    
+    allocation for one agent, one object
+    >>> a = AdditiveAgent({"x": 2}, name="Alice")
+    >>> agents=[a]
+    >>> agents_ordered=agents_conversion_to_ordered_instance(agents)
+    >>> temp=copy.deepcopy(agents_ordered)
+    >>> ordered_alloc = alfa_MMS_allocation(temp,0.5)
+    >>> print(get_alfa_MMS_allocation_to_unordered_instance(agents, agents_ordered, ordered_alloc))
+    Alice gets {x} with value 2.
+    <BLANKLINE>
+
+
+
 
     """
 
