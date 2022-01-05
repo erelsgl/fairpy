@@ -414,14 +414,14 @@ def get_alfa_MMS_allocation_to_unordered_instance(agents_unordered: List[Additiv
 
 if __name__ == '__main__':
     import doctest
-    # (failures, tests) = doctest.testmod(report=True)
-    # print("{} failures, {} tests".format(failures, tests))
+    (failures, tests) = doctest.testmod(report=True)
+    print("{} failures, {} tests".format(failures, tests))
     #how to run specific function
     # doctest.run_docstring_examples(initial_assignment_alfa_MSS, globals())
     # doctest.run_docstring_examples(bag_filling_algorithm_alfa_MMS, globals())
     # doctest.run_docstring_examples(alfa_MMS_allocation, globals())
     # doctest.run_docstring_examples(fixed_assignment, globals())
     # doctest.run_docstring_examples(tentative_assignment, globals())
-    doctest.run_docstring_examples(three_quarters_MMS_allocation, globals())
+    # doctest.run_docstring_examples(three_quarters_MMS_allocation, globals())
     # doctest.run_docstring_examples(agents_conversion_to_ordered_instance, globals())
     # doctest.run_docstring_examples(get_alfa_MMS_allocation_to_unordered_instance, globals())
