@@ -359,7 +359,7 @@ def get_alfa_MMS_allocation_to_unordered_instance(agents_unordered: List[Additiv
     :param agents_unordered: Unordered valuations agents.
     :param agents_ordered: Ordered valuations agents.
     :param ordered_allocation: MMS allocation for ordered valuations agents.
-    :return allocation_matrix: ---
+    :return allocation: return the real allocation (the allocation for the unordered items)
     >>> ### allocation for 2 agents 3 objects
     >>> a = AdditiveAgent({"x1": 3, "x2": 10, "x3": 1}, name="A")
     >>> b = AdditiveAgent({"x1": 10, "x2": 10, "x3": 10}, name="B")
