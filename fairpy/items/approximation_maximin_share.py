@@ -365,44 +365,32 @@ def get_alfa_MMS_allocation_to_unordered_instance(agents_unordered: List[Additiv
     >>> b = AdditiveAgent({"x1": 10, "x2": 10, "x3": 10}, name="B")
     >>> agents=[a,b]
     >>> agents_ordered=agents_conversion_to_ordered_instance(agents)
-    >>> ordered_alloc_alfa = alfa_MMS_allocation(agents_ordered,0.75,[4,10])
-    >>> ordered_alloc_three_qurters = three_quarters_MMS_allocation(agents_ordered)    
-    >>> a1 = get_alfa_MMS_allocation_to_unordered_instance(agents, agents_ordered, ordered_alloc_alfa)
-    >>> print(a1)
+    >>> ordered_alloc= Allocation(agents=agents_ordered, bundles={"A": {"x1"}, "B": {"x2"}})
+    >>> real_alloc = get_alfa_MMS_allocation_to_unordered_instance(agents, agents_ordered, ordered_alloc)
+    >>> print(real_alloc)
     A gets {x2} with value 10.
     B gets {x1} with value 10.
     <BLANKLINE>
-    >>> a1 = get_alfa_MMS_allocation_to_unordered_instance(agents, agents_ordered, ordered_alloc_three_qurters)
-    >>> print(a1)
-    A gets {x2} with value 10.
-    B gets {x1} with value 10.
-    <BLANKLINE>
+
     >>> ### allocation for 1 agent, 1 object
     >>> a = AdditiveAgent({"x": 2}, name="Alice")
     >>> agents=[a]
     >>> agents_ordered=agents_conversion_to_ordered_instance(agents)
-    >>> ordered_alloc_alfa = alfa_MMS_allocation(agents_ordered,0.5,[2])
-    >>> ordered_alloc_three_quarters = three_quarters_MMS_allocation(agents_ordered)
-    >>> a1 = get_alfa_MMS_allocation_to_unordered_instance(agents, agents_ordered, ordered_alloc_alfa)
-    >>> a2 = get_alfa_MMS_allocation_to_unordered_instance(agents, agents_ordered, ordered_alloc_three_quarters)
-    >>> print(a1,a2)
-    Alice gets {x} with value 2. Alice gets {x} with value 2.
+    >>> ordered_alloc= Allocation(agents=agents_ordered, bundles={"Alice": {"x"}})
+    >>> real_alloc = get_alfa_MMS_allocation_to_unordered_instance(agents, agents_ordered, ordered_alloc)
+    >>> print(real_alloc)
+    Alice gets {x} with value 2.
+    <BLANKLINE>
+    
     >>> ### allocation for 3 agents 8 objects
     >>> a = AdditiveAgent({"x1": 2, "x2": 7, "x3": 10,"x4": 8, "x5": 3, "x6": 4,"x7": 7, "x8": 11}, name="A")
     >>> b = AdditiveAgent({"x1": 8, "x2": 7, "x3": 5,"x4": 3, "x5": 10, "x6": 2,"x7": 1, "x8": 4}, name="B")
     >>> c = AdditiveAgent({"x1": 1, "x2": 2, "x3": 3,"x4": 4, "x5": 5, "x6": 6,"x7": 7, "x8": 8}, name="C")
     >>> agents=[a,b,c]
     >>> agents_ordered=agents_conversion_to_ordered_instance(agents)
-    >>> ordered_alloc_alfa = alfa_MMS_allocation(agents_ordered,0.75,[17,13,12])
-    >>> ordered_alloc_three_qurters = three_quarters_MMS_allocation(agents_ordered)    
-    >>> a1 = get_alfa_MMS_allocation_to_unordered_instance(agents, agents_ordered, ordered_alloc_alfa)
-    >>> print(a1)
-    A gets {x3, x4} with value 18.
-    B gets {x5} with value 10.
-    C gets {x7,x8} with value 15.
-    <BLANKLINE>
-    >>> a1 = get_alfa_MMS_allocation_to_unordered_instance(agents, agents_ordered, ordered_alloc_three_qurters)
-    >>> print(a1)
+    >>> ordered_alloc= Allocation(agents=agents_ordered, bundles={"A": {"x3","x4"},"B":{"x1"},"C":{"x2","x5"}})
+    >>> real_alloc =  get_alfa_MMS_allocation_to_unordered_instance(agents, agents_ordered, ordered_alloc)
+    >>> print(real_alloc)
     A gets {x3, x4} with value 18.
     B gets {x5} with value 10.
     C gets {x7,x8} with value 15.
@@ -414,8 +402,8 @@ def get_alfa_MMS_allocation_to_unordered_instance(agents_unordered: List[Additiv
 
 if __name__ == '__main__':
     import doctest
-    (failures, tests) = doctest.testmod(report=True)
-    print("{} failures, {} tests".format(failures, tests))
+    # (failures, tests) = doctest.testmod(report=True)
+    # print("{} failures, {} tests".format(failures, tests))
     #how to run specific function
     # doctest.run_docstring_examples(initial_assignment_alfa_MSS, globals())
     # doctest.run_docstring_examples(bag_filling_algorithm_alfa_MMS, globals())
@@ -424,4 +412,4 @@ if __name__ == '__main__':
     # doctest.run_docstring_examples(tentative_assignment, globals())
     # doctest.run_docstring_examples(three_quarters_MMS_allocation, globals())
     # doctest.run_docstring_examples(agents_conversion_to_ordered_instance, globals())
-    # doctest.run_docstring_examples(get_alfa_MMS_allocation_to_unordered_instance, globals())
+    doctest.run_docstring_examples(get_alfa_MMS_allocation_to_unordered_instance, globals())
