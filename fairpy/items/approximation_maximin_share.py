@@ -381,7 +381,7 @@ def get_alfa_MMS_allocation_to_unordered_instance(agents_unordered: List[Additiv
     >>> print(real_alloc)
     Alice gets {x} with value 2.
     <BLANKLINE>
-    
+
     >>> ### allocation for 3 agents 8 objects
     >>> a = AdditiveAgent({"x1": 2, "x2": 7, "x3": 10,"x4": 8, "x5": 3, "x6": 4,"x7": 7, "x8": 11}, name="A")
     >>> b = AdditiveAgent({"x1": 8, "x2": 7, "x3": 5,"x4": 3, "x5": 10, "x6": 2,"x7": 1, "x8": 4}, name="B")
@@ -402,9 +402,9 @@ def get_alfa_MMS_allocation_to_unordered_instance(agents_unordered: List[Additiv
 
 if __name__ == '__main__':
     import doctest
-    # (failures, tests) = doctest.testmod(report=True)
-    # print("{} failures, {} tests".format(failures, tests))
-    #how to run specific function
+    (failures, tests) = doctest.testmod(report=True)
+    print("{} failures, {} tests".format(failures, tests))
+    # how to run specific function
     # doctest.run_docstring_examples(initial_assignment_alfa_MSS, globals())
     # doctest.run_docstring_examples(bag_filling_algorithm_alfa_MMS, globals())
     # doctest.run_docstring_examples(alfa_MMS_allocation, globals())
@@ -412,4 +412,4 @@ if __name__ == '__main__':
     # doctest.run_docstring_examples(tentative_assignment, globals())
     # doctest.run_docstring_examples(three_quarters_MMS_allocation, globals())
     # doctest.run_docstring_examples(agents_conversion_to_ordered_instance, globals())
-    doctest.run_docstring_examples(get_alfa_MMS_allocation_to_unordered_instance, globals())
+    # doctest.run_docstring_examples(get_alfa_MMS_allocation_to_unordered_instance, globals())
