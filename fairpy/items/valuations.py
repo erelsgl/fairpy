@@ -736,26 +736,39 @@ class ValuationMatrix:
 
     def total_values(self) -> np.ndarray:
         """
-        Return a 1-dimensional array in which elemenet i is the total value of agent i for all items.
+        Returns a 1-dimensional array in which elemenet i is the total value of agent i for all items.
         """
-        return np.sum(self._v, axis=1, keepdims=True)
+        return np.sum(self._v, axis=1, keepdims=False)
 
-    def normalize(self) -> int:
+    def normalize(self) -> float:
         """
         Normalize valuation matrix so that each agent has equal total value of all items.
-        In case of integer values they remain integer to avoid floating point mistakes.
-
+        In case of integer values they remain integer to avoid floating point inaccuracies.
         :return the common value after normalization.
+
+        >>> v = ValuationMatrix([[5., 12., 3],[30, 13, 7]])
+        >>> v.normalize()
+        1
+        >>> v
+        [[0.25 0.6  0.15]
+         [0.6  0.26 0.14]]
+        >>> v = ValuationMatrix([[5, 12, 3],[20, 2, 8]])
+        >>> v.normalize()
+        60
+        >>> v
+        [[15 36  9]
+         [40  4 16]]
         """
         total_values = self.total_values()
-
         if issubclass(self._v.dtype.type, np.integer):
-            total_value = np.lcm.reduce(total_values)
-            self._v *= total_value // total_values
-            return total_value
-
-        self._v /= total_values
-        return 1
+            new_total_value = np.lcm.reduce(total_values)
+            for i in self.agents():
+                self._v[i] *= (new_total_value // total_values[i])
+            return new_total_value
+        else:
+            for i in self.agents():
+                self._v[i] /= total_values[i]
+            return 1
 
     def verify_normalized(self) -> int:
         """
