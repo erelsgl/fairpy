@@ -8,7 +8,6 @@ Since:  2021-06
 """
 
 from fairpy.items.leximin import *
-import numpy as np
 
 import sys
 logger.addHandler(logging.StreamHandler(sys.stdout))
@@ -18,6 +17,9 @@ from fairpy import solve
 solve.logger.addHandler(logging.StreamHandler(sys.stdout))
 solve.logger.setLevel(logging.INFO)
 
+from fairpy.items import leximin_generic
+leximin_generic.logger.addHandler(logging.StreamHandler(sys.stdout))
+leximin_generic.logger.setLevel(logging.INFO)
 
 def show(title, v):
     print("\n", "###", title)
@@ -26,8 +28,14 @@ def show(title, v):
     print("allocation = \n",z, "\nprofile = ", utility_profile)
 
   
-show("3 agents, competitive", [[3,2,1],[1,2,3],[2,2,2]])
-show("3 agents, non-competitive", [[3,0,0],[0,4,0],[0,0,5]])
-show("3 agents, non-competitive", [[3,0,0],[0,3,0],[0,0,5]])
-show("4 agents, partially-competitive", [[4,0,0],[0,3,0],[5,5,10],[5,5,10]])
-show("6 agents, partially-competitive", [[3,0,0],[0,8,0],[0,8,0],[5,5,15],[5,5,15],[5,5,15]])
+# show("3 agents, competitive", [[3,2,1],[1,2,3],[2,2,2]])
+# show("3 agents, non-competitive", [[3,0,0],[0,4,0],[0,0,5]])
+# show("3 agents, non-competitive", [[3,0,0],[0,3,0],[0,0,5]])
+# show("4 agents, partially-competitive", [[4,0,0],[0,3,0],[5,5,10],[5,5,10]])
+# show("6 agents, partially-competitive", [[3,0,0],[0,8,0],[0,8,0],[5,5,15],[5,5,15],[5,5,15]])
+
+
+show("2 parties", [
+    [1/3, 0, 1/3, 1/3],
+    [1, 1, 1, 0],
+])

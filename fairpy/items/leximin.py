@@ -77,6 +77,8 @@ def leximin_optimal_allocation(instance:Any) -> Allocation:
     >>> a = leximin_optimal_allocation(v)
     >>> print(a.round(3).utility_profile())
     [3. 3. 5. 5.]
+    >>> v = [[1/3, 0, 1/3, 1/3],[1, 1, 1, 0]]
+    >>> a = leximin_optimal_allocation(v)
     >>> logger.setLevel(logging.WARNING)
     """
     v = ValuationMatrix(instance)

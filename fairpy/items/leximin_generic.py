@@ -38,26 +38,33 @@ def leximin_solve(objectives:list, constraints:list, **kwargs):
     EXAMPLE: resource allocation. There are three resources to allocate among two people.
     Alice values the resources at 5, 3, 0.
     Bob values the resources at 2, 4, 9.
-    The variables a[0], a[1], a[2] denote the fraction of each resource given to Alice.
-    >>> a = cvxpy.Variable(3)
+    The variables a[0], a[1], a[2], a[3] denote the fraction of each resource given to Alice.
+    >>> a = cvxpy.Variable(4)
+    >>> feasible_allocation = [x>=0 for x in a] + [x<=1 for x in a]
 
     >>> utility_Alice = a[0]*5 + a[1]*3 + a[2]*0
     >>> utility_Bob   = (1-a[0])*2 + (1-a[1])*4 + (1-a[2])*9
-    >>> feasible_allocation = [x>=0 for x in a] + [x<=1 for x in a]
     >>> leximin_solve(objectives=[utility_Alice, utility_Bob],  constraints=feasible_allocation)
     >>> round(utility_Alice.value), round(utility_Bob.value)
     (8, 9)
     >>> [round(x.value) for x in a]  # Alice gets all of resources 0 and 1; Bob gets all of resource 2.
-    [1, 1, 0]
+    [1, 1, 0, 0]
 
     >>> utility_Alice = -5*a[0]  -3*a[1] -0*a[2]
     >>> utility_Bob   = -2*(1-a[0])  -4*(1-a[1])  -9*(1-a[2])
-    >>> feasible_allocation = [x>=0 for x in a] + [x<=1 for x in a]
+    >>> leximin_solve(objectives=[utility_Alice, utility_Bob],  constraints=feasible_allocation)
+    >>> round(utility_Alice.value,2), round(utility_Bob.value,2)
+    (-2.57, -2.57)
+    >>> [round(x.value,3) for x in a]
+    [-0.0, 0.857, 1.0, -0.0]
+
+    >>> utility_Alice = (1/3)*a[0]  + 0*a[1] + (1/3)*a[2] + (1/3)*a[3]
+    >>> utility_Bob   = 1*(1-a[0]) + 1*(1-a[1]) + 1*(1-a[2]) + 0*(1-a[3])
     >>> leximin_solve(objectives=[utility_Alice, utility_Bob],  constraints=feasible_allocation)
     >>> round(utility_Alice.value,3), round(utility_Bob.value,3)
-    (-2.571, -2.571)
+    (1.0, 1.0)
     >>> [round(x.value,3) for x in a]
-    [-0.0, 0.857, 1.0]
+    [1.0, -0.0, 1.0, 1.0]
     """
     num_of_objectives = len(objectives)
 
@@ -67,7 +74,6 @@ def leximin_solve(objectives:list, constraints:list, **kwargs):
     # Initially, all objectives are free, and no objective is saturated:
     free_objectives = list(range(num_of_objectives))
     map_saturated_objective_to_saturated_value = num_of_objectives * [None]
-    inequalities_for_saturated_objectives = []
 
     while True:
         logger.info("Saturated values: %s.", map_saturated_objective_to_saturated_value)
@@ -76,6 +82,7 @@ def leximin_solve(objectives:list, constraints:list, **kwargs):
             objectives[i] >= minimum_value_for_free_objectives
             for i in free_objectives
         ]
+        inequalities_for_saturated_objectives = [(objectives[i] >= value) for i,value in enumerate(map_saturated_objective_to_saturated_value) if value is not None]
         max_min_value_for_free_objectives = maximize(minimum_value_for_free_objectives, constraints + inequalities_for_saturated_objectives + inequalities_for_free_objectives, **kwargs)
 
         values_in_max_min_allocation = [objective.value for objective in objectives]
@@ -87,17 +94,17 @@ def leximin_solve(objectives:list, constraints:list, **kwargs):
             if values_in_max_min_allocation[ifree] > max_min_value_upper_threshold:
                 logger.info("  Max value of objective #%d is %g, which is above %g, so objective remains free.", ifree, values_in_max_min_allocation[ifree], max_min_value_upper_threshold)
                 continue
-            new_inequalities_for_free_objectives = [
+            inequalities_for_other_free_objectives = [
                 objectives[i] >= max_min_value_lower_threshold
                 for i in free_objectives if i!=ifree
             ]
-            max_value_for_ifree = maximize(objectives[ifree], constraints + inequalities_for_saturated_objectives + new_inequalities_for_free_objectives, **kwargs)
+            max_value_for_ifree = maximize(objectives[ifree], constraints + inequalities_for_saturated_objectives + inequalities_for_other_free_objectives, **kwargs)
             if max_value_for_ifree > max_min_value_upper_threshold:
                 logger.info("  Max value of objective #%d is %g, which is above %g, so objective remains free.", ifree, max_value_for_ifree, max_min_value_upper_threshold)
                 continue
-            logger.info("  Max value of objective #%d is %g, which is below %g, so objective becomes saturated.", ifree, max_value_for_ifree, max_min_value_upper_threshold)
-            map_saturated_objective_to_saturated_value[ifree] = max_min_value_for_free_objectives
-            inequalities_for_saturated_objectives.append(objectives[ifree] >= max_min_value_for_free_objectives)
+            else:
+                logger.info("  Max value of objective #%d is %g, which is below %g, so objective becomes saturated.", ifree, max_value_for_ifree, max_min_value_upper_threshold)
+                map_saturated_objective_to_saturated_value[ifree] = max_min_value_for_free_objectives
 
         new_free_agents = [i for i in free_objectives if map_saturated_objective_to_saturated_value[i] is None]
         if len(new_free_agents)==len(free_objectives):
