@@ -42,7 +42,7 @@ def insert_agent_into_allocation(agent: int, item: int, allocated_bundles: List[
 
 
 def divide(v: ValuationMatrix) -> List[List[int]]:
-    """"
+    """ "
     In stage 1 the divider agent having index 0 partitions the goods into bundles.
     >>> divide(ValuationMatrix([[0.5, 0, 0.5], [1/3, 1/3, 1/3]]))
     [[1, 0], [2]]
@@ -58,14 +58,15 @@ def divide(v: ValuationMatrix) -> List[List[int]]:
     for bundle_index in v.agents():
         bundle_value = 0
         item_index = divided_items_count
-        while item_index < v.num_of_objects and (
-                bundle_value + v[0, item_order[item_index]]) * (
-                v.num_of_agents - bundle_index) + divided_value <= total_value:
+        while (
+            item_index < v.num_of_objects
+            and (bundle_value + v[0, item_order[item_index]]) * (v.num_of_agents - bundle_index) + divided_value
+            <= total_value
+        ):
             bundle_value += v[0, item_order[item_index]]
             item_index += 1
 
-        bundles.append(
-            list(map(lambda t: item_order[t], range(divided_items_count, item_index))))
+        bundles.append(list(map(lambda t: item_order[t], range(divided_items_count, item_index))))
         divided_items_count = item_index
         divided_value += bundle_value
     return bundles
@@ -84,8 +85,12 @@ class Decomposition:
         self.bundles = []
 
     def __repr__(self):
-        return "\n".join([f"sub-problem {i}:\n\tagents : {list(agents)}\n\tgoods : {bundle}"
-                          for i, (agents, bundle) in enumerate(zip(self.agents, self.bundles))])
+        return "\n".join(
+            [
+                f"sub-problem {i}:\n\tagents : {list(agents)}\n\tgoods : {bundle}"
+                for i, (agents, bundle) in enumerate(zip(self.agents, self.bundles))
+            ]
+        )
 
     def num_of_agents(self):
         """
@@ -128,13 +133,18 @@ class Decomposition:
             sub_problem_graph.add_node(i, agents=self.agents[i - 1], bundle=self.bundles[i - 1])
         sub_problem_graph.add_node(t, agents=set(), bundle=bundle)
 
-        sub_problem_agents = nx.get_node_attributes(sub_problem_graph, 'agents')
-        sub_problem_bundle = nx.get_node_attributes(sub_problem_graph, 'bundle')
+        sub_problem_agents = nx.get_node_attributes(sub_problem_graph, "agents")
+        sub_problem_bundle = nx.get_node_attributes(sub_problem_graph, "bundle")
         for node_from in range(t):
             for node_to in range(1, t + 1):
-                agent = next(filter(lambda a: self.v.agent_value_for_bundle(a, sub_problem_bundle[
-                    node_to]) * self.v.num_of_agents >= self.total_value * max(1, len(sub_problem_agents[node_to])),
-                                    sub_problem_agents[node_from]), None)
+                agent = next(
+                    filter(
+                        lambda a: self.v.agent_value_for_bundle(a, sub_problem_bundle[node_to]) * self.v.num_of_agents
+                        >= self.total_value * max(1, len(sub_problem_agents[node_to])),
+                        sub_problem_agents[node_from],
+                    ),
+                    None,
+                )
 
                 if agent is not None:
                     sub_problem_graph.add_edge(node_from, node_to, agent=agent)
@@ -168,8 +178,11 @@ class Decomposition:
         for node_to in reachable:
             for agent in sub_problem_agents[node_to]:
                 if self.v.num_of_agents * self.v.agent_value_for_bundle(agent, self.get_all_items() + bundle) <= t:
-                    logger.info("Case 2: agent's %d vertex is reachable from the candidate's in sub-problem graph"
-                                "and she prefers sharing last n-t bundles rather than first t", agent)
+                    logger.info(
+                        "Case 2: agent's %d vertex is reachable from the candidate's in sub-problem graph"
+                        "and she prefers sharing last n-t bundles rather than first t",
+                        agent,
+                    )
 
                     logger.info("Removing agent %d from decomposition", agent)
                     self.agents[node_to - 1].remove(agent)
@@ -188,7 +201,10 @@ class Decomposition:
 
         logger.info(
             "Case 3: bundle's t vertex is not reachable from candidate's and all reachable agents of decomposition "
-            "prefer first %d bundles rather than last %d", t, self.v.num_of_agents - t)
+            "prefer first %d bundles rather than last %d",
+            t,
+            self.v.num_of_agents - t,
+        )
         logger.info("Merging all sub-problems into one and adding candidate and bundle")
         self.agents = [self.get_all_agents().union({candidate})]
         self.bundles = [self.get_all_items() + bundle]
@@ -213,8 +229,7 @@ def solve(agents) -> List[List[int]]:
     if v.num_of_agents == 0 or v.num_of_objects == 0:
         return []
 
-    logger.info("Looking for PROPm allocation for %d agents and %d items", 
-        v.num_of_agents, v.num_of_objects)
+    logger.info("Looking for PROPm allocation for %d agents and %d items", v.num_of_agents, v.num_of_objects)
     logger.info("Solving a problem defined by valuation matrix\n %s", str(np.array(agents)))
 
     total_value = v.normalize()
@@ -222,8 +237,12 @@ def solve(agents) -> List[List[int]]:
     for agent in v.agents():
         for item in v.objects():
             if v[agent][item] * v.num_of_agents > total_value:
-                logger.info("Allocating item %d to agent %d as she values it as %f > 1/n", item, agent,
-                            v[agent][item] / total_value)
+                logger.info(
+                    "Allocating item %d to agent %d as she values it as %f > 1/n",
+                    item,
+                    agent,
+                    v[agent][item] / total_value,
+                )
 
                 allocation = solve(v.without_agent(agent).without_object(item))
                 insert_agent_into_allocation(agent, item, allocation)
@@ -240,10 +259,18 @@ def solve(agents) -> List[List[int]]:
         considered_items = sum(bundles[:t], [])
 
         candidates = list(
-            filter(lambda a: v.num_of_agents * v.agent_value_for_bundle(a, considered_items) > t * total_value,
-                   remaining_agents))
-        logger.info("There are %d remaining agents that prefer sharing first %d bundles rather than last %d: %s",
-                    len(candidates), str(candidates), t, v.num_of_agents - t)
+            filter(
+                lambda a: v.num_of_agents * v.agent_value_for_bundle(a, considered_items) > t * total_value,
+                remaining_agents,
+            )
+        )
+        logger.info(
+            "There are %s remaining agents that prefer sharing first %s bundles rather than last %s: %s",
+            len(candidates),
+            str(candidates),
+            t,
+            v.num_of_agents - t,
+        )
 
         while len(candidates) > 0 and decomposition.num_of_agents() < t:
             logger.info("Current decomposition:\n %s", str(decomposition))
@@ -251,9 +278,12 @@ def solve(agents) -> List[List[int]]:
             decomposition.update(candidates[0], bundles[t - 1])
 
             remaining_agents = set(range(1, v.num_of_agents)).difference(decomposition.get_all_agents())
-            candidates = list(filter(
-                lambda a: v.num_of_agents * v.agent_value_for_bundle(a, considered_items) > t * total_value,
-                remaining_agents))
+            candidates = list(
+                filter(
+                    lambda a: v.num_of_agents * v.agent_value_for_bundle(a, considered_items) > t * total_value,
+                    remaining_agents,
+                )
+            )
 
         if decomposition.num_of_agents() < t:
             decomposition.agents.append(remaining_agents)
@@ -315,5 +345,6 @@ if __name__ == "__main__":
     # logger.setLevel(logging.INFO)
 
     import doctest
+
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))

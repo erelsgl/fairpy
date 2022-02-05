@@ -17,17 +17,29 @@ Since:  2021-05
 """
 
 import cvxpy
-from fairpy import Allocation, AllocationToFamilies, map_agent_to_family, ValuationMatrix, Agent, AdditiveValuation, convert_input_to_valuation_matrix
-from fairpy.items.leximin_generic import leximin_solve
+from fairpy import (
+    Allocation,
+    AllocationToFamilies,
+    map_agent_to_family,
+    ValuationMatrix,
+    Agent,
+    AdditiveValuation,
+    convert_input_to_valuation_matrix,
+)
+from fairpy.solve import solve
+
+from cvxpy_leximin import Problem, Leximin
 from typing import Any
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
 ##### Utility functions for comparing leximin vectors
 
-def is_leximin_better(x:list, y:list):
+
+def is_leximin_better(x: list, y: list):
     """
     >>> is_leximin_better([6,2,4],[7,3,1])
     True
@@ -37,13 +49,14 @@ def is_leximin_better(x:list, y:list):
     return sorted(x) > sorted(y)
 
 
-TOLERANCE_FACTOR=1.001  # for comparing floating-point numbers
+TOLERANCE_FACTOR = 1.001  # for comparing floating-point numbers
 
 
 ##### Find a leximin-optimal allocation for individual agents
 
+
 @convert_input_to_valuation_matrix
-def leximin_optimal_allocation(instance:Any) -> Allocation:
+def leximin_optimal_allocation(instance: Any) -> Allocation:
     """
     Find the leximin-optimal (aka Egalitarian) allocation.
     :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
@@ -51,7 +64,7 @@ def leximin_optimal_allocation(instance:Any) -> Allocation:
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
     The allocation should maximize the leximin vector of utilities.
     >>> logger.setLevel(logging.WARNING)
-    >>> a = leximin_optimal_allocation([[5,0],[3,3]]).round(3)
+    >>> a = leximin_optimal_allocation([[5,0],[3,3]]).round(2)
     >>> a
     Agent #0 gets { 75.0% of 0} with value 3.75.
     Agent #1 gets { 25.0% of 0, 100.0% of 1} with value 3.75.
@@ -83,16 +96,11 @@ def leximin_optimal_allocation(instance:Any) -> Allocation:
     """
     v = ValuationMatrix(instance)
     allocation_vars = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
-    feasibility_constraints = [
-        sum([allocation_vars[i][o] for i in v.agents()])==1
-        for o in v.objects()
-    ]
-    positivity_constraints = [
-        allocation_vars[i][o] >= 0 for i in v.agents()
-        for o in v.objects()
-    ]
-    utilities = [sum([allocation_vars[i][o]*v[i][o] for o in v.objects()]) for i in v.agents()]
-    leximin_solve(objectives=utilities, constraints=feasibility_constraints+positivity_constraints)
+    feasibility_constraints = [sum([allocation_vars[i][o] for i in v.agents()]) == 1 for o in v.objects()]
+    positivity_constraints = [allocation_vars[i][o] >= 0 for i in v.agents() for o in v.objects()]
+    utilities = [sum([allocation_vars[i][o] * v[i][o] for o in v.objects()]) for i in v.agents()]
+    problem = Problem(Leximin(utilities), constraints=feasibility_constraints + positivity_constraints)
+    solve(problem)
     allocation_matrix = allocation_vars.value
     return allocation_matrix
 
@@ -100,7 +108,7 @@ def leximin_optimal_allocation(instance:Any) -> Allocation:
 ##### leximin for families
 
 
-def leximin_optimal_allocation_for_families(instance:Any, families:list) -> AllocationToFamilies:
+def leximin_optimal_allocation_for_families(instance: Any, families: list) -> AllocationToFamilies:
     """
     Find the leximin-optimal (aka Egalitarian) allocation among families.
     :param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
@@ -110,48 +118,47 @@ def leximin_optimal_allocation_for_families(instance:Any, families:list) -> Allo
     The allocation should maximize the leximin vector of utilities.
     >>> families = [ [0], [1] ]  # two singleton families
     >>> v = [[5,0],[3,3]]
-    >>> print(leximin_optimal_allocation_for_families(v,families).round(3).utility_profile())
+    >>> print(leximin_optimal_allocation_for_families(v,families).round(2).utility_profile())
     [3.75 3.75]
     >>> v = [[3,0],[5,5]]
-    >>> print(leximin_optimal_allocation_for_families(v,families).round(3).utility_profile())
+    >>> print(leximin_optimal_allocation_for_families(v,families).round(2).utility_profile())
     [3. 5.]
     >>> families = [ [0], [1], [2] ]  # three singleton families
     >>> v = [[3,0,0],[0,4,0],[5,5,5]]
-    >>> print(leximin_optimal_allocation_for_families(v,families).round(3).utility_profile())
+    >>> print(leximin_optimal_allocation_for_families(v,families).round(2).utility_profile())
     [3. 4. 5.]
-    >>> families = [ [0, 1], [2] ]  
-    >>> print(leximin_optimal_allocation_for_families(v,families).round(3).utility_profile())
+    >>> families = [ [0, 1], [2] ]
+    >>> print(leximin_optimal_allocation_for_families(v,families).round(2).utility_profile())
     [3. 4. 5.]
-    >>> families = [ [0], [1,2] ]  
-    >>> print(leximin_optimal_allocation_for_families(v,families).round(3).utility_profile())
+    >>> families = [ [0], [1,2] ]
+
+    >>> print(leximin_optimal_allocation_for_families(v,families).round(2).utility_profile())
     [ 3.  4. 10.]
     """
     v = ValuationMatrix(instance)
-    num_of_objects  = v.num_of_objects
-    num_of_agents   = v.num_of_agents
+    num_of_objects = v.num_of_objects
+    num_of_agents = v.num_of_agents
     num_of_families = len(families)
     agent_to_family = map_agent_to_family(families, num_of_agents)
-    logger.info("map_agent_to_family = %s",agent_to_family)
+    logger.info("map_agent_to_family = %s", agent_to_family)
     allocation_vars = cvxpy.Variable((num_of_families, num_of_objects))
     feasibility_constraints = [
-        sum([allocation_vars[f][o] for f in range(num_of_families)])==1
-        for o in range(num_of_objects)
+        sum([allocation_vars[f][o] for f in range(num_of_families)]) == 1 for o in range(num_of_objects)
     ]
-    positivity_constraints = [
-        allocation_vars[f][o] >= 0 for f in range(num_of_families)
-        for o in range(num_of_objects)
+    positivity_constraints = [allocation_vars[f][o] >= 0 for f in range(num_of_families) for o in range(num_of_objects)]
+    utilities = [
+        sum([allocation_vars[agent_to_family[i]][o] * v[i][o] for o in range(num_of_objects)])
+        for i in range(num_of_agents)
     ]
-    utilities = [sum([allocation_vars[agent_to_family[i]][o]*v[i][o] 
-        for o in range(num_of_objects)]) 
-        for i in range(num_of_agents)]
-    leximin_solve(objectives=utilities, constraints=feasibility_constraints+positivity_constraints)
+    problem = Problem(Leximin(utilities), constraints=feasibility_constraints + positivity_constraints)
+    solve(problem)
     allocation_matrix = allocation_vars.value
 
     return AllocationToFamilies(v, allocation_matrix, families)
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
+
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))

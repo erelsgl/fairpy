@@ -210,7 +210,7 @@ def maximin_share_partition__cvxpy(
         constraints += [parts_values[0] == fix_smallest_part_value]
 
 
-    solvers = [(cvxpy.SCIP, {}),(cvxpy.GLPK_MI, {})] 
+    solvers = [(cvxpy.SCIP, {}),(cvxpy.GLPK_MI, {}),(cvxpy.XPRESS, {})] 
         # GLPK_MI is very slow; 
         # ECOS_BB gives wrong results even on simple problems - not recommended;
         # CBC is not installed; 
