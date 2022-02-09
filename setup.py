@@ -11,7 +11,7 @@ print(f"\nREQUIRES = {REQUIRES}\n")
 
 setuptools.setup(
     name="fairpy",
-    # version is taken from setup.cfg, which takes it from cvxpy_leximin.__init__.py
+    # version is taken from setup.cfg, which takes it from fairpy.__init__.py
     packages=setuptools.find_packages(),
     install_requires=REQUIRES,
     author="Erel Segal-Halevi",
