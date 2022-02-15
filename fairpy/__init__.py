@@ -17,7 +17,6 @@ class items:
 	from fairpy.items.one_of_threehalves_mms import bidirectional_bag_filling
 	from fairpy.items.utilitarian_matching import utilitarian_matching
 	from fairpy.items.iterated_maximum_matching import iterated_maximum_matching
-	from fairpy.items.partitions import all_partitions, partitions_to_at_most_c_subsets, partitions_to_exactly_c_subsets
 	from fairpy.items.min_sharing import proportional_allocation_with_min_sharing, envyfree_allocation_with_min_sharing, maxproduct_allocation_with_min_sharing
 	from fairpy.items.bounded_sharing import proportional_allocation_with_bounded_sharing, efficient_envyfree_allocation_with_bounded_sharing
 	from fairpy.items.propm_allocation import propm_allocation

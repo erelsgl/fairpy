@@ -8,6 +8,7 @@ pytest
 cvxpy_base>=1.1.17
 cvxpy_leximin
 prtpy
+more_itertools
 dicttools @ git+git://github.com/trzemecki/dicttools.git
 cvxopt>=1.2
 osqp

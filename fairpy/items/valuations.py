@@ -23,7 +23,6 @@ from dicttools import stringify
 import math, itertools
 from fractions import Fraction
 
-from fairpy.items import partitions  # Works in Python 3.8
 from fairpy.bundles import FractionalBundle
 
 from typing import *
@@ -31,6 +30,7 @@ Item = Any
 Bundle = Set[Item]
 
 import prtpy
+from more_itertools import set_partitions
 
 
 class Valuation(ABC):
@@ -169,7 +169,7 @@ class Valuation(ABC):
         [1, 2, 3]
 
         """
-        for partition in partitions.partitions_to_exactly_c_subsets(c, self.desired_items_list):
+        for partition in set_partitions(self.desired_items_list, c):
             yield min([self.value(bundle) for bundle in partition])
 
 
