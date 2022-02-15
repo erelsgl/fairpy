@@ -1,17 +1,21 @@
 import pathlib
 import setuptools
 
+NAME = "fairpy"
+URL = "https://github.com/erelsgl/" + NAME
 HERE = pathlib.Path(__file__).parent
 print(f"\nHERE = {HERE.absolute()}\n")
 README = (HERE / "README.md").read_text()
 REQUIRES = (HERE / "requirements.txt").read_text().strip().split("\n")
 REQUIRES = [lin.strip() for lin in REQUIRES]
-print(f"\nREQUIRES = {REQUIRES}\n")
+print(f'\nVERSION = {(HERE / NAME / "VERSION").absolute()}\n')
+VERSION = (HERE / NAME / "VERSION").read_text().strip()
+# See https://packaging.python.org/en/latest/guides/single-sourcing-package-version/
 
 
 setuptools.setup(
-    name="fairpy",
-    # version is taken from setup.cfg, which takes it from fairpy.__init__.py
+    name=NAME,
+    version=VERSION,
     packages=setuptools.find_packages(),
     install_requires=REQUIRES,
     author="Erel Segal-Halevi",
@@ -20,11 +24,11 @@ setuptools.setup(
     keywords="fair division algorithms",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/erelsgl/fairpy",
+    url=URL,
     project_urls={
-        "Documentation": "https://github.com/erelsgl/fairpy",
-        "Bug Reports": "https://github.com/erelsgl/fairpy/issues",
-        "Source Code": "https://github.com/erelsgl/fairpy",
+        "Documentation": URL,
+        "Source Code": URL,
+        "Bug Reports": f"{URL}/issues",
     },
     python_requires=">=3.8",
     include_package_data=True,

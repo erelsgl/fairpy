@@ -15,7 +15,6 @@ from typing import List, Any, Dict
 import numpy as np
 from collections import defaultdict
 from collections.abc import Iterable
-from dicttools import stringify
 import fairpy
 from fairpy import ValuationMatrix
 from fairpy.bundles import *
@@ -117,8 +116,8 @@ class Allocation:
     Alice gets {x,z} with value 4.
     George gets {y} with value 5.
     <BLANKLINE>
-    >>> stringify(a.map_item_to_agents())
-    "{x:['Alice'], y:['George'], z:['Alice']}"
+    >>> a.map_item_to_agents()
+    {'x': ['Alice'], 'z': ['Alice'], 'y': ['George']}
 
     >>> ### A dict of agents and a partial dict of bundles:
     >>> a = Allocation(agents=agent_dict, bundles =  {"Alice":{"x","z"}})
@@ -126,8 +125,8 @@ class Allocation:
     Alice gets {x,z} with value 4.
     George gets {} with value 0.
     <BLANKLINE>
-    >>> stringify(a.map_item_to_agents())
-    "{x:['Alice'], z:['Alice']}"
+    >>> a.map_item_to_agents()
+    {'x': ['Alice'], 'z': ['Alice']}
 
     >>> ### A list of agents and a dict of bundles (Note there is no value information here):
     >>> a = Allocation(agents=["Alice","George"], bundles =  {"Alice":["x","z"], "George":["x", "y"]})
@@ -135,12 +134,12 @@ class Allocation:
     Alice gets {x,z} with value nan.
     George gets {x,y} with value nan.
     <BLANKLINE>
-    >>> stringify(a.map_item_to_agents())
-    "{x:['Alice', 'George'], y:['George'], z:['Alice']}"
-    >>> stringify(a.map_item_to_agents(sortkey=lambda name: -a.map_agent_index_to_name.index(name)))
-    "{x:['George', 'Alice'], y:['George'], z:['Alice']}"
-    >>> stringify(a.map_agent_to_bundle())
-    "{Alice:['x', 'z'], George:['x', 'y']}"
+    >>> a.map_item_to_agents()
+    {'x': ['Alice', 'George'], 'z': ['Alice'], 'y': ['George']}
+    >>> a.map_item_to_agents(sortkey=lambda name: -a.map_agent_index_to_name.index(name))
+    {'x': ['George', 'Alice'], 'z': ['Alice'], 'y': ['George']}
+    >>> a.map_agent_to_bundle()
+    {'Alice': ['x', 'z'], 'George': ['x', 'y']}
 
     >>> ### A valuation list-of-lists and a list of bundles:
     >>> a = Allocation(agents=[[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]], bundles=[[0,4],None,[1,2]])

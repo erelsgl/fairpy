@@ -30,6 +30,8 @@ from typing import *
 Item = Any
 Bundle = Set[Item]
 
+import prtpy
+
 
 class Valuation(ABC):
     """
@@ -130,32 +132,31 @@ class Valuation(ABC):
         Compute a 1-out-of-c MMS partition of the given items.
         :param c: number of bundles in the partition.
         :param items: A list of the items to divide.
-        :return: The partitioning the holds the MMS
+        :return: The partitioning that holds the MMS
         AUTHOR: Shai Aharon.
         SINCE: 2021-02
 
         >>> items = ['a','b' ,'c', 'd', 'e', 'f']
-        >>> item_values = {'a': 5, 'b': 5, 'c': 3, 'd': 4, 'e': 5, 'f': 5}
+        >>> item_values = {'a': 1, 'b': 2, 'c': 4, 'd': 8, 'e': 16, 'f': 32}
         >>> valuation = AdditiveValuation(item_values)
         >>> mms_part = valuation.partition_1_of_c_MMS(3,items)
         >>> [sorted(x) for x in mms_part]
-        [['b', 'c'], ['a', 'd'], ['e', 'f']]
+        [['a', 'b', 'c', 'd'], ['e'], ['f']]
         >>> mms_part = valuation.partition_1_of_c_MMS(4,items)
         >>> [sorted(x) for x in mms_part]
-        [['a'], ['b'], ['c', 'd'], ['e', 'f']]
+        [['f'], ['d'], ['e'], ['a', 'b', 'c']]
         >>> mms_part = valuation.partition_1_of_c_MMS(4,['a','b','c'])
         >>> [sorted(x) for x in mms_part]
-        []
+        [['a', 'c'], [], ['b'], []]
         """
-        maxi_min = -1
-        partition = []
-        # Iterate over all possible partitions
-        for tmp_partition in partitions.partitions_to_exactly_c_subsets(c, items):
-            min_val = min([self.value(bundle) for bundle in tmp_partition])
-            # Update maximin value
-            if maxi_min < min_val:
-                partition = tmp_partition
-                maxi_min = min_val
+        partition = prtpy.partition(
+            algorithm=prtpy.exact.dynamic_programming,  # integer_programming is much faster, but requires installation
+            numbins=c,
+            items=items,
+            map_item_to_value=lambda item: self.value(item),
+            objective=prtpy.obj.MaximizeSmallestSum,
+            outputtype=prtpy.out.Partition
+        )
         return [set(x) for x in partition]
 
 
@@ -791,3 +792,4 @@ if __name__ == "__main__":
     import doctest
     (failures,tests) = doctest.testmod(report=True)
     print ("{} failures, {} tests".format(failures,tests))
+

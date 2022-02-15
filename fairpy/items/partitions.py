@@ -107,25 +107,6 @@ def partitions_to_exactly_c_subsets(c: int, items: Collection[Any]) -> Generator
 #### COMPUTING A BALANCED PARTITION OF NUMBERS ####
 
 
-def greedy_partition(c:int, items:Collection[Number]) -> Partition:
-    """
-    Partition the numbers using the greedy number partitioning algorithm:
-       https://en.wikipedia.org/wiki/Greedy_number_partitioning
-    >>> greedy_partition(2, [1,2,3,4,5,9])
-    [[9, 3], [5, 4, 2, 1]]
-    >>> greedy_partition(3, [1,2,3,4,5,9])
-    [[9], [5, 2, 1], [4, 3]]
-    """
-    values = sorted(items, reverse=True)
-    parts = [ [] for i in range(c) ]
-    sums  = [ 0 for i in range(c)  ]
-    for v in values:
-        index_of_part_with_smallest_sum = min(range(c), key=lambda i:sums[i])
-        parts[index_of_part_with_smallest_sum].append(v)
-        sums [index_of_part_with_smallest_sum] += v
-    return parts
-
-
 def bidirectional_balanced_partition(c:int, items:Collection[Number]) -> Partition:
     """
     Partition the numbers using "bidirectional balanced partition" (ABCCBA order).

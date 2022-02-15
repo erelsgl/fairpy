@@ -1,8 +1,8 @@
-#!python3
-# From  https://stackoverflow.com/a/49375740/827927
-# import os, sys
-# sys.path.append(os.path.dirname(os.path.realpath(__file__)))
-__version__="0.1.0"
+import pathlib
+
+HERE = pathlib.Path(__file__).parent
+__version__ = (HERE / "VERSION").read_text().strip()
+
 
 from fairpy.items.valuations import *
 from fairpy.allocations import *
