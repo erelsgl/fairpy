@@ -124,7 +124,7 @@ def maximin_share_partition(c:int, valuation:list, items:Collection[Any]=None, n
     >>> maximin_share_partition(c=2, valuation=[10,20,40,1], copies=[2,1,1,0])
     ([[0, 0, 1], [2]], [40.0, 40.0], 40.0)
     >>> maximin_share_partition(c=3, valuation=[10,20,40,1], numerator=2)
-    ([[], [0, 1, 3], [2]], [0.0, 31.0, 40.0], 31.0)
+    ([[0, 3], [1], [2]], [11.0, 20.0, 40.0], 31.0)
     >>> #maximin_share_partition(c=3, valuation=[10,20,40,1], numerator=2, fix_smallest_part_value=0)
     """
     if len(valuation)==0:
@@ -140,7 +140,6 @@ def maximin_share_partition(c:int, valuation:list, items:Collection[Any]=None, n
         map_item_to_value=lambda item: valuation[item],
         objective=prtpy.obj.MaximizeKSmallestSums(numerator),
         outputtype=prtpy.out.PartitionAndSums,
-        solver=cvxpy.GLPK_MI,
         **kwargs
     )
 

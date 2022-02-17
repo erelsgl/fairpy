@@ -144,13 +144,11 @@ class Valuation(ABC):
         [['a', 'b', 'c', 'd'], ['e'], ['f']]
         >>> mms_part = valuation.partition_1_of_c_MMS(4,items)
         >>> [sorted(x) for x in mms_part]
-        [['f'], ['d'], ['e'], ['a', 'b', 'c']]
-        >>> mms_part = valuation.partition_1_of_c_MMS(4,['a','b','c'])
-        >>> [sorted(x) for x in mms_part]
-        [['a', 'c'], [], ['b'], []]
+        [['a', 'b', 'c'], ['d'], ['e'], ['f']]
+        >>> mms_part = valuation.partition_1_of_c_MMS(4,['a','b','c']) # just verify that there is no exception
         """
         partition = prtpy.partition(
-            algorithm=prtpy.exact.dynamic_programming,  # integer_programming is much faster, but requires installation
+            algorithm=prtpy.exact.integer_programming,
             numbins=c,
             items=items,
             map_item_to_value=lambda item: self.value(item),
