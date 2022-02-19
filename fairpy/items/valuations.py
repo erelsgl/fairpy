@@ -124,53 +124,6 @@ class Valuation(ABC):
             for sub_bundle in itertools.combinations(bundle, c)
         ])
 
-
-
-
-    def partition_1_of_c_MMS(self, c: int, items: list) -> List[Bundle]:
-        """
-        Compute a 1-out-of-c MMS partition of the given items.
-        :param c: number of bundles in the partition.
-        :param items: A list of the items to divide.
-        :return: The partitioning that holds the MMS
-        AUTHOR: Shai Aharon.
-        SINCE: 2021-02
-
-        >>> items = ['a','b' ,'c', 'd', 'e', 'f']
-        >>> item_values = {'a': 1, 'b': 2, 'c': 4, 'd': 8, 'e': 16, 'f': 32}
-        >>> valuation = AdditiveValuation(item_values)
-        >>> mms_part = valuation.partition_1_of_c_MMS(3,items)
-        >>> [sorted(x) for x in mms_part]
-        [['a', 'b', 'c', 'd'], ['e'], ['f']]
-        >>> mms_part = valuation.partition_1_of_c_MMS(4,items)
-        >>> [sorted(x) for x in mms_part]
-        [['a', 'b', 'c'], ['d'], ['e'], ['f']]
-        >>> mms_part = valuation.partition_1_of_c_MMS(4,['a','b','c']) # just verify that there is no exception
-        """
-        partition = prtpy.partition(
-            algorithm=prtpy.exact.integer_programming,
-            numbins=c,
-            items=items,
-            map_item_to_value=lambda item: self.value(item),
-            objective=prtpy.obj.MaximizeSmallestSum,
-            outputtype=prtpy.out.Partition
-        )
-        return [set(x) for x in partition]
-
-
-    def values_1_of_c_partitions(self, c:int=1):
-        """
-        Generates the minimum values in all partitions into c bundles.
-
-        >>> a = AdditiveValuation({"x": 1, "y": 2, "z": 4, "w":0})
-        >>> sorted(a.values_1_of_c_partitions(c=2))
-        [1, 2, 3]
-
-        """
-        for partition in set_partitions(self.desired_items_list, c):
-            yield min([self.value(bundle) for bundle in partition])
-
-
     def value_1_of_c_MMS(self, c:int=1)->int:
         """
         Calculates the value of the 1-out-of-c maximin-share ( https://en.wikipedia.org/wiki/Maximin-share )
@@ -182,14 +135,14 @@ class Valuation(ABC):
         1
         >>> a.value_1_of_c_MMS(c=3)
         0
-        >>> a = AdditiveValuation({"x": 1, "y": 2, "z": 4, "w":0})
-        >>> a.value_1_of_c_MMS(c=2)
-        3
         """
         if c > len(self.desired_items):
             return 0
         else:
-            return max(self.values_1_of_c_partitions(c))
+            return max(
+                min([self.value(bundle) for bundle in partition])
+                for partition in set_partitions(self.desired_items_list, c)
+            )
 
     def value_proportional_except_c(self, num_of_agents:int, c:int):
         """
@@ -353,11 +306,11 @@ class AdditiveValuation(Valuation):
     False
     >>> a.is_EFx({"x"}, [{"y"}])
     True
-    >>> a.value_1_of_c_MMS(c=4)
+    >>> int(a.value_1_of_c_MMS(c=4))
     0
-    >>> a.value_1_of_c_MMS(c=3)
+    >>> int(a.value_1_of_c_MMS(c=3))
     1
-    >>> a.value_1_of_c_MMS(c=2)
+    >>> int(a.value_1_of_c_MMS(c=2))
     3
     >>> list(a.all_items())
     ['x', 'y', 'z', 'w']
@@ -403,11 +356,11 @@ class AdditiveValuation(Valuation):
     True
     >>> a.is_EF1({0}, [{1,2}])
     False
-    >>> a.value_1_of_c_MMS(c=4)
+    >>> int(a.value_1_of_c_MMS(c=4))
     0
-    >>> a.value_1_of_c_MMS(c=3)
+    >>> int(a.value_1_of_c_MMS(c=3))
     11
-    >>> a.value_1_of_c_MMS(c=2)
+    >>> int(a.value_1_of_c_MMS(c=2))
     33
     >>> a.all_items()
     {0, 1, 2, 3}
@@ -527,6 +480,59 @@ class AdditiveValuation(Valuation):
         else:
             sorted_values = sorted(self.map_good_to_value.values(), reverse=True)
             return sorted_values[c-1]
+
+    def partition_1_of_c_MMS(self, c: int, items: list) -> List[Bundle]:
+        """
+        Compute a 1-out-of-c MMS partition of the given items.
+        :param c: number of bundles in the partition.
+        :param items: A list of the items to divide.
+        :return: The partitioning that holds the MMS
+        AUTHOR: Shai Aharon.
+        SINCE: 2021-02
+
+        >>> items = ['a','b' ,'c', 'd', 'e', 'f']
+        >>> item_values = {'a': 1, 'b': 2, 'c': 4, 'd': 8, 'e': 16, 'f': 32}
+        >>> valuation = AdditiveValuation(item_values)
+        >>> mms_part = valuation.partition_1_of_c_MMS(3,items)
+        >>> [sorted(x) for x in mms_part]
+        [['a', 'b', 'c', 'd'], ['e'], ['f']]
+        >>> mms_part = valuation.partition_1_of_c_MMS(4,items)
+        >>> [sorted(x) for x in mms_part]
+        [['a', 'b', 'c'], ['d'], ['e'], ['f']]
+        >>> mms_part = valuation.partition_1_of_c_MMS(4,['a','b','c']) # just verify that there is no exception
+        """
+        partition = prtpy.partition(
+            algorithm=prtpy.exact.integer_programming,
+            numbins=c,
+            items=items,
+            map_item_to_value=lambda item: self.value(item),
+            objective=prtpy.obj.MaximizeSmallestSum,
+            outputtype=prtpy.out.Partition
+        )
+        return [set(x) for x in partition]
+
+
+    def value_1_of_c_MMS(self, c:int=1)->int:
+        """
+        Calculates the value of the 1-out-of-c maximin-share ( https://en.wikipedia.org/wiki/Maximin-share )
+
+        >>> a = AdditiveValuation({"x": 1, "y": 2, "z": 4, "w":0})
+        >>> a.value_1_of_c_MMS(c=2)
+        3.0
+        """
+        if c > len(self.desired_items):
+            return 0
+        else:
+            return prtpy.partition(
+                algorithm=prtpy.exact.integer_programming,
+                numbins=c,
+                items=self.desired_items,
+                map_item_to_value=lambda item: self.value(item),
+                objective=prtpy.obj.MaximizeSmallestSum,
+                outputtype=prtpy.out.SmallestSum
+            )
+
+
 
     def __repr__(self):
         if isinstance(self.map_good_to_value,dict):
