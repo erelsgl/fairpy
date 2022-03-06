@@ -19,7 +19,7 @@ from fairpy import Allocation, ValuationMatrix, Agent, AdditiveValuation, conver
 from fairpy import agents
 from fairpy.agents import AdditiveAgent
 from typing import Any, List
-
+from copy import deepcopy
 import logging
 logger = logging.getLogger(__name__)
 
@@ -31,36 +31,33 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
     Initial division for allocting agents according to their alpha-MMS.
     :param agents:Valuations of agents, normlized such that MMS=1 for all agents, 
     and valuation are ordered in assennding order
+    :param items: parameter for how much to approximate MMS allocation.
     :param alpha: parameter for how much to approximate MMS allocation.
-    :return allocation: Whats been allocated so far (in this function)
-    :return agents:  Agents (and objects) that still need allocation
-
-    >>> ### allocation for 1 agent, 1 object (this pass!)
+    :return agents: Agents (and objects) that still need allocation
+    :return ag_alloc:  Whats been allocated so far (in this function)
+    :return items:  A list of all the items that can still be allocation
+    >>> ### allocation for 1 agent, 1 object
     >>> a = AdditiveAgent({"x": 1}, name="Alice")
     >>> items = list(a.all_items())
     >>> agents=[a]
     >>> a1, a2, a3 = initial_assignment_alpha_MSS(agents, items, 0.75)
     >>> print(a1, a2, a3)
-    Alice gets {x} with value 1.
-     []
+    [] {'Alice': ['x']} []
     >>> ### allocation for 1 agent, 2 object
     >>> b = AdditiveAgent({"x": 0.5, "y": 0.4}, name="Blice")
-    >>> items = list(b.all_items())
+    >>> items = list(["x", "y"])
     >>> agents=[b]
     >>> a1, a2, a3 = initial_assignment_alpha_MSS(agents, items, 0.6)
     >>> print(a1, a2, a3)
-    Blice gets {x, y} with value 0.9.
-     []
+    [] {'Blice': ['x', 'y']} []
     >>> ### allocation for 2 agent, 2 object
     >>> a = AdditiveAgent({"x": 0.8, "y": 0.7}, name="Alice")
     >>> b = AdditiveAgent({"x": 0.7, "y": 0.7}, name="Blice")
     >>> items = list(a.all_items())
     >>> agents=[a,b]
-    >>> a1, a2 = initial_assignment_alpha_MSS(agents, items, 0.6)
+    >>> a1, a2, a3 = initial_assignment_alpha_MSS(agents, items, 0.6)
     >>> print(a1, a2, a3)
-    Alice gets {x} with value 0.8.
-    Blice gets {y} with value 0.7.
-     []
+    [] {'Alice': ['x'], 'Blice': ['y']} []
     >>> ### allocation for 2 agent, 8 object
     >>> a = AdditiveAgent({"x1": 0.647059, "x2": 0.588235, "x3": 0.470588, "x4": 0.411765, "x5": 0.352941, "x6": 0.294118, "x7": 0.176471, "x8": 0.117647}, name="A")
     >>> b = AdditiveAgent({"x1": 1.298701, "x2": 0.714286, "x3": 0.649351, "x4": 0.428571, "x5": 0.155844, "x6": 0.064935, "x7": 0.051948, "x8": 0.012987}, name="B")
@@ -69,23 +66,20 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
     >>> agents=[a,b,c]
     >>> a1, a2, a3 = initial_assignment_alpha_MSS(agents, items, 0.75)
     >>> print(a1, a2, a3) # x6, x7, x8 weren't divided
-    B gets {x1} with value 1.298701.
-    A gets {x3, x4} with value 0.882353.
-    C gets {x2, x5} with value 0.92.
-     []
+    [] {'A': ['x3', 'x4'], 'B': ['x1'], 'C': ['x2', 'x5']} ['x6', 'x7', 'x8']
     """
 
     ag_alloc = {} 
     n = len(agents)-1
-    if(n+1>=len(items)):
-        return
+    if(n+1>len(items)):
+        return agents, ag_alloc, items 
     j=0
-    while(j<=n):    #for evry agents chack if s1/s2/s3/s3>=alpha
+    while(j<=n):    # for evry agents chack if s1/s2/s3/s3>=alpha
         i=agents[j]
         s1 = (i.value(items[0]))
-        if(n+1<len(items)):
+        if(n+1<len(items)): # chack if we have more then n items
             s2 = (i.value(items[n]) + i.value(items[n+1]))
-            if((2*n+1)<len(items)):
+            if((2*n+1)<len(items)): # chack if we have more then 2*n items
                 s3 = (i.value(items[2*n-1])+ i.value(items[2*n]) + i.value(items[2*n+1]))
                 s4 = (s1 + i.value(items[2*n+1]))
             else:
@@ -97,32 +91,34 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
             s4 = -1
 
         if(s1>=alpha):
-            ag_alloc[str(i.name())] = {items[0]}
+            ag_alloc[str(i.name())] = [items[0]]
             items.remove(items[0])
             agents.remove(i)
             n = n - 1
         elif(s2>=alpha):
-            ag_alloc[str(i.name())] = {items[n] , items[n+1]}
+            ag_alloc[str(i.name())] = [items[n] , items[n+1]]
             items.remove(items[n+1])
             items.remove(items[n])
             agents.remove(i)
             n = n - 1
         elif(s3>=alpha):
-            ag_alloc[str(i.name())] = {(items[2*n-1], items[2*n] , items[2*n+1])}
+            ag_alloc[str(i.name())] = [(items[2*n-1], items[2*n] , items[2*n+1])]
             items.remove(items[2*n+1])
             items.remove(items[2*n])
             items.remove(items[2*n-1])
             agents.remove(i)
             n = n - 1
         elif(s4>=alpha):
-            ag_alloc[str(i.name())] = {items[0], items[2*n+1]}
+            ag_alloc[str(i.name())] = [items[0], items[2*n+1]]
             items.remove(items[0])
             items.remove(items[2*n+1])
             agents.remove(i)
             n = n - 1
         else:
             j = j + 1
-    
+    # sort the alloc!
+
+    ag_alloc = sort_allocation(ag_alloc)
     return agents, ag_alloc, items 
 
 
@@ -446,9 +442,14 @@ def get_alpha_MMS_allocation_to_unordered_instance(agents_unordered: List[Additi
     C gets {x7,x8} with value 15.
     <BLANKLINE>
     """
-
     return ordered_allocation #real allocation
 
+def sort_allocation(ag_alloc: dict())->dict() : 
+    temp_x = dict(sorted(ag_alloc.items()))
+    for key,val in ag_alloc.items():
+        temp_x[key] = deepcopy(sorted(val))
+    ag_alloc = deepcopy(temp_x)
+    return ag_alloc
 
 if __name__ == '__main__':
     import doctest
