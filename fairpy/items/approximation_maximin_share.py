@@ -514,7 +514,7 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent]):
     return Allocation(agents=agents, bundles={"Carl": {2, 3}, "Bruce": {1, 4}, "Alice": {0, 5}})
 
 ##### algo 7
-def agents_conversion_to_ordered_instance(agents: List[AdditiveAgent]) :
+def agents_conversion_to_ordered_instance(agents: List[AdditiveAgent],items:List[str]) :
     """
     The function sorted the list of additive agents such that their valuations for objects are unordered will become ordered.
     :param agents: A list of additive agents such that their valuations for objects are unordered.
@@ -523,16 +523,24 @@ def agents_conversion_to_ordered_instance(agents: List[AdditiveAgent]) :
     >>> b = AdditiveAgent({"x1": 8, "x2": 7, "x3": 5,"x4": 3, "x5": 10, "x6": 2,"x7": 1, "x8": 4}, name="B")
     >>> c =  AdditiveAgent({"x1": 1, "x2": 2, "x3": 3,"x4": 4, "x5": 5, "x6": 6,"x7": 7, "x8": 8}, name="C")
     >>> agents=[a,b,c]
-    >>> a1 = agents_conversion_to_ordered_instance(agents)
+    >>> a1 = agents_conversion_to_ordered_instance(agents,['x1','x2','x3','x4','x5','x6','x7','x8'])
     >>> print(a1)
     [A is an agent with a Additive valuation: x1=11 x2=10 x3=8 x4=7 x5=7 x6=4 x7=3 x8=2., B is an agent with a Additive valuation: x1=10 x2=8 x3=7 x4=5 x5=4 x6=3 x7=2 x8=1., C is an agent with a Additive valuation: x1=8 x2=7 x3=6 x4=5 x5=4 x6=3 x7=2 x8=1.]
     """
-
-    return agents #sorted
+    sorted_agents={}
+    for agent in agents:
+        values=[agent.value(item) for item in items] 
+        values.sort(reverse=True)
+        agent_val_dict={}
+        for item,val in zip(items,values):
+           agent_val_dict[item]=val 
+        sorted_agents[agent._name]=agent_val_dict
+    sorted_agents_list = AdditiveAgent.list_from(sorted_agents)
+    return sorted_agents_list #sorted
 
     
 ##### algo 8
-def get_alpha_MMS_allocation_to_unordered_instance(agents_unordered: List[AdditiveAgent],agents_ordered:List[AdditiveAgent],ordered_allocation:Allocation) :
+def get_alpha_MMS_allocation_to_unordered_instance(agents_unordered: List[AdditiveAgent], ag_alloc: dict(), ordered_items: List[str]) :
     """
     Get the MMS allocation for agents unordered valuations.
     :param agents_unordered: Unordered valuations agents.
@@ -541,41 +549,51 @@ def get_alpha_MMS_allocation_to_unordered_instance(agents_unordered: List[Additi
     :return allocation: return the real allocation (the allocation for the unordered items)
     >>> ### allocation for 2 agents 3 objects
     >>> a = AdditiveAgent({"x1": 3, "x2": 10, "x3": 1}, name="A")
-    >>> b = AdditiveAgent({"x1": 10, "x2": 10, "x3": 10}, name="B")
+    >>> b = AdditiveAgent({"x1": 10, "x2": 10, "x3": 9}, name="B")
     >>> agents=[a,b]
-    >>> agents_ordered=agents_conversion_to_ordered_instance(agents)
-    >>> ordered_alloc= Allocation(agents=agents_ordered, bundles={"A": {"x1"}, "B": {"x2"}})
-    >>> real_alloc = get_alpha_MMS_allocation_to_unordered_instance(agents, agents_ordered, ordered_alloc)
+    >>> ag_alloc = dict({'A': ['x1'], 'B': ['x2']})
+    >>> items_ordered = list(["x1", "x2", "x3"]) 
+    >>> real_alloc = get_alpha_MMS_allocation_to_unordered_instance(agents,  ag_alloc, items_ordered)
     >>> print(real_alloc)
-    A gets {x2} with value 10.
-    B gets {x1} with value 10.
-    <BLANKLINE>
+    {'A': ['x2'], 'B': ['x1']}
 
     >>> ### allocation for 1 agent, 1 object
     >>> a = AdditiveAgent({"x": 2}, name="Alice")
     >>> agents=[a]
-    >>> agents_ordered=agents_conversion_to_ordered_instance(agents)
-    >>> ordered_alloc= Allocation(agents=agents_ordered, bundles={"Alice": {"x"}})
-    >>> real_alloc = get_alpha_MMS_allocation_to_unordered_instance(agents, agents_ordered, ordered_alloc)
+    >>> ag_alloc = dict({'Alice': ['x']})
+    >>> items_ordered = list(["x"]) 
+    >>> real_alloc = get_alpha_MMS_allocation_to_unordered_instance(agents,  ag_alloc, items_ordered)
     >>> print(real_alloc)
-    Alice gets {x} with value 2.
-    <BLANKLINE>
+    {'Alice': ['x']}
 
     >>> ### allocation for 3 agents 8 objects
     >>> a = AdditiveAgent({"x1": 2, "x2": 7, "x3": 10,"x4": 8, "x5": 3, "x6": 4,"x7": 7, "x8": 11}, name="A")
     >>> b = AdditiveAgent({"x1": 8, "x2": 7, "x3": 5,"x4": 3, "x5": 10, "x6": 2,"x7": 1, "x8": 4}, name="B")
     >>> c = AdditiveAgent({"x1": 1, "x2": 2, "x3": 3,"x4": 4, "x5": 5, "x6": 6,"x7": 7, "x8": 8}, name="C")
     >>> agents=[a,b,c]
-    >>> agents_ordered=agents_conversion_to_ordered_instance(agents)
-    >>> ordered_alloc= Allocation(agents=agents_ordered, bundles={"A": {"x3","x4"},"B":{"x1"},"C":{"x2","x5"}})
-    >>> real_alloc =  get_alpha_MMS_allocation_to_unordered_instance(agents, agents_ordered, ordered_alloc)
+    >>> items_ordered = list(["x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8"]) 
+    >>> ag_alloc = dict({'A': ['x3', 'x4'], 'B': ['x1'], 'C': ['x2', 'x5']})
+    >>> real_alloc =  get_alpha_MMS_allocation_to_unordered_instance(agents,  ag_alloc, items_ordered)
     >>> print(real_alloc)
-    A gets {x3, x4} with value 18.
-    B gets {x5} with value 10.
-    C gets {x7,x8} with value 15.
-    <BLANKLINE>
+    {'A': ['x3', 'x4'], 'B': ['x5'], 'C': ['x8', 'x7']}
     """
-    return ordered_allocation #real allocation
+    real_alloc = dict()
+    for i in agents_unordered:
+        real_alloc[i.name()] = []
+    sorted_agents_by_values = dict() # sorted agent by values
+    for i in agents_unordered: 
+        sorted_agents_by_values[i.name()] = i.valuation.map_good_to_value
+        sorted_agents_by_values[i.name()] = dict(reversed(sorted(sorted_agents_by_values[i.name()].items(), key=lambda item: item[1])))
+    
+    for i in ordered_items:
+        for key, val in ag_alloc.items():
+            if(i in val): #if this agent get the next item
+                x=next(iter(sorted_agents_by_values[key])) #best item for agent number "key"
+                real_alloc[key].append(x)
+                for key2, val2 in sorted_agents_by_values.items(): # remove the x item from all the agents
+                    val2.pop(x)
+
+    return real_alloc #real allocation
 
 def sort_allocation(ag_alloc: dict())->dict() : 
     """
@@ -618,5 +636,5 @@ if __name__ == '__main__':
     # doctest.run_docstring_examples(fixed_assignment, globals())
     doctest.run_docstring_examples(tentative_assignment, globals())
     # doctest.run_docstring_examples(three_quarters_MMS_allocation, globals())
-    # doctest.run_docstring_examples(agents_conversion_to_ordered_instance, globals())
-    # doctest.run_docstring_examples(get_alpha_MMS_allocation_to_unordered_instance, globals())
+    doctest.run_docstring_examples(agents_conversion_to_ordered_instance, globals())
+    doctest.run_docstring_examples(get_alpha_MMS_allocation_to_unordered_instance, globals())
