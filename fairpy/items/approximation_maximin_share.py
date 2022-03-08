@@ -95,14 +95,14 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
             items.remove(items[0])
             agents.remove(i)
             n = n - 1
-            j=0
+            j = 0
         elif(s2>=alpha):
             ag_alloc[str(i.name())] = [items[n] , items[n+1]]
             items.remove(items[n+1])
             items.remove(items[n])
             agents.remove(i)
             n = n - 1
-            j=0
+            j = 0
         elif(s3>=alpha):
             ag_alloc[str(i.name())] = [(items[2*n-1], items[2*n] , items[2*n+1])]
             items.remove(items[2*n+1])
@@ -110,14 +110,14 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
             items.remove(items[2*n-1])
             agents.remove(i)
             n = n - 1
-            j=0
+            j = 0
         elif(s4>=alpha):
             ag_alloc[str(i.name())] = [items[0], items[2*n+1]]
             items.remove(items[0])
             items.remove(items[2*n+1])
             agents.remove(i)
             n = n - 1
-            j=0
+            j = 0
         else:
             j = j + 1
     # sort the alloc!
@@ -245,34 +245,26 @@ def fixed_assignment(agents: List[AdditiveAgent], items: List[str]):
     >>> ### fixed_assignment for one agent, one object
     >>> a = AdditiveAgent({"x": 1}, name="Alice")
     >>> agents=[a]
-    >>> alloc, remaining_agents=fixed_assignment(agents)
-    >>> print(alloc.str_with_values(precision=6))
-    Alice gets {x} with value 1.
-    <BLANKLINE>
-    >>> remaining_agents
-    []
+    >>> items = list(a.all_items())
+    >>> remaining_agents, alloc, remaining_items =fixed_assignment(agents, items)
+    >>> print(remaining_agents, alloc, remaining_items)
+    [] {'Alice': ['x']} []
     >>> ### fixed_assignment for two agent, one objects
     >>> b = AdditiveAgent({"x": 3.333333}, name="Bruce")
     >>> c = AdditiveAgent({"x":2}, name="Carl")
     >>> agents=[b,c]
-    >>> alloc, remaining_agents=fixed_assignment(agents)
-    >>> print(alloc.str_with_values(precision=7))
-    Bruce gets {x} with value 3.333333.
-    Carl gets {} with value 0.
-    <BLANKLINE>
-    >>> remaining_agents
-    []
+    >>> items = list(b.all_items())
+    >>> remaining_agents, alloc, remaining_items =fixed_assignment(agents, items)
+    >>> print(remaining_agents, alloc, remaining_items)
+    [Bruce is an agent with a Additive valuation: x=3.333333., Carl is an agent with a Additive valuation: x=2.] {} ['x']
     >>> ### fixed_assignment for two agent, three objects #
     >>> b = AdditiveAgent({"x": 1.2,"y": 0.24, "z":0.56}, name="Bruce")
     >>> c = AdditiveAgent({"x":1.125,"y": 0.875,"z":0.25}, name="Carl")
     >>> agents=[b,c]
-    >>> alloc, remaining_agents=fixed_assignment(agents)
-    >>> print(alloc.str_with_values(precision=6))
-    Bruce gets {x} with value 1.2.
-    Carl gets {y} with value 0.875.
-    <BLANKLINE>
-    >>> remaining_agents
-    []
+    >>> items = list(b.all_items())
+    >>> remaining_agents, alloc, remaining_items = fixed_assignment(agents, items)
+    >>> print(remaining_agents, alloc, remaining_items)
+    [] {'Bruce': ['x'], 'Carl': ['y']} ['z']
     """
     ag_alloc = {}  #agents allocations
     n = len(agents)-1
@@ -297,14 +289,13 @@ def fixed_assignment(agents: List[AdditiveAgent], items: List[str]):
         else:
             s2 = -1
             s3 = -1
-
+        
         if(s1>=three_quarters):
             ag_alloc[str(nameI)] = [items[0]]
             val_arr.pop(str(nameI))
             val_arr = update_val([items[0]], val_arr, n)
             items.remove(items[0])
             agents.remove(agents[j])
-            print(val_arr)
             j=0
             n = n - 1
         elif(s2>=three_quarters):
@@ -314,23 +305,20 @@ def fixed_assignment(agents: List[AdditiveAgent], items: List[str]):
             items.remove(items[n+1])
             items.remove(items[n])
             agents.remove(agents[j])
-            print(val_arr)
             j=0
             n = n - 1
         elif(s3>=three_quarters):
-            ag_alloc[str(nameI)] = [(items[2*n-1], items[2*n] , items[2*n+1])]
+            ag_alloc[str(nameI)] = [items[2*n-1], items[2*n] , items[2*n+1]]
             val_arr.pop(str(nameI))
-            val_arr = update_val([(items[2*n-1], items[2*n], val_arr , items[2*n+1])], n)
+            val_arr = update_val([items[2*n-1], items[2*n] , items[2*n+1]], val_arr, n)
             items.remove(items[2*n+1])
             items.remove(items[2*n])
             items.remove(items[2*n-1])
             agents.remove(agents[j])
-            print(val_arr)
             j=0
             n = n - 1
         else:
             j = j + 1
-        #print(val_arr)
     
     # sort the alloc!
     ag_alloc = sort_allocation(ag_alloc)
@@ -338,7 +326,7 @@ def fixed_assignment(agents: List[AdditiveAgent], items: List[str]):
 
 
 # Algo 6
-def tentative_assignment(agents: List[AdditiveAgent]):
+def tentative_assignment(agents: List[AdditiveAgent], items: List[str]):
     """
     The function allocates temporerly what can be allocated, can maybe hart others it not normlized close enough to the mms values.
     :param agents: Valuations of agents,such that bundles of objects at the positions:
@@ -347,11 +335,16 @@ def tentative_assignment(agents: List[AdditiveAgent]):
     :return allocation: Whats been temporarly allocated so far
     :return agents: Agents (and objects) that still need allocation
     >>> ### doesn't find any allocation.
-    >>> agents = AdditiveAgent.list_from({"Alice":[0.724489796, 0.714285714,0.387755102,0.357142857,0.357142857,0.357142857,0.020408163,0.020408163,0.020408163,0.020408163,0.020408163],\
-                                          "Bruce":[0.724489796, 0.714285714,0.387755102,0.357142857,0.357142857,0.357142857,0.020408163,0.020408163,0.020408163,0.020408163,0.020408163],\
-                                           "Carl":[0.724489796, 0.714285714,0.387755102,0.357142857,0.357142857,0.357142857,0.020408163,0.020408163,0.020408163,0.020408163,0.020408163]})
-    >>> alloc, remaining_agents=tentative_assignment(agents)
-    >>> print(alloc.str_with_values(precision=7))
+    >>> agents = AdditiveAgent.list_from({"Alice":[],\
+                                          "Bruce":[],\
+                                           "Carl":[]})
+    >>> a = AdditiveAgent({"01": 0.724489796, "02": 0.714285714, "03": 0.387755102, "04": 0.357142857, "05": 0.357142857, "06": 0.357142857, "07": 0.020408163, "08": 0.020408163, "09": 0.020408163, "10": 0.020408163, "11": 0.020408163}, name="Alice")
+    >>> b = AdditiveAgent({"01": 0.724489796, "02": 0.714285714, "03": 0.387755102, "04": 0.357142857, "05": 0.357142857, "06": 0.357142857, "07": 0.020408163, "08": 0.020408163, "09": 0.020408163, "10": 0.020408163, "11": 0.020408163}, name="Bruce")
+    >>> c = AdditiveAgent({"01": 0.724489796, "02": 0.714285714, "03": 0.387755102, "04": 0.357142857, "05": 0.357142857, "06": 0.357142857, "07": 0.020408163, "08": 0.020408163, "09": 0.020408163, "10": 0.020408163, "11": 0.020408163}, name="Carl")
+    >>> agents = [a,b,c]
+    >>> items = list(["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11"])
+    >>> remaining_agents, alloc, remaining_items = tentative_assignment(agents, items)
+    >>> print(remaining_agents, alloc, remaining_items)
     Alice gets {} with value 0.
     Bruce gets {} with value 0.
     Carl gets {} with value 0.
@@ -359,23 +352,27 @@ def tentative_assignment(agents: List[AdditiveAgent]):
     >>> remaining_agents
     [Alice is an agent with a Additive valuation: v0=0.724489796 v1=0.714285714 v2=0.387755102 v3=0.357142857 v4=0.357142857 v5=0.357142857 v6=0.020408163 v7=0.020408163 v8=0.020408163 v9=0.020408163 v10=0.020408163., Bruce is an agent with a Additive valuation: v0=0.724489796 v1=0.714285714 v2=0.387755102 v3=0.357142857 v4=0.357142857 v5=0.357142857 v6=0.020408163 v7=0.020408163 v8=0.020408163 v9=0.020408163 v10=0.020408163., Carl is an agent with a Additive valuation: v0=0.724489796 v1=0.714285714 v2=0.387755102 v3=0.357142857 v4=0.357142857 v5=0.357142857 v6=0.020408163 v7=0.020408163 v8=0.020408163 v9=0.020408163 v10=0.020408163.]
     >>> ### 3 agents 11 objects - ex 1
-    >>> agents = AdditiveAgent.list_from({"Alice":[0.727066,0.727066,0.39525,0.351334,0.351334,0.346454,0.022934,0.022934,0.022934,0.022934,0.022934],\
-                     "Bruce":[0.723887,0.723887,0.393522,0.349798,0.349798,0.344939,0.022834,0.022834,0.022834,0.022834,0.022834],\
-                    "Carl":[0.723887,0.723887,0.393522,0.349798,0.349798,0.344939,0.022834,0.022834,0.022834,0.022834,0.022834]})
-    >>> alloc, remaining_agents=tentative_assignment(agents)
-    >>> print(alloc.str_with_values(precision=7))
+    >>> a = AdditiveAgent({"01": 0.727066, "02": 0.727066, "03": 0.39525, "04": 0.351334, "05": 0.351334, "06": 0.346454, "07": 0.022934, "08": 0.022934, "09": 0.022934, "10": 0.022934, "11": 0.022934}, name="Alice")
+    >>> b = AdditiveAgent({"01": 0.723887, "02": 0.723887, "03": 0.393522, "04": 0.349798, "05": 0.349798, "06": 0.344939, "07": 0.022834, "08": 0.022834, "09":  0.022834, "10": 0.022834, "11": 0.022834}, name="Bruce")
+    >>> c = AdditiveAgent({"01": 0.723887, "02": 0.723887, "03": 0.393522, "04": 0.349798, "05": 0.349798, "06": 0.344939, "07": 0.022834, "08": 0.022834, "09": 0.022834, "10": 0.022834, "11": 0.022834}, name="Carl")
+    >>> agents = [a,b,c]
+    >>> items = list(["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11"])
+    >>> remaining_agents, alloc, remaining_items = tentative_assignment(agents, items)
+    >>> print(remaining_agents, alloc, remaining_items)
     Alice gets {0,6} with value 0.75.
     Bruce gets {3,4,5} with value 1.044535.
     Carl gets {1,2} with value 1.117409.
     <BLANKLINE>
     >>> remaining_agents
     []
-    >>> ### 3 agents 10 objects
-    >>> agents = AdditiveAgent.list_from({"Alice":[0.727272,0.727272,0.318182,0.318182,0.318182,0.318182,0.090909,0.090909,0.045454,0.045454],\
-                     "Bruce":[0.727272,0.727272,0.318182,0.318182,0.318182,0.318182,0.090909,0.090909,0.045454,0.045454],\
-                    "Carl":[0.727272,0.727272,0.318182,0.318182,0.318182,0.318182,0.090909,0.090909,0.045454,0.045454]})
-    >>> alloc, remaining_agents=tentative_assignment(agents)
-    >>> print(alloc.str_with_values(precision=7))
+    >>> ### 3 agents 10 object
+    >>> a = AdditiveAgent({"01": 0.727272, "02": 0.727272, "03": 0.318182, "04": 0.318182, "05": 0.318182, "06": 0.318182, "07": 0.090909, "08": 0.090909, "09": 0.045454, "10": 0.045454}, name="Alice")
+    >>> b = AdditiveAgent({"01": 0.727272, "02": 0.727272, "03": 0.318182, "04": 0.318182, "05": 0.318182, "06": 0.318182, "07": 0.090909, "08": 0.090909, "09": 0.045454, "10": 0.045454}, name="Bruce")
+    >>> c = AdditiveAgent({"01": 0.727272, "02": 0.727272, "03": 0.318182, "04": 0.318182, "05": 0.318182, "06": 0.318182, "07": 0.090909, "08": 0.090909, "09": 0.045454, "10": 0.045454}, name="Carl")
+    >>> agents = [a,b,c]
+    >>> items = list(["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"])
+    >>> remaining_agents, alloc, remaining_items = tentative_assignment(agents, items)
+    >>> print(remaining_agents, alloc, remaining_items)
     Alice gets {0,6} with value 0.818181.
     Bruce gets {3,4,5} with value 0.954546.
     Carl gets {1,2} with value 1.045454.
@@ -383,8 +380,84 @@ def tentative_assignment(agents: List[AdditiveAgent]):
     >>> remaining_agents
     []
     """
-    ag = []
-    return Allocation(agents=agents, bundles={"Carl": {1, 2}, "Bruce": {3, 4, 5}, "Alice": {0, 6}}), ag
+    ag_alloc = {} 
+    n = len(agents)-1
+    if(n+1>len(items)):
+        return agents, ag_alloc, items
+
+    #deepcopy of items and agents
+    agents_temp = list()
+    items_temp = list() 
+    for i in agents:
+        agents_temp.append( AdditiveAgent(i.valuation.map_good_to_value, name=i.name()))
+    for i in items:
+        items_temp.append(i)
+    
+    #items=list(agents[0].valuation.all_items())
+    val_arr = dict() #values of agents
+    for i in agents_temp:
+        val_arr[i.name()] = i.valuation.map_good_to_value
+    j=0
+    while(j<=n):    # for evry agents chack if s1/s2/s3/s3/s4>=alpha
+        
+        nameI=agents_temp[j].name()
+        i=val_arr[nameI]
+        s1 = (i.get(str(items_temp[0])))
+        
+        if(n+1<len(items_temp)): # chack if we have more then n items
+            s2 = i.get(items_temp[n]) + i.get(items_temp[n+1])
+            if((2*n+1)<len(items_temp)): # chack if we have more then 2*n items
+                s3 = (i.get(items_temp[2*n-1])) + (i.get(items_temp[2*n])) + (i.get(items_temp[2*n+1]))
+                s4 = (i.get(items_temp[0])) +  (i.get(items_temp[2*n+1]))
+            else:
+                s3 = -1
+                s4 = -1
+        else:
+            s2 = -1
+            s3 = -1
+            s4 = -1
+        if(s1>=three_quarters):
+            ag_alloc[str(nameI)] = [items_temp[0]]
+            val_arr.pop(str(nameI))
+            val_arr = update_val([items_temp[0]], val_arr, n)
+            items_temp.remove(items_temp[0])
+            agents_temp.remove(agents_temp[j])
+            j=0
+            n = n - 1
+        elif(s2>=three_quarters):
+            ag_alloc[str(nameI)] = [items_temp[n] , items_temp[n+1]]
+            val_arr.pop(str(nameI))
+            val_arr = update_val([items_temp[n] , items_temp[n+1]], val_arr, n)
+            items_temp.remove(items_temp[n+1])
+            items_temp.remove(items_temp[n])
+            agents_temp.remove(agents_temp[j])
+            j=0
+            n = n - 1
+        elif(s3>=three_quarters):
+            ag_alloc[str(nameI)] = [items_temp[2*n-1], items_temp[2*n] , items_temp[2*n+1]]
+            val_arr.pop(str(nameI))
+            val_arr = update_val([items_temp[2*n-1], items_temp[2*n] , items_temp[2*n+1]], val_arr, n)
+            items_temp.remove(items_temp[2*n+1])
+            items_temp.remove(items_temp[2*n])
+            items_temp.remove(items_temp[2*n-1])
+            agents_temp.remove(agents_temp[j])
+            j=0
+            n = n - 1
+        elif(s4>=three_quarters):
+            ag_alloc[str(nameI)] = [items_temp[0],  items_temp[2*n+1]]
+            val_arr.pop(str(nameI))
+            val_arr = update_val([items_temp[0],  items_temp[2*n+1]], val_arr, n)
+            items_temp.remove(items_temp[2*n+1])
+            items_temp.remove(items_temp[0])
+            agents_temp.remove(agents_temp[j])
+            j=0
+            n = n - 1
+        else:
+            j = j + 1
+    # sort the alloc!
+
+    #ag_alloc = sort_allocation(ag_alloc)
+    return agents_temp, ag_alloc, items_temp 
 
 
 # algo 4
@@ -533,14 +606,17 @@ def update_val(items_remove: List[str], val_arr: dict(), n: int)->dict() :
 
 if __name__ == '__main__':
     import doctest
+    import sys
+
     # (failures, tests) = doctest.testmod(report=True)
     # print("{} failures, {} tests".format(failures, tests))
     # how to run specific function
-    doctest.run_docstring_examples(initial_assignment_alpha_MSS, globals())
+    # doctest.run_docstring_examples(initial_assignment_alpha_MSS, globals())
     # doctest.run_docstring_examples(bag_filling_algorithm_alpha_MMS, globals())
     # doctest.run_docstring_examples(alpha_MMS_allocation, globals())
+
     # doctest.run_docstring_examples(fixed_assignment, globals())
-    # doctest.run_docstring_examples(tentative_assignment, globals())
+    doctest.run_docstring_examples(tentative_assignment, globals())
     # doctest.run_docstring_examples(three_quarters_MMS_allocation, globals())
     # doctest.run_docstring_examples(agents_conversion_to_ordered_instance, globals())
     # doctest.run_docstring_examples(get_alpha_MMS_allocation_to_unordered_instance, globals())
