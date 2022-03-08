@@ -22,7 +22,7 @@ from typing import Any, List
 from copy import deepcopy
 import logging
 logger = logging.getLogger(__name__)
-
+three_quarters = 0.75
 
 # Algo 2
 
@@ -95,12 +95,14 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
             items.remove(items[0])
             agents.remove(i)
             n = n - 1
+            j=0
         elif(s2>=alpha):
             ag_alloc[str(i.name())] = [items[n] , items[n+1]]
             items.remove(items[n+1])
             items.remove(items[n])
             agents.remove(i)
             n = n - 1
+            j=0
         elif(s3>=alpha):
             ag_alloc[str(i.name())] = [(items[2*n-1], items[2*n] , items[2*n+1])]
             items.remove(items[2*n+1])
@@ -108,17 +110,19 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
             items.remove(items[2*n-1])
             agents.remove(i)
             n = n - 1
+            j=0
         elif(s4>=alpha):
             ag_alloc[str(i.name())] = [items[0], items[2*n+1]]
             items.remove(items[0])
             items.remove(items[2*n+1])
             agents.remove(i)
             n = n - 1
+            j=0
         else:
             j = j + 1
     # sort the alloc!
 
-    ag_alloc = sort_allocation(ag_alloc)
+    #ag_alloc = sort_allocation(ag_alloc)
     return agents, ag_alloc, items 
 
 
@@ -229,7 +233,7 @@ def alpha_MMS_allocation(agents: List[AdditiveAgent], alpha: float, mms_values: 
     return allocation
 
 # Algo 5
-def fixed_assignment(agents: List[AdditiveAgent]):
+def fixed_assignment(agents: List[AdditiveAgent], items: List[str]):
     """
     The function allocates what can be allocated without harting others
     (each allocated agent gets 3/4 of his own MMS value,
@@ -270,11 +274,67 @@ def fixed_assignment(agents: List[AdditiveAgent]):
     >>> remaining_agents
     []
     """
-    # return  Allocation(agents=agents, bundles={"Alice": {"x"}}), []
-    # return Allocation(agents=agents, bundles={"Bruce": {"x"}, "Carl": {"y"}}), ag
+    ag_alloc = {}  #agents allocations
+    n = len(agents)-1
+    if(n+1>len(items)):
+        return agents, ag_alloc, items 
+    #items=list(agents[0].valuation.all_items())
+    val_arr = dict() #values of agents
+    for i in agents:
+        val_arr[i.name()] = i.valuation.map_good_to_value
+    j=0
+    while(j<=n):    # for evry agents chack if s1/s2/s3>=three_quarters
+        
+        nameI=agents[j].name()  #agent name
+        i=val_arr[nameI]    #agent[j]
+        s1 = (i.get(items[0]))
+        if(n+1<len(items)): # chack if we have more then n items
+            s2 = i.get(items[n]) + i.get(items[n+1])
+            if((2*n+1)<len(items)): # chack if we have more then 2*n items
+                s3 = (i.get(items[2*n-1])) + (i.get(items[2*n])) + (i.get(items[2*n+1]))
+            else:
+                s3 = -1
+        else:
+            s2 = -1
+            s3 = -1
 
-    ag = []
-    return Allocation(agents=agents, bundles={"Bruce": {"x"}}), ag
+        if(s1>=three_quarters):
+            ag_alloc[str(nameI)] = [items[0]]
+            val_arr.pop(str(nameI))
+            val_arr = update_val([items[0]], val_arr, n)
+            items.remove(items[0])
+            agents.remove(agents[j])
+            print(val_arr)
+            j=0
+            n = n - 1
+        elif(s2>=three_quarters):
+            ag_alloc[str(nameI)] = [items[n] , items[n+1]]
+            val_arr.pop(str(nameI))
+            val_arr = update_val([items[n] , items[n+1]], val_arr, n)
+            items.remove(items[n+1])
+            items.remove(items[n])
+            agents.remove(agents[j])
+            print(val_arr)
+            j=0
+            n = n - 1
+        elif(s3>=three_quarters):
+            ag_alloc[str(nameI)] = [(items[2*n-1], items[2*n] , items[2*n+1])]
+            val_arr.pop(str(nameI))
+            val_arr = update_val([(items[2*n-1], items[2*n], val_arr , items[2*n+1])], n)
+            items.remove(items[2*n+1])
+            items.remove(items[2*n])
+            items.remove(items[2*n-1])
+            agents.remove(agents[j])
+            print(val_arr)
+            j=0
+            n = n - 1
+        else:
+            j = j + 1
+        #print(val_arr)
+    
+    # sort the alloc!
+    ag_alloc = sort_allocation(ag_alloc)
+    return agents, ag_alloc, items 
 
 
 # Algo 6
@@ -445,11 +505,31 @@ def get_alpha_MMS_allocation_to_unordered_instance(agents_unordered: List[Additi
     return ordered_allocation #real allocation
 
 def sort_allocation(ag_alloc: dict())->dict() : 
+    """
+    sorted a dict in deepcopy
+    """
     temp_x = dict(sorted(ag_alloc.items()))
     for key,val in ag_alloc.items():
         temp_x[key] = deepcopy(sorted(val))
     ag_alloc = deepcopy(temp_x)
     return ag_alloc
+
+
+def update_val(items_remove: List[str], val_arr: dict(), n: int)->dict() : 
+    """
+        update all the values of the agents that still remained
+    """
+    sum_arr = dict()
+    for i in val_arr:
+        for j in items_remove:
+            val_arr[i].pop(j)
+        sum_arr[i] = 0
+        for j in val_arr[i]:
+            sum_arr[i] = sum_arr[i] + val_arr[i][j]
+        for j in val_arr[i]:
+            val_arr[i][j] = val_arr[i][j]*(n/sum_arr[i])
+    return val_arr
+
 
 if __name__ == '__main__':
     import doctest
