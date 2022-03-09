@@ -48,37 +48,40 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
     :return agents: Agents (and objects) that still need allocation
     :return ag_alloc:  Whats been allocated so far (in this function)
     :return items:  A list of all the items that can still be allocation
-    >>> ### allocation for 1 agent, 1 object
+>>> ### allocation for 1 agent, 1 object (this pass!)
     >>> a = AdditiveAgent({"x": 1}, name="Alice")
-    >>> items = list(a.all_items())
     >>> agents=[a]
-    >>> a1, a2, a3 = initial_assignment_alpha_MSS(agents, items, 0.75)
-    >>> print(a1, a2, a3)
-    [] {'Alice': ['x']} []
+    >>> a1 = initial_assignment_alfa_MSS(agents,0.75)
+    >>> print(a1, agents)
+    Alice gets {x} with value 1.
+     []
     >>> ### allocation for 1 agent, 2 object
     >>> b = AdditiveAgent({"x": 0.5, "y": 0.4}, name="Blice")
-    >>> items = list(["x", "y"])
     >>> agents=[b]
-    >>> a1, a2, a3 = initial_assignment_alpha_MSS(agents, items, 0.6)
-    >>> print(a1, a2, a3)
-    [] {'Blice': ['x', 'y']} []
+    >>> a1 = initial_assignment_alfa_MSS(agents,0.6)
+    >>> print(a1, agents)
+    Blice gets {x, y} with value 0.9.
+     []
     >>> ### allocation for 2 agent, 2 object
     >>> a = AdditiveAgent({"x": 0.8, "y": 0.7}, name="Alice")
     >>> b = AdditiveAgent({"x": 0.7, "y": 0.7}, name="Blice")
-    >>> items = list(a.all_items())
     >>> agents=[a,b]
-    >>> a1, a2, a3 = initial_assignment_alpha_MSS(agents, items, 0.6)
-    >>> print(a1, a2, a3)
-    [] {'Alice': ['x'], 'Blice': ['y']} []
+    >>> a1= initial_assignment_alfa_MSS(agents,0.6)
+    >>> print(a1, agents)
+    Alice gets {x} with value 0.8.
+    Blice gets {y} with value 0.7.
+     []
     >>> ### allocation for 2 agent, 8 object
     >>> a = AdditiveAgent({"x1": 0.647059, "x2": 0.588235, "x3": 0.470588, "x4": 0.411765, "x5": 0.352941, "x6": 0.294118, "x7": 0.176471, "x8": 0.117647}, name="A")
     >>> b = AdditiveAgent({"x1": 1.298701, "x2": 0.714286, "x3": 0.649351, "x4": 0.428571, "x5": 0.155844, "x6": 0.064935, "x7": 0.051948, "x8": 0.012987}, name="B")
     >>> c =  AdditiveAgent({"x1": 0.6, "x2": 0.6, "x3": 0.48, "x4": 0.36, "x5": 0.32, "x6": 0.32, "x7": 0.28, "x8": 0.04}, name="C")
-    >>> items = list(a.all_items())
     >>> agents=[a,b,c]
-    >>> a1, a2, a3 = initial_assignment_alpha_MSS(agents, items, 0.75)
-    >>> print(a1, a2, a3) # x6, x7, x8 weren't divided
-    [] {'A': ['x3', 'x4'], 'B': ['x1'], 'C': ['x2', 'x5']} ['x6', 'x7', 'x8']
+    >>> a1 = initial_assignment_alfa_MSS(agents,0.75)
+    >>> print(a1, agents) # x6, x7, x8 weren't divided
+    B gets {x1} with value 1.298701.
+    A gets {x3, x4} with value 0.882353.
+    C gets {x2, x5} with value 0.92.
+     []
     """
 
     ag_alloc = {} 
