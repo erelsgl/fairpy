@@ -51,14 +51,14 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
 >>> ### allocation for 1 agent, 1 object (this pass!)
     >>> a = AdditiveAgent({"x": 1}, name="Alice")
     >>> agents=[a]
-    >>> a1 = initial_assignment_alfa_MSS(agents,0.75)
+    >>> a1 = initial_assignment_alpha_MSS(agents,0.75)
     >>> print(a1, agents)
     Alice gets {x} with value 1.
      []
     >>> ### allocation for 1 agent, 2 object
     >>> b = AdditiveAgent({"x": 0.5, "y": 0.4}, name="Blice")
     >>> agents=[b]
-    >>> a1 = initial_assignment_alfa_MSS(agents,0.6)
+    >>> a1 = initial_assignment_alpha_MSS(agents,0.6)
     >>> print(a1, agents)
     Blice gets {x, y} with value 0.9.
      []
@@ -66,7 +66,7 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
     >>> a = AdditiveAgent({"x": 0.8, "y": 0.7}, name="Alice")
     >>> b = AdditiveAgent({"x": 0.7, "y": 0.7}, name="Blice")
     >>> agents=[a,b]
-    >>> a1= initial_assignment_alfa_MSS(agents,0.6)
+    >>> a1= initial_assignment_alpha_MSS(agents,0.6)
     >>> print(a1, agents)
     Alice gets {x} with value 0.8.
     Blice gets {y} with value 0.7.
@@ -76,7 +76,7 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
     >>> b = AdditiveAgent({"x1": 1.298701, "x2": 0.714286, "x3": 0.649351, "x4": 0.428571, "x5": 0.155844, "x6": 0.064935, "x7": 0.051948, "x8": 0.012987}, name="B")
     >>> c =  AdditiveAgent({"x1": 0.6, "x2": 0.6, "x3": 0.48, "x4": 0.36, "x5": 0.32, "x6": 0.32, "x7": 0.28, "x8": 0.04}, name="C")
     >>> agents=[a,b,c]
-    >>> a1 = initial_assignment_alfa_MSS(agents,0.75)
+    >>> a1 = initial_assignment_alpha_MSS(agents,0.75)
     >>> print(a1, agents) # x6, x7, x8 weren't divided
     B gets {x1} with value 1.298701.
     A gets {x3, x4} with value 0.882353.
@@ -713,10 +713,10 @@ if __name__ == '__main__':
     import doctest
     import sys
 
-    (failures, tests) = doctest.testmod(report=True)
-    print("{} failures, {} tests".format(failures, tests))
+    # (failures, tests) = doctest.testmod(report=True)
+    # print("{} failures, {} tests".format(failures, tests))
     # how to run specific function
-    # doctest.run_docstring_examples(initial_assignment_alpha_MSS, globals())
+    doctest.run_docstring_examples(initial_assignment_alpha_MSS, globals())
     # doctest.run_docstring_examples(bag_filling_algorithm_alpha_MMS, globals())
     #doctest.run_docstring_examples(alpha_MMS_allocation, globals())
     # doctest.run_docstring_examples(fixed_assignment, globals())
