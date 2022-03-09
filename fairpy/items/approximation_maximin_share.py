@@ -17,8 +17,9 @@ Since:
 # import cvxpy
 from fairpy import Allocation, ValuationMatrix, Agent, AdditiveValuation, convert_input_to_valuation_matrix
 from fairpy import agents
-from fairpy.agents import AdditiveAgent
+from fairpy.agents import AdditiveAgent, agent_names_from
 from typing import Any, List
+from fairpy.items.bag_filling import Bag
 from copy import deepcopy
 import logging
 logger = logging.getLogger(__name__)
@@ -72,14 +73,18 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
     ag_alloc = {} 
     n = len(agents)-1
     if(n+1>len(items)):
-        return agents, ag_alloc, items 
+        return agents, ag_alloc, items
+        #return None 
+    
+    names_agents=agent_names_from(agents)
+
     j=0
-    while(j<=n):    # for evry agents chack if s1/s2/s3/s3>=alpha
+    while(j<=n):    # for every agents check if s1/s2/s3/s3>=alpha
         i=agents[j]
         s1 = (i.value(items[0]))
-        if(n+1<len(items)): # chack if we have more then n items
+        if(n+1<len(items)): # check if we have more then n items
             s2 = (i.value(items[n]) + i.value(items[n+1]))
-            if((2*n+1)<len(items)): # chack if we have more then 2*n items
+            if((2*n+1)<len(items)): # check if we have more then 2*n items
                 s3 = (i.value(items[2*n-1])+ i.value(items[2*n]) + i.value(items[2*n+1]))
                 s4 = (s1 + i.value(items[2*n+1]))
             else:
@@ -123,48 +128,115 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
     # sort the alloc!
 
     #ag_alloc = sort_allocation(ag_alloc)
-    return agents, ag_alloc, items 
+    #return agents, ag_alloc, items
+    return Allocation (names_agents,ag_alloc)
+
+
+
+# def full_valuation_matrix(items: List[str],agents: List[AdditiveAgent]):
+#     items_num =len(items)
+#     values_list=[]
+#     for agent in agents:
+#         values_i=[]
+#         for k in range (0,items_num): ##add lowest value objects
+#             values_i.append(agent.value(items[k]))
+#         values_list.append(values_i)
+#     return values_list
+def willing_agent(agents:List[AdditiveAgent], bundel: List[str], threshhold):
+    num_agents=len(agents)
+    for i in range(0,num_agents):
+        if agents[i].value(bundel)>=threshhold:
+            return i
+    return None
 
 
 # Algo 3
 
-def bag_filling_algorithm_alpha_MMS(agents: List[AdditiveAgent], alpha: float) -> Allocation:
+def bag_filling_algorithm_alpha_MMS(items: List[str],agents: List[AdditiveAgent], alpha: float) -> Allocation:
     """
     The algorithm allocates the remaining objects into the remaining agents so that each received at least α from his MMS.
+    :param items: items names sorted from the highest valued to the lowest
+
     :param agents: Valuations of agents, normlized such that MMS=1 for all agents, 
     and valuation are ordered in assennding order
     :param alpha: parameter for how much to approximate MMS allocation
     :return allocation: allocation for the agents.
 
     >>> ### allocation for 1 agent, 0 object
-    >>> a = AdditiveAgent({"x": 0}, name="Alice" )
+    >>> a = AdditiveAgent({"x": 1}, name="Alice" )
     >>> agents=[a]
-    >>> a1 = bag_filling_algorithm_alpha_MMS(agents, 1)
+    >>> a1 = bag_filling_algorithm_alpha_MMS(['x'],agents, 1)
     >>> print(a1)
-    Alice gets {x} with value 0.
+    Alice gets {x} with value 1.
     <BLANKLINE>
     >>> ### allocation for 1 agent, 3 object (high alpha)
     >>> a = AdditiveAgent({"x1": 0.54, "x2": 0.3, "x3": 0.12}, name="Alice")
     >>> agents=[a]
-    >>> a1 = bag_filling_algorithm_alpha_MMS(agents, 0.9)
+    >>> a1 = bag_filling_algorithm_alpha_MMS(['x1','x2','x3'],agents, 0.9)
     >>> print(a1)
     Alice gets {x1, x2, x3} with value 0.96.
     >>> ### allocation for 2 agent, 9 object
     >>> a = AdditiveAgent({"x1": 0.25, "x2": 0.25, "x3": 0.25, "x4": 0.25, "x5": 0.25, "x6": 0.25, "x7": 0.25, "x8": 0.25, "x9": 0.25 }, name="A")
     >>> b = AdditiveAgent({"x1": 0.333333, "x2": 0.333333, "x3": 0.333333, "x4": 0.333333, "x5": 0.166667, "x6": 0.166667, "x7": 0.166667, "x8": 0.166667, "x9": 0.166667 }, name="B")
     >>> agents=[a,b]
-    >>> a1 = bag_filling_algorithm_alpha_MMS(agents,0.9)
+    >>> a1 = bag_filling_algorithm_alpha_MMS(['x1','x2','x3','x4','x5','x6','x7','x8','x9'],agents,0.9)
     >>> print(a1)
     A gets {x1, x4, x8, x9} with value 1.
     B gets {x2, x3, x6, x7} with value 1.
     """
 
-    allocation = Allocation(agents=agents, bundles={"Alice": {"x"}})
-    return allocation
+    agents_num=len(agents)
+    items_num =len(items)
+
+    if (agents_num<=0 or items_num<=0):
+        return None
+
+    agents_names=agent_names_from(agents)       
+    bundles={}
+    
+
+    while agents_num>0:
+        mirror_index=2*agents_num-1
+        if (len(items)>0 and len(items)>mirror_index ): #has to be both!!
+            bundel_name_arr=[items[0],items[mirror_index]]
+            w_agent=willing_agent(agents,bundel_name_arr,alpha)
+            last_item=len(items)-1
+            while(w_agent==None and last_item>=2*agents_num):
+                # bundel_index_arr.append(last_item)
+                bundel_name_arr.append(items[last_item])
+                last_item-=1
+                w_agent=willing_agent(agents,bundel_name_arr,alpha)
+            if w_agent==None: #there is not any devison that will satisfy the any agent
+                raise Exception("ERROR. Could not create an MMS allocation that satisfies agents.")
+            bundles[agents[w_agent]._name]=bundel_name_arr
+            agents.pop(w_agent)
+
+            for obj_index in bundel_name_arr:
+                items.remove(obj_index) 
+
+            
+            agents_num=len(agents) #update
+        else:
+            raise Exception("ERROR. Could not create an MMS allocation that satisfies agents.")
 
 
+
+    return Allocation(agents=agents_names, bundles=bundles)
+
+
+
+def normalize_algo1(agents: List[AdditiveAgent], mms_values: List[float],items: List[str]):
+    normelized_agents={}
+    #AdditiveAgent.list_from({"Alice":[1,2], "George":[3,4]})
+    num_agents=len(agents)
+    for i in range(0,num_agents):
+        normelized_agents[agents[i]._name]={}
+        for item in items:
+            normelized_agents[agents[i]._name][item]=(agents[i].value(item))/mms_values[i]
+
+    return AdditiveAgent.list_from(normelized_agents)
 # algo 1
-def alpha_MMS_allocation(agents: List[AdditiveAgent], alpha: float, mms_values: List[float]):
+def alpha_MMS_allocation(agents: List[AdditiveAgent], alpha: float, mms_values: List[float], items: List[str]):
     """
     Find alpha_MMS_allocation for the given agents and valuations.
     :param agents: Valuations of agents, valuation are ordered in assennding order
@@ -175,31 +247,31 @@ def alpha_MMS_allocation(agents: List[AdditiveAgent], alpha: float, mms_values: 
     >>> ### allocation for 1 agent, 1 object
     >>> a = AdditiveAgent({"x": 2}, name="Alice")
     >>> agents=[a]
-    >>> a1 = alpha_MMS_allocation(agents,0.5,[2])
+    >>> a1 = alpha_MMS_allocation(agents,0.5,[2],['x'])
     >>> print(a1)
     Alice gets {x} with value 2.
     <BLANKLINE>
     >>> ### allocation for 1 agent, 2 objects
-    >>> b = AdditiveAgent({"x": 1, "y": 2}, name="Blice")
+    >>> b = AdditiveAgent({"x": 2, "y": 1}, name="Blice")
     >>> agents=[b]
-    >>> a1 = alpha_MMS_allocation(agents,0.6,[3])
+    >>> a1 = alpha_MMS_allocation(agents,0.6,[3],['x','y'])
     >>> print(a1)
-    Blice gets {x} with value 1.
+    Blice gets {x} with value 2.
     <BLANKLINE>
     >>> ### allocation for 2 agents, 2 objects
-    >>> a = AdditiveAgent({"x": 1, "y": 2}, name="Alice")
+    >>> a = AdditiveAgent({"x": 2, "y": 1}, name="Alice")
     >>> agents = [a, b]
-    >>> a1 = alpha_MMS_allocation(agents,1,[1,1])
+    >>> a1 = alpha_MMS_allocation(agents,1,[1,1],['x','y'])
     >>> print(a1)
-    Alice gets {x} with value 1.
-    Blice gets {y} with value 2.
+    Alice gets {x} with value 2.
+    Blice gets {y} with value 1.
     <BLANKLINE>
     >>> ### allocation for 3 agents, 3 objects (low alpha)
     >>> a = AdditiveAgent({"x1": 3, "x2": 2, "x3": 1}, name="A")
     >>> b = AdditiveAgent({"x1": 4, "x2": 4, "x3": 4}, name="B")
     >>> c = AdditiveAgent({"x1": 5, "x2": 2, "x3": 1}, name="C")
     >>> agents=[a,b,c]
-    >>> a1 = alpha_MMS_allocation(agents,0.2,[1,4,1])
+    >>> a1 = alpha_MMS_allocation(agents,0.2,[1,4,1],['x1','x2','x3'])
     >>> print(a1)
     A gets {x1} with value 3.
     B gets {x2} with value 4.
@@ -210,10 +282,10 @@ def alpha_MMS_allocation(agents: List[AdditiveAgent], alpha: float, mms_values: 
     >>> b = AdditiveAgent({"x1": 100, "x2": 55, "x3": 50,"x4": 33, "x5": 12, "x6": 5,"x7": 4, "x8": 1}, name="B")
     >>> c = AdditiveAgent({"x1": 15, "x2": 15, "x3": 12,"x4": 9, "x5": 8, "x6": 8,"x7": 7, "x8": 5}, name="C")
     >>> agents=[a,b,c]
-    >>> a1 = alpha_MMS_allocation(agents,0.75,[17,77,25])
+    >>> a1 = alpha_MMS_allocation(agents,0.75,[17,77,25],['x1','x2','x3','x4','x5','x6','x7','x8'])
     >>> print(a1)
-    B gets {x1} with value 100.
     A gets {x3, x4} with value 15.
+    B gets {x1} with value 100.
     C gets {x2,x5} with value 23.
     <BLANKLINE>
     >>> ### allocation with 3 agents, 8 objects
@@ -221,16 +293,32 @@ def alpha_MMS_allocation(agents: List[AdditiveAgent], alpha: float, mms_values: 
     >>> b = AdditiveAgent({"x1": 2, "x2": 2, "x3": 2,"x4": 2, "x5": 2, "x6": 2,"x7": 1, "x8": 1, "x9": 1, "x10": 1,"x11": 1, "x12": 1}, name="B")
     >>> c = AdditiveAgent({"x1": 2, "x2": 2, "x3": 2,"x4": 2, "x5": 2, "x6": 2,"x7": 2, "x8": 2, "x9": 1, "x10": 1,"x11": 1, "x12": 1}, name="C")
     >>> agents=[a,b,c]
-    >>> a1 = alpha_MMS_allocation(agents,0.75,[4,6,6])
+    >>> a1 = alpha_MMS_allocation(agents,0.75,[4,6,6],['x1','x2','x3','x4','x5','x6','x7','x8','x9','x10','x11','x12'])
     >>> print(a1)
     A gets {x1, x4, x11, x12} with value 4.
     B gets {x2, x3, x9, x10} with value 6.
     C gets {x5, x6, x7} with value 6.
     <BLANKLINE>
     """
+    num_agents=len(agents)
+    names_agents=agent_names_from(agents)
+    
+    for i in range (0,num_agents):
+        if mms_values[i]==0:
+            mms_values.pop(i)
+            agents.pop(i)
+    if len(agents)==0 or len(agents)>len(items):
+       return Allocation(agents=agents, bundles={})
+    normelized_agents=normalize_algo1(agents,mms_values,items)
+    alloc_initial_assignment=initial_assignment_alpha_MSS(normelized_agents,items,alpha)
+    print(alloc_initial_assignment.map_agent_to_bundle())
+    if(len(normelized_agents)==0):
+        return alloc_initial_assignment
+    alloc_bag_filling=bag_filling_algorithm_alpha_MMS(items,agents,alpha)
+    print("hello")
+    print (alloc_initial_assignment.bundles(),alloc_bag_filling.map_agent_to_bundle())
+    #return Allocation(agents=names_agents, bundles=new_bundle)
 
-    allocation = Allocation(agents=agents, bundles={"Alice": {"x"}})
-    return allocation
 
 # Algo 5
 def fixed_assignment(agents: List[AdditiveAgent], items: List[str]):
@@ -630,11 +718,24 @@ if __name__ == '__main__':
     # print("{} failures, {} tests".format(failures, tests))
     # how to run specific function
     # doctest.run_docstring_examples(initial_assignment_alpha_MSS, globals())
-    # doctest.run_docstring_examples(bag_filling_algorithm_alpha_MMS, globals())
-    # doctest.run_docstring_examples(alpha_MMS_allocation, globals())
+    #doctest.run_docstring_examples(bag_filling_algorithm_alpha_MMS, globals())
+    #doctest.run_docstring_examples(alpha_MMS_allocation, globals())
 
     # doctest.run_docstring_examples(fixed_assignment, globals())
-    doctest.run_docstring_examples(tentative_assignment, globals())
+    #doctest.run_docstring_examples(tentative_assignment, globals())
     # doctest.run_docstring_examples(three_quarters_MMS_allocation, globals())
-    doctest.run_docstring_examples(agents_conversion_to_ordered_instance, globals())
-    doctest.run_docstring_examples(get_alpha_MMS_allocation_to_unordered_instance, globals())
+    #doctest.run_docstring_examples(agents_conversion_to_ordered_instance, globals())
+    #doctest.run_docstring_examples(get_alpha_MMS_allocation_to_unordered_instance, globals())
+
+
+    
+   ### allocation with 3 agents, 8 objects
+    a = AdditiveAgent({"x1": 1, "x2": 1, "x3": 1,"x4": 1, "x5": 1, "x6": 1,"x7": 1, "x8": 1, "x9": 1, "x10": 1,"x11": 1, "x12": 1}, name="A")
+    b = AdditiveAgent({"x1": 2, "x2": 2, "x3": 2,"x4": 2, "x5": 2, "x6": 2,"x7": 1, "x8": 1, "x9": 1, "x10": 1,"x11": 1, "x12": 1}, name="B")
+    c = AdditiveAgent({"x1": 2, "x2": 2, "x3": 2,"x4": 2, "x5": 2, "x6": 2,"x7": 2, "x8": 2, "x9": 1, "x10": 1,"x11": 1, "x12": 1}, name="C")
+    agents=[a,b,c]
+    a1 = alpha_MMS_allocation(agents,0.75,[4,6,6],['x1','x2','x3','x4','x5','x6','x7','x8','x9','x10','x11','x12'])
+    print(a1)
+    # A gets {x1, x4, x11, x12} with value 4.
+    # B gets {x2, x3, x9, x10} with value 6.
+    # C gets {x5, x6, x7} with value 6.
