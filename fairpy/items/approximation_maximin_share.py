@@ -78,8 +78,8 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
     >>> agents=[a,b,c]
     >>> a1 = initial_assignment_alpha_MSS(agents,['x1','x2','x3','x4','x5','x6','x7','x8'],0.75)
     >>> print(a1, agents) # x6, x7, x8 weren't divided
-    B gets {x1} with value 1.298701.
     A gets {x3,x4} with value 0.882353.
+    B gets {x1} with value 1.298701.
     C gets {x2,x5} with value 0.92.
      []
     """
@@ -158,15 +158,17 @@ def bag_filling_algorithm_alpha_MMS(items: List[str],agents: List[AdditiveAgent]
     >>> agents=[a]
     >>> a1 = bag_filling_algorithm_alpha_MMS(['x1','x2','x3'],agents, 0.9)
     >>> print(a1)
-    Alice gets {x1, x2, x3} with value 0.96.
+    Alice gets {x1,x2,x3} with value 0.96.
+    <BLANKLINE>
     >>> ### allocation for 2 agent, 9 object
     >>> a = AdditiveAgent({"x1": 0.25, "x2": 0.25, "x3": 0.25, "x4": 0.25, "x5": 0.25, "x6": 0.25, "x7": 0.25, "x8": 0.25, "x9": 0.25 }, name="A")
     >>> b = AdditiveAgent({"x1": 0.333333, "x2": 0.333333, "x3": 0.333333, "x4": 0.333333, "x5": 0.166667, "x6": 0.166667, "x7": 0.166667, "x8": 0.166667, "x9": 0.166667 }, name="B")
     >>> agents=[a,b]
     >>> a1 = bag_filling_algorithm_alpha_MMS(['x1','x2','x3','x4','x5','x6','x7','x8','x9'],agents,0.9)
     >>> print(a1)
-    A gets {x1, x4, x8, x9} with value 1.
-    B gets {x2, x3, x6, x7} with value 1.
+    A gets {x1,x4,x8,x9} with value 1.
+    B gets {x2,x3,x6,x7} with value 1.
+    <BLANKLINE>
     """
 
     agents_num=len(agents)
@@ -186,7 +188,6 @@ def bag_filling_algorithm_alpha_MMS(items: List[str],agents: List[AdditiveAgent]
             w_agent=willing_agent(agents,bundel_name_arr,alpha)
             last_item=len(items)-1
             while(w_agent==None and last_item>=2*agents_num):
-                # bundel_index_arr.append(last_item)
                 bundel_name_arr.append(items[last_item])
                 last_item-=1
                 w_agent=willing_agent(agents,bundel_name_arr,alpha)
@@ -218,6 +219,7 @@ def normalize_algo1(agents: List[AdditiveAgent], mms_values: List[float],items: 
         for item in items:
             normelized_agents[agents[i]._name][item]=(agents[i].value(item))/mms_values[i]
     return AdditiveAgent.list_from(normelized_agents)
+
 def combine_allocations(allocations: List[Allocation], agents: List[AdditiveAgent]):
     is_first=True
     combined_bundle=None
@@ -548,7 +550,7 @@ def tentative_assignment(agents: List[AdditiveAgent], items: List[str]):
 
 
 # algo 4
-def three_quarters_MMS_allocation(agents: List[AdditiveAgent]):
+def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str]):
     """
     Finds three_quarters_MMS_allocation for the given agents and valuations.
     :param agents: Valuations of agents, valuation are ordered in assending order
@@ -597,8 +599,56 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent]):
     <BLANKLINE>
     """
     #return Allocation(agents=agents, bundles={"Carl": {"x"}})
+    
+    num_agents=len(agents)
+    if num_agents==0 or num_agents>len(items):
+       return Allocation(agents=agents, bundles={})
 
-    return Allocation(agents=agents, bundles={"Carl": {2, 3}, "Bruce": {1, 4}, "Alice": {0, 5}})
+    divide_by_array=[]
+    for i in range(0,num_agents):
+        divide_by_array[i]=agents[i].total_value()/num_agents
+
+    normelized_agents=normalize_algo1(agents,divide_by_array,items)
+    alloc_fixed_assignment=fixed_assignment(normelized_agents,items)
+    if(len(normelized_agents)==0):
+        return combine_allocations([alloc_fixed_assignment],agents)#use function to get value of alloc
+    remaining_agents, tentative_aloc, remaining_items=tentative_assignment(items,normelized_agents)
+    agents_num=len(normelized_agents)
+    l=[0] * agents_num
+    h=[0] * agents_num
+    sum=[0] * agents_num 
+    for i in range(0,agents_num):
+        mirror_index=2*agents_num-i-1
+        assert (len(items)>0 and len(items)>mirror_index )#has to be both!!
+        bundel_i=[items[0],items[mirror_index]]
+        for agent_index in range(0,agents_num):
+            bundle_val=normelized_agents[agent_index].value(bundel_i)
+            if bundle_val<three_quarters:
+                l[agent_index]+=1
+                sum[agent_index]+=bundle_val
+            elif bundle_val>1:
+                h[agent_index]+=1
+    for agent_index in range(0,agents_num):
+        x_agent=(0.75)*l[agent_index]-sum[agent_index]
+        lowest_value_items=normelized_agents[agent_index].value_except_best_c_goods(agents_num)
+        if(h[agent_index]>0 and h[agent_index]>l[agent_index] and (x_agent+l[agent_index]/8)>lowest_value_items):
+            #update_mms_bounds:
+            alpha_array=[0]*5
+            alpha_array[0]=(0.75)*normelized_agents[agent_index].value(items[0])
+            alpha_array[1]=(0.75)*normelized_agents[agent_index].value({items[agents_num-1],items[agents_num]})
+            alpha_array[2]=(0.75)*normelized_agents[agent_index].value({items[2*agents_num-2],items[2*agents_num-1],items[2*agents_num]})
+            alpha_array[3]=(0.75)*normelized_agents[agent_index].value({remaining_items[0],remaining_items[2*len(remaining_agents)]})
+
+            multiplyer=max(alpha_array)
+
+
+
+            
+
+
+   
+    return combine_allocations([alloc_initial_assignment,alloc_bag_filling], agents)
+
 
 ##### algo 7
 def agents_conversion_to_ordered_instance(agents: List[AdditiveAgent],items:List[str]) :
@@ -716,7 +766,7 @@ if __name__ == '__main__':
     # (failures, tests) = doctest.testmod(report=True)
     # print("{} failures, {} tests".format(failures, tests))
     # how to run specific function
-    doctest.run_docstring_examples(initial_assignment_alpha_MSS, globals())
+    # doctest.run_docstring_examples(initial_assignment_alpha_MSS, globals())
     # doctest.run_docstring_examples(bag_filling_algorithm_alpha_MMS, globals())
     #doctest.run_docstring_examples(alpha_MMS_allocation, globals())
     # doctest.run_docstring_examples(fixed_assignment, globals())
