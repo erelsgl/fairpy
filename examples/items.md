@@ -91,8 +91,8 @@ print(fairpy.items.max_product_allocation(instance).round(3))
 ```
 
 ```
-Alice gets { 50.0% of z, 38.8% of x, 100.0% of w} with value 16.1.
-Dina gets { 61.2% of x, 100.0% of v, 100.0% of u} with value 30.2.
+Alice gets { 50.0% of z, 38.7% of x, 100.0% of w} with value 16.1.
+Dina gets { 61.3% of x, 100.0% of v, 100.0% of u} with value 30.2.
 George gets { 50.0% of z, 100.0% of y} with value 25.5.
 ```
 
@@ -105,9 +105,9 @@ print(fairpy.items.leximin_optimal_allocation(instance).round(3))
 ```
 
 ```
-Alice gets { 66.8% of z, 91.2% of x, 100.0% of w} with value 22.3.
-Dina gets { 8.8% of x, 100.0% of v, 100.0% of u} with value 22.3.
-George gets { 33.2% of z, 100.0% of y} with value 22.3.
+Alice gets { 66.7% of z, 91.3% of x, 100.0% of w} with value 22.3.
+Dina gets { 8.7% of x, 100.0% of v, 100.0% of u} with value 22.3.
+George gets { 33.3% of z, 100.0% of y} with value 22.3.
 ```
 
 
@@ -119,8 +119,8 @@ print(fairpy.items.efficient_envyfree_allocation_with_bounded_sharing(instance).
 ```
 
 ```
-Alice gets { 50.0% of z, 38.8% of x, 100.0% of w} with value 16.1.
-Dina gets { 61.2% of x, 100.0% of v, 100.0% of u} with value 30.2.
+Alice gets { 50.0% of z, 38.7% of x, 100.0% of w} with value 16.1.
+Dina gets { 61.3% of x, 100.0% of v, 100.0% of u} with value 30.2.
 George gets { 50.0% of z, 100.0% of y} with value 25.5.
 ```
 
@@ -145,4 +145,4 @@ For more information see:
 * [List of item allocation algorithms for future work](../fairpy/items/README-future.md).
 
 ---
-Markdown generated automatically from [items.py](items.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2021-11-23.
+Markdown generated automatically from [items.py](items.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2022-02-02.

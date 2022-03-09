@@ -108,4 +108,4 @@ Some decorators that can be useful for implementing new algorithms are:
 * Ordering an instance (useful for maximin-share approximation algorithms).
 
 ---
-Markdown generated automatically from [decorators.py](decorators.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2021-11-23.
+Markdown generated automatically from [decorators.py](decorators.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2022-02-02.

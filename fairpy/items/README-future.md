@@ -9,8 +9,7 @@
 Proceedings of EC'04.  *Theorem 2.1 (envy-graph). Theorem 3 (PTAS for minimizing envy-ratio).*.
 
 * Sylvain Bouveret, Ulle Endriss, Jérôme Lang (2010).
-["Fair Division under Ordinal Preferences: Computing Envy-Free Allocations of Indivisible Goods"](https://ebooks.iospress.nl/doi/10.3233/978-1-60750-606-5-387).
-Proceedings of ECAI'10.
+["Fair Division under Ordinal Preferences: Computing Envy-Free Allocations of Indivisible Goods"](https://ebooks.iospress.nl/doi/10.3233/978-1-60750-606-5-387). Proceedings of ECAI'10.
 
 * Evangelos Markakis, Christos-Alexandros Psomas (2011).
 ["On Worst-Case Allocations in the Presence of Indivisible Goods"](https://link.springer.com/chapter/10.1007/978-3-642-25510-6_24).
