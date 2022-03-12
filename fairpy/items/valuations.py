@@ -502,7 +502,7 @@ class AdditiveValuation(Valuation):
         >>> mms_part = valuation.partition_1_of_c_MMS(4,['a','b','c']) # just verify that there is no exception
         """
         partition = prtpy.partition(
-            algorithm=prtpy.exact.integer_programming,
+            algorithm=prtpy.partitioning.integer_programming,
             numbins=c,
             items=items,
             map_item_to_value=lambda item: self.value(item),
@@ -524,7 +524,7 @@ class AdditiveValuation(Valuation):
             return 0
         else:
             return prtpy.partition(
-                algorithm=prtpy.exact.integer_programming,
+                algorithm=prtpy.partitioning.integer_programming,
                 numbins=c,
                 items=self.desired_items,
                 map_item_to_value=lambda item: self.value(item),

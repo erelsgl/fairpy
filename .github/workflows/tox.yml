@@ -3,12 +3,12 @@ name: tox
 on:
   push:
     branches:
-      - main
-      - master
+      - main_disabled
+      - master_disabled
   pull_request:
     branches:
-      - main
-      - master
+      - main_disabled
+      - master_disabled
 
 jobs:
   build:
