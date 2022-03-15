@@ -355,62 +355,71 @@ def fixed_assignment(agents: List[AdditiveAgent], items: List[str]):
     >>> print(remaining_agents, alloc, remaining_items)
     [] {'Bruce': ['x'], 'Carl': ['y']} ['z']
     """
+    # Algo 5
+def fixed_assignment(agents: List[AdditiveAgent], items: List[str]):
     ag_alloc = {}  #agents allocations
     n = len(agents)-1
     if(n+1>len(items)):
         return agents, ag_alloc, items 
     #items=list(agents[0].valuation.all_items())
     val_arr = dict() #values of agents
+
     for i in agents:
         val_arr[i.name()] = i.valuation.map_good_to_value
-    j=0
-    while(j<=n):    # for evry agents chack if s1/s2/s3>=three_quarters
-        
-        nameI=agents[j].name()  #agent name
-        i=val_arr[nameI]    #agent[j]
-        s1 = (i.get(items[0]))
-        if(n+1<len(items)): # chack if we have more then n items
-            s2 = i.get(items[n]) + i.get(items[n+1])
-            if((2*n+1)<len(items)): # chack if we have more then 2*n items
-                s3 = (i.get(items[2*n-1])) + (i.get(items[2*n])) + (i.get(items[2*n+1]))
-            else:
-                s3 = -1
-        else:
-            s2 = -1
-            s3 = -1
-        
-        if(s1>=three_quarters):
-            ag_alloc[str(nameI)] = [items[0]]
-            val_arr.pop(str(nameI))
-            val_arr = update_val([items[0]], val_arr, n)
-            items.remove(items[0])
-            agents.remove(agents[j])
-            j=0
-            n = n - 1
-        elif(s2>=three_quarters):
-            ag_alloc[str(nameI)] = [items[n] , items[n+1]]
-            val_arr.pop(str(nameI))
-            val_arr = update_val([items[n] , items[n+1]], val_arr, n)
-            items.remove(items[n+1])
-            items.remove(items[n])
-            agents.remove(agents[j])
-            j=0
-            n = n - 1
-        elif(s3>=three_quarters):
-            ag_alloc[str(nameI)] = [items[2*n-1], items[2*n] , items[2*n+1]]
-            val_arr.pop(str(nameI))
-            val_arr = update_val([items[2*n-1], items[2*n] , items[2*n+1]], val_arr, n)
-            items.remove(items[2*n+1])
-            items.remove(items[2*n])
-            items.remove(items[2*n-1])
-            agents.remove(agents[j])
-            j=0
-            n = n - 1
-        else:
-            j = j + 1
     
+        
+    si=0
+    while(si<3):
+        j=0
+        while(j<=n):    # for evry agents chack if s1/s2/s3>=three_quarters
+        
+            nameI=agents[j].name()  #agent name
+            i=val_arr[nameI]    #agent[j]
+            if(si==0):
+                bag_si = (i.get(items[0]))
+            elif(si==1 and n+1<len(items)): # chack if we have more then n items
+                bag_si = i.get(items[n]) + i.get(items[n+1])
+            elif(si==2 and (2*n+1)<len(items)): # chack if we have more then 2*n items
+                bag_si = (i.get(items[2*n-1])) + (i.get(items[2*n])) + (i.get(items[2*n+1]))
+            else:
+                bag_si = -1
+
+            if(bag_si>=three_quarters):
+                if(si==0):
+                    ag_alloc[str(nameI)] = [items[0]]
+                    val_arr.pop(str(nameI))
+                    val_arr = update_val([items[0]], val_arr, n)
+                    items.remove(items[0])
+                    agents.remove(agents[j])
+                    n = n - 1
+                    j=n+1
+                    si=-1
+                elif(si==1):
+                    ag_alloc[str(nameI)] = [items[n] , items[n+1]]
+                    val_arr.pop(str(nameI))
+                    val_arr = update_val([items[n] , items[n+1]], val_arr, n)
+                    items.remove(items[n+1])
+                    items.remove(items[n])
+                    agents.remove(agents[j])
+                    n = n - 1
+                    j=n+1
+                    si=-1
+                elif(si==2):
+                    ag_alloc[str(nameI)] = [items[2*n-1], items[2*n] , items[2*n+1]]
+                    val_arr.pop(str(nameI))
+                    val_arr = update_val([items[2*n-1], items[2*n] , items[2*n+1]], val_arr, n)
+                    items.remove(items[2*n+1])
+                    items.remove(items[2*n])
+                    items.remove(items[2*n-1])
+                    agents.remove(agents[j])
+                    n = n - 1
+                    j=n+1
+                    si=-1
+            else:
+                j = j + 1
+        si=si+1
     # sort the alloc!
-    ag_alloc = sort_allocation(ag_alloc)
+    #ag_alloc = sort_allocation(ag_alloc)
     return agents, ag_alloc, items 
 
 
@@ -548,120 +557,120 @@ def tentative_assignment(agents: List[AdditiveAgent], items: List[str]):
     #ag_alloc = sort_allocation(ag_alloc)
     return agents_temp, ag_alloc, items_temp 
 
-def compute_n21(normelized_agents,items):
-    agents_num=len(normelized_agents)
+# def compute_n21(normelized_agents,items):
+#     agents_num=len(normelized_agents)
 
-    #calculate l,h,sum of bundles of each agents
-    l=[0] * agents_num
-    h=[0] * agents_num
-    sum=[0] * agents_num 
-    for i in range(0,agents_num):
-        mirror_index=2*agents_num-i-1
-        assert (len(items)>0 and len(items)>mirror_index )#has to be both!!
-        bundel_i=[items[0],items[mirror_index]]
-        for agent_index in range(0,agents_num):
-            bundle_val=normelized_agents[agent_index].value(bundel_i)
-            if bundle_val<three_quarters:
-                l[agent_index]+=1
-                sum[agent_index]+=bundle_val
-            elif bundle_val>1:
-                h[agent_index]+=1
+#     #calculate l,h,sum of bundles of each agents
+#     l=[0] * agents_num
+#     h=[0] * agents_num
+#     sum=[0] * agents_num 
+#     for i in range(0,agents_num):
+#         mirror_index=2*agents_num-i-1
+#         assert (len(items)>0 and len(items)>mirror_index )#has to be both!!
+#         bundel_i=[items[0],items[mirror_index]]
+#         for agent_index in range(0,agents_num):
+#             bundle_val=normelized_agents[agent_index].value(bundel_i)
+#             if bundle_val<three_quarters:
+#                 l[agent_index]+=1
+#                 sum[agent_index]+=bundle_val
+#             elif bundle_val>1:
+#                 h[agent_index]+=1
     
 
-    #go through all agents, starts from lowest index, and check if belong to n21
-    for agent_index in range(0,agents_num):
-        x_agent=(0.75)*l[agent_index]-sum[agent_index]
-        lowest_value_items=normelized_agents[agent_index].value_except_best_c_goods(agents_num)
-        #if this agent belong to N21
-        if(h[agent_index]>0 and h[agent_index]>l[agent_index] and (x_agent+l[agent_index]/8)>lowest_value_items): 
-            return agent_index
-    #if no agent belongs to N21
-    return None 
-def compute_alphas(normelized_agents,agent_index,items,remaining_items_after_tentative):
-        agents_num=len(normelized_agents)
+#     #go through all agents, starts from lowest index, and check if belong to n21
+#     for agent_index in range(0,agents_num):
+#         x_agent=(0.75)*l[agent_index]-sum[agent_index]
+#         lowest_value_items=normelized_agents[agent_index].value_except_best_c_goods(agents_num)
+#         #if this agent belong to N21
+#         if(h[agent_index]>0 and h[agent_index]>l[agent_index] and (x_agent+l[agent_index]/8)>lowest_value_items): 
+#             return agent_index
+#     #if no agent belongs to N21
+#     return None 
+# def compute_alphas(normelized_agents,agent_index,items,remaining_items_after_tentative):
+#         agents_num=len(normelized_agents)
 
-        #update_mms_bounds:
-        alpha_array=[0]*5
-        alpha_array[0]=(0.75)*normelized_agents[agent_index].value(items[0])
-        alpha_array[1]=(0.75)*normelized_agents[agent_index].value({items[agents_num-1],items[agents_num]})
-        alpha_array[2]=(0.75)*normelized_agents[agent_index].value({items[2*agents_num-2],items[2*agents_num-1],items[2*agents_num]})
-        alpha_array[3]=(0.75)*normelized_agents[agent_index].value({remaining_items_after_tentative[0],remaining_items_after_tentative[2*len(remaining_items_after_tentative)]})
+#         #update_mms_bounds:
+#         alpha_array=[0]*5
+#         alpha_array[0]=(0.75)*normelized_agents[agent_index].value(items[0])
+#         alpha_array[1]=(0.75)*normelized_agents[agent_index].value({items[agents_num-1],items[agents_num]})
+#         alpha_array[2]=(0.75)*normelized_agents[agent_index].value({items[2*agents_num-2],items[2*agents_num-1],items[2*agents_num]})
+#         alpha_array[3]=(0.75)*normelized_agents[agent_index].value({remaining_items_after_tentative[0],remaining_items_after_tentative[2*len(remaining_items_after_tentative)]})
 
-        multiplyer=max(alpha_array)
+#         multiplyer=max(alpha_array)
 
 
-def update_mms_bounds(agent):
+# def update_mms_bounds(agent):
+
+
+
+# # algo 4
+# def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str]):
+#     """
+#     Finds three_quarters_MMS_allocation for the given agents and valuations.
+#     :param agents: Valuations of agents, valuation are ordered in assending order
+#     :return allocation: three_quarters_MMS_allocation for all agents
+
+
+#     >>> ### allocation for 1 agent, 1 object
+#     >>> a = AdditiveAgent({"x": 2}, name="Alice")
+#     >>> agents=[a]
+#     >>> a1 = three_quarters_MMS_allocation(agents)
+#     >>> print(a1)
+#     Alice gets {x} with value 2.
+#     >>> ### allocation for 1 agent, 2 objects
+#     >>> b = AdditiveAgent({"x": 1, "y": 2}, name="Blice")
+#     >>> agents=[b]
+#     >>> a1 = three_quarters_MMS_allocation(agents)
+#     >>> print(a1)
+#     Blice gets {x,y} with value 3.
+#     >>> ### allocation for 2 agents, 2 objects
+#     >>> a = AdditiveAgent({"x": 1, "y": 2}, name="Alice")
+#     >>> agents = [a, b]
+#     >>> a1 = three_quarters_MMS_allocation(agents)
+#     >>> print(a1)
+#     Alice gets {x} with value 1.
+#     Blice gets {y} with value 2.
+#     >>> ### allocation for 3 agents, 3 objects (low alpha)
+#     >>> a = AdditiveAgent({"x1": 3, "x2": 2, "x3": 1}, name="A")
+#     >>> b = AdditiveAgent({"x1": 4, "x2": 4, "x3": 4}, name="B")
+#     >>> c = AdditiveAgent({"x1": 5, "x2": 2, "x3": 1}, name="C")
+#     >>> agents=[a,b,c]
+#     >>> a1 = three_quarters_MMS_allocation(agents)
+#     >>> print(a1)
+#     A gets {x1} with value 3.
+#     B gets {x2} with value 4.
+#     C gets {x3} with value 1.
+#     >>> ### detailed example: enter loop and adjusted by alpha.
+#     >>> ### 3 agents 11 objects
+#     >>> agents = AdditiveAgent.list_from({"Alice":[35.5,35,19,17.5,17.5,17.5,1,1,1,1,1],\
+#     "Bruce":[35.5,35,19,17.5,17.5,17.5,1,1,1,1,1],\
+#     "Carl":[35.5,35,19,17.5,17.5,17.5,1,1,1,1,1]})
+#     >>> alloc = three_quarters_MMS_allocation(agents)
+#     >>> print(alloc.str_with_values(precision=7))
+#     Alice gets {2,3} with value 36.5.
+#     Bruce gets {1,4} with value 52.5.
+#     Carl gets {0,6} with value .
+#     <BLANKLINE>
+#     """
+#     #return Allocation(agents=agents, bundles={"Carl": {"x"}})
     
+#     num_agents=len(agents)
+#     if num_agents==0 or num_agents>len(items):
+#        return Allocation(agents=agents, bundles={})
 
+#     divide_by_array=[]
+#     for i in range(0,num_agents):
+#         divide_by_array[i]=agents[i].total_value()/num_agents
 
-# algo 4
-def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str]):
-    """
-    Finds three_quarters_MMS_allocation for the given agents and valuations.
-    :param agents: Valuations of agents, valuation are ordered in assending order
-    :return allocation: three_quarters_MMS_allocation for all agents
+#     normelized_agents=normalize_algo1(agents,divide_by_array,items)
+#     alloc_fixed_assignment=fixed_assignment(normelized_agents,items)
+#     if(len(normelized_agents)==0):
+#         return combine_allocations([alloc_fixed_assignment],agents)#use function to get value of alloc
+#     remaining_agents, tentative_aloc, remaining_items_after_tentative=tentative_assignment(items,normelized_agents)
+#     agents_num=len(normelized_agents)
 
-
-    >>> ### allocation for 1 agent, 1 object
-    >>> a = AdditiveAgent({"x": 2}, name="Alice")
-    >>> agents=[a]
-    >>> a1 = three_quarters_MMS_allocation(agents)
-    >>> print(a1)
-    Alice gets {x} with value 2.
-    >>> ### allocation for 1 agent, 2 objects
-    >>> b = AdditiveAgent({"x": 1, "y": 2}, name="Blice")
-    >>> agents=[b]
-    >>> a1 = three_quarters_MMS_allocation(agents)
-    >>> print(a1)
-    Blice gets {x,y} with value 3.
-    >>> ### allocation for 2 agents, 2 objects
-    >>> a = AdditiveAgent({"x": 1, "y": 2}, name="Alice")
-    >>> agents = [a, b]
-    >>> a1 = three_quarters_MMS_allocation(agents)
-    >>> print(a1)
-    Alice gets {x} with value 1.
-    Blice gets {y} with value 2.
-    >>> ### allocation for 3 agents, 3 objects (low alpha)
-    >>> a = AdditiveAgent({"x1": 3, "x2": 2, "x3": 1}, name="A")
-    >>> b = AdditiveAgent({"x1": 4, "x2": 4, "x3": 4}, name="B")
-    >>> c = AdditiveAgent({"x1": 5, "x2": 2, "x3": 1}, name="C")
-    >>> agents=[a,b,c]
-    >>> a1 = three_quarters_MMS_allocation(agents)
-    >>> print(a1)
-    A gets {x1} with value 3.
-    B gets {x2} with value 4.
-    C gets {x3} with value 1.
-    >>> ### detailed example: enter loop and adjusted by alpha.
-    >>> ### 3 agents 11 objects
-    >>> agents = AdditiveAgent.list_from({"Alice":[35.5,35,19,17.5,17.5,17.5,1,1,1,1,1],\
-    "Bruce":[35.5,35,19,17.5,17.5,17.5,1,1,1,1,1],\
-    "Carl":[35.5,35,19,17.5,17.5,17.5,1,1,1,1,1]})
-    >>> alloc = three_quarters_MMS_allocation(agents)
-    >>> print(alloc.str_with_values(precision=7))
-    Alice gets {2,3} with value 36.5.
-    Bruce gets {1,4} with value 52.5.
-    Carl gets {0,6} with value .
-    <BLANKLINE>
-    """
-    #return Allocation(agents=agents, bundles={"Carl": {"x"}})
-    
-    num_agents=len(agents)
-    if num_agents==0 or num_agents>len(items):
-       return Allocation(agents=agents, bundles={})
-
-    divide_by_array=[]
-    for i in range(0,num_agents):
-        divide_by_array[i]=agents[i].total_value()/num_agents
-
-    normelized_agents=normalize_algo1(agents,divide_by_array,items)
-    alloc_fixed_assignment=fixed_assignment(normelized_agents,items)
-    if(len(normelized_agents)==0):
-        return combine_allocations([alloc_fixed_assignment],agents)#use function to get value of alloc
-    remaining_agents, tentative_aloc, remaining_items_after_tentative=tentative_assignment(items,normelized_agents)
-    agents_num=len(normelized_agents)
-
-    lowest_index_agent_in_n21=compute_n21(normelized_agents,items)
-    while lowest_index_agent_in_n21!=None:
+#     lowest_index_agent_in_n21=compute_n21(normelized_agents,items)
+#     while lowest_index_agent_in_n21!=None:
  
 
 
@@ -669,7 +678,7 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str])
 
 
    
-    return combine_allocations([alloc_initial_assignment,alloc_bag_filling], agents)
+    # return combine_allocations([alloc_initial_assignment,alloc_bag_filling], agents)
 
 
 ##### algo 7
@@ -791,7 +800,7 @@ if __name__ == '__main__':
     # doctest.run_docstring_examples(initial_assignment_alpha_MSS, globals())
     # doctest.run_docstring_examples(bag_filling_algorithm_alpha_MMS, globals())
     #doctest.run_docstring_examples(alpha_MMS_allocation, globals())
-    # doctest.run_docstring_examples(fixed_assignment, globals())
+    doctest.run_docstring_examples(fixed_assignment, globals())
     #doctest.run_docstring_examples(tentative_assignment, globals())
     #doctest.run_docstring_examples(three_quarters_MMS_allocation, globals())
     #doctest.run_docstring_examples(agents_conversion_to_ordered_instance, globals())
