@@ -548,6 +548,51 @@ def tentative_assignment(agents: List[AdditiveAgent], items: List[str]):
     #ag_alloc = sort_allocation(ag_alloc)
     return agents_temp, ag_alloc, items_temp 
 
+def compute_n21(normelized_agents,items):
+    agents_num=len(normelized_agents)
+
+    #calculate l,h,sum of bundles of each agents
+    l=[0] * agents_num
+    h=[0] * agents_num
+    sum=[0] * agents_num 
+    for i in range(0,agents_num):
+        mirror_index=2*agents_num-i-1
+        assert (len(items)>0 and len(items)>mirror_index )#has to be both!!
+        bundel_i=[items[0],items[mirror_index]]
+        for agent_index in range(0,agents_num):
+            bundle_val=normelized_agents[agent_index].value(bundel_i)
+            if bundle_val<three_quarters:
+                l[agent_index]+=1
+                sum[agent_index]+=bundle_val
+            elif bundle_val>1:
+                h[agent_index]+=1
+    
+
+    #go through all agents, starts from lowest index, and check if belong to n21
+    for agent_index in range(0,agents_num):
+        x_agent=(0.75)*l[agent_index]-sum[agent_index]
+        lowest_value_items=normelized_agents[agent_index].value_except_best_c_goods(agents_num)
+        #if this agent belong to N21
+        if(h[agent_index]>0 and h[agent_index]>l[agent_index] and (x_agent+l[agent_index]/8)>lowest_value_items): 
+            return agent_index
+    #if no agent belongs to N21
+    return None 
+def compute_alphas(normelized_agents,agent_index,items,remaining_items_after_tentative):
+        agents_num=len(normelized_agents)
+
+        #update_mms_bounds:
+        alpha_array=[0]*5
+        alpha_array[0]=(0.75)*normelized_agents[agent_index].value(items[0])
+        alpha_array[1]=(0.75)*normelized_agents[agent_index].value({items[agents_num-1],items[agents_num]})
+        alpha_array[2]=(0.75)*normelized_agents[agent_index].value({items[2*agents_num-2],items[2*agents_num-1],items[2*agents_num]})
+        alpha_array[3]=(0.75)*normelized_agents[agent_index].value({remaining_items_after_tentative[0],remaining_items_after_tentative[2*len(remaining_items_after_tentative)]})
+
+        multiplyer=max(alpha_array)
+
+
+def update_mms_bounds(agent):
+    
+
 
 # algo 4
 def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str]):
@@ -612,35 +657,12 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str])
     alloc_fixed_assignment=fixed_assignment(normelized_agents,items)
     if(len(normelized_agents)==0):
         return combine_allocations([alloc_fixed_assignment],agents)#use function to get value of alloc
-    remaining_agents, tentative_aloc, remaining_items=tentative_assignment(items,normelized_agents)
+    remaining_agents, tentative_aloc, remaining_items_after_tentative=tentative_assignment(items,normelized_agents)
     agents_num=len(normelized_agents)
-    l=[0] * agents_num
-    h=[0] * agents_num
-    sum=[0] * agents_num 
-    for i in range(0,agents_num):
-        mirror_index=2*agents_num-i-1
-        assert (len(items)>0 and len(items)>mirror_index )#has to be both!!
-        bundel_i=[items[0],items[mirror_index]]
-        for agent_index in range(0,agents_num):
-            bundle_val=normelized_agents[agent_index].value(bundel_i)
-            if bundle_val<three_quarters:
-                l[agent_index]+=1
-                sum[agent_index]+=bundle_val
-            elif bundle_val>1:
-                h[agent_index]+=1
-    for agent_index in range(0,agents_num):
-        x_agent=(0.75)*l[agent_index]-sum[agent_index]
-        lowest_value_items=normelized_agents[agent_index].value_except_best_c_goods(agents_num)
-        if(h[agent_index]>0 and h[agent_index]>l[agent_index] and (x_agent+l[agent_index]/8)>lowest_value_items):
-            #update_mms_bounds:
-            alpha_array=[0]*5
-            alpha_array[0]=(0.75)*normelized_agents[agent_index].value(items[0])
-            alpha_array[1]=(0.75)*normelized_agents[agent_index].value({items[agents_num-1],items[agents_num]})
-            alpha_array[2]=(0.75)*normelized_agents[agent_index].value({items[2*agents_num-2],items[2*agents_num-1],items[2*agents_num]})
-            alpha_array[3]=(0.75)*normelized_agents[agent_index].value({remaining_items[0],remaining_items[2*len(remaining_agents)]})
 
-            multiplyer=max(alpha_array)
-
+    lowest_index_agent_in_n21=compute_n21(normelized_agents,items)
+    while lowest_index_agent_in_n21!=None:
+ 
 
 
             
