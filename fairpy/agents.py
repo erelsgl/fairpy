@@ -115,18 +115,6 @@ class Agent(ABC):
         return self.valuation.value_except_worst_c_goods(bundle,c)
 
 
-    def values_1_of_c_partitions(self, c:int=1):
-        """
-        Generates the minimum values in all partitions into c bundles.
-
-        >>> a = AdditiveAgent({"x": 1, "y": 2, "z": 4, "w":0})
-        >>> sorted(a.values_1_of_c_partitions(c=2))
-        [1, 2, 3]
-
-        """
-        return self.valuation.values_1_of_c_partitions(c)
-
-
     def value_1_of_c_MMS(self, c:int=1)->int:
         """
         Calculates the value of the 1-out-of-c maximin-share ( https://en.wikipedia.org/wiki/Maximin-share )
@@ -139,7 +127,7 @@ class Agent(ABC):
         >>> a.value_1_of_c_MMS(c=3)
         0
         >>> a = AdditiveAgent({"x": 1, "y": 2, "z": 4, "w":0})
-        >>> a.value_1_of_c_MMS(c=2)
+        >>> int(a.value_1_of_c_MMS(c=2))
         3
         """
         return self.valuation.value_1_of_c_MMS(c)
@@ -288,11 +276,11 @@ class AdditiveAgent(Agent):
     False
     >>> a.is_EFx({"x"}, [{"y"}])
     True
-    >>> a.value_1_of_c_MMS(c=4)
+    >>> int(a.value_1_of_c_MMS(c=4))
     0
-    >>> a.value_1_of_c_MMS(c=3)
+    >>> int(a.value_1_of_c_MMS(c=3))
     1
-    >>> a.value_1_of_c_MMS(c=2)
+    >>> int(a.value_1_of_c_MMS(c=2))
     3
     >>> AdditiveAgent({"x": 1, "y": 2, "z": 4}, duplicity=2)
     Anonymous are 2 agents with a Additive valuation: x=1 y=2 z=4.

@@ -5,14 +5,11 @@ Uses `pweave`.
 
 import pweave, datetime, glob, os
 
-def publish_to_markdown(python_file:str, output_file:str):
-    doc = pweave.Pweb(
-        python_file, 
-        kernel="python3", 
-        doctype="markdown",
-        output=output_file)
 
-    doc.theme = "skeleton" # The default option is skeleton , other options are pweave (the old theme), bootstrap , cerulean and journal. All look the same for me.
+def publish_to_markdown(python_file: str, output_file: str):
+    doc = pweave.Pweb(python_file, kernel="python3", doctype="markdown", output=output_file)
+
+    doc.theme = "skeleton"  # The default option is skeleton , other options are pweave (the old theme), bootstrap , cerulean and journal. All look the same to me.
 
     doc.read()
     doc.run()
@@ -21,9 +18,9 @@ def publish_to_markdown(python_file:str, output_file:str):
     doc.write()
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     for python_file in glob.glob("*.py"):
         print(python_file)
-        if python_file!=os.path.basename(__file__):
-            output_file = python_file.replace(".py",".md")
-            publish_to_markdown(python_file,output_file)
+        if python_file != os.path.basename(__file__):
+            output_file = python_file.replace(".py", ".md")
+            publish_to_markdown(python_file, output_file)

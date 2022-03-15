@@ -14,7 +14,6 @@ Since:  2021-02
 """
 
 from fairpy.allocations import Allocation
-from fairpy.items import partitions
 
 from fairpy.items.fair_enough_utils import *
 

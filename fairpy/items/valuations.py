@@ -23,12 +23,14 @@ from dicttools import stringify
 import math, itertools
 from fractions import Fraction
 
-from fairpy.items import partitions  # Works in Python 3.8
 from fairpy.bundles import FractionalBundle
 
 from typing import *
 Item = Any
 Bundle = Set[Item]
+
+import prtpy
+from more_itertools import set_partitions
 
 
 class Valuation(ABC):
@@ -122,56 +124,6 @@ class Valuation(ABC):
             for sub_bundle in itertools.combinations(bundle, c)
         ])
 
-
-
-
-    def partition_1_of_c_MMS(self, c: int, items: list) -> List[Bundle]:
-        """
-        Compute a 1-out-of-c MMS partition of the given items.
-        :param c: number of bundles in the partition.
-        :param items: A list of the items to divide.
-        :return: The partitioning the holds the MMS
-        AUTHOR: Shai Aharon.
-        SINCE: 2021-02
-
-        >>> items = ['a','b' ,'c', 'd', 'e', 'f']
-        >>> item_values = {'a': 5, 'b': 5, 'c': 3, 'd': 4, 'e': 5, 'f': 5}
-        >>> valuation = AdditiveValuation(item_values)
-        >>> mms_part = valuation.partition_1_of_c_MMS(3,items)
-        >>> [sorted(x) for x in mms_part]
-        [['b', 'c'], ['a', 'd'], ['e', 'f']]
-        >>> mms_part = valuation.partition_1_of_c_MMS(4,items)
-        >>> [sorted(x) for x in mms_part]
-        [['a'], ['b'], ['c', 'd'], ['e', 'f']]
-        >>> mms_part = valuation.partition_1_of_c_MMS(4,['a','b','c'])
-        >>> [sorted(x) for x in mms_part]
-        []
-        """
-        maxi_min = -1
-        partition = []
-        # Iterate over all possible partitions
-        for tmp_partition in partitions.partitions_to_exactly_c_subsets(c, items):
-            min_val = min([self.value(bundle) for bundle in tmp_partition])
-            # Update maximin value
-            if maxi_min < min_val:
-                partition = tmp_partition
-                maxi_min = min_val
-        return [set(x) for x in partition]
-
-
-    def values_1_of_c_partitions(self, c:int=1):
-        """
-        Generates the minimum values in all partitions into c bundles.
-
-        >>> a = AdditiveValuation({"x": 1, "y": 2, "z": 4, "w":0})
-        >>> sorted(a.values_1_of_c_partitions(c=2))
-        [1, 2, 3]
-
-        """
-        for partition in partitions.partitions_to_exactly_c_subsets(c, self.desired_items_list):
-            yield min([self.value(bundle) for bundle in partition])
-
-
     def value_1_of_c_MMS(self, c:int=1)->int:
         """
         Calculates the value of the 1-out-of-c maximin-share ( https://en.wikipedia.org/wiki/Maximin-share )
@@ -183,14 +135,14 @@ class Valuation(ABC):
         1
         >>> a.value_1_of_c_MMS(c=3)
         0
-        >>> a = AdditiveValuation({"x": 1, "y": 2, "z": 4, "w":0})
-        >>> a.value_1_of_c_MMS(c=2)
-        3
         """
         if c > len(self.desired_items):
             return 0
         else:
-            return max(self.values_1_of_c_partitions(c))
+            return max(
+                min([self.value(bundle) for bundle in partition])
+                for partition in set_partitions(self.desired_items_list, c)
+            )
 
     def value_proportional_except_c(self, num_of_agents:int, c:int):
         """
@@ -354,11 +306,11 @@ class AdditiveValuation(Valuation):
     False
     >>> a.is_EFx({"x"}, [{"y"}])
     True
-    >>> a.value_1_of_c_MMS(c=4)
+    >>> int(a.value_1_of_c_MMS(c=4))
     0
-    >>> a.value_1_of_c_MMS(c=3)
+    >>> int(a.value_1_of_c_MMS(c=3))
     1
-    >>> a.value_1_of_c_MMS(c=2)
+    >>> int(a.value_1_of_c_MMS(c=2))
     3
     >>> list(a.all_items())
     ['x', 'y', 'z', 'w']
@@ -404,11 +356,11 @@ class AdditiveValuation(Valuation):
     True
     >>> a.is_EF1({0}, [{1,2}])
     False
-    >>> a.value_1_of_c_MMS(c=4)
+    >>> int(a.value_1_of_c_MMS(c=4))
     0
-    >>> a.value_1_of_c_MMS(c=3)
+    >>> int(a.value_1_of_c_MMS(c=3))
     11
-    >>> a.value_1_of_c_MMS(c=2)
+    >>> int(a.value_1_of_c_MMS(c=2))
     33
     >>> a.all_items()
     {0, 1, 2, 3}
@@ -528,6 +480,59 @@ class AdditiveValuation(Valuation):
         else:
             sorted_values = sorted(self.map_good_to_value.values(), reverse=True)
             return sorted_values[c-1]
+
+    def partition_1_of_c_MMS(self, c: int, items: list) -> List[Bundle]:
+        """
+        Compute a 1-out-of-c MMS partition of the given items.
+        :param c: number of bundles in the partition.
+        :param items: A list of the items to divide.
+        :return: The partitioning that holds the MMS
+        AUTHOR: Shai Aharon.
+        SINCE: 2021-02
+
+        >>> items = ['a','b' ,'c', 'd', 'e', 'f']
+        >>> item_values = {'a': 1, 'b': 2, 'c': 4, 'd': 8, 'e': 16, 'f': 32}
+        >>> valuation = AdditiveValuation(item_values)
+        >>> mms_part = valuation.partition_1_of_c_MMS(3,items)
+        >>> [sorted(x) for x in mms_part]
+        [['a', 'b', 'c', 'd'], ['e'], ['f']]
+        >>> mms_part = valuation.partition_1_of_c_MMS(4,items)
+        >>> [sorted(x) for x in mms_part]
+        [['a', 'b', 'c'], ['d'], ['e'], ['f']]
+        >>> mms_part = valuation.partition_1_of_c_MMS(4,['a','b','c']) # just verify that there is no exception
+        """
+        partition = prtpy.partition(
+            algorithm=prtpy.exact.integer_programming,
+            numbins=c,
+            items=items,
+            map_item_to_value=lambda item: self.value(item),
+            objective=prtpy.obj.MaximizeSmallestSum,
+            outputtype=prtpy.out.Partition
+        )
+        return [set(x) for x in partition]
+
+
+    def value_1_of_c_MMS(self, c:int=1)->int:
+        """
+        Calculates the value of the 1-out-of-c maximin-share ( https://en.wikipedia.org/wiki/Maximin-share )
+
+        >>> a = AdditiveValuation({"x": 1, "y": 2, "z": 4, "w":0})
+        >>> a.value_1_of_c_MMS(c=2)
+        3.0
+        """
+        if c > len(self.desired_items):
+            return 0
+        else:
+            return prtpy.partition(
+                algorithm=prtpy.exact.integer_programming,
+                numbins=c,
+                items=self.desired_items,
+                map_item_to_value=lambda item: self.value(item),
+                objective=prtpy.obj.MaximizeSmallestSum,
+                outputtype=prtpy.out.SmallestSum
+            )
+
+
 
     def __repr__(self):
         if isinstance(self.map_good_to_value,dict):
@@ -736,26 +741,39 @@ class ValuationMatrix:
 
     def total_values(self) -> np.ndarray:
         """
-        Return a 1-dimensional array in which elemenet i is the total value of agent i for all items.
+        Returns a 1-dimensional array in which elemenet i is the total value of agent i for all items.
         """
-        return np.sum(self._v, axis=1, keepdims=True)
+        return np.sum(self._v, axis=1, keepdims=False)
 
-    def normalize(self) -> int:
+    def normalize(self) -> float:
         """
         Normalize valuation matrix so that each agent has equal total value of all items.
-        In case of integer values they remain integer to avoid floating point mistakes.
-
+        In case of integer values they remain integer to avoid floating point inaccuracies.
         :return the common value after normalization.
+
+        >>> v = ValuationMatrix([[5., 12., 3],[30, 13, 7]])
+        >>> v.normalize()
+        1
+        >>> v
+        [[0.25 0.6  0.15]
+         [0.6  0.26 0.14]]
+        >>> v = ValuationMatrix([[5, 12, 3],[20, 2, 8]])
+        >>> v.normalize()
+        60
+        >>> v
+        [[15 36  9]
+         [40  4 16]]
         """
         total_values = self.total_values()
-
         if issubclass(self._v.dtype.type, np.integer):
-            total_value = np.lcm.reduce(total_values)
-            self._v *= total_value // total_values
-            return total_value
-
-        self._v /= total_values
-        return 1
+            new_total_value = np.lcm.reduce(total_values)
+            for i in self.agents():
+                self._v[i] *= (new_total_value // total_values[i])
+            return new_total_value
+        else:
+            for i in self.agents():
+                self._v[i] /= total_values[i]
+            return 1
 
     def verify_normalized(self) -> int:
         """
@@ -778,3 +796,4 @@ if __name__ == "__main__":
     import doctest
     (failures,tests) = doctest.testmod(report=True)
     print ("{} failures, {} tests".format(failures,tests))
+

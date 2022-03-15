@@ -43,6 +43,7 @@ def dominating_allocation_with_bounded_sharing(instance:Any, thresholds:List) ->
     Agent #1 gets { 37.5% of 0, 100.0% of 1} with value 6.88.
     <BLANKLINE>
     """
+    # logger.info("Finding an allocation with thresholds %s", thresholds)
     v = ValuationMatrix(instance)
     allocation_vars = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
     feasibility_constraints = [
@@ -59,6 +60,7 @@ def dominating_allocation_with_bounded_sharing(instance:Any, thresholds:List) ->
     ]
     constraints = feasibility_constraints+positivity_constraints+utility_constraints
     problem = cvxpy.Problem(cvxpy.Maximize(utilities[v.num_of_agents-1]), constraints)
+    logger.info("constraints: %s", constraints)
     solvers = [
         (cvxpy.SCIPY, {'method': 'highs-ds'}),        # Always finds a BFS
         (cvxpy.MOSEK, {"bfs":True}),                  # Always finds a BFS
@@ -107,7 +109,10 @@ def proportional_allocation_with_bounded_sharing(instance:Any, entitlements:List
     else:
         entitlements = np.array(entitlements)
     entitlements = entitlements/sum(entitlements)  # normalize
+    logger.info("Normalized entitlements: %s", entitlements)
+    logger.info("Total values: %s", v.total_values())
     thresholds = v.total_values() * entitlements
+    logger.info("Value thresholds: %s", thresholds)
     return dominating_allocation_with_bounded_sharing(v, thresholds)
 
 
