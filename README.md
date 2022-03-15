@@ -1,6 +1,6 @@
 # fairpy
 
-![Tox result](https://github.com/erelsgl/fairpy/workflows/tox/badge.svg)
+![PyTest result](https://github.com/erelsgl/fairpy/workflows/pytest/badge.svg)
 
 An open-source library of [fair division algorithms](https://en.wikipedia.org/wiki/Fair_division) in Python.
 Designed for three target audiences:
