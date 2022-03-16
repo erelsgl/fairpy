@@ -750,10 +750,7 @@ def compute_alphas(agents,agent_index,items,remaining_items_after_tentative):
 
     return max(alpha_array)
     
-
-
-# def update_mms_bounds(normelized_agents,agent_index,items,remaining_items_after_tentative):
-   
+ 
 
 
 # algo 4
@@ -807,7 +804,7 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str])
     >>> print(alloc.str_with_values(precision=7))
     Alice gets {x3,x4} with value 36.5.
     Bruce gets {x2,x5} with value 52.5.
-    Carl gets {x1,x7} with value 36.5.
+    Carl gets {x1,x6} with value 53.
     <BLANKLINE>
     """
     
@@ -827,7 +824,7 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str])
     if(len(normelized_agents)==0):
         return combine_allocations([alloc_fixed_assignment],agents)#use function to get value of alloc
     #algo 6
-    remaining_agents,tentative_aloc,remaining_items_after_tentative=tentative_assignment(items=items,agents=normelized_agents)
+    remaining_agents,tentative_alloc,remaining_items_after_tentative=tentative_assignment(items=items,agents=normelized_agents)
     
     lowest_index_agent_in_n21=compute_n21(normelized_agents,items)
     while lowest_index_agent_in_n21!=None:
@@ -851,15 +848,6 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str])
 
     bag_filling_alloc=bag_filling_algorithm_alpha_MMS(items=items,agents=normelized_agents,alpha=0.75)
     return combine_allocations([alloc_fixed_assignment,tentative_alloc,bag_filling_alloc],agents) 
-
-
-
-            
-
-
-   
-    return 5
-    #combine_allocations([alloc_initial_assignment,alloc_bag_filling], agents)
 
 
 ##### algo 7
@@ -989,5 +977,4 @@ if __name__ == '__main__':
     # Alice gets {x3,x4} with value 36.5.
     # Bruce gets {x2,x5} with value 52.5.
     # Carl gets {x1,x7} with value 36.5.
-
 
