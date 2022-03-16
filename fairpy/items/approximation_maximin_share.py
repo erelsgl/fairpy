@@ -14,7 +14,6 @@ See also:
 Since:
 """
 
-# import cvxpy
 from unicodedata import name
 from fairpy import Allocation, ValuationMatrix, Agent, AdditiveValuation, convert_input_to_valuation_matrix
 from fairpy import agents
@@ -24,7 +23,6 @@ from fairpy.items.bag_filling import Bag
 from copy import deepcopy
 import logging
 
-import cvxpy as cp
 
 logger = logging.getLogger(__name__)
 three_quarters = 0.75
