@@ -15,6 +15,7 @@ Since:
 """
 
 # import cvxpy
+from unicodedata import name
 from fairpy import Allocation, ValuationMatrix, Agent, AdditiveValuation, convert_input_to_valuation_matrix
 from fairpy import agents
 from fairpy.agents import AdditiveAgent, agent_names_from
@@ -208,9 +209,27 @@ def bag_filling_algorithm_alpha_MMS(items: List[str],agents: List[AdditiveAgent]
 
     return Allocation(agents=agents_names, bundles=bundles)
 
+def update_bound(agents: List[AdditiveAgent],alpha: float,items: List[str],index_specific_agent:int):
+    
+    # if not index_specific_agent(index_specific_agent,int): #how much to do?
+    #     raise IndexError(f"agent index should be an integer, but it is {index_specific_agent}") 
+
+    updated_agents=[None]*len(agents)
+    num_agents=len(agents)
+    for i in range(0,num_agents):
+        if(i!=index_specific_agent):
+            updated_agents[i]=agents[i]
+        else:
+            item_value={}
+
+            for item in items:
+               item_value[item]=(agents[i].value(item))/alpha
+            updated_agents[i]=AdditiveAgent(item_value,name=agents[i]._name)
+    return updated_agents
 
 
 def normalize_algo1(agents: List[AdditiveAgent], mms_values: List[float],items: List[str]):
+    
     normelized_agents={}
     #AdditiveAgent.list_from({"Alice":[1,2], "George":[3,4]})
     num_agents=len(agents)
@@ -626,6 +645,7 @@ def compute_sigma_for_given_alpha(bundles:List[float],alpha:float):
     :param bundles: valuations of the bags from B1 to Bk, were k is number of agents
     :param alpha: the potential alpha5. currently computed with
     :return sigma: oneside of the inequality 
+    >>> compute_sigma_for_given_alpha(bundles,0.967930029)
     """
     sum=0
     count=0
@@ -646,7 +666,7 @@ def compute_alpha5_using_binary_search(bundles:List[float],lowest_valued_items:f
     :return sigma: approximation of alpha 5
     """
     
-# ע"י חיפוש בינארי, תוך 20 איטרציות אפשר למצוא את אלפא המקסימלי בדיוק של 1 למיליון, שזה נראה לי די מספיק.
+# ע"י חיפוש בינארי, תוך 20 איטרציות אפשר למצוא את אלפא המקסימלי בדיוק של 1 למיליון
     edges=[1,0]
     # alpha=0.5
     alpha=(edges[0]+edges[1])/2 
@@ -662,6 +682,7 @@ def compute_alpha5_using_binary_search(bundles:List[float],lowest_valued_items:f
             edges[0]=alpha #make lower edge higher
             edge_index=1
         alpha=(edges[0]+edges[1])/2 
+        i+=1
     return edges[edge_index]
     
     
@@ -793,25 +814,44 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str])
     num_agents=len(agents)
     if num_agents==0 or num_agents>len(items):
        return Allocation(agents=agents, bundles={})
-
+    
+    #normelize
     divide_by_array=[0]*num_agents
     for i in range(0,num_agents):
         divide_by_array[i]=agents[i].total_value()/num_agents
 
     normelized_agents=normalize_algo1(agents,divide_by_array,items)
+
+    #algo 5
     alloc_fixed_assignment=fixed_assignment(normelized_agents,items)
     if(len(normelized_agents)==0):
         return combine_allocations([alloc_fixed_assignment],agents)#use function to get value of alloc
+    #algo 6
     remaining_agents,tentative_aloc,remaining_items_after_tentative=tentative_assignment(items=items,agents=normelized_agents)
-    agents_num=len(normelized_agents)
-
+    
     lowest_index_agent_in_n21=compute_n21(normelized_agents,items)
     while lowest_index_agent_in_n21!=None:
         #update mms bounds
         alpha=compute_alphas(normelized_agents,lowest_index_agent_in_n21,items,remaining_items_after_tentative)
-        # a = AdditiveAgent({"x1": 0.25, "x2": 0.25, "x3": 0.25, "x4": 0.25, "x5": 0.25, "x6": 0.25, "x7": 0.25, "x8": 0.25, "x9": 0.25 }, name="A")
-        print(normelized_agents[lowest_index_agent_in_n21].valuation.desired_items())
- 
+        normelized_agents=update_bound(normelized_agents,alpha,items,lowest_index_agent_in_n21) 
+
+        #algo 5
+        alloc_fixed_assignment=fixed_assignment(normelized_agents,items)
+        if(len(normelized_agents)==0):
+            return combine_allocations([alloc_fixed_assignment],agents) #use function to get value of alloc
+        
+        #algo 6
+        remaining_agents,tentative_alloc,remaining_items_after_tentative=tentative_assignment(items=items,agents=normelized_agents)
+        #update val for loop
+        lowest_index_agent_in_n21=compute_n21(normelized_agents,items)
+
+    #make all tentative assignments final
+    normelized_agents=remaining_agents
+    items=remaining_items_after_tentative
+
+    bag_filling_alloc=bag_filling_algorithm_alpha_MMS(items=items,agents=normelized_agents,alpha=0.75)
+    return combine_allocations([alloc_fixed_assignment,tentative_alloc,bag_filling_alloc],agents) 
+
 
 
             
@@ -945,7 +985,7 @@ if __name__ == '__main__':
     "Bruce":{"x1":35.5,"x2":35,"x3":19,"x4":17.5,"x5":17.5,"x6":17.5,"x7":1,"x8":1,"x9":1,"x10":1,"x11":1},\
     "Carl":{"x1":35.5,"x2":35,"x3":19,"x4":17.5,"x5":17.5,"x6":17.5,"x7":1,"x8":1,"x9":1,"x10":1,"x11":1}})
     alloc = three_quarters_MMS_allocation(agents,['x1','x2','x3','x4','x5','x6','x7','x8','x9','x10','x11'])
-    # print(alloc.str_with_values(precision=7))
+    print(alloc.str_with_values(precision=7))
     # Alice gets {x3,x4} with value 36.5.
     # Bruce gets {x2,x5} with value 52.5.
     # Carl gets {x1,x7} with value 36.5.
