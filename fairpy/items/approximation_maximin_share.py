@@ -645,7 +645,6 @@ def compute_sigma_for_given_alpha(bundles:List[float],alpha:float):
     :param bundles: valuations of the bags from B1 to Bk, were k is number of agents
     :param alpha: the potential alpha5. currently computed with
     :return sigma: oneside of the inequality 
-    >>> compute_sigma_for_given_alpha(bundles,0.967930029)
     """
     sum=0
     count=0
@@ -812,7 +811,7 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str])
     if num_agents==0 or num_agents>len(items):
        return Allocation(agents=agents, bundles={})
     
-    #normelize
+    #normalize
     divide_by_array=[0]*num_agents
     for i in range(0,num_agents):
         divide_by_array[i]=agents[i].total_value()/num_agents
@@ -956,8 +955,8 @@ if __name__ == '__main__':
     import doctest
     import sys
 
-    # (failures, tests) = doctest.testmod(report=True)
-    # print("{} failures, {} tests".format(failures, tests))
+    (failures, tests) = doctest.testmod(report=True)
+    print("{} failures, {} tests".format(failures, tests))
     # how to run specific function
     # doctest.run_docstring_examples(initial_assignment_alpha_MSS, globals())
     # doctest.run_docstring_examples(bag_filling_algorithm_alpha_MMS, globals())
@@ -969,12 +968,12 @@ if __name__ == '__main__':
     #doctest.run_docstring_examples(get_alpha_MMS_allocation_to_unordered_instance, globals())
 
 
-    agents = AdditiveAgent.list_from({"Alice":{"x1":35.5,"x2":35,"x3":19,"x4":17.5,"x5":17.5,"x6":17.5,"x7":1,"x8":1,"x9":1,"x10":1,"x11":1},\
-    "Bruce":{"x1":35.5,"x2":35,"x3":19,"x4":17.5,"x5":17.5,"x6":17.5,"x7":1,"x8":1,"x9":1,"x10":1,"x11":1},\
-    "Carl":{"x1":35.5,"x2":35,"x3":19,"x4":17.5,"x5":17.5,"x6":17.5,"x7":1,"x8":1,"x9":1,"x10":1,"x11":1}})
-    alloc = three_quarters_MMS_allocation(agents,['x1','x2','x3','x4','x5','x6','x7','x8','x9','x10','x11'])
-    print(alloc.str_with_values(precision=7))
-    # Alice gets {x3,x4} with value 36.5.
+    # agents = AdditiveAgent.list_from({"Alice":{"x1":35.5,"x2":35,"x3":19,"x4":17.5,"x5":17.5,"x6":17.5,"x7":1,"x8":1,"x9":1,"x10":1,"x11":1},\
+    # "Bruce":{"x1":35.5,"x2":35,"x3":19,"x4":17.5,"x5":17.5,"x6":17.5,"x7":1,"x8":1,"x9":1,"x10":1,"x11":1},\
+    # "Carl":{"x1":35.5,"x2":35,"x3":19,"x4":17.5,"x5":17.5,"x6":17.5,"x7":1,"x8":1,"x9":1,"x10":1,"x11":1}})
+    # alloc = three_quarters_MMS_allocation(agents,['x1','x2','x3','x4','x5','x6','x7','x8','x9','x10','x11'])
+    # print(alloc.str_with_values(precision=7))
+    # # Alice gets {x3,x4} with value 36.5.
     # Bruce gets {x2,x5} with value 52.5.
     # Carl gets {x1,x7} with value 36.5.
 
