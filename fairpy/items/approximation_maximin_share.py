@@ -36,6 +36,21 @@ def willing_agent(agents:List[AdditiveAgent], bundel: List[str], threshhold)->in
     :param threshhold: parameter for how much the bag mast be worth for agent to willing to accept it.
     
     :return index: the index of the lowest index agent that will be satisfied with the bundle
+
+    >>> #
+    >>> a = AdditiveAgent({"x": 0.5, "y": 0.3 ,"z":0.2}, name="Alice")
+    >>> b = AdditiveAgent({"x": 0.4, "y": 0.8 ,"z":0.2}, name="Blice")    
+    >>> agents=[a,b]
+    >>> # empty bundle,insufficient - returns None
+    >>> willing_agent(agents,[], 0.5)
+    >>> # insufficient bundle - returns None
+    >>> willing_agent(agents,["z"], 0.5)
+    >>> # lowest index agent
+    >>> willing_agent(agents,["x","z"], 0.6)
+    0
+    >>> # first agent isn't satisfied
+    >>> willing_agent(agents,["x","y"],0.9)
+    1
     """
     num_agents=len(agents)
     for i in range(0,num_agents):
@@ -54,7 +69,6 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
     and valuation are ordered in assennding order
     :param items: items names sorted from the highest valued to the lowest
     :param alpha: parameter for how much to approximate MMS allocation.
-
     :return agents: Agents (and objects) that still need allocation
     :return ag_alloc:  Whats been allocated so far (in this function)
     :return items:  A list of all the items that can still be allocation
@@ -212,30 +226,65 @@ def bag_filling_algorithm_alpha_MMS(items: List[str],agents: List[AdditiveAgent]
     return Allocation(agents=agents_names, bundles=bundles)
 
 
-def normalize(agents: List[AdditiveAgent], mms_values: List[float],items: List[str])->List[AdditiveAgent]:
+def normalize(agents: List[AdditiveAgent], divided_by_values: List[float],items: List[str])->List[AdditiveAgent]:
     """
     normalize agents by deviding them in theirvalue in the given mms_values list
     :param agents: Valuations of agents, valuation are ordered in assenting order
-    :param mms_values: mms_value of each agents / values fo each agents valuations to be divided by.
+    :param divided_by_values: mms_value of each agents / values fo each agents valuations to be divided by.
     :param items: items names sorted from the highest valued to the lowest
-
     :return agents: new list of agents with normelized valuations
+
+    >>> a = AdditiveAgent({"x1": 3, "x2": 2, "x3": 1}, name="A")
+    >>> b = AdditiveAgent({"x1": 4, "x2": 4, "x3": 4}, name="B")
+    >>> c = AdditiveAgent({"x1": 5, "x2": 2, "x3": 1}, name="C")
+    >>> agents=[a,b,c]
+    >>> list_agents= normalize(agents, [1,4,2],['x1','x2','x3'])
+    >>> list_agents[0]
+    A is an agent with a Additive valuation: x1=3.0 x2=2.0 x3=1.0.
+    >>> list_agents[1]
+    B is an agent with a Additive valuation: x1=1.0 x2=1.0 x3=1.0.
+    >>> list_agents[2]
+    C is an agent with a Additive valuation: x1=2.5 x2=1.0 x3=0.5.
+    >>> normalize([a], [0],['x1','x2','x3'])
+    Traceback (most recent call last):
+    ZeroDivisionError: division by zero
     """
     normelized_agents={}
     num_agents=len(agents)
     for i in range(0,num_agents):
         normelized_agents[agents[i]._name]={}
         for item in items:
-            normelized_agents[agents[i]._name][item]=(agents[i].value(item))/mms_values[i]
+            normelized_agents[agents[i]._name][item]=(agents[i].value(item))/divided_by_values[i]
     return AdditiveAgent.list_from(normelized_agents)
 
 def combine_allocations(allocations: List[Allocation], agents: List[AdditiveAgent])->Allocation:
     """
-    combine list of allocations to a single alloation
+    combine list of allocations to a single alloation,
+    also allows for different valuations of agents in the returned allcation
+    assume:
+    1. if agents is allocated in one allocation, there isn't another allocation for him
+    2. no item is allocated twice
     :param allocations: list of Allocation to be combined
     :param agents: Valuations of agents, valuation are ordered in assenting order (the full list of agents from all the different allocations)
 
     :return allocation: the combined allocations
+
+    >>> #combine a few allocation
+    >>> a = AdditiveAgent({"x1": 1, "x2": 2, "x3": 3, "x4": 4, "x5": 5, "x6": 6}, name="Alice")
+    >>> b = AdditiveAgent({"x1": 1, "x2": 2, "x3": 3, "x4": 4, "x5": 5, "x6": 6}, name="Bruce")
+    >>> a1 = Allocation(agents=["Alice","Bruce"],bundles={"Alice":{}, "Bruce": {"x1","x5","x3"}})
+    >>> a2 = Allocation(agents=["Alice","Bruce"],bundles={"Alice":{"x2","x6"}, "Bruce": {}})
+    >>> combine_allocations([a1,a2], [a,b])
+    Alice gets {x2,x6} with value 8.
+    Bruce gets {x1,x3,x5} with value 9.
+    <BLANKLINE>
+    >>> # same allcations, different valuations
+    >>> c = AdditiveAgent({"x1": 0.1, "x2": 0.2, "x3": 0.3, "x4": 0.4, "x5": 0.5, "x6": 0.6}, name="Alice")
+    >>> d = AdditiveAgent({"x1": 0.1, "x2": 0.2, "x3": 0.3, "x4": 0.4, "x5": 0.5, "x6": 0.6}, name="Bruce")
+    >>> combine_allocations([a1,a2], [c,d])
+    Alice gets {x2,x6} with value 0.8.
+    Bruce gets {x1,x3,x5} with value 0.9.
+    <BLANKLINE>
     """
     is_first=True
     combined_bundle=None
@@ -597,7 +646,23 @@ def compute_n21(normelized_agents,items)->int:
     :param items: items names sorted from the highest valued to the lowest
 
     :return agent_index: the lowest index of agent in n21. if there isn't such agent, returns None 
+    >>> normelized_agents = AdditiveAgent.list_from({"A":{"x1":0.724489796,"x2":0.714285714,"x3":0.387755102,"x4":0.357142857,"x5":0.357142857,"x6":0.357142857,"x7":0.020408163,"x8":0.020408163,"x9":0.020408163,"x10":0.020408163,"x11":0.020408163},\
+    "B":{"x1":0.724489796,"x2":0.714285714,"x3":0.387755102,"x4":0.357142857,"x5":0.357142857,"x6":0.357142857,"x7":0.020408163,"x8":0.020408163,"x9":0.020408163,"x10":0.020408163,"x11":0.020408163},\
+    "C":{"x1":0.724489796,"x2":0.714285714,"x3":0.387755102,"x4":0.357142857,"x5":0.357142857,"x6":0.357142857,"x7":0.020408163,"x8":0.020408163,"x9":0.020408163,"x10":0.020408163,"x11":0.020408163}})
+	>>> compute_n21(normelized_agents,["x1","x2","x3","x4","x5","x6","x7","x8","x9","x10","x11"])	
+        0							
+    >>> normelized_agents = AdditiveAgent.list_from({"A":{"x1":0.735849057,"x2":0.679245283,"x3":0.367924528,"x4":0.367924528,"x5":0.367924528,"x6":0.283018868,"x7":0.198113208},\
+    "B":{"x1":0.735849057,"x2":0.679245283,"x3":0.367924528,"x4":0.367924528,"x5":0.367924528,"x6":0.283018868,"x7":0.198113208},\
+    "C":{"x1":0.735849057,"x2":0.679245283,"x3":0.367924528,"x4":0.367924528,"x5":0.367924528,"x6":0.283018868,"x7":0.198113208}})
+    >>> compute_n21(normelized_agents,[])	
+    Traceback (most recent call last):
+    Exception: ERROR. not enough items if passed initial assignmen
     """
+    #     >>> # for no items - retrun	None
+	# >>> compute_n21(normelized_agents,[])
+    #     Traceback (most recent call last):
+    #     Exception: ERROR. not enough items if passed initial assignmen	
+    # >>> # not in n21 (Vi(M\J)>xi+li\8)
     agents_num=len(normelized_agents)
 
     #calculate l,h,sum of bundles of each agents
@@ -608,7 +673,9 @@ def compute_n21(normelized_agents,items)->int:
         mirror_index=2*agents_num-i-1
         # has to be both index- because if the agent remained after initial assignment,
         # it means no single item is enough, so there are at least 2*agents_num items
-        assert (len(items)>0 and len(items)>mirror_index )
+        if not (len(items)>0 and len(items)>mirror_index ):
+            raise Exception("ERROR. not enough items if passed initial assignment")
+
         bundel_i=[items[i],items[mirror_index]]
         for agent_index in range(0,agents_num):
             bundle_val=normelized_agents[agent_index].value(bundel_i)
@@ -637,7 +704,23 @@ def compute_sigma_for_given_alpha(bundles:List[float],alpha:float)->float:
     :param bundles: valuations of the bags from B1 to Bk, were k is number of agents
     :param alpha: the potential alpha5- sigma is computed with it
 
-    :return sigma: one side of the inequality 
+    :return sigma: one side of the inequality
+
+    >>> bundles=[0.74,0.75,0.50,1.02] 
+    >>> alpha = 0.92
+    >>> round(compute_sigma_for_given_alpha(bundles=bundles,alpha=alpha),6)
+    0.331522
+
+    >>> bundles=[0.74,0.75,0.72] 
+    >>> alpha = 0.9
+    >>> compute_sigma_for_given_alpha(bundles=bundles,alpha=alpha)
+    0.0
+
+    >>> bundles=[0.74,0.73] 
+    >>> alpha = 0.99
+    >>> round(compute_sigma_for_given_alpha(bundles=bundles,alpha=alpha),6)
+    0.265152
+
     """
     sum=0
     count=0
@@ -657,6 +740,29 @@ def compute_alpha5_using_binary_search(bundles:List[float],lowest_valued_items:f
     :param rounds: number of rounds the binary search is executed.
 
     :return alpha5: approximation of alpha 5
+    >>> # for 3 agents, each with the following valuation's:
+    >>> # x1=0.724489796	x2=0.714285714	x3=0.387755102	x4=0.357142857	x5=0.357142857	x6=0.357142857	
+    >>> # x7=0.020408163 x8=0.020408163	x9=0.020408163	x10=0.020408163	x11=0.020408163
+    >>> bundles=[0.744897959,1.071428571,1.081632653]
+    >>> lowest_valued_items=0.102040816
+    >>> alpha5=compute_alpha5_using_binary_search(bundles,lowest_valued_items)
+    >>> alpha5 < 1
+    True
+    >>> alpha5 > 0
+    True
+    >>> sum=compute_sigma_for_given_alpha(bundles,alpha5)
+    >>> sum>=(lowest_valued_items/alpha5)
+    True
+    >>> bundles=[0.74,1.02,1.03]
+    >>> lowest_valued_items =0.198
+    >>> alpha5=compute_alpha5_using_binary_search(bundles,lowest_valued_items)
+    >>> alpha5 < 1
+    True
+    >>> alpha5 > 0
+    True
+    >>> sum=compute_sigma_for_given_alpha(bundles,alpha5)
+    >>> sum>=(lowest_valued_items/alpha5)
+    True
     """
     
 # ע"י חיפוש בינארי, תוך 20 איטרציות אפשר למצוא את אלפא המקסימלי בדיוק של 1 למיליון
@@ -690,6 +796,7 @@ def find_max_items_that_were_not_tentively_assigned(items:List[str],remaining_it
     :param m_size: the size of M
 
     :return max_items: set containing the highest valued item from M and the highest valued item from M\J that weren't tentivlely assigned
+
     """
     max1=None
     max1_found=False
@@ -707,7 +814,7 @@ def find_max_items_that_were_not_tentively_assigned(items:List[str],remaining_it
         except:
             continue 
             #continue the loop
-    #not sure if suppose to get here. there is no 
+    #not sure if suppose to get here.  
     return {}
 
 
@@ -720,6 +827,8 @@ def compute_alphas(agents,agent_index,items,remaining_items_after_tentative)->fl
 
     :return max_alpha:the highest alpha from all the calculated alphas,
     the alpha to be used in the mms bound updating
+
+    # what returned suppose to cause agent i not to be in n21 anymore!!
     """
     agents_num=len(agents)
 
@@ -942,17 +1051,23 @@ def get_alpha_MMS_allocation_to_unordered_instance(agents_unordered: List[Additi
     for i in agents_unordered:
         real_alloc[i.name()] = []
     sorted_agents_by_values = dict() # sorted agent by values
-    for i in agents_unordered: 
-        sorted_agents_by_values[i.name()] = i.valuation.map_good_to_value
-        sorted_agents_by_values[i.name()] = dict(reversed(sorted(sorted_agents_by_values[i.name()].items(), key=lambda item: item[1])))
+    for agent in agents_unordered: 
+        sorted_agents_by_values[agent.name()] = agent.valuation.map_good_to_value
+        sorted_agents_by_values[agent.name()] = dict(reversed(sorted(sorted_agents_by_values[agent.name()].items(), key=lambda item: item[1])))
     
-    for i in ordered_items:
+    for item in ordered_items:
         for key, val in ag_alloc.items():
-            if(i in val): #if this agent get the next item
+            if(item in val): #if this agent get the next item
                 x=next(iter(sorted_agents_by_values[key])) #best item for agent number "key"
                 real_alloc[key].append(x)
-                for key2, val2 in sorted_agents_by_values.items(): # remove the x item from all the agents
+                for val2 in sorted_agents_by_values.values(): # remove the x item from all the agents
                     val2.pop(x)
+
+    #print(Allocation(bundles=real_alloc,agents=agent_names_from(agents_unordered)))
+    #print(Allocation(bundles=real_alloc,agents=agent_names_from(agents_unordered)).get_bundles())
+    # print(Allocation(bundles=real_alloc,agents=agent_names_from(agents_unordered)).agents)
+
+
 
     return real_alloc #real allocation
 
@@ -988,10 +1103,14 @@ if __name__ == '__main__':
     # how to run specific function
     # doctest.run_docstring_examples(initial_assignment_alpha_MSS, globals())
     # doctest.run_docstring_examples(bag_filling_algorithm_alpha_MMS, globals())
-    #doctest.run_docstring_examples(alpha_MMS_allocation, globals())
-    #doctest.run_docstring_examples(fixed_assignment, globals())
-    #doctest.run_docstring_examples(tentative_assignment, globals())
-    #doctest.run_docstring_examples(three_quarters_MMS_allocation, globals())
-    #doctest.run_docstring_examples(agents_conversion_to_ordered_instance, globals())
-    #doctest.run_docstring_examples(get_alpha_MMS_allocation_to_unordered_instance, globals())
-
+    # doctest.run_docstring_examples(alpha_MMS_allocation, globals())
+    # doctest.run_docstring_examples(fixed_assignment, globals())
+    # doctest.run_docstring_examples(tentative_assignment, globals())
+    # doctest.run_docstring_examples(three_quarters_MMS_allocation, globals())
+    # doctest.run_docstring_examples(agents_conversion_to_ordered_instance, globals())
+    # doctest.run_docstring_examples(get_alpha_MMS_allocation_to_unordered_instance, globals())
+    # a = AdditiveAgent({"x1": 1, "x2": 2, "x3": 3, "x4": 4, "x5": 5, "x6": 6}, name="Alice")
+    # b = AdditiveAgent({"x1": 1, "x2": 2, "x3": 3, "x4": 4, "x5": 5, "x6": 6}, name="Bruce")
+    # a1 = Allocation(agents=["a","b"],bundles={"Alice":{"x2","x6"}, "Bruce": {}})
+    # a2 = Allocation(agents=["a","b"],bundles={"Alice":{}, "Bruce": {"x1","x4","x3"}})
+    # combine_allocations([a1,a2], [a,b])
