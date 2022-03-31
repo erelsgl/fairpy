@@ -751,7 +751,7 @@ def compute_alpha5_using_binary_search(bundles:List[float],lowest_valued_items:f
     >>> alpha5 > 0
     True
     >>> sum=compute_sigma_for_given_alpha(bundles,alpha5)
-    >>> sum>=(lowest_valued_items/alpha5)
+    >>> sum<=(lowest_valued_items/alpha5)
     True
     >>> bundles=[0.74,1.02,1.03]
     >>> lowest_valued_items =0.198
@@ -761,7 +761,7 @@ def compute_alpha5_using_binary_search(bundles:List[float],lowest_valued_items:f
     >>> alpha5 > 0
     True
     >>> sum=compute_sigma_for_given_alpha(bundles,alpha5)
-    >>> sum>=(lowest_valued_items/alpha5)
+    >>> sum<=(lowest_valued_items/alpha5)
     True
     """
     
@@ -770,57 +770,32 @@ def compute_alpha5_using_binary_search(bundles:List[float],lowest_valued_items:f
     # alpha=0.5
     alpha=(edges[0]+edges[1])/2 
 
-    edge_index=1 #keep what index was good last.
     i=0;
     while i<rounds:
         sum=compute_sigma_for_given_alpha(bundles,alpha)
-        if sum<(lowest_valued_items/alpha):
-            edges[1]=alpha #lower the upper edge
-            edge_index=0
+        if sum<=(lowest_valued_items/alpha):
+            edges[1]=alpha #make lower edge higher
         else:
-            edges[0]=alpha #make lower edge higher
-            edge_index=1
+            edges[0]=alpha #lower the upper edge
         alpha=(edges[0]+edges[1])/2 
         i+=1
-    return edges[edge_index]
+    return alpha
     
     
 
-
-def find_max_items_that_were_not_tentively_assigned(items:List[str],remaining_items_after_tentative,m_size):
+def compute_max_alphas(agents,agents_after_tentative_assignment,agent_index,items,remaining_items_after_tentative)->float:
     """
-    help function to conput_alphas, help to compute alpha4
-    Finds max item from M (first 2n items) and max item from M\J (the following items) that weren't tentively assigned.
-    :param items: items BEFORE tentative assignment, item names sorted from the highest valued to the lowest
-    :param remaining_items_after_tentative: items AFTER tentative assignment, item names sorted from the highest valued to the lowest
-    :param m_size: the size of M
-
-    :return max_items: set containing the highest valued item from M and the highest valued item from M\J that weren't tentivlely assigned
-
+    This is wrap function for a function computes alpha1 to alpha5 as part of updating mms upper bound
+    the function returns the max valued alpha, inorder to allow for testing
     """
-    max1=None
-    max1_found=False
-    max2=None
-    for item in remaining_items_after_tentative:
-        try:
-            index=items.index(item) #if not exist- throws, and we try the next item
-            if(index<m_size):
-                if(not max1_found):
-                    max1=item
-                    max1_found=True
-            else:
-                max2=item
-                return {max1,max2}           
-        except:
-            continue 
-            #continue the loop
-    #not sure if suppose to get here.  
-    return {}
+    return  max(compute_alphas(agents,agents_after_tentative_assignment,agent_index,items,remaining_items_after_tentative))
 
-
-def compute_alphas(agents,agent_index,items,remaining_items_after_tentative)->float:
+def compute_alphas(agents,agents_after_tentative_assignment,agent_index,items,remaining_items_after_tentative)->float:
     """
-    The function computes alpha1 to alpha5 as part f updating mms upper bound
+    The function computes alpha1 to alpha5 as part of updating mms upper bound
+    :param agents: list of agents
+    :param agents_after_tentative_assignment: agent remained after tentative assignment
+    :param agent_index: index of current agent we calculate alpha for.
     :param items: items BEFORE tentative assignment, item names sorted from the highest valued to the lowest
     :param remaining_items_after_tentative: items AFTER tentative assignment, item names sorted from the highest valued to the lowest
     :param m_size: the size of M
@@ -831,15 +806,14 @@ def compute_alphas(agents,agent_index,items,remaining_items_after_tentative)->fl
     # what returned suppose to cause agent i not to be in n21 anymore!!
     """
     agents_num=len(agents)
+    agents_num_after_tentative_assignment=len(agents_after_tentative_assignment)
 
     #update_mms_bounds:
     alpha_array=[0]*5
     alpha_array[0]=(4/3)*agents[agent_index].value(items[0])
     alpha_array[1]=(4/3)*agents[agent_index].value({items[agents_num-1],items[agents_num]})
     alpha_array[2]=(4/3)*agents[agent_index].value({items[2*agents_num-2],items[2*agents_num-1],items[2*agents_num]})
-    bundle=find_max_items_that_were_not_tentively_assigned(items,remaining_items_after_tentative,2*agents_num)
-
-    alpha_array[3]=(4/3)*agents[agent_index].value(bundle)
+    alpha_array[3]=(4/3)*agents[agent_index].value({remaining_items_after_tentative[0],remaining_items_after_tentative[agents_num_after_tentative_assignment]})
 
     #create list of the B_k bundles
     bundles=[0]*agents_num
@@ -850,7 +824,7 @@ def compute_alphas(agents,agent_index,items,remaining_items_after_tentative)->fl
     all_items=agents[agent_index].valuation.map_good_to_value
     alpha_array[4]=compute_alpha5_using_binary_search(bundles,agents[agent_index].value_except_best_c_goods(bundle=all_items,c=2*agents_num)) # v_i(M\J)
 
-    return max(alpha_array)
+    return alpha_array
     
  
 def update_bound(agents: List[AdditiveAgent],alpha: float,items: List[str],index_specific_agent:int)->List[AdditiveAgent]:
@@ -861,7 +835,7 @@ def update_bound(agents: List[AdditiveAgent],alpha: float,items: List[str],index
     and valuation are ordered in ascending order
     :param alpha: parameter to divide the given agent valuations by
 
-    :return agents: list of agents after after givens gent valuation hav been updated. 
+    :return agents: list of agents after after givens gent valuation have been updated. 
     """   
     # if not index_specific_agent(index_specific_agent,int): #how much to do?
     #     raise IndexError(f"agent index should be an integer, but it is {index_specific_agent}") 
@@ -958,7 +932,7 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str])
     lowest_index_agent_in_n21=compute_n21(normelized_agents,items)
     while lowest_index_agent_in_n21!=None:
         #update mms bounds
-        alpha=compute_alphas(normelized_agents,lowest_index_agent_in_n21,items,remaining_items_after_tentative)
+        alpha=compute_max_alphas(normelized_agents,remaining_agents,lowest_index_agent_in_n21,items,remaining_items_after_tentative)
         normelized_agents=update_bound(normelized_agents,alpha,items,lowest_index_agent_in_n21) 
 
         #algo 5
@@ -1063,12 +1037,6 @@ def get_alpha_MMS_allocation_to_unordered_instance(agents_unordered: List[Additi
                 for val2 in sorted_agents_by_values.values(): # remove the x item from all the agents
                     val2.pop(x)
 
-    #print(Allocation(bundles=real_alloc,agents=agent_names_from(agents_unordered)))
-    #print(Allocation(bundles=real_alloc,agents=agent_names_from(agents_unordered)).get_bundles())
-    # print(Allocation(bundles=real_alloc,agents=agent_names_from(agents_unordered)).agents)
-
-
-
     return real_alloc #real allocation
 
 
@@ -1109,8 +1077,30 @@ if __name__ == '__main__':
     # doctest.run_docstring_examples(three_quarters_MMS_allocation, globals())
     # doctest.run_docstring_examples(agents_conversion_to_ordered_instance, globals())
     # doctest.run_docstring_examples(get_alpha_MMS_allocation_to_unordered_instance, globals())
-    # a = AdditiveAgent({"x1": 1, "x2": 2, "x3": 3, "x4": 4, "x5": 5, "x6": 6}, name="Alice")
-    # b = AdditiveAgent({"x1": 1, "x2": 2, "x3": 3, "x4": 4, "x5": 5, "x6": 6}, name="Bruce")
-    # a1 = Allocation(agents=["a","b"],bundles={"Alice":{"x2","x6"}, "Bruce": {}})
-    # a2 = Allocation(agents=["a","b"],bundles={"Alice":{}, "Bruce": {"x1","x4","x3"}})
-    # combine_allocations([a1,a2], [a,b])
+ 
+
+
+
+ # for 3 agents, each with the following valuation's:
+     # x1=0.724489796	x2=0.714285714	x3=0.387755102	x4=0.357142857	x5=0.357142857	x6=0.357142857	
+    # x7=0.020408163 x8=0.020408163	x9=0.020408163	x10=0.020408163	x11=0.020408163
+    bundles=[0.744897959,1.071428571,1.081632653]
+    lowest_valued_items=0.102040816
+    alpha5=compute_alpha5_using_binary_search(bundles,lowest_valued_items)
+    alpha5 < 1
+    # True
+    alpha5 > 0
+    # True
+    sum=compute_sigma_for_given_alpha(bundles,alpha5)
+    sum<=(lowest_valued_items/alpha5)
+    # True
+    bundles=[0.74,1.02,1.03]
+    lowest_valued_items =0.198
+    alpha5=compute_alpha5_using_binary_search(bundles,lowest_valued_items)
+    alpha5 < 1
+#    True
+    alpha5 > 0
+    # True
+    sum=compute_sigma_for_given_alpha(bundles,alpha5)
+    sum>=(lowest_valued_items/alpha5)
+ #   True
