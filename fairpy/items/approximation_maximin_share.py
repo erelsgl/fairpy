@@ -166,6 +166,7 @@ def bag_filling_algorithm_alpha_MMS(items: List[str],agents: List[AdditiveAgent]
     >>> agents=[a]
     >>> a1 = bag_filling_algorithm_alpha_MMS(['x'],agents, 1)
     Traceback (most recent call last):
+    ...
     Exception: ERROR. Could not create an MMS allocation that satisfies agents.
     >>> ### allocation for 1 agent, 3 object (high alpha)
     >>> a = AdditiveAgent({"x1": 0.54, "x2": 0.3, "x3": 0.12}, name="Alice")
@@ -222,7 +223,7 @@ def bag_filling_algorithm_alpha_MMS(items: List[str],agents: List[AdditiveAgent]
             
             agents_num=len(agents) #update
         else:
-            raise Exception("ERROR. Could not create an MMS allocation that satisfies agents. ")
+            raise Exception("ERROR. Could not create an MMS allocation that satisfies agents.")
 
     return Allocation(agents=agents_names, bundles=bundles)
 
@@ -656,15 +657,15 @@ def compute_n21(normelized_agents,items)->int:
     >>> normelized_agents = AdditiveAgent.list_from({"A":{"x1":0.724489796,"x2":0.714285714,"x3":0.387755102,"x4":0.357142857,"x5":0.357142857,"x6":0.357142857,"x7":0.020408163,"x8":0.020408163,"x9":0.020408163,"x10":0.020408163,"x11":0.020408163},\
     "B":{"x1":0.724489796,"x2":0.714285714,"x3":0.387755102,"x4":0.357142857,"x5":0.357142857,"x6":0.357142857,"x7":0.020408163,"x8":0.020408163,"x9":0.020408163,"x10":0.020408163,"x11":0.020408163},\
     "C":{"x1":0.724489796,"x2":0.714285714,"x3":0.387755102,"x4":0.357142857,"x5":0.357142857,"x6":0.357142857,"x7":0.020408163,"x8":0.020408163,"x9":0.020408163,"x10":0.020408163,"x11":0.020408163}})
-	>>> compute_n21(normelized_agents,["x1","x2","x3","x4","x5","x6","x7","x8","x9","x10","x11"])	
-        0	
+    >>> compute_n21(normelized_agents,["x1","x2","x3","x4","x5","x6","x7","x8","x9","x10","x11"])	
+    0
     >>> #not has enough items						
     >>> normelized_agents = AdditiveAgent.list_from({"A":{"x1":0.735849057,"x2":0.679245283,"x3":0.367924528,"x4":0.367924528,"x5":0.367924528,"x6":0.283018868,"x7":0.198113208},\
     "B":{"x1":0.735849057,"x2":0.679245283,"x3":0.367924528,"x4":0.367924528,"x5":0.367924528,"x6":0.283018868,"x7":0.198113208},\
     "C":{"x1":0.735849057,"x2":0.679245283,"x3":0.367924528,"x4":0.367924528,"x5":0.367924528,"x6":0.283018868,"x7":0.198113208}})
     >>> compute_n21(normelized_agents,[])	
     Traceback (most recent call last):
-    Exception: ERROR. not enough items if passed initial assignmen
+    Exception: ERROR. not enough items if passed initial assignment
     """
  
     agents_num=len(normelized_agents)
@@ -737,10 +738,10 @@ def compute_sigma_for_given_alpha(bundles:List[float],alpha:float)->float:
 def compute_alpha5_using_binary_search(bundles:List[float],lowest_valued_items:float,rounds:int=20)->float:
     """
     This function computes an approximation of alpha5 by using binary search 
-    we choose alpha, calculate vi(M\J)/alpha and the sum from the other side
-    if vi(M\J)/alpha <= sum, we grow alpha, else- we lower it.
+    we choose alpha, calculate vi(M\ J)/alpha and the sum from the other side
+    if vi(M\ J)/alpha <= sum, we grow alpha, else- we lower it.
     :param bundles: valuations of the bags from B1 to Bk, were k is number of agents
-    :param lowest_valued_items: the value of M\J
+    :param lowest_valued_items: the value of M\ J
     :param rounds: number of rounds the binary search is executed.
 
     :return alpha5: approximation of alpha 5
