@@ -505,7 +505,7 @@ class AdditiveValuation(Valuation):
             algorithm=prtpy.partitioning.integer_programming,
             numbins=c,
             items=items,
-            map_item_to_value=lambda item: self.value(item),
+            valueof=lambda item: self.value(item),
             objective=prtpy.obj.MaximizeSmallestSum,
             outputtype=prtpy.out.Partition
         )
@@ -527,7 +527,7 @@ class AdditiveValuation(Valuation):
                 algorithm=prtpy.partitioning.integer_programming,
                 numbins=c,
                 items=self.desired_items,
-                map_item_to_value=lambda item: self.value(item),
+                valueof=lambda item: self.value(item),
                 objective=prtpy.obj.MaximizeSmallestSum,
                 outputtype=prtpy.out.SmallestSum
             )

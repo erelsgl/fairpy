@@ -40,7 +40,7 @@ To verify that everything was installed correctly, run one of the example progra
 
 For a partial list of algorithms and their implementation status, see:
 
-* [Cake-cutting algorithms](fairpy/cake/README.md)  
+* [Cake-cutting algorithms](fairpy/cake/README.md)
 * [Item allocation algorithms](fairpy/items/README.md)
 
 
@@ -51,9 +51,6 @@ Many algorithms can be added to `fairpy`. See:
 * [Cake-cutting algorithms for future work](fairpy/cake/README-future.md)  
 * [Item allocation algorithms for future work](fairpy/items/README-future.md)
 
-You can run all doctests by either one of these commands:
-
-    pytest --doctest-modules --ignore=examples/_pweave.py
-    tox
+You can run all doctests by either `pytest` or `tox`.
 
 **See also**: [other open-source projects related to fairness](related.md).

@@ -7,7 +7,7 @@ repackage
 pytest
 cvxpy_base>=1.1.17
 cvxpy_leximin
-prtpy>=0.6.0
+prtpy>=0.7.0
 more_itertools
 dicttools @ git+https://github.com/trzemecki/dicttools.git
 cvxopt>=1.2
