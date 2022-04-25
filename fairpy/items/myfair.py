@@ -9,7 +9,7 @@ Authors - Arpita Biswas, Siddharth Barman
 At - https://arxiv.org/pdf/1804.09521.pdf
 """
 
-class data:
+class Data:
     """
     data should hold all given catagories of item, including each Agenets name and his evaluation for each item.
     """
@@ -22,7 +22,7 @@ class data:
         self._catagories = catagories
         self._goods = goods_and_values
 
-def ef1_algorithm(m:list, f:data) -> bundles.Bundle:
+def ef1_algorithm(m:list, f: Data) -> bundles.Bundle:
     """
     in paper - Algorithm 1 ALG 1
     this algorithm returns a bundel of agents when each of the holds the best allocation to his valuation of the goods.
@@ -74,11 +74,11 @@ class TestAlgo(unittest.TestCase):
                     "iphone":4,"galaxy":20,"g5":25,
             }
         } 
-        data1 = data(catalog1,dict_goods1)
-        data2 = data(catalog2,dict_goods2)
+        data1 = Data(catalog1,dict_goods1)
+        data2 = Data(catalog2,dict_goods2)
 
-        ans1 = ef1_algorithm(["1","2"],2,data1)
-        ans2 = ef1_algorithm(["gidon","shmuel"],2,data2)
+        ans1 = ef1_algorithm(["1","2"],data1)
+        ans2 = ef1_algorithm(["gidon","shmuel"],data2)
 
         self.assertEqual(ans1, bundles.Bundle([{"1":["pizza","sushi","beer","vodka"]},{"2":["noodles","hamburger","cola","coffee"]}]))
         self.assertEqual(ans2, bundles.Bundle([{"1":["lenovo","asus","sharp","g5","galaxy"]},{"2":["acer","LG","samsung","iphone"]}]))
@@ -109,8 +109,8 @@ class TestAlgo(unittest.TestCase):
                     "21":8,"22":44,"23":13,"24":35,
                 }   
         } 
-        data = data(catalog, dict_goods)
-        sol = ef1_algorithm(["v1","v2","v3"], 3, data)
+        data = Data(catalog, dict_goods)
+        sol = ef1_algorithm(["v1","v2","v3"], data)
         total_value_for_agents = [234,310,236]
         for i in range(3):
             self.assertEqual(sol[i], total_value_for_agents[i])
