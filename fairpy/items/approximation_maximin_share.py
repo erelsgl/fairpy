@@ -972,7 +972,6 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str])
     Carl gets {x1,x6} with value 53.
     <BLANKLINE>
     """
-    print("hello")
     items=deepcopy(items)
     num_agents=len(agents)
     if num_agents==0 or num_agents>len(items):
