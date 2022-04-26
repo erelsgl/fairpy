@@ -20,7 +20,7 @@ from fairpy.agents import AdditiveAgent, agent_names_from
 from typing import Any, List
 from copy import deepcopy
 import logging
-
+import math
 
 logger = logging.getLogger(__name__)
 three_quarters = 0.75
