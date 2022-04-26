@@ -15,12 +15,9 @@ Since:
 """
 
 from unicodedata import name
-from fairpy import Allocation, ValuationMatrix, Agent, AdditiveValuation, convert_input_to_valuation_matrix
-from fairpy import agents
+from fairpy import Allocation
 from fairpy.agents import AdditiveAgent, agent_names_from
-import math
 from typing import Any, List
-from fairpy.items.bag_filling import Bag
 from copy import deepcopy
 import logging
 
@@ -975,7 +972,8 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str])
     Carl gets {x1,x6} with value 53.
     <BLANKLINE>
     """
-    
+    print("hello")
+    items=deepcopy(items)
     num_agents=len(agents)
     if num_agents==0 or num_agents>len(items):
        return Allocation(agents=agents, bundles={})
