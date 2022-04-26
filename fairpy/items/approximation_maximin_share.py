@@ -209,7 +209,7 @@ def bag_filling_algorithm_alpha_MMS(items: List[str],agents: List[AdditiveAgent]
                 w_agent=willing_agent(agents,bundel_name_arr,alpha)
             
             if w_agent==None: #there is not any devison that will satisfy any agent
-                raise Exception("ERROR. Could not create an MMS allocation that satisfies agents. ")
+                break
             
             bundles[agents[w_agent]._name]=bundel_name_arr #give bundle to agent
             #remove agent
@@ -933,6 +933,13 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str])
     >>> a1 = three_quarters_MMS_allocation(agents,["x"])
     >>> print(a1)
     Alice gets {x} with value 2.
+    <BLANKLINE>
+    >>> a = AdditiveAgent( {'x0': 1000.0, 'x1': 0.0, 'x2': 0.0}, name="agent0")
+    >>> b = AdditiveAgent( {'x0': 1000.0, 'x1': 0.0, 'x2': 0.0}, name="agent1")
+    >>> agents=[a]
+    >>> a1 = three_quarters_MMS_allocation(agents,["x0","x1","x2"])
+    >>> print(a1)
+    agent0 gets {x0} with value 1e+03.
     <BLANKLINE>
     >>> ### allocation for 1 agent, 2 objects
     >>> b = AdditiveAgent({"x": 2, "y": 1}, name="Blice")
