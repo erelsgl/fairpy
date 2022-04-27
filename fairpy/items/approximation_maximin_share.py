@@ -220,7 +220,9 @@ def bag_filling_algorithm_alpha_MMS(items: List[str],agents: List[AdditiveAgent]
             
             agents_num=len(agents) #update
         else:
-            raise Exception("ERROR. Could not create an MMS allocation that satisfies agents.")
+            #there is not any devison that will satisfy any agent
+           print("warning. ERROR. Could not create an MMS allocation that satisfies agents.")
+           break
 
     return Allocation(agents=agents_names, bundles=bundles)
 
@@ -645,7 +647,7 @@ def tentative_assignment(agents: List[AdditiveAgent], items: List[str]):
 
 def compute_n21(normelized_agents,items)->int:
     """
-    The function compute l,h inorder to find tif there are agents in n21.
+    The function compute l,h inorder to find if there are agents in n21.
     :param agents: Valuations of agents, normalized such that MMS <=1 for all agents
     :param items: items names sorted from the highest valued to the lowest
 
@@ -675,8 +677,10 @@ def compute_n21(normelized_agents,items)->int:
         mirror_index=2*agents_num-i-1
         # has to be both index- because if the agent remained after initial assignment,
         # it means no single item is enough, so there are at least 2*agents_num items
+        # can happen if one agents has 0 mms.
         if not (len(items)>0 and len(items)>mirror_index ):
-            raise Exception("ERROR. not enough items if passed initial assignment")
+            print("warnning-ERROR. not enough items if passed initial assignment,can happen if one agents has 0 mms.")
+            return None
 
         bundel_i=[items[i],items[mirror_index]]
         for agent_index in range(0,agents_num):
@@ -1059,6 +1063,7 @@ def get_alpha_MMS_allocation_to_unordered_instance(agents_unordered: List[Additi
     :param agents_ordered: Ordered valuations agents.
     
     :param ordered_allocation: MMS allocation for ordered valuations agents.
+
     :return allocation: return the real allocation (the allocation for the unordered items)
     >>> ### allocation for 2 agents 3 objects
     >>> a = AdditiveAgent({"x1": 3, "x2": 10, "x3": 1}, name="A")
@@ -1066,19 +1071,23 @@ def get_alpha_MMS_allocation_to_unordered_instance(agents_unordered: List[Additi
     >>> agents=[a,b]
     >>> ag_alloc = dict({'A': ['x1'], 'B': ['x2']})
     >>> items_ordered = list(["x1", "x2", "x3"]) 
-    >>> real_alloc = get_alpha_MMS_allocation_to_unordered_instance(agents,  ag_alloc, items_ordered)
+    >>> real_alloc,remaining_items = get_alpha_MMS_allocation_to_unordered_instance(agents,  ag_alloc, items_ordered)
     >>> print(real_alloc)
     {'A': ['x2'], 'B': ['x1']}
 
+    >>> print(remaining_items)
+    ['x3']
     >>> ### allocation for 1 agent, 1 object
     >>> a = AdditiveAgent({"x": 2}, name="Alice")
     >>> agents=[a]
     >>> ag_alloc = dict({'Alice': ['x']})
     >>> items_ordered = list(["x"]) 
-    >>> real_alloc = get_alpha_MMS_allocation_to_unordered_instance(agents,  ag_alloc, items_ordered)
+    >>> real_alloc,remaining_items  = get_alpha_MMS_allocation_to_unordered_instance(agents,  ag_alloc, items_ordered)
     >>> print(real_alloc)
     {'Alice': ['x']}
 
+    >>> print(remaining_items)
+    []
     >>> ### allocation for 3 agents 8 objects
     >>> a = AdditiveAgent({"x1": 2, "x2": 7, "x3": 10,"x4": 8, "x5": 3, "x6": 4,"x7": 7, "x8": 11}, name="A")
     >>> b = AdditiveAgent({"x1": 8, "x2": 7, "x3": 5,"x4": 3, "x5": 10, "x6": 2,"x7": 1, "x8": 4}, name="B")
@@ -1086,11 +1095,14 @@ def get_alpha_MMS_allocation_to_unordered_instance(agents_unordered: List[Additi
     >>> agents=[a,b,c]
     >>> items_ordered = list(["x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8"]) 
     >>> ag_alloc = dict({'A': ['x3', 'x4'], 'B': ['x1'], 'C': ['x2', 'x5']})
-    >>> real_alloc =  get_alpha_MMS_allocation_to_unordered_instance(agents,  ag_alloc, items_ordered)
+    >>> real_alloc,remaining_items  =  get_alpha_MMS_allocation_to_unordered_instance(agents,  ag_alloc, items_ordered)
     >>> print(real_alloc)
     {'A': ['x3', 'x4'], 'B': ['x5'], 'C': ['x8', 'x7']}
+    >>> print(remaining_items)
+    ['x1', 'x2', 'x6']
     """
     real_alloc = dict()
+    un_allocated_items=deepcopy(ordered_items) 
     for i in agents_unordered:
         real_alloc[i.name()] = []
     sorted_agents_by_values = dict() # sorted agent by values
@@ -1103,10 +1115,11 @@ def get_alpha_MMS_allocation_to_unordered_instance(agents_unordered: List[Additi
             if(item in val): #if this agent get the next item
                 x=next(iter(sorted_agents_by_values[key])) #best item for agent number "key"
                 real_alloc[key].append(x)
+                un_allocated_items.remove(x)
                 for val2 in sorted_agents_by_values.values(): # remove the x item from all the agents
                     val2.pop(x)
 
-    return real_alloc #real allocation
+    return real_alloc,un_allocated_items  #real allocation
 
 
 def update_val(items_remove: List[str], val_arr: dict(), n: int)->dict() : 
@@ -1136,8 +1149,9 @@ def update_val(items_remove: List[str], val_arr: dict(), n: int)->dict() :
         sum_arr[i] = 0
         for j in val_arr[i]:
             sum_arr[i] = sum_arr[i] + val_arr[i][j]
-        for j in val_arr[i]:
-            val_arr[i][j] = val_arr[i][j]*(n/sum_arr[i])
+        if(sum_arr[i]!=0):
+            for j in val_arr[i]:
+                val_arr[i][j] = val_arr[i][j]*(n/sum_arr[i])
     return val_arr
 
 if __name__ == '__main__':
