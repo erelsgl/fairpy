@@ -1,57 +1,8 @@
-from fairpy import bundles 
-from fairpy import agents
-from fairpy import allocations 
 import unittest
-
-"""
-This Python file represent the paper named  Fair Division Under Cardinality Constraints
-Authors - Arpita Biswas, Siddharth Barman
-At - https://arxiv.org/pdf/1804.09521.pdf
-"""
-
-class Data:
-    """
-    data should hold all given catagories of item, including each Agenets name and his evaluation for each item.
-    """
-    def __init__(self,catagories:list, goods_and_values:dict):
-        """"
-        :param catagories, a list (of strings).
-        :param goods_and_values, a specification dictionary for each agent. 
-
-        """
-        self._catagories = catagories
-        self._goods = goods_and_values
-
-def ef1_algorithm(m:list, f: Data) -> bundles.Bundle:
-    """
-    in paper - Algorithm 1 ALG 1
-    this algorithm returns a bundel of agents when each of the holds the best allocation to his valuation of the goods.
-    :param m a list of items
-    :param f data obj, hold all other information about agents, evaluation, and items.
-    """
-    pass
-
-def greedy_round_robin(catag :list, Vi:dict) -> bundles.Bundle:
-    """
-    in paper - Algorithm 2 Greedy-Round-Robin (ALG 2)
-    this algorithm divides all of the item in each category.
-    :param catag the category that will be divided.
-    :param Vi hold all of the agents and their preferences.
-    :return an updated bundel of the agents.
-    """
-    pass
-
-def envy_graph_l1(bun_agents:bundles.Bundle) -> bundles.Bundle:
-    """
-    this method is being called from the main algorithm, to achieve EF1 allocation we must make sure there are no 
-    cycles in the envy graph. 
-    :param bun_agents a bundel of agents.
-    """
-    pass
 
 class TestAlgo(unittest.TestCase):
 
-    def test_ex1(self):
+    def test_assertion_by_goods(self):
         catalog1 = ["food", "drinks"]
         dict_goods1 = {"1": {
                     "pizza":86,"hamburger":9,"sushi":40,"noodles":52,
@@ -83,7 +34,7 @@ class TestAlgo(unittest.TestCase):
         self.assertEqual(ans1, bundles.Bundle([{"1":["pizza","sushi","beer","vodka"]},{"2":["noodles","hamburger","cola","coffee"]}]))
         self.assertEqual(ans2, bundles.Bundle([{"1":["lenovo","asus","sharp","g5","galaxy"]},{"2":["acer","LG","samsung","iphone"]}]))
 
-    def test_ex2(self):
+    def test_assertion_by_value(self):
         catalog = ["C1", "C2","C3","C4"]
         dict_goods = {"v1": {
                     "1":4,"2":17,"3":18,"4":39,
@@ -114,12 +65,7 @@ class TestAlgo(unittest.TestCase):
         total_value_for_agents = [234,310,236]
         for i in range(3):
             self.assertEqual(sol[i], total_value_for_agents[i])
-
-
-
+            
 
 if __name__ == '__main__':
     unittest.main()
-  
- 
-
