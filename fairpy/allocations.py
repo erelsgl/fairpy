@@ -110,7 +110,7 @@ class Allocation:
 
     >>> agent_dict = {"Alice":{"x":1,"y":2,"z":3},"George":{"x":4,"y":5,"z":6}}
 
-    >>> ### A dict of agents and a dict of bundles:
+    ### A dict of agents and a dict of bundles:
     >>> a = Allocation(agents=agent_dict, bundles =  {"Alice":{"x","z"}, "George":{"y"}})
     >>> a
     Alice gets {x,z} with value 4.
@@ -119,7 +119,7 @@ class Allocation:
     >>> a.map_item_to_agents()
     {'x': ['Alice'], 'z': ['Alice'], 'y': ['George']}
 
-    >>> ### A dict of agents and a partial dict of bundles:
+    ### A dict of agents and a partial dict of bundles:
     >>> a = Allocation(agents=agent_dict, bundles =  {"Alice":{"x","z"}})
     >>> a
     Alice gets {x,z} with value 4.
@@ -128,7 +128,7 @@ class Allocation:
     >>> a.map_item_to_agents()
     {'x': ['Alice'], 'z': ['Alice']}
 
-    >>> ### A list of agents and a dict of bundles (Note there is no value information here):
+    ### A list of agents and a dict of bundles (Note there is no value information here):
     >>> a = Allocation(agents=["Alice","George"], bundles =  {"Alice":["x","z"], "George":["x", "y"]})
     >>> a
     Alice gets {x,z} with value nan.
@@ -141,7 +141,7 @@ class Allocation:
     >>> a.map_agent_to_bundle()
     {'Alice': ['x', 'z'], 'George': ['x', 'y']}
 
-    >>> ### A valuation list-of-lists and a list of bundles:
+    ### A valuation list-of-lists and a list of bundles:
     >>> a = Allocation(agents=[[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]], bundles=[[0,4],None,[1,2]])
     >>> a
     Agent #0 gets {0,4} with value 60.
@@ -153,7 +153,7 @@ class Allocation:
     []
     [1, 2]
 
-    >>> ### A valuation matrix and an allocation matrix:
+    ### A valuation matrix and an allocation matrix:
     >>> a = Allocation(agents=ValuationMatrix([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=AllocationMatrix([[1,0,0,0,1],[0,0,0,0,0],[0,1,1,0,0]]))
     >>> a
     Agent #0 gets { 100% of 0, 100% of 4} with value 60.
@@ -180,11 +180,19 @@ class Allocation:
      [0.67 0.   0.   0.   0.  ]
      [0.   1.   1.   0.   0.  ]]
 
-    >>> ### A valuation matrix and a numpy array as allocation matrix
+    ### A valuation matrix and a numpy array as allocation matrix
     >>> Allocation(agents=ValuationMatrix([[10,20,30,40,50],[999,999,999,999,999],[50,40,30,20,10]]), bundles=np.array([[1/3,0,0,0,1],[2/3,0,0,0,0],[0,1,1,0,0]]))
     Agent #0 gets { 33.333% of 0, 100.0% of 4} with value 53.3.
     Agent #1 gets { 66.667% of 0} with value 666.
     Agent #2 gets { 100.0% of 1, 100.0% of 2} with value 70.
+    <BLANKLINE>
+
+    ### A dict of agents and a dict of bundles, but in non-alphabetic order.
+    >>> agents = {"b": [1,2], "a": [11,22]}
+    >>> bundles = {"b": [0], "a":[1]}
+    >>> Allocation(agents, bundles)
+    b gets {0} with value 1.
+    a gets {1} with value 22.
     <BLANKLINE>
     """
     def __init__(self, agents: List[Any], bundles: List[List[Any]], matrix=None):
@@ -204,6 +212,9 @@ class Allocation:
         if isinstance(agents,dict) and not isinstance(bundles,dict):
             raise ValueError(f"Cannot match agents to bundles: agents is a dict but bundles is {type(bundles)}")
 
+        if isinstance(agents,dict) or (isinstance(agents,list) and isinstance(agents[0],list)):       # If "agents" is a dict mapping an agent name to its valuation...
+            agents = fairpy.agents_from(agents)  # ... convert it to a list mapping an agent index to its valuation.
+
         map_agent_index_to_name = self.map_agent_index_to_name = fairpy.agent_names_from(agents)
 
         if isinstance(bundles,dict):       # If "bundles" is a dict mapping an agent name to its bundle... 
@@ -218,9 +229,6 @@ class Allocation:
             bundles = [bundle_from(bundles[i]) for i in range(len(bundles))]
         if matrix is not None:
             self.matrix = AllocationMatrix(matrix)
-
-        if isinstance(agents,dict) or (isinstance(agents,list) and isinstance(agents[0],list)):       # If "agents" is a dict mapping an agent name to its valuation...
-            agents = fairpy.agents_from(agents)  # ... convert it to a list mapping an agent index to its valuation.
 
         # Compute num_of_agents:
         num_of_agents = agents.num_of_agents if hasattr(agents,'num_of_agents') else len(agents)
@@ -371,13 +379,27 @@ def compute_agent_bundle_value_matrix(agents, bundles, num_of_agents, num_of_bun
     """
     Compute a matrix U in which each row is an agent, each column is a bundle,
     and U[i,j] is the value of agent i to bundle j.
+
+    >>> agents=ValuationMatrix([[1,2,3.5],[4,5,6]])
+    >>> bundles = [[0,1],[2]]
+    >>> compute_agent_bundle_value_matrix(agents, bundles, 2, 2)
+    array([[3. , 3.5],
+           [9. , 6. ]])
+
+    >>> agents=fairpy.agents_from(agents)
+    >>> compute_agent_bundle_value_matrix(agents, bundles, 2, 2)
+    array([[3. , 3.5],
+           [9. , 6. ]])
     """
     agent_bundle_value_matrix = np.zeros([num_of_agents,num_of_bundles])
+    # print("bundles: ",bundles)
     if hasattr(agents, 'agent_value_for_bundle'):  # E.g. when agents is a ValuationMatrix.
+        # print("agents 1: ",agents)
         for i_agent in range(num_of_agents):
             for i_bundle in range(num_of_bundles):
                 agent_bundle_value_matrix[i_agent,i_bundle] = agents.agent_value_for_bundle(i_agent, bundles[i_bundle])
     elif hasattr(next(iter(agents)), 'value'):              # E.g. when agents is a list of Agent objects
+        # print("agents 2: ",agents)
         for i_agent in range(num_of_agents):
             for i_bundle in range(num_of_bundles):
                 agent = agents[i_agent]
@@ -400,3 +422,7 @@ if __name__ == "__main__":
     import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
+    # agents = {"b": [1,2], "a": [11,22]}
+    # bundles = {"b": [0], "a":[1]}
+    # allocation = Allocation(agents, bundles)
+    # print(allocation)
