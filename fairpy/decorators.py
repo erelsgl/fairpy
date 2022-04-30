@@ -63,6 +63,26 @@ def convert_input_to_valuation_matrix(algorithm: Callable)->Allocation:
     a gets { 100.0% of y} with value 2.
     b gets { 100.0% of x, 100.0% of z} with value 10.
     <BLANKLINE>
+
+    >>> input_dict_of_dicts = {"a": {"x":4,"y":2,"z":6}, "b": {"x":1,"y":5,"z":3}}       # a dict mapping agent names to dict of values; REVERSE ORDER
+    >>> convert_input_to_valuation_matrix(utilitarian_matrix_list_algorithm)(input_dict_of_dicts)
+    a gets {x,z} with value 10.
+    b gets {y} with value 5.
+    <BLANKLINE>
+    >>> convert_input_to_valuation_matrix(utilitarian_matrix_matrix_algorithm)(input_dict_of_dicts)
+    a gets { 100.0% of x, 100.0% of z} with value 10.
+    b gets { 100.0% of y} with value 5.
+    <BLANKLINE>
+
+    >>> input_dict_of_dicts = {"b": {"x":1,"y":5,"z":3}, "a": {"x":4,"y":2,"z":6}}       # a dict mapping agent names to dict of values; REVERSE ORDER
+    >>> convert_input_to_valuation_matrix(utilitarian_matrix_list_algorithm)(input_dict_of_dicts)
+    b gets {y} with value 5.
+    a gets {x,z} with value 10.
+    <BLANKLINE>
+    >>> convert_input_to_valuation_matrix(utilitarian_matrix_matrix_algorithm)(input_dict_of_dicts)
+    b gets { 100.0% of y} with value 5.
+    a gets { 100.0% of x, 100.0% of z} with value 10.
+    <BLANKLINE>
     """
     @wraps(algorithm)
     def adapted_algorithm(input, *args, **kwargs):
@@ -91,7 +111,6 @@ def convert_input_to_valuation_matrix(algorithm: Callable)->Allocation:
 
         # Step 2. Run the algorithm:
         output = algorithm(valuation_matrix, *args, **kwargs)
-        # return output if isinstance(output,Allocation) else Allocation(valuation_matrix, output)
 
         # Step 3. Adapt the output:
         if isinstance(output,Allocation):
@@ -99,8 +118,6 @@ def convert_input_to_valuation_matrix(algorithm: Callable)->Allocation:
 
         if agent_names is None:
             agent_names = [f"Agent #{i}" for i in valuation_matrix.agents()]
-
-        # print("agent_names", agent_names, "object_names", object_names,"output", output)
 
         if isinstance(output, np.ndarray) or isinstance(output, AllocationMatrix):  # allocation matrix
             allocation_matrix = AllocationMatrix(output)
@@ -130,7 +147,7 @@ def convert_input_to_valuation_matrix(algorithm: Callable)->Allocation:
 The algorithms below are dummy algorithms, used for demonstrating the adaptors.
 They accept an input a valuation profile (as a list of lists, or valuation matrix),
      and return as output an allocation profile (as a list of lists, or allocation matrix).
-The allocate the objects in turn, like "round robin" but without regard to valuations.
+They allocate the objects in turn, like "round robin" but without regard to valuations.
 """
 def dummy_list_list_algorithm(valuations:List[List])->List[List]:
     """ 
@@ -206,10 +223,39 @@ def dummy_matrix_matrix_algorithm(valuations:ValuationMatrix, first_agent:int=0)
     return bundles
 
 
+def utilitarian_matrix_list_algorithm(valuations:ValuationMatrix)->List[List]:
+    """ 
+    >>> utilitarian_matrix_list_algorithm(ValuationMatrix([[44,22,66],[11,55,33]]))
+    [[0, 2], [1]]
+    """
+    num_agents = valuations.num_of_agents
+    num_objects = valuations.num_of_objects
+    bundles = [[] for _ in range(num_agents)]
+    for i_object in range(num_objects):
+        i_agent = max(range(num_agents), key=lambda i_agent: valuations[i_agent][i_object])
+        bundles[i_agent].append(i_object)
+    return bundles
+
+
+def utilitarian_matrix_matrix_algorithm(valuations:ValuationMatrix)->List[List]:
+    """ 
+    >>> utilitarian_matrix_matrix_algorithm(ValuationMatrix([[44,22,66],[11,55,33]]))
+    array([[1., 0., 1.],
+           [0., 1., 0.]])
+    """
+    num_agents = valuations.num_of_agents
+    num_objects = valuations.num_of_objects
+    bundles = np.zeros([num_agents,num_objects])
+    for i_object in range(num_objects):
+        i_agent = max(range(num_agents), key=lambda i_agent: valuations[i_agent][i_object])
+        bundles[i_agent][i_object] = 1
+    return bundles
+
+
 if __name__ == "__main__":
     import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
-    # input_dict_of_lists = {"a": [1,2,3], "b": [4,5,6]}
-    # print(convert_input_to_valuation_matrix(dummy_matrix_list_algorithm)(input_dict_of_lists))
+    # input_dict_of_dicts = {"b": {"x":1,"y":5,"z":3}, "a": {"x":4,"y":2,"z":6}}       # a dict mapping agent names to dict of values; REVERSE ORDER
+    # convert_input_to_valuation_matrix(utilitarian_matrix_list_algorithm)(input_dict_of_dicts)
 
