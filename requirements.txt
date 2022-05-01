@@ -6,7 +6,7 @@ matplotlib
 repackage
 pytest
 cvxpy_base>=1.1.17
-cvxpy_leximin
+cvxpy_leximin>=0.4.4
 prtpy>=0.7.0
 more_itertools
 dicttools @ git+https://github.com/trzemecki/dicttools.git
