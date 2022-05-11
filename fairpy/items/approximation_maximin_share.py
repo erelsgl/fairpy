@@ -1143,6 +1143,26 @@ def get_alpha_MMS_allocation_to_unordered_instance(agents_unordered: List[Additi
     return real_alloc,un_allocated_items  #real allocation
 
 def is_sum_valuations_zero(agent:AdditiveAgent,agent_curr_val:dict(), items:List[str])->boolean:
+    """
+        Check if given agent valuation is zero for all the remaining items.
+        only if agent_curr_val in dict format is None, the use agent- in AdditiveAgent format
+        :param agent: agent in AdditiveAgent format
+        :param agent_curr_val: agent in dict format
+        :param items: list of remainig items
+        :return true if given agent valuation is zero for all the remaining items, otherwise false
+        >>> a = AdditiveAgent({"x1": 2, "x2": 7, "x3": 10,"x4": 8, "x5": 3, "x6": 4,"x7": 7, "x8": 11}, name="A")
+        >>> is_sum_valuations_zero(a,None,["x1","x2","x3","x4","x5","x6","x7","x8"])
+        False
+        >>> a = AdditiveAgent({"x1":0, "x2": 0, "x3": 0}, name="A")
+        >>> is_sum_valuations_zero(a,None,["x1","x2","x3"])
+        True
+        >>> a_dict = {'01': 0.727272, '02': 0.727272, '03': 0.318182, '04': 0.318182}
+        >>> is_sum_valuations_zero(None,a_dict,["01","02","03,"04"])
+        False
+        >>> a_dict = {'01': 0.0, '02': 0.0, '03': 0.0, '04': 0.0}
+        >>> is_sum_valuations_zero(None,a_dict,["01","02","03,"04"])
+        True     
+    """
     sum=0
     for item in items:
         if (agent_curr_val==None):
