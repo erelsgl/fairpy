@@ -17,6 +17,7 @@ from fairpy.agents import AdditiveAgent, agent_names_from
 from typing import Any, List
 from copy import deepcopy
 import logging
+import math
 
 logger = logging.getLogger(__name__)
 three_quarters = 0.75
@@ -1157,22 +1158,25 @@ def is_sum_valuations_zero(agent:AdditiveAgent,agent_curr_val:dict(), items:List
         >>> is_sum_valuations_zero(a,None,["x1","x2","x3"])
         True
         >>> a_dict = {'01': 0.727272, '02': 0.727272, '03': 0.318182, '04': 0.318182}
-        >>> is_sum_valuations_zero(None,a_dict,["01","02","03,"04"])
+        >>> is_sum_valuations_zero(None,a_dict,['01','02','03','04'])
         False
         >>> a_dict = {'01': 0.0, '02': 0.0, '03': 0.0, '04': 0.0}
-        >>> is_sum_valuations_zero(None,a_dict,["01","02","03,"04"])
-        True     
-    """
-    sum=0
+        >>> is_sum_valuations_zero(None,a_dict,["01","02","03","04"])
+        True
+        """
+    all_zero=True
     for item in items:
         if (agent_curr_val==None):
-            sum+=agent.value(item)
+            if(agent.value(item)!=0):
+                all_zero=False
+                break
         else: 
-            sum+=agent_curr_val[item]
-    if sum == 0:
-        return True
-    else:
-        return False
+            if(agent_curr_val[item]!=0):
+                all_zero=False
+                break
+    
+    return all_zero
+
 
 
 def update_val(items_remove: List[str], val_arr: dict(), n: int)->dict() : 
