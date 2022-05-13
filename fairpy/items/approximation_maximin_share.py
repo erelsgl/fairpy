@@ -12,17 +12,15 @@ Programmers: Liad Nagi and Moriya Elgrabli
 Since: 2022-05
 """
 
-from xmlrpc.client import boolean
-
 from fairpy import Allocation
 from fairpy.agents import AdditiveAgent, agent_names_from
-from typing import Any, List
+from typing import List
 from copy import deepcopy
 import logging
 import math
 
 logger = logging.getLogger(__name__)
-three_quarters = 0.75
+three_quarters = 0.75                # The approximation ratio of the algorithm
 
 
 ####
@@ -1189,7 +1187,7 @@ def get_alpha_MMS_allocation_to_unordered_instance(agents_unordered: List[Additi
 
     return real_alloc,un_allocated_items  #real allocation
 
-def is_sum_valuations_zero(agent:AdditiveAgent,agent_curr_val:dict(), items:List[str])->boolean:
+def is_sum_valuations_zero(agent:AdditiveAgent,agent_curr_val:dict(), items:List[str])->bool:
     """
         Check if given agent valuation is zero for all the remaining items.
         only if agent_curr_val in dict format is None, the use agent- in AdditiveAgent format
