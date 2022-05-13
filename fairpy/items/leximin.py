@@ -53,7 +53,7 @@ def is_leximin_better(x: list, y: list):
 
 
 @convert_input_to_valuation_matrix
-def leximin_optimal_allocation(instance: Any) -> Allocation:
+def leximin_optimal_allocation(instance: Any, **solver_options) -> Allocation:
     """
     Find the leximin-optimal (aka Egalitarian) allocation.
     :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
@@ -107,9 +107,11 @@ def leximin_optimal_allocation(instance: Any) -> Allocation:
     problem = Problem(
         Leximin(utilities),
         constraints=feasibility_constraints + positivity_constraints,
+        **solver_options
     )
     solve(problem)
     allocation_matrix = allocation_vars.value
+    logger.debug("allocation_matrix:\n%s", allocation_matrix)
     return allocation_matrix
 
 

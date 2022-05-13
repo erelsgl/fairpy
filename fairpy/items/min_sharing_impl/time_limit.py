@@ -17,13 +17,27 @@ import contextlib
 
 class TimeoutException(Exception): pass
 
+IS_TIME_LIMIT_SUPPORTED = hasattr(signal, "SIGALRM")  # only works on Linux
+
+if not IS_TIME_LIMIT_SUPPORTED:
+    import warnings
+    warnings.warn("Time-limit is not supported by your operating system.")
+
 @contextlib.contextmanager
 def time_limit(seconds):
-    def signal_handler(signum, frame):
-        raise TimeoutException("Timed out!")
-    signal.signal(signal.SIGALRM, signal_handler)
-    signal.alarm(seconds)
-    try:
-        yield
-    finally:
-        signal.alarm(0)
+    if IS_TIME_LIMIT_SUPPORTED:
+        def signal_handler(signum, frame):
+            raise TimeoutException("Timed out!")
+        signal.signal(signal.SIGALRM, signal_handler)
+        signal.alarm(seconds)
+        try:
+            yield
+        finally:
+            signal.alarm(0)
+    else:
+        yield        
+
+
+if __name__=="__main__":
+    with time_limit(1):
+        for i in range(1000): print(i)

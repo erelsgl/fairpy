@@ -6,10 +6,10 @@ matplotlib
 repackage
 pytest
 cvxpy_base>=1.1.17
-cvxpy_leximin
-prtpy>=0.6.0
+cvxpy_leximin>=0.4.4
+prtpy>=0.7.0
 more_itertools
-dicttools @ git+http://github.com/trzemecki/dicttools.git
+dicttools @ git+https://github.com/trzemecki/dicttools.git
 cvxopt>=1.2
 osqp
 scs
