@@ -230,9 +230,11 @@ def solve(agents) -> List[List[int]]:
         return []
 
     logger.info("Looking for PROPm allocation for %d agents and %d items", v.num_of_agents, v.num_of_objects)
-    logger.info("Solving a problem defined by valuation matrix\n %s", str(np.array(agents)))
+    logger.info("Solving a problem defined by valuation matrix:\n %s", v)
 
     total_value = v.normalize()
+
+    logger.info("Normalized matrix:\n %s", v)
 
     for agent in v.agents():
         for item in v.objects():
@@ -337,6 +339,7 @@ def propm_allocation(instance) -> Allocation:
     """
     return convert_input_to_valuation_matrix(solve)(instance)
 
+propm_allocation.logger = logger
 
 if __name__ == "__main__":
     import sys

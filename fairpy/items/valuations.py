@@ -780,8 +780,8 @@ class ValuationMatrix:
         Check if total value of each agent is the same. Return total value.
         """
         total_values = np.sum(self._v, axis=1)
-        if not np.all(total_values == total_values[0]):
-            raise ValueError("Valuation matrix is not normalized")
+        if not np.allclose(total_values, total_values[0]):
+            raise ValueError(f"Valuation matrix is not normalized. Total values: {total_values}")
         return total_values[0]
 
     def equals(self, other)->bool:
