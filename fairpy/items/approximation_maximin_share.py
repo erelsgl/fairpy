@@ -92,8 +92,7 @@ def alpha_MMS_allocation(agents: List[AdditiveAgent], alpha: float, mms_values: 
     <BLANKLINE>
     """
     num_agents=len(agents)
-    #names_agents=agent_names_from(agents)
-    
+   
     for i in range (0,num_agents):
         if mms_values[i]==0:
             mms_values.pop(i)
