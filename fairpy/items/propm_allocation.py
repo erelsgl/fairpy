@@ -20,6 +20,48 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+###
+### Main function
+###
+
+def propm_allocation(instance) -> Allocation:
+    """
+    Function that takes a valuation matrix and returns PROPm allocation of goods.
+    >>> import numpy as np
+    >>> v = np.array([
+    ... [0.25, 0.25, 0.25, 0.25, 0, 0],
+    ... [0.25, 0, 0.26, 0, 0.25, 0.24],
+    ... [0.25, 0, 0.24, 0, 0.25, 0.26]
+    ... ])
+    >>> propm_allocation(v)
+    Agent #0 gets {2,3} with value 0.5.
+    Agent #1 gets {1,5} with value 0.24.
+    Agent #2 gets {0,4} with value 0.5.
+    <BLANKLINE>
+    >>> propm_allocation(v[np.ix_([0, 1, 2], [0, 2, 1, 3, 4, 5])])
+    Agent #0 gets {2,3} with value 0.5.
+    Agent #1 gets {0,1} with value 0.51.
+    Agent #2 gets {4,5} with value 0.51.
+    <BLANKLINE>
+
+    >>> v = {"Alice":  {"z":12, "y":10, "x":8, "w":7, "v":4, "u":1},\
+            "Dina":   {"z":14, "y":9, "x":15, "w":4, "v":9, "u":12},\
+            "George": {"z":19, "y":16, "x":8, "w":6, "v":5, "u":1},\
+            }
+    >>> propm_allocation(v)
+    Alice gets {x,y} with value 18.
+    Dina gets {u,v,w} with value 25.
+    George gets {z} with value 19.
+    <BLANKLINE>
+    """
+    return convert_input_to_valuation_matrix(solve)(instance)
+
+
+
+###
+### Subroutines
+###
+
 def insert_agent_into_allocation(agent: int, item: int, allocated_bundles: List[List[int]]):
     """
     If agent's i value of item j is greater than 1/n, we can allocate item j to i and solve
@@ -322,38 +364,6 @@ def solve(agents) -> List[List[int]]:
 
             return allocation
 
-
-def propm_allocation(instance) -> Allocation:
-    """
-    Function that takes a valuation matrix and returns PROPm allocation of goods.
-    >>> import numpy as np
-    >>> v = np.array([
-    ... [0.25, 0.25, 0.25, 0.25, 0, 0],
-    ... [0.25, 0, 0.26, 0, 0.25, 0.24],
-    ... [0.25, 0, 0.24, 0, 0.25, 0.26]
-    ... ])
-    >>> propm_allocation(v)
-    Agent #0 gets {2,3} with value 0.5.
-    Agent #1 gets {1,5} with value 0.24.
-    Agent #2 gets {0,4} with value 0.5.
-    <BLANKLINE>
-    >>> propm_allocation(v[np.ix_([0, 1, 2], [0, 2, 1, 3, 4, 5])])
-    Agent #0 gets {2,3} with value 0.5.
-    Agent #1 gets {0,1} with value 0.51.
-    Agent #2 gets {4,5} with value 0.51.
-    <BLANKLINE>
-
-    >>> v = {"Alice":  {"z":12, "y":10, "x":8, "w":7, "v":4, "u":1},\
-            "Dina":   {"z":14, "y":9, "x":15, "w":4, "v":9, "u":12},\
-            "George": {"z":19, "y":16, "x":8, "w":6, "v":5, "u":1},\
-            }
-    >>> propm_allocation(v)
-    Alice gets {x,y} with value 18.
-    Dina gets {u,v,w} with value 25.
-    George gets {z} with value 19.
-    <BLANKLINE>
-    """
-    return convert_input_to_valuation_matrix(solve)(instance)
 
 propm_allocation.logger = logger
 
