@@ -215,6 +215,7 @@ def solve(agents) -> List[List[int]]:
     recursive function which takes valuations and returns a PROPm allocation
     as a list of bundles
     >>> import numpy as np
+
     >>> v = np.array([
     ... [0.25, 0.25, 0.25, 0.25, 0, 0],
     ... [0.25, 0, 0.26, 0, 0.25, 0.24],
@@ -222,8 +223,17 @@ def solve(agents) -> List[List[int]]:
     ... ])
     >>> solve(v)
     [[2, 3], [1, 5], [4, 0]]
+
     >>> solve(v[np.ix_([0, 1, 2], [0, 2, 1, 3, 4, 5])])
     [[2, 3], [0, 1], [4, 5]]
+
+    >>> v = np.array([
+    ... [0, 0, 0, 0, 0, 0],
+    ... [1, 2, 3, 4, 5, 6],
+    ... [10, 20, 30, 40, 50, 60]
+    ... ])
+    >>> solve(v)
+    [[], [0, 1, 2, 3], [4, 5]]
     """
     v = ValuationMatrix(agents)
     if v.num_of_agents == 0 or v.num_of_objects == 0:
@@ -231,6 +241,12 @@ def solve(agents) -> List[List[int]]:
 
     logger.info("Looking for PROPm allocation for %d agents and %d items", v.num_of_agents, v.num_of_objects)
     logger.info("Solving a problem defined by valuation matrix:\n %s", v)
+
+    for agent in v.agents():
+        if np.allclose(v[agent], 0.0):  # irrelevant agent - values everything at 0
+            allocation = solve(v.without_agent(agent))
+            allocation.insert(agent, [])
+            return allocation
 
     total_value = v.normalize()
 
