@@ -107,7 +107,6 @@ def get_mms_alloc(data: dict):
 
 
     alloc_with_dividing_remaining_items=assign_remaining_items(alloc,remaining_items,agents)
-    #alloc = Allocation(data1, alloc1)
     alloc = Allocation(data, alloc)
     alloc_with_dividing_remaining_items = Allocation(data, alloc_with_dividing_remaining_items)
 
@@ -213,15 +212,7 @@ def plot_graph_statistics(arr: dict(), name: str(), ylim: int=4000):
 
 
 if __name__=="__main__":
-    # import doctest
-    # import sys
-
-    # (failures, tests) = doctest.testmod(report=True)
-    # print("{} failures, {} tests".format(failures, tests))
     
-    # val_dict={'agent0': {'x0': 1000.0, 'x1': 0.0, 'x2': 0.0}, 'agent1': {'x0': 0.0, 'x1': 1000.0, 'x2': 0.0}}
-    
-    # alloc_mms=get_mms_alloc(val_dict)
     min_sum=[0,0,0,0]
     sum_of_sum=[0,0,0,0]
     cont_for_avg = [0,0,0,0]
@@ -272,7 +263,7 @@ if __name__=="__main__":
         except Exception as e:
             cont_errors[1]+=1
             print("Error in promp test "+str(i)+":\n"+str(e)+"\nTest case:\n"+str(val_dict)+"\n")
-            # with open('promp_errors_2.txt', 'a') as f:
+            # with open('promp_errors.txt', 'a') as f:
             #     f.write("Error in promp test "+str(i)+":\n"+str(e)+"\nTest case:\n"+str(val_dict)+"\n")
 
         try:
