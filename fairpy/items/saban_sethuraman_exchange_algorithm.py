@@ -10,7 +10,6 @@ Since: 2022-05
 """
 import fairpy
 import operator
-import dictionary as dictionary
 import networkx as nx
 import unittest
 
@@ -19,7 +18,7 @@ from typing import Dict
 
 # the Kosaraju’s algorithm i copy from https://www.geeksforgeeks.org/strongly-connected-components/
 
-def print_SCCs(owner_house: dictionary, PreferenceLists: dictionary):
+def print_SCCs(owner_house: Dict, PreferenceLists: Dict):
     """
     the main fun that call all the func and return the owner houses after do this algo.
     :param owner_house:dictionary that connect between the houses to there owners.keys = agent, values = houses.
@@ -165,7 +164,7 @@ def stringify(d):
 
     return "{" + ", ".join(["{}:{}".format(k, v) for k, v in sorted(d2.items())]) + "}"
 
-def make_graph(PreferenceLists: dictionary, graph):
+def make_graph(PreferenceLists: Dict, graph):
     """
     part 1(a)
     O(n^2)
@@ -202,7 +201,7 @@ def make_graph(PreferenceLists: dictionary, graph):
     return graph
 
 
-def make_graph_begin(PreferenceLists: dictionary, owner_house: dictionary):
+def make_graph_begin(PreferenceLists: Dict, owner_house: Dict):
     """
     O(n^2)
     This func make graph with agents and houses nodes and connect between them with edges.
@@ -307,7 +306,7 @@ def SCC(graph, v, visited: list, SCC_list):
     return SCC_list
 
 
-def if_all_satisfied(graph, owner_house: dictionary):
+def if_all_satisfied(graph, owner_house: Dict):
     """
     O(n)
     check if there aren't jealous agents in the graph return 1 else 0.
@@ -333,7 +332,7 @@ def if_all_satisfied(graph, owner_house: dictionary):
     return 1
 
 
-def if_SCC_change_owners(graph, owner_house: dictionary):
+def if_SCC_change_owners(graph, owner_house: Dict):
     """
     part 2(1.b)
     this func run over all SCC in the graph and replace the houses owners in this SCC(that every agents in SCC will be satisfied) .
@@ -389,7 +388,7 @@ def if_SCC_change_owners(graph, owner_house: dictionary):
     return graph
 
 
-def find_satisfied_SCC(graph, owner_house: dictionary, PreferenceLists: dictionary):
+def find_satisfied_SCC(graph, owner_house: Dict, PreferenceLists: Dict):
     """
     part 1(b)
     find SCC that all there agents are satisfied and point only to this SCC, if there is this SCC remove all the
@@ -505,7 +504,7 @@ def connect_jealous_agents_to_there_best(jealous: list, graph):
     return graph
 
 
-def connect_satisfied_agents_to_there_best(graph, owner_house: dictionary, labeled: list):
+def connect_satisfied_agents_to_there_best(graph, owner_house: Dict, labeled: list):
     """
     part 2(1.b)
     O(n^2)
@@ -597,7 +596,7 @@ def connect_satisfied_agents_to_there_best(graph, owner_house: dictionary, label
     return graph
 
 
-def get_all_values(owner_house: dictionary, PreferenceLists: dictionary):
+def get_all_values(owner_house: Dict, PreferenceLists: Dict):
     """
     O(n^2*log(n))
     :param owner_house:dictionary that connect between the houses to there owners.
