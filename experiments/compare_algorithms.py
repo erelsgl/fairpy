@@ -25,8 +25,8 @@ import numpy as np
 
 def min_and_sum(alloc: Allocation,multiply=1):
     """
-    return sum of agents utilities and the minimum utilty.
-    if multiply is given (witch means valuations were normelized and need to be re-valuated)
+    Return sum of agents utilities and the minimum utility for given allocation.
+    if multiply is given (which means valuations were normelized and need to be re-valuated)
     multiply by the value
     """
     sum_all_sher = multiply*sum(alloc.utility_profile())
@@ -38,7 +38,7 @@ def min_and_sum(alloc: Allocation,multiply=1):
 # def convert_valuation_matrix_to_dict(valuation_matrix):
 #     """
 #     convert values in given as a valuation matrix - rows are agents, colomes are item valuations
-#     to dict with names to agents ang items for easyer use.
+#     to dict with names to agents ang items for easier use.
 #     >>> val_matrix=    [[ 500,0,0,125,375],[0,500,167,83,250],[0,1000,0,0,0]]
 #     >>> convert_valuation_matrix_to_dict(val_matrix)
 #     {'agent0': {'x0': 500, 'x1': 0, 'x2': 0, 'x3': 125, 'x4': 375}, 'agent1': {'x0': 0, 'x1': 500, 'x2': 167, 'x3': 83, 'x4': 250}, 'agent2': {'x0': 0, 'x1': 1000, 'x2': 0, 'x3': 0, 'x4': 0}}
@@ -308,14 +308,10 @@ if __name__=="__main__":
     avg_of_sum_by_len = dict()
     avg_of_min_by_len = dict()
     for i,j in sum_of_sum_bay_len.items():
-        #print(j[0],"//",cont_for_avg_bay_len[i][0]," = ")
-        #print(j[0]/cont_for_avg_bay_len[i][0])
         if(cont_for_avg_bay_len[i][0]!=0 and cont_for_avg_bay_len[i][1]!=0 and cont_for_avg_bay_len[i][2]!=0):
             avg_of_sum_by_len[i]=[j[0]/cont_for_avg_bay_len[i][0], j[1]/cont_for_avg_bay_len[i][1], j[2]/cont_for_avg_bay_len[i][2],j[3]/cont_for_avg_bay_len[i][3]]
 
     for i,j in min_sum_bay_len.items():
-        #print(j[0],"//",cont_for_avg_bay_len[i][0]," = ")
-        #print(j[0]/cont_for_avg_bay_len[i][0])
         if(cont_for_avg_bay_len[i][0]!=0 and cont_for_avg_bay_len[i][1]!=0 and cont_for_avg_bay_len[i][2]!=0):
             avg_of_min_by_len[i]=[i*(j[0]/cont_for_avg_bay_len[i][0]), i*(j[1]/cont_for_avg_bay_len[i][1]), i*(j[2]/cont_for_avg_bay_len[i][2]), i*(j[3]/cont_for_avg_bay_len[i][3])]        
 
