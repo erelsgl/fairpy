@@ -231,7 +231,6 @@ if __name__=="__main__":
     for i, assignment in enumerate(assignments_generator):
 
         ind,val_matrix=assignment
-        val_dict=convert_valuation_matrix_to_dict(val_matrix)
         len_agents = len(val_matrix)
         print (f"\n INSTANCE {i}: {len_agents} agents")
         try:
