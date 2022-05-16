@@ -65,7 +65,6 @@ def three_quarters_MMS_allocation_algorithm(agents, items:List[Any]=None)-> (All
         
         >>> ### A different input format:
         >>> ### allocation for 3 agents, 3 objects 
-        >>> agents=[a,b,c]
         >>> alloc, remaining_items = three_quarters_MMS_allocation_algorithm([[2,3,1],[4,4,4],[2,5,3]])
         >>> print(alloc)
         Agent #0 gets {1} with value 3.
