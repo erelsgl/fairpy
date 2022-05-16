@@ -64,16 +64,13 @@ def three_quarters_MMS_allocation_algorithm(agents, items:List[Any]=None)-> (All
         []
         
         >>> ### A different input format:
-        >>> ### allocation for 3 agents, 3 objects (low alpha)
-        >>> a = AdditiveAgent({"x1": 2, "x2": 3, "x3": 1}, name="A")
-        >>> b = AdditiveAgent({"x1": 4, "x2": 4, "x3": 4}, name="B")
-        >>> c = AdditiveAgent({"x1": 2, "x2": 5, "x3": 1}, name="C")
+        >>> ### allocation for 3 agents, 3 objects 
         >>> agents=[a,b,c]
         >>> alloc, remaining_items = three_quarters_MMS_allocation_algorithm([[2,3,1],[4,4,4],[2,5,3]])
         >>> print(alloc)
         Agent #0 gets {1} with value 3.
         Agent #1 gets {0} with value 4.
-        Agent #2 gets {2} with value 1.
+        Agent #2 gets {2} with value 3.
         <BLANKLINE>
         >>> remaining_items
         []
@@ -97,18 +94,18 @@ def three_quarters_MMS_allocation_algorithm(agents, items:List[Any]=None)-> (All
     if items is None: items = list(agents[0].all_items())
     
     # algo 7 - sort valuations from largest to smallest
-    temp_agents = agents_conversion_to_ordered_instance(agents, items)
+    ordered_agents = agents_conversion_to_ordered_instance(agents, items)
 
     # algo 4 
-    res = three_quarters_MMS_allocation(temp_agents, items)
+    alloc_for_ordered_valuations = three_quarters_MMS_allocation(ordered_agents, items)
 
     # Map the result to somting like this "{'Alice': ['x3'], 'Bruce': ['x2'], 'Carl': ['x1']}"
-    res=dict(res.map_agent_to_bundle())
+    alloc_for_ordered_valuations=dict(alloc_for_ordered_valuations.map_agent_to_bundle())
     
     # algo 8 - Get the real allocation
-    real_res, remaining_items=get_alpha_MMS_allocation_to_unordered_instance(agents, res, items)
+    real_alloc, remaining_items=get_alpha_MMS_allocation_to_unordered_instance(agents, alloc_for_ordered_valuations, items)
 
-    return Allocation(agents=agents,bundles=real_res),remaining_items
+    return Allocation(agents=agents,bundles=real_alloc),remaining_items
 
 ####
 #### Algorithm 1
@@ -1255,21 +1252,17 @@ def get_alpha_MMS_allocation_to_unordered_instance(agents_unordered: List[Additi
     """
     real_alloc = dict()
     un_allocated_items=deepcopy(ordered_items) 
-    for i in agents_unordered:
-        real_alloc[i.name()] = []
-    sorted_agents_by_values = dict() # sorted agent by values
-    for agent in agents_unordered: 
-        sorted_agents_by_values[agent.name()] = agent.valuation.map_good_to_value
-        sorted_agents_by_values[agent.name()] = dict(reversed(sorted(sorted_agents_by_values[agent.name()].items(), key=lambda item: item[1])))
-    
+    dict_agents_unordered={} #keep in dictionary to allow access by
+    for agent in agents_unordered:
+        real_alloc[agent.name()] = []
+        dict_agents_unordered[agent.name()]=agent
+   
     for item in ordered_items:
-        for key, val in ag_alloc.items():
-            if(item in val): #if this agent get the next item
-                x=next(iter(sorted_agents_by_values[key])) #best item for agent number "key"
-                real_alloc[key].append(x)
-                un_allocated_items.remove(x)
-                for val2 in sorted_agents_by_values.values(): # remove the x item from all the agents
-                    val2.pop(x)
+        for name, agent_items in ag_alloc.items():
+            if(item in agent_items): #if this agent get the next item
+                index_item_to_allocate=dict_agents_unordered[name].best_index(un_allocated_items) #chose best item for agent from remaining items
+                real_alloc[name].append(un_allocated_items[index_item_to_allocate])
+                un_allocated_items.remove(un_allocated_items[index_item_to_allocate])
                 break
 
     return real_alloc,un_allocated_items  #real allocation
@@ -1360,6 +1353,7 @@ if __name__ == '__main__':
     print("{} failures, {} tests".format(failures, tests))
 
     # Testing specific functions:
+    # doctest.run_docstring_examples(three_quarters_MMS_allocation_algorithm, globals())
     # doctest.run_docstring_examples(update_bound, globals())
     # doctest.run_docstring_examples(compute_alphas, globals())
     # doctest.run_docstring_examples(initial_assignment_alpha_MSS, globals())
@@ -1370,5 +1364,5 @@ if __name__ == '__main__':
     # doctest.run_docstring_examples(three_quarters_MMS_allocation, globals())
     # doctest.run_docstring_examples(agents_conversion_to_ordered_instance, globals())
     # doctest.run_docstring_examples(get_alpha_MMS_allocation_to_unordered_instance, globals())
- 
-   
+
+    
