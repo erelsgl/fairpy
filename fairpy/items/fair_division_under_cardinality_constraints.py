@@ -1,6 +1,6 @@
-from fairpy import bundles 
-from fairpy import agents
-from fairpy import allocations 
+# from fairpy import bundles 
+# from fairpy import agents
+# from fairpy import allocations 
 import unittest
 
 """
@@ -13,16 +13,18 @@ class Data:
     """
     data should hold all given catagories of item, including each Agenets name and his evaluation for each item.
     """
-    def __init__(self,catagories:list, goods_and_values:dict):
+    def __init__(self,catagories:list, a_evaluation:dict,items:set):
         """"
         :param catagories, a list (of strings).
         :param goods_and_values, a specification dictionary for each agent. 
 
         """
         self._catagories = catagories
-        self._goods = goods_and_values
+        self._items = items
+        self._agents_evaluation = agents_evaluation
+        
 
-def ef1_algorithm(m:list, f: Data) -> bundles.Bundle:
+def ef1_algorithm(agents_names:list, f: Data) :#-> bundles.Bundle
     """
     in paper - Algorithm 1 ALG 1
     this algorithm returns a bundel of agents when each of the holds the best allocation to his valuation of the goods.
@@ -30,20 +32,28 @@ def ef1_algorithm(m:list, f: Data) -> bundles.Bundle:
     :param f data obj, hold all other information about agents, evaluation, and items.
     :return a bundel of agents each containing a fair allocation of the goods that said agent desired the most.(that is ef1 fair)
 
-    >>> catagories = catalog1 = ["trees", "doors"]
-    >>> dict_goods1 = {"trees": {"oak":6,"sprouce":9,"sakoia":4,"mango":2},"doors":{"white":8,"black":1,"red":4,"green":5}}
-    >>> data = Data(catagories,dict_goods1)
-    >>> m
+    >>> agents_names
     ["a","b"]
-    >>> answer =  ef1_algorithm(m ,data)
+    >>> catagories  = ["trees", "doors"]
+    >>> dict_goods ={"a": {"trees": {"oak":6,"sprouce":9,"sakoia":4,"mango":2},"doors":{"white":8,"black":1,"red":4,"green":5}}, 
+                "b":{"trees": {"oak":7,"sprouce":6,"sakoia":7,"mango":5},"doors":{"white":1,"black":4,"red":2,"green":9}}
+            }
+    >>> data = Data(catagories,dict_goods)
+    >>> answer =  ef1_algorithm(agents_names ,data)
     >>> answer['a'] 
     {{"trees":["sprouce","skoia"],"doors":["white","red"]}}
     >>> answer['b']
     {{"trees":["oak","mango"],"doors":["green","black"]}}
     """
-    pass
+    allocation = {a:set() for a in agents_names}; allocation_sum = {a:0 for a in agents_names} ; sigma = [a for a in agents_names]
+    for category in f._catagories:
+        Bh = greedy_round_robin(category ,f._items, sigma , f._agents_evaluation)
+        for agent in agents_names:
+            allocation[agent].update(Bh[agent])
+            allocation_sum[agent] += sum(value for key, value in f._agents_evaluation[agent][category].items() if key in allocation[agent])
+        allocation, allocation_sum, sigma = envy_graph_l1(category, allocation, sigma)
 
-def greedy_round_robin(catag :dict, Vi:dict, agents:dict) -> bundles.Bundle:
+def greedy_round_robin(category:str, items:set, agents:list, agents_evaluation:dict) -> dict:#-> bundles.Bundle
     """
     in paper - Algorithm 2 Greedy-Round-Robin (ALG 2)
     this algorithm divides all of the item in each category.
@@ -53,8 +63,8 @@ def greedy_round_robin(catag :dict, Vi:dict, agents:dict) -> bundles.Bundle:
 
     >>> agents
     {"a":[],"b":[]}
-    >>> catag
-    {"trees": {"oak":6,"sprouce":9,"sakoia":4,"mango":2}}
+    >>> items
+    {"trees":{"oak","sprouce","sakoia","mango"},"doors":{"white","black","red","green"}}
 
     iteration 1:
     >>> agents
@@ -74,12 +84,20 @@ def greedy_round_robin(catag :dict, Vi:dict, agents:dict) -> bundles.Bundle:
 
     >>> isenvy = envy_graph_l1(bundles.Bundle(agents))
     (two agents cant envy)
-    isenvy =[]
-
+    isenvy ={}}
     """
-    pass
+    index = 0;allocation ={a:set() for a in agents} ;M = {k for k in agents_evaluation[agents[index]][category].keys()}
+    while len(M) != 0:
+        for i in range(len(set(M))):
+            agent = agents[index % len(agents)]
+            temp = dict({k:v for k,v in agents_evaluation[agent][category].items() if k in M})
+            item =  max(temp, key =lambda x: temp[x])
+            allocation[agent].add(item)
+            M.discard(item)
+            index += 1
+    return allocation
 
-def envy_graph_l1(agents:dict,catag :dict) -> bundles.Bundle:
+def envy_graph_l1(category:str, allocation:dict, sigma:list) -> (dict, dict, list):#  -> bundles.Bundle
     """
     this method is being called from the main algorithm, to achieve EF1 allocation we must make sure there are no 
     cycles in the envy graph. 
@@ -95,4 +113,15 @@ def envy_graph_l1(agents:dict,catag :dict) -> bundles.Bundle:
     >>>         sums[agnt] += val    
     >>> else: return []
     """
+    pass
+
+if __name__ == "__main__":
+    agents_evaluation ={"a": {"trees": {"oak":6,"sprouce":9,"sakoia":4,"mango":2},"doors":{"white":8,"black":1,"red":4,"green":5}}, 
+                "b":{"trees": {"oak":7,"sprouce":6,"sakoia":7,"mango":5},"doors":{"white":1,"black":4,"red":2,"green":9}}
+            }
+    catagories  = ["trees", "doors"]
+    items = {"trees":{"oak","sprouce","sakoia","mango"},"doors":{"white","black","red","green"}}
+    agents_names = ['a','b']
+    d = Data(catagories,agents_evaluation,items)
+    ef1_algorithm(agents_names,d)
     pass
