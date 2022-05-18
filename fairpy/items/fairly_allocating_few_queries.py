@@ -67,38 +67,39 @@ def two_agents_ef1(agents: List[Agent], items: List[Any]) -> Allocation:
     >>> Alice.is_EF1(allocation[0], allocation) and George.is_EF1(allocation[1], allocation)
     True
     """
-    first_agent_items = agents[0].all_items()
-    left_value = 0
-    right_value = agents[0].total_value()
+    items = agents[0].all_items()
+    Lg_value = 0
+    Rg_value = agents[0].total_value()
     rightmost = None
-    for agent_value in first_agent_items:
-        if left_value <= right_value:
-            left_value += agents[0].value(agent_value)
-            right_value -= agents[0].value(agent_value)
-            rightmost = agent_value
+    for item in items:
+        if Lg_value <= Rg_value:
+            Lg_value += agents[0].value(item)
+            Rg_value -= agents[0].value(item)
+            rightmost = item
         else:
             break
     Lg = []
     Rg = []
-    flag = False
-    if rightmost is not None and left_value - agents[0].value(rightmost) <= right_value:
+    # partitioning the items
+    rightmost_found = False
+    if rightmost is not None and Lg_value - agents[0].value(rightmost) <= Rg_value:
         for item in items:
-            if flag is False:
+            if rightmost_found is False:
                 Lg.append(item)
                 if item == rightmost:
-                    flag = True
+                    rightmost_found = True
             else:
                 Rg.append(item)
     else:
         for item in items:
             if item == rightmost:
-                flag = True
-            if flag is False:
+                rightmost_found = True
+            if rightmost_found is False:
                 Lg.append(item)
             else:
                 Rg.append(item)
-    a = Allocation(agents=agents, bundles={agents[0].name(): Rg, agents[1].name(): Lg})
-    return a
+    allocation = Allocation(agents=agents, bundles={agents[0].name(): Rg, agents[1].name(): Lg})
+    return allocation
 
 
 def three_agents_IAV(agents: List[Agent], items: List[Any]) -> Allocation:
@@ -151,45 +152,41 @@ def three_agents_IAV(agents: List[Agent], items: List[Any]) -> Allocation:
     >>> Alice.is_EF1(allocation[0], allocation) and Bob.is_EF1(allocation[1], allocation) and George.is_EF1(allocation[2], allocation)
     True
     """
-    agent_items = agents[0].all_items()
-    u_G = agents[0].total_value()
+    uG = agents[0].total_value()  # represents the u(G) - the value of all items
     Lg1_value = 0
     Lg3_value = 0
-    Rg2_value = u_G
-    g1 = None
+    Rg2_value = uG
     g2 = None
-    g3 = None
     g1_found = False
-    g3_found = False
-    counter = u_G
+    counter = uG
     A = []
     Lg1 = []
     Rg2 = []
     Lg3 = []
     G = items.copy()
-    for item in agent_items:
-        if g1_found is False and Lg1_value + agents[0].value(item) > u_G / 3:
-            g1 = item
+    for item in items:
+        if g1_found is False and Lg1_value + agents[0].value(item) > uG / 3:
+            # g1 = item
             g1_found = True
             Lg1.append(item)
-        if g1_found is True and Rg2_value > u_G / 3:
+        if g1_found is True and Rg2_value > uG / 3:
             g2 = item
             Rg2 = G.copy()
-            for g in agent_items:
+            for g in items:
                 counter -= agents[0].value(g)
                 Rg2.remove(g)
                 if g == g2:
                     break
             Rg2_value = counter
-            counter = u_G
-            if Rg2_value + agents[0].value(item) < u_G / 3:
+            counter = uG
+            if Rg2_value + agents[0].value(item) < uG / 3:
                 break
         Lg1_value += agents[0].value(item)
     # print("g1:", g1, "g2:", g2)
     if len(Lg1) != 0:
         for item in items:
             Lg3.append(item)
-            g3 = item
+            # g3 = item
             Lg3_value += agents[0].value(item)
             if Lg3_value >= Rg2_value:
                 break
@@ -197,25 +194,31 @@ def three_agents_IAV(agents: List[Agent], items: List[Any]) -> Allocation:
     # print("g3:", g3)
     C = Rg2
     B = G.copy()
-    AuC = A.copy()
-    AuC += C
+    # A u C
+    AuC = A.copy() + C
+    # B = G\(A u C)
     [B.remove(arg) for arg in AuC]
     if B.count(g2) == 0 and agents[0].value(C) >= agents[0].value(B):
-        a = Allocation(agents=agents, bundles={agents[0].name(): A, agents[1].name(): B, agents[2].name(): C})
+        allocation = Allocation(agents=agents, bundles={agents[0].name(): A, agents[1].name(): B, agents[2].name(): C})
+    # if u(C) >= u(B\{g2})
     elif agents[0].value(C) >= agents[0].value(copy(B).remove(g2)):
-        a = Allocation(agents=agents, bundles={agents[0].name(): A, agents[1].name(): B, agents[2].name(): C})
+        allocation = Allocation(agents=agents, bundles={agents[0].name(): A, agents[1].name(): B, agents[2].name(): C})
     else:
+        # C' = Rg2 u {g2}
         C_tag = copy(Rg2).add(g2)
         A_tag = set()
-        B_tag = copy(G).remove(C_tag)
+        # B' = G\C'
+        B_tag = copy(G)
+        B_tag.remove(C_tag)
+        # partitioning the bundle to 2
         for item in items:
             A_tag.add(item)
             B_tag.remove(item)
             if agents[0].value(A_tag) >= agents[0].value(B_tag):
                 break
-        a = Allocation(agents=agents,
+        allocation = Allocation(agents=agents,
                        bundles={agents[0].name(): A_tag, agents[1].name(): B_tag, agents[2].name(): C_tag})
-    return a
+    return allocation
 
 
 def three_agents_AAV(agents: List[Agent], items: List[Any]) -> Allocation:
