@@ -23,7 +23,7 @@ class Data:
         """
         self._catagories = catagories
         self._items = items
-        self._agents_evaluation = agents_evaluation
+        self._agents_evaluation = a_evaluation
         
 
 def ef1_algorithm(agents_names:list, f: Data) -> dict:
@@ -61,13 +61,6 @@ def ef1_algorithm(agents_names:list, f: Data) -> dict:
         #changing the order of the agents, using the topology of the envy graph.
         sigma = lemma_1(envy_graph, f._agents_evaluation, allocation, category, sigma)
     # this for loop is to assign the total amount of value each agent got for each category (from all items)
-    for agent in agents_names:
-        for category in f._agents_evaluation[agent].keys():
-            for item in f._agents_evaluation[agent][category]:
-                if item in allocation[agent][category]:
-                    value += f._agents_evaluation[agent][category][item]
-            allocation[agent]['total'] = {category:value}
-            value = 0
     return allocation   
 
 
@@ -112,7 +105,7 @@ def greedy_round_robin(category:str, items:set, agents:list, agents_evaluation:d
         for i in range(len(set(M))):
             agent_name = agents[index % len(agents)]
             evaluation_arr = dict({key:value for key, value in agents_evaluation[agent_name][category].items() if key in M})
-            max_item =  max(evaluation_arr, key =lambda x: evaluation_arr[x])
+            max_item = max(evaluation_arr, key =lambda x: evaluation_arr[x])
             allocation[agent_name].add(max_item)
             M.discard(max_item)
             index += 1
@@ -188,6 +181,17 @@ def sum_values(agent_name:str, evaluation:dict, category:str, allocations:set) -
     #simple method for calculating the sum of all values (values of one agent from the PERSPECTIVE of another)
     return sum([sum(evaluation[agent_name][category][item] for x in evaluation[agent_name][category] if x == item )for item in allocations[category]])
 
+def add_total(allocation:dict, f:Data) -> dict:
+    temp ={}
+    for agent_name in allocation.keys():
+        temp[agent_name+"_total"]={}
+        for category in allocation[agent_name]:
+            value = 0
+            for item in allocation[agent_name][category]:
+                value += f._agents_evaluation[agent_name][category][item]
+            temp[agent_name+"_total"].update({category+"_"+"total":value})
+    allocation.update(temp)
+    
 if __name__ == "__main__":
     agents_evaluation ={
                 "a": {"trees": {"oak":8,"sprouce":9,"sakoia":9,"mango":2},"doors":{"white":8,"black":1,"red":4,"green":5}}, 
@@ -198,4 +202,5 @@ if __name__ == "__main__":
     items = {"trees":{"oak","sprouce","sakoia","mango"},"doors":{"white","black","red","green"}}
     agents_names = ['a','b','c']
     d = Data(catagories,agents_evaluation,items)
-    pprint.pprint(ef1_algorithm(agents_names,d))
+    allocation = add_total(ef1_algorithm(agents_names,d), d)
+    pprint.pprint(allocation)
