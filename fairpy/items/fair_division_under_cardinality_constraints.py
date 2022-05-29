@@ -191,8 +191,9 @@ def add_total(allocation:dict, f:Data) -> dict:
                 value += f._agents_evaluation[agent_name][category][item]
             temp[agent_name+"_total"].update({category+"_"+"total":value})
     allocation.update(temp)
-    
+
 if __name__ == "__main__":
+    # this is a test for branching
     agents_evaluation ={
                 "a": {"trees": {"oak":8,"sprouce":9,"sakoia":9,"mango":2},"doors":{"white":8,"black":1,"red":4,"green":5}}, 
                 "b":{"trees": {"oak":2,"sprouce":2,"sakoia":2,"mango":2},"doors":{"white":1,"black":4,"red":2,"green":9}},
