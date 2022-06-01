@@ -16,6 +16,7 @@ from unittest import result
 import fairpy
 from fairpy import Agent 
 from fairpy.allocations import Allocation
+from more_itertools import powerset 
 from sympy import group
 import logging
 logger = logging.getLogger(__name__)
@@ -170,8 +171,8 @@ def undercut(agents: List[Agent], items: List[Any]) -> List:
     logger.info("Checking if there is a single item") 
     if num_of_items==1:
         item_ = items.pop()
-        valA_=agents.__getitem__(0)[item_]
-        valB_=agents.__getitem__(1)[item_]  
+        valA_=agents[0][item_]
+        valB_=agents[1][item_]  
         if(valA_<=0 and valB_ >=0 ):
            temp2.append(item_)
            result=f"Alice gets {temp} with value {0}.\n"     
@@ -198,23 +199,23 @@ def undercut(agents: List[Agent], items: List[Any]) -> List:
             counter=0
             for item in group:
                 for item_ in item:
-                    val=values[counter]+ agents.__getitem__(counter)[item_]
+                    val=values[counter]+ agents[counter][item_]
                     values[counter]=val
                 counter+=1
-            groupi2=group.__getitem__(0)
-            groupi=group.__getitem__(1)
+            groupi2=group[0]
+            groupi=group[1]
             counter_groupi2=len(groupi2)
             counter_groupi=len(groupi)
             counteri=0
             counter_=0
             val2=val22=0
             for item_ in groupi:
-                    val2+=agents.__getitem__(0)[item_]    
+                    val2+=agents[0][item_]    
             for item_ in groupi2:
-                    val22+=agents.__getitem__(1)[item_]    
+                    val22+=agents[1][item_]    
             if values[0]>=val2: #Alice weakly prefers X to Y
                 for item_ in groupi2: #If any single item is moved from X to Y
-                    if values[0]-agents.__getitem__(0)[item_]>=val2+agents.__getitem__(0)[item_]: #then Alice strictly prefers Y to X
+                    if values[0]-agents[0][item_]>=val2+agents[0][item_]: #then Alice strictly prefers Y to X
                         break
                     counteri=counteri+1
                 if counteri==counter_groupi2: #(X,Y) is almost-equal-cut for Alice (prefers X to Y)
@@ -236,7 +237,7 @@ def undercut(agents: List[Agent], items: List[Any]) -> List:
                     else: #George rejects the partition if he prefers X to Y
                         logger.info("Bob rejects the offer because he has more benefit from {} than {}".format(groupi2,groupi))
                         for item_ in groupi2: # check if there exists an item x in X such that: 
-                            if val22-agents.__getitem__(1)[item_]>=values[1]+agents.__getitem__(1)[item_]:  # George prefers X \ x to Y U x
+                            if val22-agents[1][item_]>=values[1]+agents[1][item_]:  # George prefers X \ x to Y U x
                                 for i in groupi2:
                                     if  i is not item_:
                                         temp.append(i) #George reports X \ x
@@ -245,13 +246,13 @@ def undercut(agents: List[Agent], items: List[Any]) -> List:
                                 temp2.append(item_) #Y U x
                                 temp.sort()
                                 temp2.sort()   
-                                result=f"Alice gets {temp2} with value {val2+agents.__getitem__(0)[item_]}.\n"     
-                                result+=f"Bob gets {temp} with value {val22-agents.__getitem__(1)[item_]}.\n"   
+                                result=f"Alice gets {temp2} with value {val2+agents[0][item_]}.\n"     
+                                result+=f"Bob gets {temp} with value {val22-agents[1][item_]}.\n"   
                                 logger.info(result) 
                                 return result                       
             if values[1]>=val22: #George weakly prefers Y to X
                 for item_ in groupi: #If any single item is moved from Y to X
-                    if values[1]-agents.__getitem__(1)[item_]>=val22+agents.__getitem__(1)[item_]:  #then George strictly prefers X to Y
+                    if values[1]-agents[1][item_]>=val22+agents[1][item_]:  #then George strictly prefers X to Y
                         break
                     counter_=counter_+1 
                 if counter_==counter_groupi: #(X,Y) is almost-equal-cut for George (prefers Y to X)
@@ -266,7 +267,7 @@ def undercut(agents: List[Agent], items: List[Any]) -> List:
                     else: #Alice rejects the partition if she prefers Y to X
                         logger.info("Alice rejects the offer because she has more benefit from {} than {}".format(groupi,groupi2))
                         for item_ in groupi: # check if there exists an item y in Y such that: 
-                            if val2-agents.__getitem__(0)[item_]>=values[0]+agents.__getitem__(0)[item_]:  # Alice prefers Y \ y to X U y
+                            if val2-agents[0][item_]>=values[0]+agents[0][item_]:  # Alice prefers Y \ y to X U y
                                 for i in groupi:
                                     if  i is not item_:
                                         temp.append(i) #Alice reports Y \ y
@@ -275,8 +276,8 @@ def undercut(agents: List[Agent], items: List[Any]) -> List:
                                 temp2.append(item_) #X U y
                                 temp.sort()
                                 temp2.sort()
-                                result=f"Alice gets {temp} with value {val2-agents.__getitem__(0)[item_]}.\n"     
-                                result+=f"Bob gets {temp2} with value {val22+agents.__getitem__(1)[item_]}.\n"   
+                                result=f"Alice gets {temp} with value {val2-agents[0][item_]}.\n"     
+                                result+=f"Bob gets {temp2} with value {val22+agents[1][item_]}.\n"   
                                 logger.info(result) 
                                 return result    
            
