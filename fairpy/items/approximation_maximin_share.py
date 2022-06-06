@@ -1,15 +1,13 @@
-#!python3
-
 """
 Find an approximate MMS allocation.
 
 Based on:
-Jugal Garg and Setareh Taki
-["An Improved Approximation Algorithm for Maximin Shares"](https://arxiv.org/abs/1903.00029)
+Jugal Garg and Setareh Taki,
+["An Improved Approximation Algorithm for Maximin Shares"](https://www.sciencedirect.com/science/article/abs/pii/S0004370221000989),
+Artificial Intelligence, 2021.
 
 Programmers: Liad Nagi and Moriya Elgrabli
-
-Since: 2022-05
+Date: 2022-05
 """
 
 from fairpy import Allocation, agents_from
