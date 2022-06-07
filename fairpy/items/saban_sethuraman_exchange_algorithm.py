@@ -18,7 +18,7 @@ from typing import Dict
 
 # the Kosaraju’s algorithm i copy from https://www.geeksforgeeks.org/strongly-connected-components/
 
-def print_SCCs(owner_house: Dict, PreferenceLists: Dict):
+def top_trading_cycles_with_indifferences(owner_house: Dict, PreferenceLists: Dict):
     """
     the main fun that call all the func and return the owner houses after do this algo.
     :param owner_house:dictionary that connect between the houses to there owners.keys = agent, values = houses.
@@ -28,62 +28,62 @@ def print_SCCs(owner_house: Dict, PreferenceLists: Dict):
 
     >>> PreferenceLists = {1: ['b', 'a'], 2: ['c', 'b'], 3: ['d', 'c'], 4: ['d']}
     >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
-    >>> print_SCCs(house, PreferenceLists)
+    >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
 
     >>> PreferenceLists = {1: [{'a', 'b'}], 2: ['a', 'b']}
     >>> house = {1: 'a', 2: 'b'}
-    >>> print_SCCs(house, PreferenceLists)
+    >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'b', 2: 'a'}
 
     >>> PreferenceLists = {1: {'a': 3, 'b': 3}, 2: {'a': 5, 'b': 1}}
     >>> house = {1: 'a', 2: 'b'}
-    >>> print_SCCs(house, PreferenceLists)
+    >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'b', 2: 'a'}
 
     >>> PreferenceLists = {1: {'b': 3, 'a': 2}, 2: {'c': 5, 'b': 1}, 3:{'d':9, 'c':8},4:{'d':3}}
     >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
-    >>> print_SCCs(house, PreferenceLists)
+    >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
 
     >>> PreferenceLists = {1: ['b', 'a'], 2: ['c', 'b'], 3: ['d', 'c'], 4: ['a']}
     >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
-    >>> print_SCCs(house, PreferenceLists)
+    >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'b', 2: 'c', 3: 'd', 4: 'a'}
 
     >>> PreferenceLists = {1: {'b': 3, 'a': 2}, 2: {'c': 5, 'b': 1}, 3:{'d':9, 'c':8},4:{'a':3}}
     >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
-    >>> print_SCCs(house, PreferenceLists)
+    >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'b', 2: 'c', 3: 'd', 4: 'a'}
 
     >>> PreferenceLists = {1: ['b'], 2: ['a'], 3: ['c']}
     >>> house = {1: 'a', 2: 'b', 3: 'c'}
-    >>> print_SCCs(house, PreferenceLists)
+    >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'b', 2: 'a', 3: 'c'}
 
     >>> PreferenceLists = {1: {'b': 3}, 2: {'a': 5}, 3:{'c':9}}
     >>> house = {1: 'a', 2: 'b', 3: 'c'}
-    >>> print_SCCs(house, PreferenceLists)
+    >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'b', 2: 'a', 3: 'c'}
 
     >>> PreferenceLists = {1: [{'g', 'c'}], 2: [{'f', 'g', 'd'}], 3: [{'b', 'e'}, 'c'], 4: ['e'], 5: ['d'], 6: ['b', 'f'], 7: ['a']}
     >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f', 7: 'g'}
-    >>> print_SCCs(house, PreferenceLists)
+    >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'g', 2: 'f', 3: 'c', 4: 'e', 5: 'd', 6: 'b', 7: 'a'}
 
     >>> PreferenceLists = {1: {'g': 3, 'c': 3}, 2: {'f': 2, 'g': 2, 'd': 2}, 3: {'b': 9, 'e':9, 'c': 3}, 4: {'e': 1}, 5: {'d': 5},6: {'b': 1, 'f': 0}, 7:{'a':3}}
     >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f', 7: 'g'}
-    >>> print_SCCs(house, PreferenceLists)
+    >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'g', 2: 'f', 3: 'c', 4: 'e', 5: 'd', 6: 'b', 7: 'a'}
 
     >>> PreferenceLists = {1: [{'a', 'c'}],2: [{'a', 'b', 'd'}], 3: [{'c', 'e'}], 4: ['c'], 5: [{'a', 'f'}], 6: ['b']}
     >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f'}
-    >>> print_SCCs(house, PreferenceLists)
+    >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'a', 2: 'd', 3: 'e', 4: 'c', 5: 'f', 6: 'b'}
 
     >>> PreferenceLists = {1: {'a': 3, 'c': 3}, 2: {'a': 2, 'b': 2, 'd': 2}, 3: {'c': 9, 'e':9}, 4: {'c': 1}, 5: {'a': 5, 'f': 5},6: {'b': 1}}
     >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f'}
-    >>> print_SCCs(house, PreferenceLists)
+    >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'a', 2: 'd', 3: 'e', 4: 'c', 5: 'f', 6: 'b'}
 
 
@@ -603,7 +603,7 @@ def get_all_values(owner_house: Dict, PreferenceLists: Dict):
     keys = agent, values = houses.
     :param PreferenceLists:dictionary with agent's keys and the houses values with number how much the agent appraiser the houses.
     keys = agent, values = houses with number.
-    :return:call print_SCCs func with order PreferenceLists and owner houses.
+    :return:call top_trading_cycles_with_indifferences func with order PreferenceLists and owner houses.
 
     >>> PreferenceLists = {1: {'a': 3, 'b': 3}, 2: {'a': 5, 'b': 1}}
     >>> house = {1: 'a', 2: 'b'}
@@ -659,7 +659,7 @@ if __name__ == '__main__':
     doctest.run_docstring_examples(make_graph_begin, globals())
     doctest.run_docstring_examples(make_graph, globals())
     doctest.run_docstring_examples(if_SCC_change_owners, globals())
-    doctest.run_docstring_examples(print_SCCs, globals())
+    doctest.run_docstring_examples(top_trading_cycles_with_indifferences, globals())
     doctest.run_docstring_examples(connect_satisfied_agents_to_there_best, globals())
     doctest.run_docstring_examples(connect_jealous_agents_to_there_best, globals())
     doctest.run_docstring_examples(find_satisfied_SCC, globals())
