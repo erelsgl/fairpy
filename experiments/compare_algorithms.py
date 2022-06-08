@@ -118,7 +118,7 @@ def plot_an_statistic(arr: list(), name: str()):
     height = arr
 
     # labels for bars
-    tick_label = ['MMS', 'promp', 'leximin', 'max sum']
+    tick_label = ['MMS', 'PROPm', 'leximin', 'max sum']
 
     # plotting a bar chart
     plt.bar(left, height, tick_label = tick_label,
@@ -170,8 +170,8 @@ def plot_graph_statistics(arr: dict(), name: str(), ylim: int=4000):
     fig=plt.figure()
     ax = fig.add_subplot(111)
 
-    ax.plot(line,line , label='mms',color='blue')
-    ax.plot(line, line**2,label='propm', color='green')
+    ax.plot(line,line , label='MMS',color='blue')
+    ax.plot(line, line**2,label='PROPm', color='green')
     ax.plot(line, line**3, label='leximin',color='y')
     ax.plot(line, line**4, label='max sum',color='red')
     ax.legend(loc=1, )
