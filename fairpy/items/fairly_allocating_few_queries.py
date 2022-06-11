@@ -311,7 +311,7 @@ def Lemma4_1(remaining_goods: list, agent):
     return A_tag, B_tag
 
 
-# this algorithm isn't finished
+# this algorithm isn't done, steps 1,2 finished.
 def three_agents_AAV(agents: List[Agent], items: List[Any]) -> Allocation:
     """
     Algorithm No 3 - three agents with Arbitrary Additive Valuations
