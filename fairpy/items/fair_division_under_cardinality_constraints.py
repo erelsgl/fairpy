@@ -1,10 +1,8 @@
-# from fairpy import bundles 
-# from fairpy import agents
-# from fairpy import allocations 
 import unittest
 import networkx as nx
 import copy
 import pprint
+import doctest
 import itertools
 
 """
@@ -36,18 +34,17 @@ def ef1_algorithm(agents_names:list, f: Data) -> dict:
     :param f data obj, hold all other information about agents, evaluation, and items.
     :return a bundel of agents each containing a fair allocation of the goods that said agent desired the most.(that is ef1 fair)
 
-    >>> agents_names
-    ["a","b"]
+    >>> agents_evaluation ={"a": {"trees": {"oak":9,"sprouce":8,"mango":2},"doors":{"white":8,"black":1,"green":5}}, "b":{"trees": {"oak":10,"sprouce":5,"mango":0},"doors":{"white":1,"black":4,"green":9}},"c":{"trees": {"oak":0,"sprouce":10,"mango":6},"doors":{"white":4,"black":6,"green":7}}}
     >>> catagories  = ["trees", "doors"]
-    >>> dict_goods ={"a": {"trees": {"oak":6,"sprouce":9,"sakoia":4,"mango":2},"doors":{"white":8,"black":1,"red":4,"green":5}}, 
-                "b":{"trees": {"oak":7,"sprouce":6,"sakoia":7,"mango":5},"doors":{"white":1,"black":4,"red":2,"green":9}}
-            }
-    >>> data = Data(catagories,dict_goods)
-    >>> answer =  ef1_algorithm(agents_names ,data)
-    >>> answer['a'] 
-    {{"trees":["sprouce","skoia"],"doors":["white","red"]}}
+    >>> items = {"trees":{"oak","sprouce","sakoia","mango"},"doors":{"white","black","red","green"}}
+    >>> agents_names = ['a','b','c']
+    >>> answer =  ef1_algorithm(agents_names , Data(catagories, agents_evaluation, items))
+    >>> answer['a']
+    {'trees': {'oak'}, 'doors': {'white'}}
     >>> answer['b']
-    {{"trees":["oak","mango"],"doors":["green","black"]}}
+    {'trees': {'sprouce'}, 'doors': {'black'}}
+    >>> answer['c']
+    {'trees': {'mango'}, 'doors': {'green'}}
     """
     # Initialize parameters, each to zero-values. 
     allocation, sigma= {a:{k:set() for k in f._catagories} for a in agents_names}, [a for a in agents_names]
@@ -66,38 +63,23 @@ def ef1_algorithm(agents_names:list, f: Data) -> dict:
     # this for loop is to assign the total amount of value each agent got for each category (from all items)
     return allocation   
 
-def greedy_round_robin(category:str, items:set, agents:list, agents_evaluation:dict) -> dict:#-> bundles.Bundle
+def greedy_round_robin(category:str, items:set, agents:list, agents_evaluation:dict) -> dict:
     """
     in paper - Algorithm 2 Greedy-Round-Robin (ALG 2)
     this algorithm divides all of the item in each category.
     :param catag the category that will be divided.
     :param Vi hold all of the agents and their preferences.
     :return an updated bundel of the agents.
+    >>> agents_evaluation ={"a": {"trees": {"oak":9,"sprouce":8,"mango":2},"doors":{"white":8,"black":1,"green":5}}, "b":{"trees": {"oak":10,"sprouce":5,"mango":0},"doors":{"white":1,"black":4,"green":9}},"c":{"trees": {"oak":0,"sprouce":10,"mango":6},"doors":{"white":4,"black":6,"green":7}}}
+    >>> catagories  = ["trees", "doors"]
+    >>> items = {"trees":{"oak","sprouce","sakoia","mango"},"doors":{"white","black","red","green"}}
+    >>> agents_names = ['a','b','c']
 
-    >>> agents
-    {"a":[],"b":[]}
-    >>> items
-    {"trees":{"oak","sprouce","sakoia","mango"},"doors":{"white","black","red","green"}}
+    >>> greedy_round_robin('trees', items, agents_names, agents_evaluation)
+    {'a': {'oak'}, 'b': {'sprouce'}, 'c': {'mango'}}
 
-    iteration 1:
-    >>> agents
-    {"a":["sprouce"],"b":[]}
-
-    iteration 2:
-    >>> agents
-    {"a":["sprouce"],"b":["oak"]}
-
-    iteration 3:
-    >>> agents
-    {"a":["sprouce","sakoia"],"b":["oak"]}
-
-    iteration 4:
-    >>> agents
-    {"a":["sprouce","sakoia"],"b":["oak","mango"]}
-
-    >>> isenvy = envy_graph_l1(bundles.Bundle(agents))
-    (two agents cant envy)
-    isenvy ={}}
+    >>> greedy_round_robin('doors', items, agents_names, agents_evaluation)
+    {'a': {'white'}, 'b': {'green'}, 'c': {'black'}}
     """
     # Greedy-Round-Robin from paper, 
     index =0
@@ -119,46 +101,30 @@ def lemma_1(envy_graph:nx.DiGraph, evaluation:dict, allocation:dict, category:st
     cycles in the envy graph. 
     :param bun_agents a bundel of agents.
 
-    iteration 1:
-    >>> category
-    'trees'
-    >>> evaluation
-    {
-        "a": {"trees": {"oak":9,"sprouce":8,"sakoia":0,"mango":2},"doors":{"white":8,"black":1,"red":4,"green":5}}, 
-        "b":{"trees": {"oak":10,"sprouce":5,"sakoia":0,"mango":0},"doors":{"white":1,"black":4,"red":2,"green":9}},
-        "c":{"trees": {"oak":0,"sprouce":10,"sakoia":9,"mango":0},"doors":{"white":4,"black":6,"red":3,"green":7}}
-    }
-    >>> allocation 
-    {
-        "a": {"trees": {"oak","mango"},"doors":{}, 
-        "b":{"trees": {"sprouce"},"doors":{},
-        "c":{"trees": {"sakoia"},"doors":{}
-    }
-    >>> envy_graph.edges()
-    [('b', 'a'), ('c', 'b')]
-    >>> sigma
-    ['a','b','c']
+    >>> envy_graph = nx.DiGraph()
+    >>> for agent in agents_names:
+    ...     envy_graph.add_node(agent)
+    >>> evaluation ={"a": {"trees": {"oak":9,"sprouce":8,"mango":2},"doors":{"white":8,"black":1,"green":5}}, "b":{"trees": {"oak":10,"sprouce":5,"mango":0},"doors":{"white":1,"black":4,"green":9}},"c":{"trees": {"oak":0,"sprouce":10,"mango":6},"doors":{"white":4,"black":6,"green":7}}}
+    >>> category  = "trees" 
+    >>> items = {"trees":{"oak","sprouce","sakoia","mango"},"doors":{"white","black","red","green"}}
+    >>> sigma = ['a','b','c']
+    >>> allocation ={'a': {'trees': {'oak'}, 'doors': set()}, 'b': {'trees': {'sprouce'}, 'doors': set()}, 'c': {'trees': {'mango'}, 'doors': set()}}
+    >>> generate_envy(envy_graph, evaluation, category, allocation)
+    >>> lemma_1(envy_graph, evaluation, allocation, category, sigma, items)
+    ['c', 'b', 'a']
 
-    iteration 2:
-    >>> category
-    'doors'
-    >>> evaluation
-    {
-        "a": {"trees": {"oak":9,"sprouce":8,"sakoia":0,"mango":2},"doors":{"white":8,"black":1,"red":4,"green":5}}, 
-        "b":{"trees": {"oak":10,"sprouce":5,"sakoia":0,"mango":0},"doors":{"white":1,"black":4,"red":2,"green":9}},
-        "c":{"trees": {"oak":0,"sprouce":10,"sakoia":9,"mango":0},"doors":{"white":4,"black":6,"red":3,"green":7}}
-    }
-    allocation
-    {
-        "a": {"trees": {"oak","mango"},"doors":{"white"}}, 
-        "b":{"trees": {"sprouce"},"doors":{"black"},
-        "c":{"trees": {"sakoia"},"doors":{"green", "red"}
-    }
-    >>> envy_graph.edges()
-    [('a', 'c'), ('b', 'c')]
 
-    >>> sigma
-    ['c','b','a']
+    >>> envy_graph = nx.DiGraph()
+    >>> for agent in agents_names:
+    ...     envy_graph.add_node(agent)
+    >>> agents_evaluation = {"a": {"trees": {"oak":9,"sprouce":8,"sakoia":0,"mango":2},"doors":{"white":8,"black":1,"red":4,"green":5}},"b":{"trees": {"oak":10,"sprouce":5,"sakoia":0,"mango":0},"doors":{"white":1,"black":4,"red":2,"green":9}},"c":{"trees": {"oak":0,"sprouce":10,"sakoia":9,"mango":0},"doors":{"white":4,"black":6,"red":3,"green":7}}}
+    >>> category  = "trees" 
+    >>> items = {"trees":{"oak","sprouce","sakoia","mango"},"doors":{"white","black","red","green"}}
+    >>> sigma = ['a','b','c']
+    >>> allocation ={'a': {'trees': {'oak'}, 'doors': set()}, 'b': {'trees': {'sprouce'}, 'doors': set()}, 'c': {'trees': {'mango'}, 'doors': set()}}
+    >>> generate_envy(envy_graph, evaluation, category, allocation)
+    >>> lemma_1(envy_graph, evaluation, allocation, category, sigma, items)
+    ['c', 'b', 'a']
     """
     # lemma_1 - remove cycles from graph using networkx, and changing the order of the agents byt the topology of the graph.  
     # algorithm:
@@ -187,45 +153,11 @@ def lemma_1(envy_graph:nx.DiGraph, evaluation:dict, allocation:dict, category:st
         return list(nx.topological_sort(envy_graph))
 
 def generate_envy(envy_graph:nx.DiGraph, evaluation:dict, category:str, allocation:dict):
-    # first we remove all edges from graph so we wont have duplicates,
-    # if agent named u envy'es an agent named v, add an edge (as stated in paper.)
-    """
-        iteration 1:
-        >>> category
-        'trees'
-        >>> evaluation
-        {
-            "a": {"trees": {"oak":9,"sprouce":8,"sakoia":0,"mango":2},"doors":{"white":8,"black":1,"red":4,"green":5}}, 
-            "b":{"trees": {"oak":10,"sprouce":5,"sakoia":0,"mango":0},"doors":{"white":1,"black":4,"red":2,"green":9}},
-            "c":{"trees": {"oak":0,"sprouce":10,"sakoia":9,"mango":0},"doors":{"white":4,"black":6,"red":3,"green":7}}
-        }
-        >>> allocation 
-        {
-            "a": {"trees": {"oak","mango"},"doors":{}, 
-            "b":{"trees": {"sprouce"},"doors":{},
-            "c":{"trees": {"sakoia"},"doors":{}
-        }
-        >>> envy_graph.edges()
-        [('b', 'a'), ('c', 'b')]
+    # simple method for loop on all agents, checking each agent as follows:
+    # allocation = {'alice' : {'oak'}, 'bob':{'sakoia'}, 'eve':{"sprouce"}}
+    # we define envy as alice's evaluation of her allocations,
+    # so if eval(alice(oak)) < eval(alice(sakoia)) then alice is envious of bob, and so one.  
 
-        iteration 2:
-        >>> category
-        'doors'
-        >>> evaluation
-        {
-            "a": {"trees": {"oak":9,"sprouce":8,"sakoia":0,"mango":2},"doors":{"white":8,"black":1,"red":4,"green":5}}, 
-            "b":{"trees": {"oak":10,"sprouce":5,"sakoia":0,"mango":0},"doors":{"white":1,"black":4,"red":2,"green":9}},
-            "c":{"trees": {"oak":0,"sprouce":10,"sakoia":9,"mango":0},"doors":{"white":4,"black":6,"red":3,"green":7}}
-        }
-        allocation
-        {
-            "a": {"trees": {"oak","mango"},"doors":{"white"}}, 
-            "b":{"trees": {"sprouce"},"doors":{"black"},
-            "c":{"trees": {"sakoia"},"doors":{"green", "red"}
-        }
-        >>> envy_graph.edges()
-        [('a', 'c'), ('b', 'c')]
-    """
     for agent_u in allocation.keys():
         for agent_v in allocation.keys():
             if agent_u != agent_v:
@@ -238,30 +170,19 @@ def sum_values(agent_name:str, evaluation:dict, category:str, allocations:set) -
     #simple method for calculating the sum of all values (values of one agent from the PERSPECTIVE of another)
     return sum([sum(evaluation[agent_name][category][item] for x in evaluation[agent_name][category] if x == item )for item in allocations[category]])
 
-def add_total(allocation:dict, f:Data) -> dict:
-    temp ={}
-    for agent_name in allocation.keys():
-        temp[agent_name+"_total"]={}
-        for category in allocation[agent_name]:
-            value = 0
-            for item in allocation[agent_name][category]:
-                value += f._agents_evaluation[agent_name][category][item]
-            temp[agent_name+"_total"].update({category+"_"+"total":value})
-    allocation.update(temp)
-    return allocation
-
 if __name__ == "__main__":
     # this is a test for branching
-    agents_evaluation ={
+    agents_evaluation = {
                 "a": {"trees": {"oak":9,"sprouce":8,"sakoia":0,"mango":2},"doors":{"white":8,"black":1,"red":4,"green":5}}, 
                 "b":{"trees": {"oak":10,"sprouce":5,"sakoia":0,"mango":0},"doors":{"white":1,"black":4,"red":2,"green":9}},
-                "c":{"trees": {"oak":0,"sprouce":10,"sakoia":9,"mango":0},"doors":{"white":4,"black":6,"red":3,"green":7}
-            }}
+                "c":{"trees": {"oak":0,"sprouce":10,"sakoia":9,"mango":0},"doors":{"white":4,"black":6,"red":3,"green":7}}
+                    }
     catagories  = ["trees", "doors"]
     items = {"trees":{"oak","sprouce","sakoia","mango"},"doors":{"white","black","red","green"}}
     agents_names = ['a','b','c']
     d = Data(catagories, agents_evaluation, items)
-    allocation = add_total(ef1_algorithm(agents_names,d), d)
-    pprint.pprint(allocation)
+    allocation = ef1_algorithm(agents_names,d)
+    doctest.testmod()
+    # pprint.pprint(allocation)
 
  
