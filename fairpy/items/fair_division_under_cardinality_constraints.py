@@ -101,6 +101,7 @@ def lemma_1(envy_graph:nx.DiGraph, evaluation:dict, allocation:dict, category:st
     cycles in the envy graph. 
     :param bun_agents a bundel of agents.
     >>> import networkx as nx
+    >>> agents_names = ['a','b','c']
     >>> envy_graph = nx.DiGraph()
     >>> for agent in agents_names:
     ...     envy_graph.add_node(agent)
