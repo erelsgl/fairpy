@@ -100,7 +100,7 @@ def lemma_1(envy_graph:nx.DiGraph, evaluation:dict, allocation:dict, category:st
     this method is being called from the main algorithm, to achieve EF1 allocation we must make sure there are no 
     cycles in the envy graph. 
     :param bun_agents a bundel of agents.
-
+    >>> import networkx as nx
     >>> envy_graph = nx.DiGraph()
     >>> for agent in agents_names:
     ...     envy_graph.add_node(agent)
