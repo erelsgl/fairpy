@@ -1,13 +1,8 @@
 #!python3
-from fairpy import bundles 
+
 from .undercut_procedure import undercut
 import unittest
-from typing import List, Any
-from fairpy import agents
-from fairpy import allocations 
 import fairpy
-from fairpy import Agent
-from fairpy.allocations import Allocation
 
 
 class TestAlgo(unittest.TestCase):
@@ -19,8 +14,6 @@ class TestAlgo(unittest.TestCase):
         Alice = ({"a": 7, "b": 4, "c": 3, "d":2})
         Bob = ({"a": 1, "b": 7, "c": 3, "d":2})
         items=['a','b','c','d']
-
-
         
         A = fairpy.agents.AdditiveAgent({"a": 7, "b": 4, "c": 3, "d":2}, name="Alice")
         B = fairpy.agents.AdditiveAgent({"a": 1, "b": 7, "c": 3, "d":2}, name="Bob")

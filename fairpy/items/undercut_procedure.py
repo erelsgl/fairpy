@@ -15,6 +15,7 @@ from fairpy import Agent
 from fairpy.allocations import Allocation
 import logging
 
+
 logger = logging.getLogger(__name__)
 
 def undercut(agents: List[Agent], items: List[Any]) -> str:
@@ -62,7 +63,6 @@ def undercut(agents: List[Agent], items: List[Any]) -> str:
     Alice gets [] with value 0.
     Bob gets [] with value 0.
     <BLANKLINE>
-
     >>> Alice=({"a":-5})
     >>> Bob =({"a":5})
     >>> print(undercut([Alice,Bob],['a']))
@@ -130,7 +130,6 @@ def undercut(agents: List[Agent], items: List[Any]) -> str:
 def almost_equal_cut(group_,Name: str, agents,values,items_for_bob,items_for_alice,bob_val_for_alice_items,alice_val_for_bob_items) -> str:
     """
     A function which checks whether the agents accept the offer of the almost equal groups
-
     Args:
         group_:  the combination
         Name (str): the agent
@@ -140,7 +139,6 @@ def almost_equal_cut(group_,Name: str, agents,values,items_for_bob,items_for_ali
         items_for_alice
         bob_val_for_alice_items
         alice_val_for_bob_items
-
     Returns:
         if there is a subgroup: envy-free division
         else: There is no envy-free division_
@@ -173,12 +171,10 @@ def almost_equal_cut(group_,Name: str, agents,values,items_for_bob,items_for_ali
 def get_allocation(items_for_alice,items_for_bob,values) -> str:
     """ 
     A function that constructs the allocation of objects to Alice and Bob
-
     Args:
         items_for_alice
         items_for_bob
         values: Alice and Bob's values for the items
-
     Returns:
         envy free allocation
     """
@@ -200,7 +196,6 @@ def search_subgroup(agents,Name: str,items_for_alice,items_for_bob,val1,val2,val
     """
     A function that searches for a subgroup so that there will be a envy-free division by 
     removing one item from the group of the agent who rejected the offer
-
     Args:
         agents (List): Agents preferences
         Name: the agent who rejected the offer
@@ -209,7 +204,6 @@ def search_subgroup(agents,Name: str,items_for_alice,items_for_bob,val1,val2,val
         val1: Alice's value for Bob's items
         val2: Bob's value for Alice's items
         value: The value of the agent who rejected the offer
-
     Returns:
         envy free allocation (if it exists)
         else: There is no envy-free division
@@ -264,7 +258,7 @@ def one_item(agents: List[Agent], items: List[Any]) -> str:
         logger.info("\tIf both agents have a positive benefit from the object - there is no envy-free division")
         return "There is no envy-free division"
     
-def all_combinations(items, num_agents) ->  list[list[tuple]]:
+def all_combinations(items, num_agents) ->  List[List[tuple]]:
     """
     Returns all possible combinations of division into 2 groups
     >>> items=['a','b','c','d']
