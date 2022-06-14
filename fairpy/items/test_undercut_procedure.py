@@ -24,7 +24,7 @@ class TestAlgo(unittest.TestCase):
         A = fairpy.agents.AdditiveAgent({"a": 7, "b": 4, "c": 3, "d":2}, name="Alice")
         B = fairpy.agents.AdditiveAgent({"a": 1, "b": 7, "c": 3, "d":2}, name="Bob")
         allocation = undercut([Alice,Bob],items)
-        self.assertEqual(allocation, "Alice gets ['a', 'c', 'd'] with value 12.\nBob gets ['b'] with value 7.\n")
+        self.assertEqual(allocation, "Alice gets ['a', 'd'] with value 9.\nBob gets ['b', 'c'] with value 10.\n")
         
         
         A = fairpy.agents.AdditiveAgent({"a": 8, "b": 7, "c": 6, "d":3}, name="Alice")
@@ -45,7 +45,7 @@ class TestAlgo(unittest.TestCase):
         A = fairpy.agents.AdditiveAgent({"a": 4, "b": 4, "c": 4, "d":4}, name="Alice")
         B = fairpy.agents.AdditiveAgent({"a": 4, "b": 4, "c": 4, "d":4}, name="Bob")
         allocation = undercut([{"a": 4, "b": 4, "c": 4, "d":4},{"a": 4, "b": 4, "c": 4, "d":4}],['a','b','c','d'])
-        self.assertEqual(allocation, "Alice gets ['a', 'b'] with value 8.\nBob gets ['c', 'd'] with value 8.\n")
+        self.assertEqual(allocation, "Alice gets ['a', 'd'] with value 8.\nBob gets ['b', 'c'] with value 8.\n")
         
         
         A = fairpy.agents.AdditiveAgent({"a": 1,"b": 2, "c": 3, "d":4,"e": 5, "f":14}, name="Alice")
