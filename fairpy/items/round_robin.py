@@ -79,8 +79,7 @@ round_robin.logger = logger
 ### MAIN
 
 if __name__ == "__main__":
-    # import sys
-    # logger.addHandler(logging.StreamHandler(sys.stdout))
+    # logger.addHandler(logging.StreamHandler())
     # logger.setLevel(logging.INFO)
     #
     import doctest
