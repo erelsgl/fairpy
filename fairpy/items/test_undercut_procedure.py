@@ -1,5 +1,6 @@
+#!python3
 from fairpy import bundles 
-from undercut_procedure import undercut
+from .undercut_procedure import undercut
 import unittest
 from typing import List, Any
 from fairpy import agents

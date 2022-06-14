@@ -1,3 +1,4 @@
+#!python3
 """
 Implementing the algorithm in the following article: "A note on the undercut procedure"
 By Haris Aziz
