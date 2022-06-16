@@ -65,25 +65,21 @@ def undercut(agents: Any, items: List[Any]=None) -> Allocation:
     """
     
     """ Algorithm """
-
-    val=0
-    
+  
     num_agents=len(agents)
     agents = fairpy.agents_from(agents)  # Handles various input formats
     
     logger.info("Checking if there are no_items")
-    if (items==None):
-        return no_items(agents)
+    if (items==None): #returns value 0 without having to continue the rest of the function
+        return Allocation(agents, [[],[]])
     
     num_of_items=len(items)
     if (num_agents!=2):
         raise ValueError('The number of agents should be 2')
     
-    values_for_alice_and_bob={0:0,1:0}  #first initialize values to 0 for both agents
-    
     logger.info("Checking if there are 0 items")
-    if (num_of_items==0):
-        return no_items(agents)
+    if (num_of_items==0): #returns value 0 without having to continue the rest of the function
+        return Allocation(agents, [[],[]])
 
     logger.info("Checking if there is a single item") 
     if num_of_items==1:
@@ -91,20 +87,16 @@ def undercut(agents: Any, items: List[Any]=None) -> Allocation:
     
     logger.info("Stage 1 - find a almost equal cut")    
     for group_ in all_combinations(items, num_agents):
+        values_for_alice_and_bob={0:0,1:0} #initialize values to 0 for both agents
         for agent_num, subgroup_ in enumerate(group_):
-            for item_ in subgroup_:
-                val=values_for_alice_and_bob[agent_num]+agents[agent_num].value(item_)
-                values_for_alice_and_bob[agent_num]=val #calculate the values of the two agents for this particular combination
+            values_for_alice_and_bob[agent_num]=agents[agent_num].value(subgroup_) #calculate the values of the two agents for this particular combination
         items_for_alice=group_[0]
         items_for_bob=group_[1]
         num_of_items_for_alice=len(items_for_alice)
         num_of_items_for_bob=len(items_for_bob)
         counter_alice=counter_bob=0
-        alice_val_for_bob_items=bob_val_for_alice_items=0
-        for item_ in items_for_bob:
-                alice_val_for_bob_items+=agents[0].value(item_)  #calculating Alice's value for Bob's items
-        for item_ in items_for_alice:
-                bob_val_for_alice_items+=agents[1].value(item_)  #calculating Bob's value for Alice's items
+        alice_val_for_bob_items=agents[0].value(items_for_bob)  #calculating Alice's value for Bob's items
+        bob_val_for_alice_items=agents[1].value(items_for_alice)  #calculating Bob's value for Alice's items
         if values_for_alice_and_bob[0]>=alice_val_for_bob_items: #if Alice weakly prefers X to Y
             for item_ in items_for_alice: #and if any single item is moved from X to Y
                 if values_for_alice_and_bob[0]-agents[0].value(item_)>=alice_val_for_bob_items+agents[0].value(item_): #then Alice strictly prefers Y to X
@@ -120,7 +112,6 @@ def undercut(agents: Any, items: List[Any]=None) -> Allocation:
                     counter_bob+=1 
                 if counter_alice==num_of_items_for_bob:  #this is an almost equal cut for George
                     result= almost_equal_cut(group_,1,agents,values_for_alice_and_bob,bob_val_for_alice_items,alice_val_for_bob_items)      
-        values_for_alice_and_bob={0:0,1:0}  #initialize values to 0 for both agents
     return result #if we went through all the possible combinations then there is no envy-free division
 
 
@@ -163,61 +154,26 @@ def almost_equal_cut(group_,agent_num, agents,values,bob_val_for_alice_items,ali
     result="There is no envy-free division"
     logger.info("\t{} is almost-equal-cut for agent Alice (prefers {} to {})".format(group_, group_[0],group_[1]))
     if agent_num==0:
-            #this partition is presented to George
+        logger.info("Stage 2 - offer the division to George") 
+        #this partition is presented to George
         if values[1]>=bob_val_for_alice_items: #George accepts the partition if he prefers Y to X
-            logger.info("Stage 2")  
-            result= get_allocation(agents,group_[1],group_[0])
-        else: 
+            result= Allocation(agents, [group_[0],group_[1]])
+        else:  #George rejects the partition if he prefers X to Y
             logger.info("Stage 3 - find an unnecessary item in Alice's items")   
-            #George rejects the partition if he prefers X to Y
             #check if there exists an item x in X such that George prefers X \ x to Y U x
             result= search_subgroup(agents,"1",group_[0],group_[1],bob_val_for_alice_items,alice_val_for_bob_items,values[1])
                 
     elif agent_num==1:
+        logger.info("Stage 2 - offer the division to Alice") 
         if values[0]>=alice_val_for_bob_items: #Alice accepts the partition if she prefers X to Y
-            logger.info("Stage 2")  
-            result= get_allocation(agents,group_[0],group_[1])
-        else: 
+            result=Allocation(agents, [group_[0],group_[1]])
+        else:  #Alice rejects the partition if she prefers Y to X
             logger.info("Stage 3 - find an unnecessary item in Bob's items")  
-            #Alice rejects the partition if she prefers Y to X
             #check if there exists an item y in Y such that Alice prefers Y \ y to X U y
             result= search_subgroup(agents,"0",group_[0],group_[1],alice_val_for_bob_items,bob_val_for_alice_items,values[0]) 
     return result
     
                     
-def get_allocation(agents,items_for_alice,items_for_bob) -> Allocation:
-    """ 
-    A function that constructs the allocation of objects to Alice and Bob
-    Args:
-        items_for_alice
-        items_for_bob
-        values: Alice and Bob's values for the items
-    Returns:
-        envy free allocation
-        
-    >>> agent_dict = {"Alice":{"a": 7, "b": 4, "c": 3, "d":2},"George":{"a": 1, "b": 7, "c": 3, "d":2}}
-    >>> agents= fairpy.agents_from(agent_dict)
-    >>> print(get_allocation(agents,('b','c'),('a','d')))
-    Alice gets {a,d} with value 9.
-    George gets {b,c} with value 10.
-    <BLANKLINE>   
-    >>> #The partition [{a,d} for Alice, {b,c} for Bob] ({a,d} a almost equal cut for Alice) is presented to Bob
-    >>> #and Bob accepts it 
-    """
-
-    temp,temp2 = [], [] 
-    logger.info("Bob accepts the offer because he has more benefit from {} than {}".format(items_for_alice,items_for_bob))
-    for item_ in items_for_alice:
-        temp.append(item_)
-    for item__ in items_for_bob:
-        temp2.append(item__)
-    temp.sort()
-    temp2.sort() 
-    allocations = [temp2,temp] 
-    result=Allocation(agents, allocations)
-    logger.info(result)
-    return result
-
 def search_subgroup(agents,agent_num,items_for_alice,items_for_bob,val1,val2,value) -> Allocation:
         
     """
@@ -258,40 +214,11 @@ def search_subgroup(agents,agent_num,items_for_alice,items_for_bob,val1,val2,val
     logger.info("{} rejects the offer because he has more benefit from {} than {}".format(agent_num,items_for_alice,items_for_bob))
     for item_ in items_for_alice: # check if there exists an item x in X such that: 
         if val1-agents[1].value(item_)>=value+agents[1].value(item_):  # agent1 prefers X \ x to Y U x
-            for i in items_for_alice:
-                if  i is not item_:
-                    temp.append(i) #agent1 reports X \ x
-            for i in items_for_bob: 
-                temp2.append(i) #agent2 prefers Y U x to X \ x (Since (X,Y) is an almost-equal-cut for agent2).
-            temp2.append(item_) #Y U x
-            temp.sort()
-            temp2.sort()   
-            allocations = [temp2,temp] 
-            result=Allocation(agents, allocations)  
+            temp = sorted(set(items_for_alice) - set([item_]))  #agent1 reports X \ x
+            temp2 = sorted(set(items_for_bob).union(set([item_])))  #agent2 prefers Y U x to X \ x (Since (X,Y) is an almost-equal-cut for agent2).
+            result=Allocation(agents, [temp2,temp])  
             logger.info(result) 
     return result      
-
-def no_items(agents) -> Allocation:
-    """
-    When there are no items the function returns value 0 to both 
-    agents without having to continue the rest of the function
-    
-    Args:
-        agents (List[Agent]): agents preferences
-    Returns:
-        Allocation
-        
-    >>> agent_dict = {"Alice":{},"Bob":{}}
-    >>> agents= fairpy.agents_from(agent_dict)
-    >>> print(no_items(agents))
-    Alice gets {} with value 0.
-    Bob gets {} with value 0.
-    <BLANKLINE>
-    
-    """
-    allocations = [[],[]] 
-    result=Allocation(agents, allocations)
-    return result 
 
 def one_item(agents: List[Agent], items: List[Any]) -> Allocation:
     """
@@ -315,22 +242,18 @@ def one_item(agents: List[Agent], items: List[Any]) -> Allocation:
     >>> print(one_item(agents,['a']))
     There is no envy-free division
     """
-    temp,temp2 = [], []
     item_ = items.pop()
     valA_=agents[0].value(item_)
     valB_=agents[1].value(item_)
     if(valA_<=0 and valB_ >=0 ):
-        temp2.append(item_)
         logger.info("\tAgent Alice has a benefit of {} from the item which is negative so Bob who does have a benefit of {} from the item gets it".format(valA_, valB_))
-        return Allocation(agents, [temp,temp2] )
+        return Allocation(agents, [[],item_] )
     elif (valA_>=0 and valB_<=0):
-        temp.append(item_)
-        temp2.append(item_)
         logger.info("\tAgent Bob has a benefit of {} from the item which is negative so Alice who does have a benefit of {} from the item gets it".format(valB_, valA_))
-        return Allocation(agents, [temp,temp2])
+        return Allocation(agents, [item_,[]])
     elif (valA_<=0 and valB_<=0):
         logger.info("\tBoth agents have a negative benefit from the item so no one gets it")
-        return Allocation(agents,  [temp,temp2])
+        return Allocation(agents, [[],[]])
     else:
         logger.info("\tIf both agents have a positive benefit from the object - there is no envy-free division")
         return "There is no envy-free division"
