@@ -1,6 +1,16 @@
 #!python3
+"""
+Implementing the algorithm in the following article: "A note on the undercut procedure"
+By Haris Aziz
+2014
+Link to the article: https://arxiv.org/pdf/1312.6444.pdf
+Programmer: Helen Yonas
+Date: 2022-05
+The undercut procedure is a procedure for fair item assignment between *two* people.
+"""
 
-from .undercut_procedure import undercut
+from fairpy.items.undercut_procedure  import undercut
+from fairpy.allocations import Allocation
 import unittest
 import fairpy
 
@@ -11,51 +21,51 @@ class TestAlgo(unittest.TestCase):
         
     def test_normal_cases(self):
         
-        Alice = ({"a": 7, "b": 4, "c": 3, "d":2})
-        Bob = ({"a": 1, "b": 7, "c": 3, "d":2})
+        
+        Alice = fairpy.agents.AdditiveAgent({"a": 7, "b": 4, "c": 3, "d":2}, name="Alice")
+        Bob = fairpy.agents.AdditiveAgent({"a": 1, "b": 7, "c": 3, "d":2}, name="Bob")
         items=['a','b','c','d']
-        
-        A = fairpy.agents.AdditiveAgent({"a": 7, "b": 4, "c": 3, "d":2}, name="Alice")
-        B = fairpy.agents.AdditiveAgent({"a": 1, "b": 7, "c": 3, "d":2}, name="Bob")
-        allocation = undercut([Alice,Bob],items)
-        self.assertEqual(allocation, "Alice gets ['a', 'd'] with value 9.\nBob gets ['b', 'c'] with value 10.\n")
+        allocation1 = undercut([Alice,Bob],items)
+        allocation2 =  Allocation([Alice,Bob],[['a','d'],['b','c']])
+        self.assertEqual(allocation1.str_with_values(),allocation2.str_with_values())
         
         
-        A = fairpy.agents.AdditiveAgent({"a": 8, "b": 7, "c": 6, "d":3}, name="Alice")
-        B = fairpy.agents.AdditiveAgent({"a": 8, "b": 7, "c": 6, "d":3}, name="Bob")
-        allocation = undercut([{"a": 8, "b": 7, "c": 6, "d":3},{"a": 8, "b": 7, "c": 6, "d":3}],['a','b','c','d'])
+        agents_dict = {"Alice":{"a": 8, "b": 7, "c": 6, "d":3},"George":{"a": 8, "b": 7, "c": 6, "d":3}}
+        allocation = undercut(agents_dict,items)
         self.assertEqual(allocation, "There is no envy-free division")
     
 
     def test_special_cases(self):
         
         #no objects
-        A = fairpy.agents.AdditiveAgent({}, name="Alice")
-        B = fairpy.agents.AdditiveAgent({}, name="Bob")
-        allocation = undercut([{},{}],[])
-        self.assertEqual(allocation, "Alice gets [] with value 0.\nBob gets [] with value 0.\n")
+        Alex = fairpy.agents.AdditiveAgent({}, name="Alex")
+        George = fairpy.agents.AdditiveAgent({}, name="George")
+        allocation = undercut([Alex,George],[])
+        allocation2 =  Allocation([Alex,George],[[],[]])
+        self.assertEqual(allocation.str_with_values(),allocation2.str_with_values())
         
         #same values
-        A = fairpy.agents.AdditiveAgent({"a": 4, "b": 4, "c": 4, "d":4}, name="Alice")
-        B = fairpy.agents.AdditiveAgent({"a": 4, "b": 4, "c": 4, "d":4}, name="Bob")
-        allocation = undercut([{"a": 4, "b": 4, "c": 4, "d":4},{"a": 4, "b": 4, "c": 4, "d":4}],['a','b','c','d'])
-        self.assertEqual(allocation, "Alice gets ['a', 'd'] with value 8.\nBob gets ['b', 'c'] with value 8.\n")
+        agents_dict = {"Alice":{"a": 4, "b": 4, "c": 4, "d":4},"Bob":{"a": 4, "b": 4, "c": 4, "d":4}}
+        bundles = {"Alice": {'a', 'd'}, "Bob":{'b', 'c'}}
+        allocation = undercut(agents_dict,['a','b','c','d'])
+        allocation2 =  Allocation(agents_dict,bundles)
+        self.assertEqual(allocation.str_with_values(),allocation2.str_with_values())
         
         
-        A = fairpy.agents.AdditiveAgent({"a": 1,"b": 2, "c": 3, "d":4,"e": 5, "f":14}, name="Alice")
-        B = fairpy.agents.AdditiveAgent({"a":1,"b": 1, "c": 1, "d":1,"e": 1, "f":7}, name="Bob")
-        allocation = undercut([{"a": 1,"b": 2, "c": 3, "d":4,"e": 5, "f":14},{"a":1,"b": 1, "c": 1, "d":1,"e": 1, "f":7}],['a','b','c','d','e','f'])  
-        self.assertEqual(allocation, "Alice gets ['a', 'b', 'c', 'd', 'e'] with value 15.\nBob gets ['f'] with value 7.\n")
+        Alice = fairpy.agents.AdditiveAgent({"a": 1,"b": 2, "c": 3, "d":4,"e": 5, "f":14}, name="Alice")
+        Bob = fairpy.agents.AdditiveAgent({"a":1,"b": 1, "c": 1, "d":1,"e": 1, "f":7}, name="Bob")
+        allocation = undercut([Alice,Bob],['a','b','c','d','e','f'])  
+        allocation2 = Allocation([Alice,Bob],[['a','b','c','d','e'],['f']])  
+        self.assertEqual(allocation.str_with_values(), allocation2.str_with_values())
         
         #no allocation
         A = fairpy.agents.AdditiveAgent({"a": 8, "b": 7, "c": 6, "d":3}, name="Alice")
         B = fairpy.agents.AdditiveAgent({"a": 8, "b": 7, "c": 6, "d":3}, name="Bob")
-        allocation = undercut([{"a": 8, "b": 7, "c": 6, "d":3},{"a": 8, "b": 7, "c": 6, "d":3}],['a','b','c','d'])
+        allocation = undercut([A,B],['a','b','c','d'])
         self.assertEqual(allocation, "There is no envy-free division")
 
     def test_envy_free(self):
       
-        
         A = fairpy.agents.AdditiveAgent({"a": 7, "b": 4, "c": 3, "d":2}, name="Alice")
         B = fairpy.agents.AdditiveAgent({"a": 1, "b": 7, "c": 3, "d":2}, name="Bob")
         self.assertTrue(A.is_EF({'a', 'c', 'd'}, [{"b"},{"a","d"},{"b","c"}]))
