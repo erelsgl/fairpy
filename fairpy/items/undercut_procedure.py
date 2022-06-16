@@ -31,13 +31,12 @@ def undercut(agents: Any, items: List[Any]=None) -> Allocation:
     >>> Alice = fairpy.agents.AdditiveAgent({"a": 7, "b": 4, "c": 3, "d":2}, name="Alice")
     >>> George = fairpy.agents.AdditiveAgent({"a": 1, "b": 7, "c": 3, "d":2}, name="George")
     >>> items=['a','b','c','d']
-    >>> print(undercut([Alice,George],items))
+    >>> allocation = undercut([Alice,George],items)
+    >>> allocation
     Alice gets {a,d} with value 9.
     George gets {b,c} with value 10.
-    <BLANKLINE>
-    >>> print(Alice.is_EF({"a","d"}, [{"b","c"}]))
-    True
-    >>> print(George.is_EF({"b","c"}, [{"a","d"}]))
+    <BLANKLINE> 
+    >>> print(Alice.is_EF(allocation[0],allocation)) and George.is_EF(allocation[1], allocation)
     True
     
     >>> agent_dict = {"Alice":{"a": 8, "b": 7, "c": 6, "d":3},"Bob":{"a": 8, "b": 7, "c": 6, "d":3}}
@@ -63,7 +62,6 @@ def undercut(agents: Any, items: List[Any]=None) -> Allocation:
     Alice gets {} with value 0.
     Bob gets {a} with value 5.
     <BLANKLINE>
-
     """
     
     """ Algorithm """
@@ -161,8 +159,6 @@ def almost_equal_cut(group_,agent_num, agents,values,bob_val_for_alice_items,ali
     There is no envy-free division
     >>> #The {b,c} group is an almost equal cut for Alice and George
     >>> #so George and Alice will reject the offer and there is no subgroup
-
-
     """
     result="There is no envy-free division"
     logger.info("\t{} is almost-equal-cut for agent Alice (prefers {} to {})".format(group_, group_[0],group_[1]))
@@ -282,7 +278,6 @@ def no_items(agents) -> Allocation:
     
     Args:
         agents (List[Agent]): agents preferences
-
     Returns:
         Allocation
         
@@ -292,7 +287,6 @@ def no_items(agents) -> Allocation:
     Alice gets {} with value 0.
     Bob gets {} with value 0.
     <BLANKLINE>
-
     
     """
     allocations = [[],[]] 
@@ -303,11 +297,9 @@ def one_item(agents: List[Agent], items: List[Any]) -> Allocation:
     """
     If there is one item there will be a envy free division only if for one of 
     the agents the benefit is negative
-
     Args:
         agents (List[Agent]): agents preferences
         items (List[Any]):  the items which are divided
-
     Returns:
         Allocation: an envey free allocation if it exists
         

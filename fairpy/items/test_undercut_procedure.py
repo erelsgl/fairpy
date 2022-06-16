@@ -68,19 +68,18 @@ class TestAlgo(unittest.TestCase):
       
         A = fairpy.agents.AdditiveAgent({"a": 7, "b": 4, "c": 3, "d":2}, name="Alice")
         B = fairpy.agents.AdditiveAgent({"a": 1, "b": 7, "c": 3, "d":2}, name="Bob")
-        self.assertTrue(A.is_EF({'a', 'c', 'd'}, [{"b"},{"a","d"},{"b","c"}]))
-        self.assertTrue(B.is_EF({"b"}, [{'a', 'c', 'd'},{"a","d"},{"c"}]))
-        self.assertFalse(B.is_EF({"a","d"}, [{"a","d"},{"b","c"}]))
+        allocation = undercut([A,B],['a','b','c','d'])  
+        self.assertTrue(A.is_EF(allocation[0],allocation)) and B.is_EF(allocation[1], allocation)
 
         A = fairpy.agents.AdditiveAgent({"a": 7, "b": 4, "c": 3, "d":2}, name="Alice")
         B = fairpy.agents.AdditiveAgent({"a": 7, "b": 1, "c": 3, "d":2}, name="Bob")
-        self.assertTrue(A.is_EF({"b","c","d"}, [{"a"},{"b","c","d"}]))
-        self.assertTrue(B.is_EF({"a"}, [{"a"},{"b","c","d"}]))
+        allocation = undercut([A,B],['a','b','c','d'])  
+        self.assertTrue(A.is_EF(allocation[0],allocation)) and B.is_EF(allocation[1], allocation)
 
         A = fairpy.agents.AdditiveAgent({"a": 5, "b": 5, "c": 5, "d":5}, name="Alice")
         B = fairpy.agents.AdditiveAgent({"a": 5, "b": 5, "c": 5, "d":5}, name="Bob")
-        self.assertTrue(A.is_EF({"a","b"}, [{"a","b"},{"a","d"},{"a","c"},{"b","c"},{"b","d"},{"c","d"}]))
-        self.assertTrue(B.is_EF({"c","d"}, [{"a","b"},{"a","d"},{"a","c"},{"b","c"},{"b","d"},{"c","d"}]))
+        allocation = undercut([A,B],['a','b','c','d'])  
+        self.assertTrue(A.is_EF(allocation[0],allocation) and B.is_EF(allocation[1], allocation))
 
         A = fairpy.agents.AdditiveAgent({"a": 8, "b": 7, "c": 6, "d":3}, name="Alice")
         B = fairpy.agents.AdditiveAgent({"a": 8, "b": 7, "c": 6, "d":3}, name="Bob")
@@ -89,13 +88,15 @@ class TestAlgo(unittest.TestCase):
 
         A = fairpy.agents.AdditiveAgent({"a": 5}, name="Alice")
         B = fairpy.agents.AdditiveAgent({"a": -4}, name="Bob")
-        self.assertTrue(A.is_EF({"a"}, [{},{"a"}]))
-        self.assertTrue(B.is_EF({},[{},{"a"}]))
+        allocation = undercut([A,B],['a'])  
+        self.assertTrue(A.is_EF(allocation[0],allocation) and B.is_EF(allocation[1], allocation))
+
 
         A = fairpy.agents.AdditiveAgent({}, name="Alice")
         B = fairpy.agents.AdditiveAgent({}, name="Bob")
-        self.assertTrue(A.is_EF({}, [{}]))
-        self.assertTrue(B.is_EF({}, [{}]))
+        allocation = undercut([A,B],[])  
+        self.assertTrue(A.is_EF(allocation[0],allocation) and B.is_EF(allocation[1], allocation))
+
 
 if __name__ == '__main__':
     unittest.main()
