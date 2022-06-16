@@ -6,14 +6,16 @@ Authors: Hoon Oh, Ariel D. Procaccia, Warut Suksompong. See https://ojs.aaai.org
 Programmer: Aviem Hadar
 Since: 2022
 """
+import logging
 import sys
-import doctest
 
 from typing import List, Any
 
 import fairpy
 from fairpy import Agent
 from fairpy.allocations import Allocation
+
+logger = logging.getLogger(__name__)
 
 
 def two_agents_ef1(agents: List[Agent], items: List[Any]) -> Allocation:
@@ -77,6 +79,11 @@ def two_agents_ef1(agents: List[Agent], items: List[Any]) -> Allocation:
     >>> Alice.is_EF1(allocation[0], allocation) and George.is_EF1(allocation[1], allocation)
     True
     """
+    if len(agents) != 2:
+        raise Exception("wrong number of agents")
+    if _are_identical_valuations(agents) is False:
+        raise Exception("valuations are not identical")
+    logger.info("\nTwo Agents %s %s and items %s", agents[0].name(), agents[1].name(), items)
     Lg_value = 0
     Rg_value = agents[0].total_value()
     rightmost = None
@@ -89,7 +96,6 @@ def two_agents_ef1(agents: List[Agent], items: List[Any]) -> Allocation:
             rightmost = item
         else:
             break
-    # partitioning the items
     rightmost_found = False
     if rightmost is not None and Lg_value - agents[0].value(rightmost) <= Rg_value:
         for item in items:
@@ -107,6 +113,8 @@ def two_agents_ef1(agents: List[Agent], items: List[Any]) -> Allocation:
                 Lg.append(item)
             else:
                 Rg.append(item)
+    logger.info("g is %s, Lg = %s (total value %d), Rg = %s (total value %d)", rightmost, Lg, Lg_value, Rg,
+                Rg_value)
     allocation = Allocation(agents=agents, bundles={agents[0].name(): Rg, agents[1].name(): Lg})
     return allocation
 
@@ -173,7 +181,7 @@ def three_agents_IAV(agents: List[Agent], items: List[Any]) -> Allocation:
     >>> Alice.is_EF1(allocation[0], allocation) and Bob.is_EF1(allocation[1], allocation) and George.is_EF1(allocation[2], allocation)
     True
     >>> Alice = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":1,"e":1,"f":7,"g":15,"h":21,"i":4,"j":23,"k":7,"l":10,"m":11,"n":22,"o":6,"p":9,"q":16,"r":12,"s":3,"t":28,"u":39,"v":2,"w":9,"x":1,"y":17,"z":100}, name="Alice")
-    >>> Bob = fairpy.agents.AdditiveAgent({"a":1,"b":1,"c":1,"d":1,"e":1,"f":1,"g":1,"h":30,"i":4,"j":23,"k":7,"l":10,"m":11,"n":22,"o":6,"p":9,"q":16,"r":12,"s":3,"t":28,"u":39,"v":2,"w":9,"x":1,"y":17,"z":100}, name="Bob")
+    >>> Bob = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":1,"e":1,"f":7,"g":15,"h":21,"i":4,"j":23,"k":7,"l":10,"m":11,"n":22,"o":6,"p":9,"q":16,"r":12,"s":3,"t":28,"u":39,"v":2,"w":9,"x":1,"y":17,"z":100}, name="Bob")
     >>> George = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":1,"e":1,"f":7,"g":15,"h":21,"i":4,"j":23,"k":7,"l":10,"m":11,"n":22,"o":6,"p":9,"q":16,"r":12,"s":3,"t":28,"u":39,"v":2,"w":9,"x":1,"y":17,"z":100}, name="George")
     >>> allocation = three_agents_IAV([Alice,Bob,George],["a", "b", "c", "d", "e", "f", "g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"])
     >>> allocation
@@ -184,18 +192,24 @@ def three_agents_IAV(agents: List[Agent], items: List[Any]) -> Allocation:
     >>> Alice.is_EF1(allocation[0], allocation) and Bob.is_EF1(allocation[1], allocation) and George.is_EF1(allocation[1], allocation)
     True
     """
+    if len(agents) != 3:
+        raise Exception("wrong number of agents")
+    if _are_identical_valuations(agents) is False:
+        raise Exception("valuations are not identical")
+    logger.info("\nThree Agents %s %s %s and items %s", agents[0].name(), agents[1].name(), agents[2].name(), items)
     A = []
     G = items.copy()
-    g1, Lg1, Lg1_value = find_g1(agents[0], items)
-    g2, Rg2, Rg2_value = find_g2(agents[0], items)
-    # if u(Lg1) >= u(Rg2)
+    g1, Lg1, Lg1_value = _find_g1(agents[0], items)
+    g2, Rg2, Rg2_value = _find_g2(agents[0], items)
     if Lg1_value < Rg2_value:
+        logger.info("u(Lg1) >= u(Rg2), reversing the items order")
         G.reverse()
-        g1, Lg1, Lg1_value = find_g1(agents[0], G)
-        g2, Rg2, Rg2_value = find_g2(agents[0], G)
-    # STEP 2 #
+        g1, Lg1, Lg1_value = _find_g1(agents[0], G)
+        g2, Rg2, Rg2_value = _find_g2(agents[0], G)
+    logger.info("g1 = %s, Lg1 = %s, (total value %d), g2 = %s, Rg2 = %s, (total value %d) \nStep 2:", g1, Lg1,
+                Lg1_value, g2, Rg2, Rg2_value)
     if len(Lg1) != 0:
-        A, Lg3_value = find_g3(agents[0], G, Rg2_value)
+        A, Lg3_value = _find_g3(agents[0], G, Rg2_value)
     C = Rg2
     B = G.copy()
     AuC = A.copy() + C  # A u C
@@ -203,29 +217,52 @@ def three_agents_IAV(agents: List[Agent], items: List[Any]) -> Allocation:
     B_copy = B.copy()
     if B_copy.count(g2) != 0:
         B_copy.remove(g2)
-    if agents[0].value(C) >= agents[0].value(B_copy):  # if u(C) >= u(B\{g2})
+    logger.info("A = %s, B = %s, C = %s", A, B, C)
+    if agents[0].value(C) >= agents[0].value(B_copy):
+        logger.info("u(C) >= u(B\\{g2})")
         allocation = Allocation(agents=agents, bundles={agents[0].name(): A, agents[1].name(): B, agents[2].name(): C})
     else:
-        C_tag = Rg2.copy()  # C' = Rg2 u {g2}
+        C_tag = Rg2.copy()
         C_tag.append(g2)
         remaining_goods = G.copy()
         [remaining_goods.remove(arg) for arg in C_tag]  # G \ C'
-        A_tag, B_tag = Lemma4_1(remaining_goods, agents[0])
+        A_tag, B_tag = _Lemma4_1(remaining_goods, agents[0])
+        logger.info("A' = %s, B' = %s, C' = %s", A_tag, B_tag, C_tag)
         allocation = Allocation(agents=agents,
                                 bundles={agents[0].name(): A_tag, agents[1].name(): B_tag, agents[2].name(): C_tag})
     return allocation
 
 
-def find_g1(agent, items):
+def _are_identical_valuations(agents: List[Agent]) -> bool:
+    """
+    this function make sure that the valuations entered by the user
+    are equal for all agents
+    """
+    a1 = agents[0]
+    a2 = agents[1]
+    a3 = None
+    if len(agents) == 3:
+        a3 = agents[2]
+    for item in a1.all_items():
+        first_two = (a1.value(item) == a2.value(item))
+        if first_two is False:
+            return False
+        if a3 is not None:
+            if a1.value(item) != a3.value(item):
+                return False
+    return True
+
+
+def _find_g1(agent, items):
     """
     this function finds the leftmost good such that
     u(Lg1 u {g1}) > u(G)/3
     >>> Alice = fairpy.agents.AdditiveAgent({"a":4,"b":3,"c":2,"d":1}, name="Alice")
-    >>> partition = find_g1(Alice,{"a":4,"b":3,"c":2,"d":1})
+    >>> partition = _find_g1(Alice,{"a":4,"b":3,"c":2,"d":1})
     >>> partition # u(G) is 10
     ('a', [], 0)
     >>> Alice = fairpy.agents.AdditiveAgent({"a":5,"b":6,"c":1,"d":2,"e":2,"f":2,"g":4}, name="Alice")
-    >>> partition = find_g1(Alice,{"a":5,"b":6,"c":1,"d":2,"e":2,"f":2,"g":4})
+    >>> partition = _find_g1(Alice,{"a":5,"b":6,"c":1,"d":2,"e":2,"f":2,"g":4})
     >>> partition # u(G) is 22
     ('b', ['a'], 5)
     """
@@ -242,16 +279,16 @@ def find_g1(agent, items):
     return g1, Lg1, Lg1_value
 
 
-def find_g2(agent, items):
+def _find_g2(agent, items):
     """
     this function finds the rightmost good such that
     u(Rg2 u {g2}) > u(G)/3
     >>> Alice = fairpy.agents.AdditiveAgent({"a":4,"b":3,"c":2,"d":1}, name="Alice")
-    >>> partition = find_g2(Alice,{"a":4,"b":3,"c":2,"d":1})
+    >>> partition = _find_g2(Alice,{"a":4,"b":3,"c":2,"d":1})
     >>> partition # u(G) is 10
     ('c', ['d'], 1)
     >>> Alice = fairpy.agents.AdditiveAgent({"a":5,"b":6,"c":1,"d":2,"e":2,"f":2,"g":4}, name="Alice")
-    >>> partition = find_g2(Alice,{"a":5,"b":6,"c":1,"d":2,"e":2,"f":2,"g":4})
+    >>> partition = _find_g2(Alice,{"a":5,"b":6,"c":1,"d":2,"e":2,"f":2,"g":4})
     >>> partition # u(G) is 22
     ('f', ['g'], 4)
     """
@@ -270,12 +307,12 @@ def find_g2(agent, items):
     return g2, Rg2, Rg2_value
 
 
-def find_g3(agent, items, Rg2_value):
+def _find_g3(agent, items, Rg2_value):
     """
     this function finds the leftmost good such that
     u(Lg3 u {g3}) > u(Rg2)
     >>> Alice = fairpy.agents.AdditiveAgent({"a":5,"b":6,"c":1,"d":2,"e":2,"f":2,"g":4}, name="Alice")
-    >>> partition = find_g3(Alice,{"a":5,"b":6,"c":1,"d":2,"e":2,"f":2,"g":4},4)
+    >>> partition = _find_g3(Alice,{"a":5,"b":6,"c":1,"d":2,"e":2,"f":2,"g":4},4)
     >>> partition # u(G) is 22
     (['a'], 5)
     """
@@ -289,7 +326,7 @@ def find_g3(agent, items, Rg2_value):
     return Lg3, Lg3_value
 
 
-def Lemma4_1(remaining_goods: list, agent):
+def _Lemma4_1(remaining_goods: list, agent):
     """
     partitioning the remaining goods into 2 parts, where the
     difference between them is small enough
@@ -311,140 +348,13 @@ def Lemma4_1(remaining_goods: list, agent):
     return A_tag, B_tag
 
 
-# this algorithm isn't done, steps 1,2 finished.
-# def three_agents_AAV(agents: List[Agent], items: List[Any]) -> Allocation:
-#     """
-#     Algorithm No 3 - three agents with Arbitrary Additive Valuations
-#     Allocating the given items to three agents with different valuations for the items while satisfying EF1 condition
-#     >>> Alice = fairpy.agents.AdditiveAgent({"a":5,"b":6,"c":1,"d":2,"e":2,"f":2,"g":4}, name="Alice")
-#     >>> Bob = fairpy.agents.AdditiveAgent({"a":5,"b":6,"c":1,"d":2,"e":3,"f":2,"g":3}, name="Bob")
-#     >>> George = fairpy.agents.AdditiveAgent({"a":4,"b":5,"c":1,"d":2,"e":2,"f":3,"g":4}, name="George")
-#     >>> allocation = three_agents_AAV([Alice,Bob,George],["a","b","c","d","e","f","g"])
-#     >>> allocation
-#     Alice gets {c,d,e} with value 5.
-#     Bob gets {a,b} with value 11.
-#     George gets {f,g} with value 7.
-#     <BLANKLINE>
-#     >>> Alice.is_EF1(allocation[0], allocation) and Bob.is_EF1(allocation[1], allocation) and George.is_EF1(allocation[2], allocation)
-#     True
-#     >>> #NOT EQUAL BUNDLES
-#     >>> Alice = fairpy.agents.AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1, "g": 1}, name="Alice")
-#     >>> Bob = fairpy.agents.AdditiveAgent({"a": 5, "b": 6, "c": 6, "d": 2, "e": 3, "f": 2, "g": 3}, name="Bob")
-#     >>> George = fairpy.agents.AdditiveAgent({"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 3, "g": 4}, name="George")
-#     >>> allocation = three_agents_AAV([Alice, Bob, George], ["a", "b", "c", "d", "e", "f", "g"])
-#     >>> allocation
-#     >>> # EQUAL BUNDLES
-#     >>> Alice = fairpy.agents.AdditiveAgent({"a": 5, "b": 6, "c": 1, "d": 2, "e": 2, "f": 2, "g": 4}, name="Alice")
-#     >>> Bob = fairpy.agents.AdditiveAgent({"a": 5, "b": 6, "c": 1, "d": 2, "e": 3, "f": 2, "g": 3}, name="Bob")
-#     >>> George = fairpy.agents.AdditiveAgent({"a": 4, "b": 5, "c": 1, "d": 2, "e": 2, "f": 3, "g": 4}, name="George")
-#     >>> allocation = three_agents_AAV([Alice, Bob, George], ["a", "b", "c", "d", "e", "f", "g"])
-#     >>> allocation
-#     >>> Alice = fairpy.agents.AdditiveAgent({"a": 10, "b": 8, "c": 9, "d": 2, "e": 7, "f": 1, "g": 4, "h": 6}, name="Alice")
-#     >>> Bob = fairpy.agents.AdditiveAgent({"a": 4, "b": 2, "c": 1, "d": 2, "e": 7, "f": 2, "g": 3, "h": 5}, name="Bob")
-#     >>> George = fairpy.agents.AdditiveAgent({"a": 4, "b": 4, "c": 1, "d": 2, "e": 2, "f": 9, "g": 3, "h": 3},
-#                                          name="George")
-#     >>> allocation = three_agents_AAV([Alice, Bob, George], ["a", "b", "c", "d", "e", "f", "g", "h"])
-#     >>> allocation
-#     """
-#     # STEP 1:
-#     u1_valuation = {}
-#     u2_valuation = {}
-#     u3_valuation = {}
-#     a1 = agents[0]
-#     a2 = agents[1]
-#     a3 = agents[2]
-#     for item in items:
-#         u1_valuation[item] = a1.value(item)
-#         u2_valuation[item] = a2.value(item)
-#         u3_valuation[item] = a3.value(item)
-#     initial_allocation = Identical_EF1(u1_valuation, items)
-#     A, B, C = initial_allocation[0], initial_allocation[1], initial_allocation[2]
-#     a2_favorite_value = 0
-#     a3_favorite_value = 0
-#     for alloc in A, B, C:
-#         if a2_favorite_value < a2.value(alloc.items):
-#             a2_bundle = alloc.items
-#             a2_favorite_value = a2.value(a2_bundle)
-#         if a3_favorite_value < a3.value(alloc.items):
-#             a3_bundle = alloc.items
-#             a3_favorite_value = a3.value(a3_bundle)
-#     a1_bundle = items.copy()
-#     if a2_bundle != a3_bundle:
-#         [a1_bundle.remove(arg) for arg in a2_bundle]
-#         [a1_bundle.remove(arg) for arg in a3_bundle]
-#         # print("Different bundles", a1_bundle, a2_bundle, a3_bundle)
-#     # else:
-#     # print("Same bundles:", a1_bundle, a2_bundle, a3_bundle)
-#     if A.items != a2_bundle:
-#         temp = A.items
-#         A.items = a2_bundle
-#         if B.items == A.items:
-#             B.items = temp
-#         else:
-#             C.items = temp
-#     # STEP 2:
-#     A_tag = []
-#     T = A.items.copy()
-#     # print("before splitting A:\n", "A:", A, "B:", B, "C:", C)
-#     u2_val_A = {}
-#     for k, v in u2_valuation.items():
-#         if A.items.count(k) != 0:
-#             u2_val_A[k] = v
-#     A_sort_by_val = {k: v for k, v in sorted(u2_val_A.items(), key=lambda good: good[1])}
-#     for item in A_sort_by_val:
-#         A_tag.append(item)
-#         T.remove(item)
-#         flag = False
-#         if a2.value(A_tag) <= a2.value(B):
-#             for g in T:
-#                 temp_set = A_tag.copy()
-#                 temp_set.append(g)
-#                 if a2.value(temp_set) > a2.value(B):
-#                     flag = True
-#                     break
-#         else:
-#             break
-#         if flag:
-#             break
-#     # print("A_tag:", A_tag, "T:", T)
-#     if a3.value(A_tag) >= max(a3.value(B), a3.value(C)):
-#         second_allocation = Identical_EF1(u2_valuation, T)
-#         T1, T2, T3 = second_allocation[0], second_allocation[1], second_allocation[2]
-#         # print("T1, T2, T3", T1, T2, T3)
-#         a1_favorite_value = 0
-#         a3_favorite_value = 0
-#         alloc = {T1, T2, T3}
-#         while len(alloc) != 0 and len(alloc) != 1:
-#             # print("start:", alloc)
-#             pop = alloc.pop()
-#             if a3_favorite_value < a3.value(pop):
-#                 alloc.add(a3_bundle)
-#                 a3_bundle = pop
-#                 a3_favorite_value = a3.value(a3_bundle)
-#             if a1_favorite_value < a1.value(pop):
-#                 alloc.add(a1_bundle)
-#                 a1_bundle = pop
-#                 a1_favorite_value = a1.value(a1_bundle)
-#             # print("end:", alloc)
-#         a3_bundle += A_tag
-#         a2_bundle += B
-#         a1_bundle += C
-#     # print(A_tag, T, B, C)
-#     return 0
-
-
-# def Identical_EF1(valuation, items):
-#     """
-#     the function calculates EF1 allocation with same valuation for using
-#     in three_agents_AAV algorithm
-#     """
-#     a1 = fairpy.agents.AdditiveAgent(valuation, name="a1")
-#     a2 = fairpy.agents.AdditiveAgent(valuation, name="a2")
-#     a3 = fairpy.agents.AdditiveAgent(valuation, name="a3")
-#     allocation = three_agents_IAV([a1, a2, a3], items)
-#     return allocation
-
+two_agents_ef1.logger = logger
+three_agents_IAV.logger = logger
 
 if __name__ == "__main__":
+    # logger.addHandler(logging.StreamHandler(sys.stdout))
+    # logger.setLevel(logging.INFO)
+
+    import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
