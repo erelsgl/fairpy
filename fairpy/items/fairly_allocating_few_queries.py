@@ -30,7 +30,7 @@ def two_agents_ef1(agents: List[Agent], items: List[Any]) -> Allocation:
     :return: An allocation for each of the agents.
 
 
-    >>> ### Using Agent objects:
+    >>> ### identical valuations:
     >>> Alice = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":1,"e":1,"f":7,"g":15}, name="Alice")
     >>> George = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":1,"e":1,"f":7,"g":15}, name="George")
     >>> allocation = two_agents_ef1([Alice,George],["a", "b", "c", "d", "e", "f", "g"])
@@ -40,12 +40,12 @@ def two_agents_ef1(agents: List[Agent], items: List[Any]) -> Allocation:
     <BLANKLINE>
     >>> Alice.is_EF1(allocation[0], allocation) and George.is_EF1(allocation[1], allocation)
     True
-    >>> Alice = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":1,"e":4,"f":7,"g":15}, name="Alice")
-    >>> George = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":1,"e":4,"f":7,"g":15}, name="George")
+    >>> Alice = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":1,"e":4,"f":7,"g":12}, name="Alice")
+    >>> George = fairpy.agents.AdditiveAgent({"a": 3, "b": 5, "c": 4, "d":1,"e":2,"f":10,"g":15}, name="George")
     >>> allocation = two_agents_ef1([Alice,George],["a", "b", "c", "d", "e", "f", "g"])
     >>> allocation
-    Alice gets {f,g} with value 22.
-    George gets {a,b,c,d,e} with value 16.
+    Alice gets {a,b,c,d,e} with value 16.
+    George gets {f,g} with value 25.
     <BLANKLINE>
     >>> Alice.is_EF1(allocation[0], allocation) and George.is_EF1(allocation[1], allocation)
     True
@@ -69,20 +69,18 @@ def two_agents_ef1(agents: List[Agent], items: List[Any]) -> Allocation:
     <BLANKLINE>
     >>> Alice.is_EF1(allocation[0], allocation) and George.is_EF1(allocation[1], allocation)
     True
-    >>> Alice = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":1,"e":1,"f":7,"g":15,"h":21,"i":4,"j":23,"k":7,"l":10,"m":11,"n":22,"o":6,"p":9,"q":16,"r":12,"s":3,"t":28,"u":39,"v":2,"w":9,"x":1,"y":17,"z":100}, name="Alice")
-    >>> George = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":1,"e":1,"f":7,"g":15,"h":21,"i":4,"j":23,"k":7,"l":10,"m":11,"n":22,"o":6,"p":9,"q":16,"r":12,"s":3,"t":28,"u":39,"v":2,"w":9,"x":1,"y":17,"z":100}, name="George")
+    >>> Alice = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":3,"e":1,"f":7,"g":15,"h":21,"i":4,"j":22,"k":7,"l":10,"m":11,"n":22,"o":6,"p":7,"q":16,"r":12,"s":3,"t":28,"u":39,"v":4,"w":9,"x":1,"y":17,"z":99}, name="Alice")
+    >>> George = fairpy.agents.AdditiveAgent({"a": 2, "b": 4, "c": 3, "d":1,"e":0,"f":7,"g":16,"h":21,"i":4,"j":23,"k":7,"l":10,"m":11,"n":22,"o":6,"p":9,"q":16,"r":10,"s":3,"t":24,"u":39,"v":2,"w":9,"x":5,"y":17,"z":100}, name="George")
     >>> allocation = two_agents_ef1([Alice,George],["a", "b", "c", "d", "e", "f", "g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"])
     >>> allocation
-    Alice gets {t,u,v,w,x,y,z} with value 196.
-    George gets {a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s} with value 179.
+    Alice gets {a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s} with value 178.
+    George gets {t,u,v,w,x,y,z} with value 196.
     <BLANKLINE>
     >>> Alice.is_EF1(allocation[0], allocation) and George.is_EF1(allocation[1], allocation)
     True
     """
     if len(agents) != 2:
         raise Exception("wrong number of agents")
-    if _are_identical_valuations(agents) is False:
-        raise Exception("valuations are not identical")
     logger.info("\nTwo Agents %s %s and items %s", agents[0].name(), agents[1].name(), items)
     Lg_value = 0
     Rg_value = agents[0].total_value()
@@ -115,7 +113,10 @@ def two_agents_ef1(agents: List[Agent], items: List[Any]) -> Allocation:
                 Rg.append(item)
     logger.info("g is %s, Lg = %s (total value %d), Rg = %s (total value %d)", rightmost, Lg, Lg_value, Rg,
                 Rg_value)
-    allocation = Allocation(agents=agents, bundles={agents[0].name(): Rg, agents[1].name(): Lg})
+    if agents[1].value(Rg) > agents[1].value(Lg):
+        allocation = Allocation(agents=agents, bundles={agents[0].name(): Lg, agents[1].name(): Rg})
+    else:
+        allocation = Allocation(agents=agents, bundles={agents[0].name(): Rg, agents[1].name(): Lg})
     return allocation
 
 
@@ -240,16 +241,11 @@ def _are_identical_valuations(agents: List[Agent]) -> bool:
     """
     a1 = agents[0]
     a2 = agents[1]
-    a3 = None
-    if len(agents) == 3:
-        a3 = agents[2]
+    a3 = agents[2]
     for item in a1.all_items():
         first_two = (a1.value(item) == a2.value(item))
-        if first_two is False:
+        if first_two is False or a1.value(item) != a3.value(item):
             return False
-        if a3 is not None:
-            if a1.value(item) != a3.value(item):
-                return False
     return True
 
 
@@ -356,5 +352,6 @@ if __name__ == "__main__":
     # logger.setLevel(logging.INFO)
 
     import doctest
+
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
