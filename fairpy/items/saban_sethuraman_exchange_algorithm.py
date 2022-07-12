@@ -8,143 +8,175 @@ Daniela Saban and Jay Sethuraman.
 Programmer: Ishay Levy.
 Since: 2022-05
 """
-import fairpy
 import operator
-import networkx as nx
-import unittest
-import logging
-logger = logging.getLogger("saban_sethuraman_exchange_algorithm")
-from typing import Dict
+import sys
 
+import networkx as nx
+import logging
+# saban_sethuraman_exchange_algorithm
+logger = logging.getLogger("project")
+from typing import Dict
+logger.addHandler(logging.StreamHandler(sys.stdout))
 
 def top_trading_cycles_with_indifferences(owner_house: Dict, PreferenceLists: Dict) -> Dict:
     """
     the main fun that call all the func and return the owner houses after do this algo.
     :param owner_house:dictionary that connect between the houses to their owners.keys = agent, values = houses.
     :param PreferenceLists:dictionary with agent's keys and the values are order list houses from top to low choices.
-    :return:owner houses after this algo.
-
+    :return:owner houses after this algorithm.
     # >>> logger.addHandler(logging.StreamHandler())
-    >>> logger.setLevel(logging.INFO)
-    >>> PreferenceLists = {1: ['b', 'a'], 2: ['c', 'b'], 3: ['d', 'c'], 4: ['d']}
-    >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
-    >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
-    {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
 
+    >>> logger.setLevel(logging.INFO)
+    >>> logger.info("----------------------------------------begin----------------------------------------------------")
     >>> PreferenceLists = {1: [{'a', 'b'}], 2: ['a', 'b']}
     >>> house = {1: 'a', 2: 'b'}
     >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'b', 2: 'a'}
-
+    >>> logger.info("----------------------------------------end----------------------------------------------------")
+    >>> logger.info("----------------------------------------begin----------------------------------------------------")
+    >>> PreferenceLists = {1: ['b', 'a'], 2: ['c', 'b'], 3: ['d', 'c'], 4: ['d']}
+    >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
+    >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
+    {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
+    >>> logger.info("----------------------------------------end----------------------------------------------------")
+    >>> logger.info("----------------------------------------begin----------------------------------------------------")
     >>> PreferenceLists = {1: {'a': 3, 'b': 3}, 2: {'a': 5, 'b': 1}}
     >>> house = {1: 'a', 2: 'b'}
     >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'b', 2: 'a'}
-
+    >>> logger.info("----------------------------------------end----------------------------------------------------")
+    >>> logger.info("----------------------------------------begin----------------------------------------------------")
     >>> PreferenceLists = {1: {'b': 3, 'a': 2}, 2: {'c': 5, 'b': 1}, 3:{'d':9, 'c':8},4:{'d':3}}
     >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
     >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
-
+    >>> logger.info("----------------------------------------end----------------------------------------------------")
+    >>> logger.info("----------------------------------------begin----------------------------------------------------")
     >>> PreferenceLists = {1: ['b', 'a'], 2: ['c', 'b'], 3: ['d', 'c'], 4: ['a']}
     >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
     >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'b', 2: 'c', 3: 'd', 4: 'a'}
-
+    >>> logger.info("----------------------------------------end----------------------------------------------------")
+    >>> logger.info("----------------------------------------begin----------------------------------------------------")
     >>> PreferenceLists = {1: {'b': 3, 'a': 2}, 2: {'c': 5, 'b': 1}, 3:{'d':9, 'c':8},4:{'a':3}}
     >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
     >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'b', 2: 'c', 3: 'd', 4: 'a'}
-
+    >>> logger.info("----------------------------------------end----------------------------------------------------")
+    >>> logger.info("----------------------------------------begin----------------------------------------------------")
     >>> PreferenceLists = {1: ['b'], 2: ['a'], 3: ['c']}
     >>> house = {1: 'a', 2: 'b', 3: 'c'}
     >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'b', 2: 'a', 3: 'c'}
-
+    >>> logger.info("----------------------------------------end----------------------------------------------------")
+    >>> logger.info("----------------------------------------begin----------------------------------------------------")
     >>> PreferenceLists = {1: {'b': 3}, 2: {'a': 5}, 3:{'c':9}}
     >>> house = {1: 'a', 2: 'b', 3: 'c'}
     >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'b', 2: 'a', 3: 'c'}
-
+    >>> logger.info("----------------------------------------end----------------------------------------------------")
+    >>> logger.info("----------------------------------------begin----------------------------------------------------")
     >>> PreferenceLists = {1: [{'g', 'c'}], 2: [{'f', 'g', 'd'}], 3: [{'b', 'e'}, 'c'], 4: ['e'], 5: ['d'], 6: ['b', 'f'], 7: ['a']}
     >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f', 7: 'g'}
     >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'g', 2: 'f', 3: 'c', 4: 'e', 5: 'd', 6: 'b', 7: 'a'}
-
+    >>> logger.info("----------------------------------------end----------------------------------------------------")
+    >>> logger.info("----------------------------------------begin----------------------------------------------------")
     >>> PreferenceLists = {1: {'g': 3, 'c': 3}, 2: {'f': 2, 'g': 2, 'd': 2}, 3: {'b': 9, 'e':9, 'c': 3}, 4: {'e': 1}, 5: {'d': 5},6: {'b': 1, 'f': 0}, 7:{'a':3}}
     >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f', 7: 'g'}
     >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'g', 2: 'f', 3: 'c', 4: 'e', 5: 'd', 6: 'b', 7: 'a'}
-
+    >>> logger.info("----------------------------------------end----------------------------------------------------")
+    >>> logger.info("----------------------------------------begin----------------------------------------------------")
     >>> PreferenceLists = {1: [{'a', 'c'}],2: [{'a', 'b', 'd'}], 3: [{'c', 'e'}], 4: ['c'], 5: [{'a', 'f'}], 6: ['b']}
     >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f'}
     >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'a', 2: 'd', 3: 'e', 4: 'c', 5: 'f', 6: 'b'}
-
+    >>> logger.info("----------------------------------------end----------------------------------------------------")
+    >>> logger.info("----------------------------------------begin----------------------------------------------------")
     >>> PreferenceLists = {1: {'a': 3, 'c': 3}, 2: {'a': 2, 'b': 2, 'd': 2}, 3: {'c': 9, 'e':9}, 4: {'c': 1}, 5: {'a': 5, 'f': 5},6: {'b': 1}}
     >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f'}
     >>> top_trading_cycles_with_indifferences(house, PreferenceLists)
     {1: 'a', 2: 'd', 3: 'e', 4: 'c', 5: 'f', 6: 'b'}
+    >>> logger.info("----------------------------------------end----------------------------------------------------")
+
     """
+
+
     logger.info("Top trading cycles with indifferences algorithm")
     logger.info("List with all the preference lists of all agents: %s ", PreferenceLists)
     logger.info("List with agents and their own house: %s ", owner_house)
 
-
     for key, value in PreferenceLists.items():
         if isinstance(value, Dict):
-            # this func change the data from rank with numbers to rank with order.
+            logger.info("this func change the data from rank with numbers to rank with order.")
             PreferenceLists = Change_preferences_by_numbers_to_preferences_by_order(PreferenceLists)
             break
 
     graph = make_graph_begin(PreferenceLists, owner_house)
-    # ----------------------------------------------1------------------------------------------------------------------
-    # Repeat until no agent is left.
+
+    logger.info("----------------------------------------------1------------------------------------------------------")
+    logger.info("Repeat until no agent is left.")
+
     while len(graph) != 0:
         jealous = []
-        # ------------------------------------------1(a)--------------------------------------------------------------
-        # connect between agents to there first
-        # prefer object in the graph and also between the object to their owners.
+
+        logger.info("------------------------------------------1(a)---------------------------------------------------")
+        logger.info("connect between agents to there first preference and also between the object to their owners.")
         graph = make_graph(PreferenceLists, graph)
+        logger.info(nx.to_dict_of_dicts(graph, edge_data=None))
+        # I add this func to the algorithm
+        if are_all_agents_satisfied(graph, owner_house):
+            logger.info("if all agents in the graph are satisfied return the owner_house. %s \n", owner_house)
+            return owner_house
 
-        # # if all agents in the graph are satisfied return the owner_house.
-        # if are_all_agents_satisfied(graph, owner_house):
-        #     return owner_house
+        logger.info("------------------------------------------1(b)---------------------------------------------------")
+        logger.info(" if there is final scc remove all the node in this scc and update the graph and repeat.")
+        logger.info("over this until there is no final scc in the graph.")
 
-        # -------------------------------------------1(b)------------------------------------------------------------
-
-        # if there is final scc remove all the node in this scc and update the graph and repeat.
-        # over this until there is no final scc in the graph.
         graph = find_satisfied_SCC(graph, owner_house, PreferenceLists)
-        # ------------------------------------------------------------------------------------------------------------
-        # ------------------------------------------------------------------------------------------------------------
+        logger.info("the find_satisfied_SCC is : %s ", nx.to_dict_of_dicts(graph, edge_data=None))
 
-        # ---------------------------------------------2--------------------------------------------------------------
-        # keep all the jealous agens in list.
+
+        logger.info("-------------------------------------------------------------------------------------------------")
+        logger.info("-------------------------------------------------------------------------------------------------")
+
+        logger.info("----------------------------------------------2--------------------------------------------------")
+        logger.info("keep all the jealous agens in list.")
         for li in graph:
             if owner_house.keys().__contains__(li) and not graph.has_edge(li, owner_house[li]):
                 jealous.append(li)
+        logger.info("jealous agents are:")
+        logger.info(jealous)
 
         labeled = []
-        # ---------------------------------------------2(1.a)----------------------------------------------------------
-        # connect jealous people to the min house they have edge to.
+        logger.info("----------------------------------------------2(1.a)---------------------------------------------")
+        logger.info("connect jealous people to the min house they have edge to.")
         graph = connect_jealous_agents_to_there_best(jealous, graph)
-        # -------------------------------------------------------------------------------------------------------------
+        logger.info(nx.to_dict_of_dicts(graph, edge_data=None))
+        logger.info("-------------------------------------------------------------------------------------------------")
 
         for je in jealous:
             labeled.append(je)
             labeled.append(owner_house[je])
-        # connect satisfied people to the closest label agent.
-        # ---------------------------------------------2(1.b)----------------------------------------------------------
+        logger.info("----------------------------------------------2(1.b)---------------------------------------------")
+        logger.info("connect satisfied agents to the closest label agent.")
         graph = connect_satisfied_agents_to_their_preferred_house(graph, owner_house, labeled)
+        logger.info(nx.to_dict_of_dicts(graph, edge_data=None))
 
-        # Change houses owners in SCC.
+        logger.info("Change houses owners in SCC.")
         graph = if_SCC_change_owners(graph, owner_house)
+        logger.info(nx.to_dict_of_dicts(graph, edge_data=None))
 
-        # ------------------------------------------------------------------------------------------------------------
-        # ------------------------------------------------------------------------------------------------------------
+        logger.info("-------------------------------------------------------------------------------------------------")
+        logger.info("-------------------------------------------------------------------------------------------------")
     logger.info("List with agents and their new house after redistribution: %s \n", owner_house)
     return owner_house
+
+
+
+
+
 top_trading_cycles_with_indifferences.logger = logger
 
 
@@ -185,7 +217,6 @@ def make_graph(PreferenceLists: Dict, graph):
     '{1:{c:{}, g:{}}, 3:{e:{}}, 4:{e:{}}, 5:{d:{}}, 6:{f:{}}, 7:{a:{}}, a:{1:{}}, c:{3:{}}, d:{4:{}}, e:{5:{}}, f:{6:{}}, g:{7:{}}}'
     """
 
-
     newGraph = graph.copy()
     for i in newGraph:
         if i in PreferenceLists.keys():
@@ -213,35 +244,30 @@ def make_graph_begin(PreferenceLists: Dict, owner_house: Dict) -> nx.DiGraph:
      keys = agent, values = houses.
     :param graph:empty graph.
     :return:graph after add al the agents and houses and update the edges.
-
     >>> PreferenceLists = {'1': ['a', 'b'],'2': ['b', 'a'],'3': ['c']}
     >>> house = {'1': 'a', '2': 'b', '3': 'c'}
     >>> G = make_graph_begin(PreferenceLists, house)
     >>> G = nx.to_dict_of_dicts(G, edge_data=None)
     >>> stringify(G)
     '{1:{a:{}}, 2:{b:{}}, 3:{c:{}}, a:{1:{}}, b:{2:{}}, c:{3:{}}}'
-
     >>> PreferenceLists = {'1': [{'a', 'b', 'c'}], '2': [{'a', 'b', 'c'}], '3': [{'a', 'b', 'c'}]}
     >>> house = {'1': 'a', '2': 'b', '3': 'c'}
     >>> G = make_graph_begin(PreferenceLists, house)
     >>> G = nx.to_dict_of_dicts(G, edge_data=None)
     >>> stringify(G)
     '{1:{a:{}, b:{}, c:{}}, 2:{a:{}, b:{}, c:{}}, 3:{a:{}, b:{}, c:{}}, a:{1:{}}, b:{2:{}}, c:{3:{}}}'
-
     >>> PreferenceLists = {'1': [{'g', 'c'}],'2': [{'f', 'g', 'd'}],'3': [{'b', 'e'}, 'c'],'4': ['e'],'5': ['d'],'6': ['b', 'f'],'7': ['a']}
     >>> house = {'1': 'a','2': 'b','3': 'c','4': 'd','5': 'e','6': 'f','7': 'g'}
     >>> G = make_graph_begin(PreferenceLists, house)
     >>> G = nx.to_dict_of_dicts(G, edge_data=None)
     >>> stringify(G)
     '{1:{c:{}, g:{}}, 2:{d:{}, f:{}, g:{}}, 3:{b:{}, e:{}}, 4:{e:{}}, 5:{d:{}}, 6:{b:{}}, 7:{a:{}}, a:{1:{}}, b:{2:{}}, c:{3:{}}, d:{4:{}}, e:{5:{}}, f:{6:{}}, g:{7:{}}}'
-
     >>> PreferenceLists = {'1': [{'a', 'c'}],'2': ['c'],'3': ['d'],'4': [{'b', 'd'}]}
     >>> house = {'1': 'a','2': 'b','3': 'c','4': 'd'}
     >>> G = make_graph_begin(PreferenceLists, house)
     >>> G = nx.to_dict_of_dicts(G, edge_data=None)
     >>> stringify(G)
     '{1:{a:{}, c:{}}, 2:{c:{}}, 3:{d:{}}, 4:{b:{}, d:{}}, a:{1:{}}, b:{2:{}}, c:{3:{}}, d:{4:{}}}'
-
     >>> PreferenceLists = {'1': ['a', 'b', 'c', 'd'],'2': ['a', 'b', 'c', 'd'],'3': ['a', 'b', 'c', 'd'],'4': ['a', 'b', 'c', 'd']}
     >>> house = {'1': 'a','2': 'b','3': 'c','4': 'd'}
     >>> G = make_graph_begin(PreferenceLists, house)
@@ -294,22 +320,18 @@ def DFS(graph: nx.DiGraph, node, visited: list, DFS_list: list) -> list:
     >>> DFS_list = []
     >>> DFS(graph, node, visited, DFS_list)
     ['1', 'a', '2', 'b', '3', 'c']
-
     >>> graph = {'1': {'a': {}}, 'b': {'3': {}}, '2': {'b': {}}, 'c': {'1': {}}, '3': {'c': {}}, 'a': {'2': {}}}
     >>> node = '3'
     >>> visited = []
     >>> DFS_list = []
     >>> DFS(graph, node, visited, DFS_list)
     ['3', 'c', '1', 'a', '2', 'b']
-
     >>> graph = {'1': {'a': {}}, 'b': {}, '2': {'b': {}}, 'a': {'2': {}}, '3': {'c': {}}, 'c': {'3': {}}}
     >>> node = '1'
     >>> visited = []
     >>> DFS_list = []
     >>> DFS(graph, node, visited, DFS_list)
     ['1', 'a', '2', 'b']
-
-
     >>> graph = {'1': {'a': {}}, 'b': {}, '2': {'b': {}}, 'a': {'2': {}}, '3': {'c': {}}, 'c': {'3': {}}}
     >>> node = '3'
     >>> visited = []
@@ -334,13 +356,11 @@ def are_all_agents_satisfied(graph, owner_house: Dict) -> bool:
     :param graph:diGraph with agents and houses nodes and edges that connect between them.
     :param owner_house:dictionary that connect between the houses to their owners.keys = agent, values = houses.
     :return:true if all the agents in the graph are satisfied, else false.
-
     >>> PreferenceLists = {'1': [{'a', 'b', 'c'}],'2': [{'a', 'b', 'c'}],'3': [{'a', 'b', 'c'}]}
     >>> house = {'1': 'a','2': 'b','3': 'c'}
     >>> graph = make_graph_begin(PreferenceLists, house)
     >>> are_all_agents_satisfied(graph, house)
     True
-
     >>> PreferenceLists = {'1': [{'b'}],'2': [{'a', 'b', 'c'}],'3': [{'a', 'b', 'c'}]}
     >>> house = {'1': 'a','2': 'b','3': 'c'}
     >>> graph = make_graph_begin(PreferenceLists, house)
@@ -360,7 +380,6 @@ def if_SCC_change_owners(graph, owner_house: Dict) -> nx.DiGraph:
     :param graph:diGraph with agents and houses nodes and edges that connect between them.
     :param owner_house:dictionary that connect between the houses to their owners.keys = agent, values = houses.
     :return: update graph.
-
     >>> PreferenceLists = {'1': ['b'],'2': ['a'],'3': ['d'],'4': ['c']}
     >>> house = {'1': 'a', '2': 'b', '3': 'c', '4': 'd'}
     >>> graph = make_graph_begin(PreferenceLists, house)
@@ -413,8 +432,6 @@ def find_satisfied_SCC(graph: nx.DiGraph, owner_house: Dict, PreferenceLists: Di
     :param owner_house:dictionary that connect between the houses to their owners.keys = agent, values = houses.
     :param PreferenceLists:dictionary with agent's keys and the values are order list houses from top to low choices.
     :return: update graph.
-
-
     >>> PreferenceLists = {'1': ['a', 'b'], '2': ['b', 'a'], '3': ['d'], '4': ['c']}
     >>> house = {'1': 'a', '2': 'b', '3': 'c', '4': 'd'}
     >>> graph = make_graph_begin(PreferenceLists, house)
@@ -422,7 +439,6 @@ def find_satisfied_SCC(graph: nx.DiGraph, owner_house: Dict, PreferenceLists: Di
     >>> graph = nx.to_dict_of_dicts(graph, edge_data=None)
     >>> stringify(graph)
     '{3:{d:{}}, 4:{c:{}}, c:{3:{}}, d:{4:{}}}'
-
     >>> PreferenceLists = {'1': ['b'], '2': ['a'], '3': [{'c','d'}], '4': [{'c','d'}]}
     >>> house = {'1': 'a', '2': 'b', '3': 'c', '4': 'd'}
     >>> graph = make_graph_begin(PreferenceLists, house)
@@ -430,7 +446,6 @@ def find_satisfied_SCC(graph: nx.DiGraph, owner_house: Dict, PreferenceLists: Di
     >>> graph = nx.to_dict_of_dicts(graph, edge_data=None)
     >>> stringify(graph)
     '{1:{b:{}}, 2:{a:{}}, a:{1:{}}, b:{2:{}}}'
-
     """
     change = 1
     while change:
@@ -485,8 +500,6 @@ def connect_jealous_agents_to_there_best(jealous: list, graph: nx.DiGraph) -> nx
     :param jealous:list with all jealous agents.
     :param graph:diGraph with agents and houses nodes and edges that connect between them.
     :return: update graph.
-
-
     >>> PreferenceLists = {'1': ['a', 'b'], '2': ['b', 'a'], '3': ['d'], '4': ['c']}
     >>> house = {'1': 'a', '2': 'b', '3': 'c', '4': 'd'}
     >>> graph = make_graph_begin(PreferenceLists, house)
@@ -494,7 +507,6 @@ def connect_jealous_agents_to_there_best(jealous: list, graph: nx.DiGraph) -> nx
     >>> graph = nx.to_dict_of_dicts(graph, edge_data=None)
     >>> stringify(graph)
     '{1:{a:{}}, 2:{b:{}}, 3:{d:{}}, 4:{c:{}}, a:{1:{}}, b:{2:{}}, c:{3:{}}, d:{4:{}}}'
-
     >>> PreferenceLists = {'1': [{'b','c','d'}], '2': [{'a','c','d'}], '3': [{'c','d'}], '4': [{'c','d'}]}
     >>> house = {'1': 'a', '2': 'b', '3': 'c', '4': 'd'}
     >>> graph = make_graph_begin(PreferenceLists, house)
@@ -530,8 +542,6 @@ def connect_satisfied_agents_to_their_preferred_house(graph: nx.DiGraph, owner_h
     :param labeled:in begin it is all the jealous agents.and after that all the agents that connect to this labeled add
     to labeld.
     :return: update graph.
-
-
     >>> PreferenceLists = {'1': ['a', 'b'], '2': ['b', 'a'], '3': ['d'], '4': ['c']}
     >>> house = {'1': 'a', '2': 'b', '3': 'c', '4': 'd'}
     >>> graph = nx.DiGraph()
@@ -543,8 +553,6 @@ def connect_satisfied_agents_to_their_preferred_house(graph: nx.DiGraph, owner_h
     >>> graph = nx.to_dict_of_dicts(graph, edge_data=None)
     >>> stringify(graph)
     '{3:{d:{}}, 4:{c:{}}, c:{3:{}}, d:{4:{}}}'
-
-
     >>> PreferenceLists = {1: [{'b','c','d'}], 2: [{'a','c','d'}], 3: [{'c','d'}], 4: [{'c','d'}]}
     >>> house = {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
     >>> graph = nx.DiGraph()
@@ -620,15 +628,12 @@ def Change_preferences_by_numbers_to_preferences_by_order(PreferenceLists: Dict)
     :param PreferenceLists:dictionary with agent's keys and the houses values with number how much the agent appraiser the houses.
     keys = agent, values = houses with number.
     :return:call top_trading_cycles_with_indifferences func with order PreferenceLists and owner houses.
-
     >>> PreferenceLists = {1: {'a': 3, 'b': 3}, 2: {'a': 5, 'b': 1}}
     >>> Change_preferences_by_numbers_to_preferences_by_order(PreferenceLists)
     {1: [['a', 'b']], 2: ['a', 'b']}
-
     >>> PreferenceLists = {1: {'b': 3, 'a': 2}, 2: {'c': 5, 'b': 1}, 3:{'d':9, 'c':8},4:{'d':3}}
     >>> Change_preferences_by_numbers_to_preferences_by_order(PreferenceLists)
     {1: ['b', 'a'], 2: ['c', 'b'], 3: ['d', 'c'], 4: ['d']}
-
     >>> PreferenceLists = {1: {'b': 3, 'a': 2}, 2: {'c': 5, 'b': 1}, 3:{'d':9, 'c':8},4:{'a':3}}
     >>> Change_preferences_by_numbers_to_preferences_by_order(PreferenceLists)
     {1: ['b', 'a'], 2: ['c', 'b'], 3: ['d', 'c'], 4: ['a']}
@@ -664,6 +669,7 @@ def Change_preferences_by_numbers_to_preferences_by_order(PreferenceLists: Dict)
 
 
 if __name__ == '__main__':
+    logger.setLevel(logging.INFO)
 
     import doctest
     doctest.run_docstring_examples(DFS, globals())
@@ -677,4 +683,3 @@ if __name__ == '__main__':
     doctest.run_docstring_examples(find_satisfied_SCC, globals())
     doctest.run_docstring_examples(are_all_agents_satisfied, globals())
     doctest.run_docstring_examples(Change_preferences_by_numbers_to_preferences_by_order, globals())
-
