@@ -20,12 +20,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 @convert_input_to_valuation_matrix
-def max_welfare_allocation(instance:Any, welfare_function, welfare_constraint_function=None) -> Allocation:
+def max_welfare_allocation(instance:Any, welfare_function, welfare_constraint_function=None, allocation_constraint_function=None) -> Allocation:
     """
-    Find an allocation maximizing a given social welfare function. (aka Max Nash Welfare) allocation.
-    :param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    Find an allocation maximizing a given social welfare function. 
+    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
     :param welfare_function:   a monotonically-increasing function w: R -> R representing the welfare function to maximize.
     :param welfare_constraint: a predicate w: R -> {true,false} representing an additional constraint on the utility of each agent.
+    :param allocation_constraint_function: a predicate w: R -> {true,false} representing an additional constraint on the allocation variables.
 
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
 
@@ -46,19 +47,71 @@ def max_welfare_allocation(instance:Any, welfare_function, welfare_constraint_fu
         welfare_constraints = [welfare_constraint_function(utility) for utility in utilities]
     else:
         welfare_constraints = []
-    max_welfare = maximize(welfare_function(utilities), feasibility_constraints+positivity_constraints+welfare_constraints)
+    if allocation_constraint_function is not None:
+        allocation_constraints = [allocation_constraint_function(allocation_vars[i]) for i in v.agents()]
+    else:
+        allocation_constraints = []
+    max_welfare = maximize(welfare_function(utilities), feasibility_constraints+positivity_constraints+welfare_constraints+allocation_constraints)
     logger.info("Maximum welfare is %g",max_welfare)
     allocation_matrix = allocation_vars.value
     return allocation_matrix
 
 
 
+@convert_input_to_valuation_matrix
+def max_welfare_envyfree_allocation(instance:Any, welfare_function, allocation_constraint_function=None) -> Allocation:
+    """
+    Find an allocation maximizing a given social welfare function subject to envy-freeness.
+    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param welfare_function:   a monotonically-increasing function w: R -> R representing the welfare function to maximize.
+    :param welfare_constraint: a predicate w: R -> {true,false} representing an additional constraint on the utility of each agent.
+    :param allocation_constraint_function: a predicate w: R -> {true,false} representing an additional constraint on the allocation variables.
+
+    :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
+
+    >>> v = {"Alice": [6,12] , "Bob": [12,18]}
+    >>> max_welfare_envyfree_allocation(v,
+    ...     welfare_function=lambda utilities: sum([cvxpy.log(utility) for utility in utilities]),
+    ...     allocation_constraint_function=lambda z: sum(z)==1
+    ...     ).round(3).matrix
+    [[0.5 0.5]
+     [0.5 0.5]]
+    """
+    v = ValuationMatrix(instance)
+    allocation_vars = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
+    feasibility_constraints = [
+        sum([allocation_vars[i][o] for i in v.agents()])==1
+        for o in v.objects()
+    ]
+    positivity_constraints = [
+        allocation_vars[i][o] >= 0 for i in v.agents()
+        for o in v.objects()
+    ]
+    utility_matrix = [       #  u[i][j] is the utility agent i attributes to the bundle of agent j.
+        [sum([allocation_vars[j][o]*v[i][o] for o in v.objects()]) for j in v.agents()]
+        for i in v.agents()
+    ]
+    utilities = [utility_matrix[i][i] for i in v.agents()]
+    envyfreeness_constraints = [
+        utility_matrix[i][i] >= utility_matrix[i][j]
+        for i in v.agents() for j in v.agents()
+    ]
+    if allocation_constraint_function is not None:
+        allocation_constraints = [allocation_constraint_function(allocation_vars[i]) for i in v.agents()]
+    else:
+        allocation_constraints = []
+    max_welfare = maximize(welfare_function(utilities), feasibility_constraints+positivity_constraints+allocation_constraints+envyfreeness_constraints)
+    logger.info("Maximum welfare is %g",max_welfare)
+    allocation_matrix = allocation_vars.value
+    return allocation_matrix
+
+
 from fairpy.families import AllocationToFamilies, map_agent_to_family
 
 def max_welfare_allocation_for_families(instance, families:list, welfare_function, welfare_constraint_function=None) -> AllocationToFamilies:
     """
-    Find an allocation maximizing a given social welfare function. (aka Max Nash Welfare) allocation.
-    :param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    Find an allocation among families, maximizing a given social welfare function. 
+    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
     :param families: a list of lists. Each list represents a family and contains the indices of the agents in the family.
     :param welfare_function:   a monotonically-increasing function w: R -> R representing the welfare function to maximize.
     :param welfare_constraint: a predicate w: R -> {true,false} representing an additional constraint on the utility of each agent.
@@ -93,10 +146,10 @@ def max_welfare_allocation_for_families(instance, families:list, welfare_functio
 
 
 
-def max_sum_allocation(instance) -> Allocation:
+def max_sum_allocation(instance, allocation_constraint_function=None) -> Allocation:
     """
     Find the max-sum (aka Utilitarian) allocation.
-    :param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
     The allocation should maximize the product (= sum of logs) of utilities
@@ -112,16 +165,38 @@ def max_sum_allocation(instance) -> Allocation:
     """
     return max_welfare_allocation(instance,
         welfare_function=lambda utilities: sum(utilities),
-        welfare_constraint_function=lambda utility: utility >= 0)
+        welfare_constraint_function=lambda utility: utility >= 0,
+        allocation_constraint_function = allocation_constraint_function)
 
+def pareto_dominating_allocation(instance, original_utilities:list, allocation_constraint_function=None) -> Allocation:
+    """
+    Find an allocation that Pareto-dominates the given allocation.
+    Essentially, it finds an allocation that maximizes the sum of utilities over all allocations that give each agent at least as much utility.
 
-def max_power_sum_allocation(instance, power:float) -> Allocation:
+    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param original_utilities: a vector u of utilities in the original allocation. u[i] is the original utility of agent i.
+
+    :return a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
+    >>> pareto_dominating_allocation([ [3,2] , [1,4] ], [2,2]).round(3).matrix   
+    [[1. 0.]
+     [0. 1.]]
+    >>> pareto_dominating_allocation([ [3,2] , [1,4] ], [4,0]).round(3).matrix   
+    [[1.  0.5]
+     [0.  0.5]]
+    """
+    original_utilities_iterator = iter(original_utilities)
+    return max_welfare_allocation(instance,
+        welfare_function=lambda utilities: sum(utilities),
+        welfare_constraint_function=lambda utility: utility >= next(original_utilities_iterator),
+        allocation_constraint_function = allocation_constraint_function)
+
+def max_power_sum_allocation(instance, power:float, allocation_constraint_function=None) -> Allocation:
     """
     Find the maximum of sum of utility to the given power.
     * When power=1, it is equivalent to max-sum;
     * When power -> 0, it converges to max-product;
     * When power -> -infinity, it converges to leximin.
-    :param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
     The allocation should maximize the product (= sum of logs) of utilities
@@ -149,13 +224,14 @@ def max_power_sum_allocation(instance, power:float) -> Allocation:
         welfare_function=lambda utilities: sum([cvxpy.log(utility) for utility in utilities])
     return max_welfare_allocation(instance,
         welfare_function=welfare_function,
-        welfare_constraint_function=lambda utility: utility >= 0)
+        welfare_constraint_function=lambda utility: utility >= 0,
+        allocation_constraint_function=allocation_constraint_function)
 
 
-def max_product_allocation(instance) -> Allocation:
+def max_product_allocation(instance, allocation_constraint_function=None) -> Allocation:
     """
     Find the max-product (aka Max Nash Welfare) allocation.
-    :param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
     The allocation should maximize the product (= sum of logs) of utilities
@@ -171,13 +247,14 @@ def max_product_allocation(instance) -> Allocation:
     """
     return max_welfare_allocation(instance,
         welfare_function=lambda utilities: sum([cvxpy.log(utility) for utility in utilities]),
-        welfare_constraint_function=lambda utility: utility >= 0)
+        welfare_constraint_function=lambda utility: utility >= 0,
+        allocation_constraint_function = allocation_constraint_function)
 
 
-def max_minimum_allocation(instance) -> Allocation:
+def max_minimum_allocation(instance, allocation_constraint_function=None) -> Allocation:
     """
     Find the max-minimum (aka Egalitarian) allocation.
-    :param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
     The allocation should maximize the leximin vector of utilities.
@@ -205,14 +282,15 @@ def max_minimum_allocation(instance) -> Allocation:
     """
     return max_welfare_allocation(instance,
         welfare_function=lambda utilities: cvxpy.min(cvxpy.hstack(utilities)),
-        welfare_constraint_function=lambda utility: utility >= 0)
+        welfare_constraint_function=lambda utility: utility >= 0,
+        allocation_constraint_function = allocation_constraint_function)
 
 
 
 def max_minimum_allocation_for_families(instance, families) -> AllocationToFamilies:
     """
     Find the max-minimum (aka Egalitarian) allocation.
-    :param agents: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
     :param families: a list of lists. Each list represents a family and contains the indices of the agents in the family.
 
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
