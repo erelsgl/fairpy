@@ -9,6 +9,7 @@ Since:  2020-07
 """
 
 from fairpy.allocations import Allocation
+from fairpy.agents import Agent
 import fairpy
 
 import logging
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 from typing import List, Any
 
 
-def round_robin(agents, agent_order:List[int]=None, items:List[Any]=None) -> Allocation:
+def round_robin(agents:List[Agent], agent_order:List[int]=None, items:List[Any]=None) -> Allocation:
     """
     Allocate the given items to the given agents using the round-robin protocol, in the given agent-order.
 
@@ -37,11 +38,13 @@ def round_robin(agents, agent_order:List[int]=None, items:List[Any]=None) -> All
     True
     >>> George.is_EF(allocation[1], allocation)
     False
+
     >>> ### Dividing only some of the items:
     >>> round_robin([Alice,George], agent_order=[0,1], items={"x","y","z"})
     Alice gets {y,z} with value 66.
     George gets {x} with value 22.
     <BLANKLINE>
+
     >>> ### A different input format:
     >>> round_robin([[11,22,44,0],[22,11,66,33]], agent_order=[0,1], items={0,1,2,3})
     Agent #0 gets {1,2} with value 66.
@@ -58,7 +61,7 @@ def round_robin(agents, agent_order:List[int]=None, items:List[Any]=None) -> All
     agent_order = list(agent_order)
 
     if items is None: items = agents[0].all_items()
-    
+
     remaining_items = list(items)
     logger.info("\nRound Robin with agent-order %s and items %s", agent_order, remaining_items)
     allocations = [[] for _ in agents]
