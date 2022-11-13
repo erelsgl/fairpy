@@ -7,7 +7,7 @@ Programmer: Erel Segal-Halevi
 Since: 2021-07
 """
 
-from fairpy import ValuationMatrix
+from fairpy import ValuationMatrix, AgentList
 from fairpy.allocations import *
 from typing import List, Any
 import numpy as np
@@ -90,7 +90,7 @@ class AllocationToFamilies:
             bundles = [ListBundle(bundles[i]) for i in range(len(bundles))]
 
         if isinstance(agents,dict):       # If "agents" is a dict mapping an agent name to its valuation...
-            agents = fairpy.agents_from(agents)  # ... convert it to a list mapping an agent index to its valuation.
+            agents = AgentList(agents)  # ... convert it to a list mapping an agent index to its valuation.
 
         # Compute num_of_agents:
         num_of_agents = agents.num_of_agents if hasattr(agents,'num_of_agents') else len(agents)

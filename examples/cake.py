@@ -2,7 +2,7 @@
 #' Cake-cutting algorithms require `Agent` objects that can answer `mark` and `eval` queries.
 #' Some such Agent objects are already defined.
 
-from fairpy.agents import PiecewiseUniformAgent, PiecewiseConstantAgent, agents_from
+from fairpy import PiecewiseUniformAgent, PiecewiseConstantAgent, AgentList
 
 #' Alice has two desired intervals, 0..1 and 3..6. Each interval has value 1:
 Alice = PiecewiseUniformAgent ([(0,1),(3,6)], name="Alice")   
@@ -38,7 +38,7 @@ last_diminisher.logger.addHandler(logging.StreamHandler(sys.stdout))
 last_diminisher.logger.setLevel(logging.INFO)
 
 from fairpy.cake.valuations import PiecewiseConstantValuation
-print(last_diminisher.last_diminisher(agents_from([
+print(last_diminisher.last_diminisher(AgentList([
     PiecewiseConstantValuation([1,3,5,7]), 
     PiecewiseConstantValuation([7,5,3,1]),
     PiecewiseConstantValuation([4,4,4,4]),

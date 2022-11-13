@@ -9,15 +9,15 @@ Date: 2022-05
 The undercut procedure is a procedure for fair item assignment between *two* people.
 """
 
-from typing import List, Any
-import fairpy
-from fairpy import Agent 
-from fairpy.allocations import Allocation
-import logging
 
+import fairpy
+from fairpy import Allocation, Agent, AgentList
+
+from typing import List, Any
+import logging
 logger = logging.getLogger(__name__)
 
-def undercut(agents: Any, items: List[Any]=None) -> Allocation:
+def undercut(agents:AgentList, items: List[Any]=None) -> Allocation:
     """
     Undercut Procedure - An algorithm that returns a envy free allocation 
     (if it exists) even when the agents may express indifference between objects.
@@ -31,7 +31,7 @@ def undercut(agents: Any, items: List[Any]=None) -> Allocation:
     >>> Alice = fairpy.agents.AdditiveAgent({"a": 7, "b": 4, "c": 3, "d":2}, name="Alice")
     >>> George = fairpy.agents.AdditiveAgent({"a": 1, "b": 7, "c": 3, "d":2}, name="George")
     >>> items=['a','b','c','d']
-    >>> allocation = undercut([Alice,George],items)
+    >>> allocation = undercut(AgentList([Alice,George]),items)
     >>> allocation
     Alice gets {a,d} with value 9.
     George gets {b,c} with value 10.
@@ -39,44 +39,39 @@ def undercut(agents: Any, items: List[Any]=None) -> Allocation:
     >>> print(Alice.is_EF(allocation[0],allocation)) and George.is_EF(allocation[1], allocation)
     True
     
-    >>> agent_dict = {"Alice":{"a": 8, "b": 7, "c": 6, "d":3},"Bob":{"a": 8, "b": 7, "c": 6, "d":3}}
+    >>> agent_dict = AgentList({"Alice":{"a": 8, "b": 7, "c": 6, "d":3},"Bob":{"a": 8, "b": 7, "c": 6, "d":3}})
     >>> items=['a','b','c','d']
     >>> print(undercut(agent_dict,items))
     There is no envy-free division
     
-    >>> agent_dict = {"Alex":{"a": 1,"b": 2, "c": 3, "d":4,"e": 5, "f":14},"Bob":{"a":1,"b": 1, "c": 1, "d":1,"e": 1, "f":7}}
+    >>> agent_dict = AgentList({"Alex":{"a": 1,"b": 2, "c": 3, "d":4,"e": 5, "f":14},"Bob":{"a":1,"b": 1, "c": 1, "d":1,"e": 1, "f":7}})
     >>> items=['a','b','c','d','e','f']
     >>> print(undercut(agent_dict,items))
     Alex gets {a,b,c,d,e} with value 15.
     Bob gets {f} with value 7.
     <BLANKLINE>
     
-    >>> agent_dict = {"Alice":{},"Bob":{}}
+    >>> agent_dict = AgentList({"Alice":{},"Bob":{}})
     >>> print(undercut(agent_dict,[]))
     Alice gets {} with value 0.
     Bob gets {} with value 0.
     <BLANKLINE>
     
-    >>> agent_dict = {"Alice":{"a":-5},"Bob":{"a":5}}
+    >>> agent_dict = AgentList({"Alice":{"a":-5},"Bob":{"a":5}})
     >>> print(undercut(agent_dict,['a']))
     Alice gets {} with value 0.
     Bob gets {a} with value 5.
     <BLANKLINE>
     """
-    
-    """ Algorithm """
-  
+    assert isinstance(agents, AgentList)
+    if (items==None): items = agents.all_items()
+    items = list(items)
+
     num_agents=len(agents)
-    agents = fairpy.agents_from(agents)  # Handles various input formats
-    
-    logger.info("Checking if there are no_items")
-    if (items==None): #returns value 0 without having to continue the rest of the function
-        return Allocation(agents, [[],[]])
-    
-    num_of_items=len(items)
     if (num_agents!=2):
         raise ValueError('The number of agents should be 2')
-    
+
+    num_of_items=len(items)    
     logger.info("Checking if there are 0 items")
     if (num_of_items==0): #returns value 0 without having to continue the rest of the function
         return Allocation(agents, [[],[]])

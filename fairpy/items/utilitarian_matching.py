@@ -19,23 +19,21 @@ from typing import *
 from dicttools import stringify
 from collections import defaultdict
 import fairpy
-from fairpy.allocations import Allocation
+from fairpy import Allocation, AgentList
 
 import logging
 logger = logging.getLogger(__name__)
 
-AgentsDict = Dict[str, Dict[str, int]]
 
 
-
-def instance_to_graph(agents: AgentsDict,  agent_weights: Dict[str, int]=None, item_capacities: Dict[str,int]=None, agent_capacities: Dict[str,int]=None)->networkx.Graph:
+def instance_to_graph(agents: AgentList,  agent_weights: Dict[str, int]=None, item_capacities: Dict[str,int]=None, agent_capacities: Dict[str,int]=None)->networkx.Graph:
     """
     Converts agents' preferences to a bipartite graph (a networkx object).
     :param agents: maps each agent to a map from an item's name to its value for the agent.
     :param agent_weights [optional]: maps each agent to a weight. The values of each agent are multiplied by the agent's weight.
     :param item_capacities [optional]: maps each item to its number of units. Default is 1.
 
-    >>> prefs = {"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}}
+    >>> prefs = AgentList({"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}})
     >>> graph = instance_to_graph(prefs) 
     >>> list(graph.edges.data())
     [('avi', 'x', {'weight': 5}), ('avi', 'y', {'weight': 4}), ('x', 'beni', {'weight': 2}), ('y', 'beni', {'weight': 3})]
@@ -51,11 +49,13 @@ def instance_to_graph(agents: AgentsDict,  agent_weights: Dict[str, int]=None, i
     >>> graph = instance_to_graph(prefs, item_capacities={"x":1, "y":2}, agent_capacities={"avi":2, "beni":1}) 
     >>> list(graph.edges.data())
     [(('avi', 0), 'x', {'weight': 5}), (('avi', 0), ('y', 0), {'weight': 4}), (('avi', 0), ('y', 1), {'weight': 4}), ('x', ('avi', 1), {'weight': 5}), ('x', 'beni', {'weight': 2}), (('avi', 1), ('y', 0), {'weight': 4}), (('avi', 1), ('y', 1), {'weight': 4}), (('y', 0), 'beni', {'weight': 3}), (('y', 1), 'beni', {'weight': 3})]
-    >>> prefs = [[5,4],[2,3]]
+
+    >>> prefs = AgentList([[5,4],[2,3]])
     >>> graph = instance_to_graph(prefs) 
     >>> list(graph.edges.data())
     [('Agent #0', 0, {'weight': 5}), ('Agent #0', 1, {'weight': 4}), (0, 'Agent #1', {'weight': 2}), (1, 'Agent #1', {'weight': 3})]
     """
+    assert isinstance(agents, AgentList)
 
     # Utility function to get the capacity from a capacity map if it exists:
     def _get_capacity(map_item_to_capacity:Dict[str,int], item:str):
@@ -66,9 +66,8 @@ def instance_to_graph(agents: AgentsDict,  agent_weights: Dict[str, int]=None, i
         else:
             return map_item_to_capacity[item]
 
-    agents_list = fairpy.agents_from(agents)
     graph = networkx.Graph()
-    for agent in agents_list:
+    for agent in agents:
         agent_name = agent.name()
         num_of_agent_clones = _get_capacity(agent_capacities, agent_name)
         for item in agent.all_items():
@@ -142,7 +141,7 @@ def matching_to_allocation(matching: list, agent_names:list)->Dict[str,str]:
 
 
 
-def utilitarian_matching(agents: AgentsDict, agent_weights: Dict[str, int]=None, item_capacities: Dict[str,int]=None, agent_capacities: Dict[str,int]=None, maxcardinality=True):
+def utilitarian_matching(agents: AgentList, agent_weights: Dict[str, int]=None, item_capacities: Dict[str,int]=None, agent_capacities: Dict[str,int]=None, maxcardinality=True):
     """
     Finds a maximum-weight matching with the given preferences, agent_weights and capacities.
     :param agents: maps each agent to a map from an item's name to its value for the agent.
@@ -150,13 +149,14 @@ def utilitarian_matching(agents: AgentsDict, agent_weights: Dict[str, int]=None,
     :param item_capacities [optional]: maps each item to its number of units. Default is 1.
     :param maxcardinality: True to require maximum weight subject to maximum cardinality. False to require only maximum weight.
 
-    >>> prefs = {"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}}
+    >>> prefs = AgentList({"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}})
     >>> alloc = utilitarian_matching(prefs)
     >>> stringify(alloc.map_agent_to_bundle())
     "{avi:['x'], beni:['y']}"
     >>> stringify(alloc.map_item_to_agents())
     "{x:['avi'], y:['beni']}"
-    >>> prefs = {"avi": {"x":5, "y": -2}, "beni": {"x":2, "y":-3}}
+
+    >>> prefs = AgentList({"avi": {"x":5, "y": -2}, "beni": {"x":2, "y":-3}})
     >>> utilitarian_matching(prefs, maxcardinality=True)
     avi gets {x} with value 5.
     beni gets {y} with value -3.
@@ -165,7 +165,8 @@ def utilitarian_matching(agents: AgentsDict, agent_weights: Dict[str, int]=None,
     avi gets {x} with value 5.
     beni gets {} with value 0.
     <BLANKLINE>
-    >>> prefs = {"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}, "gadi": {"x":3, "y":2}}
+
+    >>> prefs = AgentList({"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}, "gadi": {"x":3, "y":2}})
     >>> alloc = utilitarian_matching(prefs, item_capacities={"x":2, "y":2})
     >>> stringify(alloc.map_agent_to_bundle())
     "{avi:['x'], beni:['y'], gadi:['x']}"
@@ -178,13 +179,14 @@ def utilitarian_matching(agents: AgentsDict, agent_weights: Dict[str, int]=None,
     >>> stringify(alloc.map_agent_to_bundle())
     "{avi:['x', 'y'], beni:['y'], gadi:['x']}"
 
-    >>> prefs = [[5,4],[3,2]]
+    >>> prefs = AgentList([[5,4],[3,2]])
     >>> alloc = utilitarian_matching(prefs)
     >>> stringify(alloc.map_agent_to_bundle())
     '{Agent #0:[1], Agent #1:[0]}'
     >>> stringify(alloc.map_item_to_agents())
     "{0:['Agent #1'], 1:['Agent #0']}"
     """
+    assert isinstance(agents, AgentList)
     graph = instance_to_graph(agents, agent_weights=agent_weights, item_capacities=item_capacities, agent_capacities=agent_capacities)
     logger.info("Graph edges: %s", list(graph.edges.data()))
     matching = networkx.max_weight_matching(graph, maxcardinality=maxcardinality)

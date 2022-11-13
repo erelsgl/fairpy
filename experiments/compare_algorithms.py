@@ -7,11 +7,10 @@ AUTHOR: Moriya Elgrabli and Liad Nagi
 SINCE:  27 Apr 2022
 """
 
-from typing import  List
 from copy import deepcopy
 from spliddit import spliddit_instances # file that get data from data file
-from fairpy.agents import  AdditiveAgent
-from fairpy import Allocation, agents_from
+from fairpy import Allocation
+from fairpy.agents import AgentList
 from fairpy.items.max_welfare import *
 from fairpy.items import  (
     approximation_maximin_share as ams,
@@ -53,23 +52,6 @@ def min_and_sum(alloc: Allocation,multiply=1):
 #     return full_valuations_dict
 
 
-def assign_remaining_items(alloc:dict,remaining_items:List[str],agents:List[AdditiveAgent])->dict:
-    alloc=deepcopy(alloc)
-    flag_some_agent_want=True
-
-    while(flag_some_agent_want):
-        #if there is round where no agent want any item- end 
-        flag_some_agent_want=False
-        for agent in reversed(agents):
-            for item in remaining_items:
-                val_for_item=agent.value(item)
-                if val_for_item>0:
-                    flag_some_agent_want=True
-                    alloc[agent._name].append(item)
-                    remaining_items.remove(item)
-                    break
-    return alloc
-
         
 def get_mms_alloc(agents):
     """
@@ -97,7 +79,7 @@ def get_mms_alloc(agents):
         <BLANKLINE>
 
     """
-    agents=agents_from(agents)  # Handles various input formats
+    agents=AgentList(agents)  # Handles various input formats
 
     alloc, remaining_items= ams.three_quarters_MMS_allocation_algorithm(agents) 
     
@@ -105,10 +87,11 @@ def get_mms_alloc(agents):
     # Map the result to somting like this "{'Alice': ['x3'], 'Bruce': ['x2'], 'Carl': ['x1']}"
     dict_alloc=dict(alloc.map_agent_to_bundle())
    
-    alloc_with_dividing_remaining_items=assign_remaining_items(dict_alloc,remaining_items,agents)
+    alloc_with_dividing_remaining_items=ams.assign_remaining_items(dict_alloc,remaining_items,agents)
     alloc_with_dividing_remaining_items = Allocation(agents, alloc_with_dividing_remaining_items)
 
     return(alloc,alloc_with_dividing_remaining_items)
+
 
 def plot_an_statistic(arr: list(), name: str()):
     # x-coordinates of left sides of bars

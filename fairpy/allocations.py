@@ -17,6 +17,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 import fairpy
 from fairpy import ValuationMatrix
+from fairpy.agentlist import AgentList
 from fairpy.bundles import *
 
 
@@ -213,7 +214,7 @@ class Allocation:
             raise ValueError(f"Cannot match agents to bundles: agents is a dict but bundles is {type(bundles)}")
 
         if isinstance(agents,dict) or (isinstance(agents,list) and isinstance(agents[0],list)):       # If "agents" is a dict mapping an agent name to its valuation...
-            agents = fairpy.agents_from(agents)  # ... convert it to a list mapping an agent index to its valuation.
+            agents = AgentList(agents)  # ... convert it to a list mapping an agent index to its valuation.
 
         map_agent_index_to_name = self.map_agent_index_to_name = fairpy.agent_names_from(agents)
 
@@ -386,7 +387,7 @@ def compute_agent_bundle_value_matrix(agents, bundles, num_of_agents, num_of_bun
     array([[3. , 3.5],
            [9. , 6. ]])
 
-    >>> agents=fairpy.agents_from(agents)
+    >>> agents=AgentList(agents)
     >>> compute_agent_bundle_value_matrix(agents, bundles, 2, 2)
     array([[3. , 3.5],
            [9. , 6. ]])

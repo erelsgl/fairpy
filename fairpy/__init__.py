@@ -8,9 +8,11 @@ from fairpy.items.valuations import *
 from fairpy.allocations import *
 from fairpy.families import *
 from fairpy.agents import *
+from fairpy.agentlist import *
 from fairpy.decorators import *
 
 class items:
+	from fairpy.items.adaptors import divide
 	from fairpy.items.round_robin import round_robin
 	from fairpy.items.max_welfare import max_sum_allocation, max_power_sum_allocation, max_product_allocation, max_minimum_allocation, max_welfare_allocation, max_welfare_allocation_for_families
 	from fairpy.items.leximin import leximin_optimal_allocation, leximin_optimal_allocation_for_families
@@ -20,3 +22,5 @@ class items:
 	from fairpy.items.min_sharing import proportional_allocation_with_min_sharing, envyfree_allocation_with_min_sharing, maxproduct_allocation_with_min_sharing
 	from fairpy.items.bounded_sharing import proportional_allocation_with_bounded_sharing, efficient_envyfree_allocation_with_bounded_sharing
 	from fairpy.items.propm_allocation import propm_allocation
+	from fairpy.items.undercut_procedure import undercut
+	from fairpy.items.approximation_maximin_share import three_quarters_MMS_allocation

@@ -2,11 +2,13 @@
 #' The output of a fair division allocation is usually an `Allocation` object.
 
 import fairpy
+divide = fairpy.items.divide
+
 agent_values = {"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}, "gadi": {"x":3, "y":2}}
 agent_capacities = {"avi":2,"beni":1,"gadi":1}
 agent_weights = {"avi":1, "gadi":10, "beni":100}
 item_capacities = {"x":2, "y":2}
-allocation = fairpy.items.utilitarian_matching(agent_values, item_capacities=item_capacities, agent_capacities=agent_capacities, agent_weights=agent_weights)
+allocation = divide(fairpy.items.utilitarian_matching, agent_values, item_capacities=item_capacities, agent_capacities=agent_capacities, agent_weights=agent_weights)
 
 #' You can see what bundle is given to each agent:
 print(allocation.map_agent_to_bundle())

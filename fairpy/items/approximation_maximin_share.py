@@ -10,8 +10,8 @@ Programmers: Liad Nagi and Moriya Elgrabli
 Date: 2022-05
 """
 
-from fairpy import Allocation, agents_from
-from fairpy.agents import AdditiveAgent, agent_names_from
+from fairpy import Allocation
+from fairpy import AdditiveAgent, agent_names_from, AgentList
 from typing import List,Any,Tuple
 from copy import deepcopy
 import logging
@@ -21,9 +21,60 @@ logger = logging.getLogger(__name__)
 three_quarters = 0.75                # The approximation ratio of the algorithm
 
 
-def three_quarters_MMS_allocation_algorithm(agents, items:List[Any]=None)-> Tuple[Allocation,List[str]]:
+def three_quarters_MMS_allocation(agents: AgentList, items:List[Any]=None)-> Allocation:
     """
-        Get List of agents (with valuations), and returns 3/4_mms allocation using the algorithm from the article. 
+        Compute a 3/4-mms allocation (all items are allocated)
+
+        >>> data=AgentList({'agent0': {'x0': 1000.0, 'x1': 0.0, 'x2': 0.0}, 'agent1': {'x0': 0.0, 'x1': 1000.0, 'x2': 0.0}})
+        >>> alloc_after_dividing_remaining_items=three_quarters_MMS_allocation(data)
+        >>> alloc_after_dividing_remaining_items
+        agent0 gets {x0} with value 1e+03.
+        agent1 gets {x1} with value 1e+03.
+        <BLANKLINE>
+        >>> data=AgentList([[1000.0,0.0,0.0],[0.0,1000.0,0.0]])
+        >>> alloc_after_dividing_remaining_items=three_quarters_MMS_allocation(data)
+        >>> alloc_after_dividing_remaining_items
+        Agent #0 gets {0} with value 1e+03.
+        Agent #1 gets {1} with value 1e+03.
+        <BLANKLINE>
+    """
+    if items is None: items = agents.all_items()
+    items = list(items)
+
+    alloc, remaining_items = three_quarters_MMS_allocation_algorithm(agents, items) 
+
+    # Build the real allocations with the values    
+    # Map the result to somting like this "{'Alice': ['x3'], 'Bruce': ['x2'], 'Carl': ['x1']}"
+    dict_alloc=dict(alloc.map_agent_to_bundle())
+   
+    alloc_with_dividing_remaining_items=assign_remaining_items(dict_alloc,remaining_items,agents)
+    alloc_with_dividing_remaining_items = Allocation(agents, alloc_with_dividing_remaining_items)
+
+    return alloc_with_dividing_remaining_items
+
+
+def assign_remaining_items(alloc:dict,remaining_items:List[str],agents:List[AdditiveAgent])->dict:
+    alloc=deepcopy(alloc)
+    flag_some_agent_want=True
+
+    while(flag_some_agent_want):
+        #if there is round where no agent want any item- end 
+        flag_some_agent_want=False
+        for agent in reversed(agents):
+            for item in remaining_items:
+                val_for_item=agent.value(item)
+                if val_for_item>0:
+                    flag_some_agent_want=True
+                    alloc[agent._name].append(item)
+                    remaining_items.remove(item)
+                    break
+    return alloc
+
+
+def three_quarters_MMS_allocation_algorithm(agents: AgentList, items:List[Any]=None)-> Tuple[Allocation,List[str]]:
+    """
+        Compute a 3/4-mms allocation, and possibly some remaining items.
+
         :param agents: list of agents in diffrent formattes, to preform alloction to
         :param items: list of items names, if wants to assing only some the items the agents has valuations to.
         :return allocation: alpha-mms Allocation to each agent.  
@@ -31,7 +82,7 @@ def three_quarters_MMS_allocation_algorithm(agents, items:List[Any]=None)-> Tupl
 
         ### allocation for 2 agents, 3 objects, with 0 valuations.
         >>> data={'agent0': {'x0': 1000.0, 'x1': 0.0, 'x2': 0.0}, 'agent1': {'x0': 0.0, 'x1': 1000.0, 'x2': 0.0}}
-        >>> agents=AdditiveAgent.list_from(data)
+        >>> agents=AgentList(data)
         >>> alloc, remaining_items=three_quarters_MMS_allocation_algorithm(agents)
         >>> alloc
         agent0 gets {x0} with value 1e+03.
@@ -40,9 +91,9 @@ def three_quarters_MMS_allocation_algorithm(agents, items:List[Any]=None)-> Tupl
         >>> remaining_items
         ['x1', 'x2']
 
-        >>> ### allocation for 1 agent, 1 object
+        ### allocation for 1 agent, 1 object
         >>> a = AdditiveAgent({"x": 2}, name="Alice")
-        >>> agents=[a]
+        >>> agents=AgentList([a])
         >>> alloc, remaining_items = three_quarters_MMS_allocation_algorithm(agents)
         >>> alloc
         Alice gets {x} with value 2.
@@ -50,10 +101,10 @@ def three_quarters_MMS_allocation_algorithm(agents, items:List[Any]=None)-> Tupl
         >>> remaining_items
         []
 
-        >>>  ### allocation for 2 agents, 2 objects 
+        ### allocation for 2 agents, 2 objects 
         >>> a = AdditiveAgent({"x": 2, "y": 1}, name="Alice")
         >>> b = AdditiveAgent({"x": 1, "y": 2}, name="Blice")
-        >>> agents = [a, b]
+        >>> agents = AgentList([a, b])
         >>> alloc, remaining_items  =  three_quarters_MMS_allocation_algorithm(agents)
         >>> print(alloc)
         Alice gets {x} with value 2.
@@ -62,9 +113,9 @@ def three_quarters_MMS_allocation_algorithm(agents, items:List[Any]=None)-> Tupl
         >>> remaining_items
         []
         
-        >>> ### A different input format:
-        >>> ### allocation for 3 agents, 3 objects 
-        >>> alloc, remaining_items = three_quarters_MMS_allocation_algorithm([[2,3,1],[4,4,4],[2,5,3]])
+        ### A different input format:
+        ### allocation for 3 agents, 3 objects 
+        >>> alloc, remaining_items = three_quarters_MMS_allocation_algorithm(AgentList([[2,3,1],[4,4,4],[2,5,3]]))
         >>> print(alloc)
         Agent #0 gets {1} with value 3.
         Agent #1 gets {0} with value 4.
@@ -72,12 +123,13 @@ def three_quarters_MMS_allocation_algorithm(agents, items:List[Any]=None)-> Tupl
         <BLANKLINE>
         >>> remaining_items
         []
-        >>> ### detailed example: enter loop and adjusted by alpha.
-        >>> ### different agents preffer different items
-        >>> ### 3 agents 11 objects
-        >>> agents ={"Alice":{"x1":17.5,"x2":35,"x3":17.5,"x4":17.5,"x5":35.5,"x6":19,"x7":1,"x8":1,"x9":1,"x10":1,"x11":1},\
+
+        ### detailed example: enter loop and adjusted by alpha.
+        ### different agents preffer different items
+        ### 3 agents 11 objects
+        >>> agents =AgentList({"Alice":{"x1":17.5,"x2":35,"x3":17.5,"x4":17.5,"x5":35.5,"x6":19,"x7":1,"x8":1,"x9":1,"x10":1,"x11":1},\
         "Bruce":{"x1":1,"x2":35,"x3":17.5,"x4":17.5,"x5":17.5,"x6":19,"x7":1,"x8":1,"x9":1,"x10":35.5,"x11":1},\
-        "Carl":{"x1":35.5,"x2":35,"x3":1,"x4":17.5,"x5":17.5,"x6":1,"x7":17.5,"x8":1,"x9":19,"x10":1,"x11":1}}
+        "Carl":{"x1":35.5,"x2":35,"x3":1,"x4":17.5,"x5":17.5,"x6":1,"x7":17.5,"x8":1,"x9":19,"x10":1,"x11":1}})
         >>> alloc,remaining_items =  three_quarters_MMS_allocation_algorithm(agents)
         >>> print(alloc.str_with_values(precision=7))
         Alice gets {x2,x5} with value 70.5.
@@ -87,15 +139,14 @@ def three_quarters_MMS_allocation_algorithm(agents, items:List[Any]=None)-> Tupl
         >>> remaining_items
         ['x3', 'x4', 'x7', 'x8', 'x11']
     """
-    agents = agents_from(agents)  # Handles various input formats
+    if items is None: items = agents.all_items()
+    items = list(items)
 
-    if items is None: items = list(agents[0].all_items())
-    
     # algo 7 - sort valuations from largest to smallest
     ordered_agents = agents_conversion_to_ordered_instance(agents, items)
 
     # algo 4 
-    alloc_for_ordered_valuations = three_quarters_MMS_allocation(ordered_agents, items)
+    alloc_for_ordered_valuations = three_quarters_MMS_subroutine(ordered_agents, items)
 
     # Map the result to somting like this "{'Alice': ['x3'], 'Bruce': ['x2'], 'Carl': ['x1']}"
     alloc_for_ordered_valuations=dict(alloc_for_ordered_valuations.map_agent_to_bundle())
@@ -478,30 +529,30 @@ def combine_allocations(allocations: List[Allocation], agents: List[AdditiveAgen
 #### Algorithm 4
 ####
 
-def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str])->Allocation:
+def three_quarters_MMS_subroutine(agents: List[AdditiveAgent], items: List[str])->Allocation:
     """
-    Finds three_quarters_MMS_allocation for the given agents and valuations.
+    Finds three-quarters MMS-allocation for the given agents and valuations.
     :param agents: valuations of agents, valuation are ordered in assending order
     :param items: items names sorted from the highest valued to the lowest
-    :return allocation: three_quarters_MMS_allocation for all agents for ordered valuations.
+    :return allocation: three-quarters MMS-allocation for all agents for ordered valuations.
     >>> ### allocation for 1 agent, 1 object
     >>> a = AdditiveAgent({"x": 2}, name="Alice")
     >>> agents=[a]
-    >>> a1 = three_quarters_MMS_allocation(agents,["x"])
+    >>> a1 = three_quarters_MMS_subroutine(agents,["x"])
     >>> print(a1)
     Alice gets {x} with value 2.
     <BLANKLINE>
     >>> ### allocation for 1 agent, 2 objects
     >>> b = AdditiveAgent({"x": 2, "y": 1}, name="Blice")
     >>> agents=[b]
-    >>> a1 = three_quarters_MMS_allocation(agents,["x","y"])
+    >>> a1 = three_quarters_MMS_subroutine(agents,["x","y"])
     >>> print(a1)
     Blice gets {x,y} with value 3.
     <BLANKLINE>
     >>> ### allocation for 2 agents, 2 objects
     >>> a = AdditiveAgent({"x": 2, "y": 1}, name="Alice")
     >>> agents = [a, b]
-    >>> a1 = three_quarters_MMS_allocation(agents,["x","y"])
+    >>> a1 = three_quarters_MMS_subroutine(agents,["x","y"])
     >>> print(a1)
     Alice gets {x} with value 2.
     Blice gets {y} with value 1.
@@ -511,7 +562,7 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str])
     >>> b = AdditiveAgent({"x1": 4, "x2": 4, "x3": 4}, name="B")
     >>> c = AdditiveAgent({"x1": 5, "x2": 2, "x3": 1}, name="C")
     >>> agents=[a,b,c]
-    >>> a1 = three_quarters_MMS_allocation(agents,["x1","x2","x3"])
+    >>> a1 = three_quarters_MMS_subroutine(agents,["x1","x2","x3"])
     >>> print(a1)
     A gets {x1} with value 3.
     B gets {x2} with value 4.
@@ -522,7 +573,7 @@ def three_quarters_MMS_allocation(agents: List[AdditiveAgent], items: List[str])
     >>> agents = AdditiveAgent.list_from({"Alice":{"x1":35.5,"x2":35,"x3":19,"x4":17.5,"x5":17.5,"x6":17.5,"x7":1,"x8":1,"x9":1,"x10":1,"x11":1},\
     "Bruce":{"x1":35.5,"x2":35,"x3":19,"x4":17.5,"x5":17.5,"x6":17.5,"x7":1,"x8":1,"x9":1,"x10":1,"x11":1},\
     "Carl":{"x1":35.5,"x2":35,"x3":19,"x4":17.5,"x5":17.5,"x6":17.5,"x7":1,"x8":1,"x9":1,"x10":1,"x11":1}})
-    >>> alloc = three_quarters_MMS_allocation(agents,['x1','x2','x3','x4','x5','x6','x7','x8','x9','x10','x11'])
+    >>> alloc = three_quarters_MMS_subroutine(agents,['x1','x2','x3','x4','x5','x6','x7','x8','x9','x10','x11'])
     >>> print(alloc.str_with_values(precision=7))
     Alice gets {x3,x4} with value 36.5.
     Bruce gets {x2,x5} with value 52.5.
