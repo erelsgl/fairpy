@@ -32,7 +32,6 @@ logger = logging.getLogger(__name__)
 ##### Find a leximin-optimal allocation for individual agents
 
 
-# @convert_input_to_valuation_matrix
 def leximin_optimal_allocation(v: ValuationMatrix, allocation_constraint_function=None, **solver_options) -> Allocation:
     """
     Find the leximin-optimal (aka Egalitarian) allocation.
@@ -114,7 +113,6 @@ def leximin_optimal_allocation(v: ValuationMatrix, allocation_constraint_functio
     # return Allocation(v, allocation_matrix)
 
 
-# @convert_input_to_valuation_matrix
 def leximin_optimal_envyfree_allocation(v: ValuationMatrix, allocation_constraint_function=None, **solver_options) -> Allocation:
     """
     Find the leximin-optimal allocation subject to envy-vreeness.
