@@ -10,7 +10,6 @@ Programmers: Liad Nagi and Moriya Elgrabli
 Date: 2022-05
 """
 
-from fairpy import Allocation
 from fairpy import AdditiveAgent, AgentList
 from typing import List,Any,Tuple,Dict
 from copy import deepcopy
@@ -144,14 +143,14 @@ def three_quarters_MMS_allocation_algorithm(agents: AgentList, items:List[Any]=N
 #### Algorithm 1
 ####
 
-def alpha_MMS_allocation(agents: List[AdditiveAgent], alpha: float, mms_values: List[float], items: List[str])->Allocation:
+def alpha_MMS_allocation(agents: List[AdditiveAgent], alpha: float, mms_values: List[float], items: List[str])->Dict[str,List[Any]]:
     """
     Find alpha_MMS_allocation for the given agents and valuations.
     :param agents: valuations of agents, valuation are ordered in ascending order
     :param alpha: parameter for how much to approximate MMS allocation
     :param mms_values: mms_values of each agent inorder to normalize by them.
     :param items: items names sorted from the highest valued to the lowest
-    :return allocation: alpha-mms Allocation to each agent.
+    :return allocation: alpha-mms allocation to each agent.
 
     ### allocation for 1 agent, 1 object
     >>> a = AdditiveAgent({"x": 2}, name="Alice")
@@ -208,7 +207,7 @@ def alpha_MMS_allocation(agents: List[AdditiveAgent], alpha: float, mms_values: 
             mms_values.pop(i)
             agents.pop(i)
     if len(agents)==0 or len(agents)>len(items):
-       return Allocation(agents=agents, bundles={})
+       return {}
     normelized_agents=normalize(agents,mms_values,items)
     alloc_initial_assignment = initial_assignment_alpha_MSS(normelized_agents,items,alpha)
     if(len(normelized_agents)==0):
@@ -258,14 +257,14 @@ def willing_agent(agents:List[AdditiveAgent], bundle: List[str], threshold)->int
 #### Algorithm 2 
 ####
 
-def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], alpha: float)->Allocation:
+def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], alpha: float)->Dict[str,List[Any]]:
     """
     Initial division for allocting agents according to their alpha-MMS.
     :param agents: valuations of agents, normalized such that MMS=1 for all agents, 
      and valuation are ordered in ascending order
     :param items: items names sorted from the highest valued to the lowest
     :param alpha: parameter for how much to approximate MMS allocation.
-    :return Allocation:  whats been allocated so far (in this function), items and agents are update during function
+    :return allocation:  whats been allocated so far (in this function), items and agents are updated during function
 
     ### allocation for 1 agent, 1 object (this pass!)
     >>> a = AdditiveAgent({"x": 1}, name="Alice")
@@ -346,7 +345,7 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
 #### Algorithm 3
 ####
 
-def bag_filling_algorithm_alpha_MMS(items: List[str],agents: List[AdditiveAgent], alpha: float) -> Allocation:
+def bag_filling_algorithm_alpha_MMS(items: List[str],agents: List[AdditiveAgent], alpha: float) -> Dict[str,List[Any]]:
     """
     The algorithm allocates the remaining objects into the remaining agents so that each received at least α from his MMS.
     :param items: items names sorted from the highest valued to the lowest
@@ -451,7 +450,7 @@ def normalize(agents: List[AdditiveAgent], divided_by_values: List[float],items:
             normelized_agents[agents[i]._name][item]=(agents[i].value(item))/divided_by_values[i]
     return AdditiveAgent.list_from(normelized_agents)
 
-def combine_allocations(allocations: List[Allocation], agents: List[AdditiveAgent])->Allocation:
+def combine_allocations(allocations: List[ Dict[str,List[Any]] ], agents: List[AdditiveAgent])->Dict[str,List[Any]]:
     """
     combine list of allocations to a single alloation,
     also allows for different valuations of agents in the returned allcation.
@@ -460,7 +459,7 @@ def combine_allocations(allocations: List[Allocation], agents: List[AdditiveAgen
     1. if agents is allocated in one allocation, there isn't another allocation for him
     2. no item is allocated twice
 
-    :param allocations: list of Allocation to be combined
+    :param allocations: list of allocations to be combined
     :param agents: valuations of agents, valuation are ordered in ascending order (the full list of agents from all the different allocations)
     :return allocation: the combined allocations
 
@@ -502,7 +501,7 @@ def combine_allocations(allocations: List[Allocation], agents: List[AdditiveAgen
 #### Algorithm 4
 ####
 
-def three_quarters_MMS_subroutine(agents: List[AdditiveAgent], items: List[str])->Allocation:
+def three_quarters_MMS_subroutine(agents: List[AdditiveAgent], items: List[str])->Dict[str,List[Any]]:
     """
     Finds three-quarters MMS-allocation for the given agents and valuations.
     :param agents: valuations of agents, valuation are ordered in assending order
@@ -746,7 +745,7 @@ def fixed_assignment(agents: List[AdditiveAgent], items: List[str])->Dict[str,Li
 ####
 #### Algorithm 6
 ####
-def tentative_assignment(agents: List[AdditiveAgent], items: List[str])->Tuple[List[AdditiveAgent],Allocation,List[str]]:
+def tentative_assignment(agents: List[AdditiveAgent], items: List[str])->Tuple[List[AdditiveAgent], Dict[str,List[Any]], List[str]]:
     """
     The function allocates temporarily what can be allocated, can maybe hart others it not normalized close enough to the mms values.
     :param agents: Valuations of agents,such that bundles of objects at the positions:
@@ -768,10 +767,7 @@ def tentative_assignment(agents: List[AdditiveAgent], items: List[str])->Tuple[L
     >>> print(remaining_agents)
     [Alice is an agent with a Additive valuation: 01=0.724489796 02=0.714285714 03=0.387755102 04=0.357142857 05=0.357142857 06=0.357142857 07=0.020408163 08=0.020408163 09=0.020408163 10=0.020408163 11=0.020408163., Bruce is an agent with a Additive valuation: 01=0.724489796 02=0.714285714 03=0.387755102 04=0.357142857 05=0.357142857 06=0.357142857 07=0.020408163 08=0.020408163 09=0.020408163 10=0.020408163 11=0.020408163., Carl is an agent with a Additive valuation: 01=0.724489796 02=0.714285714 03=0.387755102 04=0.357142857 05=0.357142857 06=0.357142857 07=0.020408163 08=0.020408163 09=0.020408163 10=0.020408163 11=0.020408163.]
     >>> print(alloc)
-    Alice gets {} with value nan.
-    Bruce gets {} with value nan.
-    Carl gets {} with value nan.
-    <BLANKLINE>
+    {}
     >>> print(remaining_items)
     ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11']
     
@@ -787,10 +783,7 @@ def tentative_assignment(agents: List[AdditiveAgent], items: List[str])->Tuple[L
     >>> agents #check tentative assignment hasn't changed agents.
     [Alice is an agent with a Additive valuation: 01=0.727066 02=0.727066 03=0.39525 04=0.351334 05=0.351334 06=0.346454 07=0.022934 08=0.022934 09=0.022934 10=0.022934 11=0.022934., Bruce is an agent with a Additive valuation: 02=0.6425184619754313 03=0.349288148831925 04=0.3104789462472484 05=0.3104789462472484 06=0.3061661222750834 08=0.020267343605765816 09=0.020267343605765816 10=0.020267343605765816 11=0.020267343605765816., Carl is an agent with a Additive valuation: 02=0.5988748660801078 03=0.32556246354690194 08=0.01889066759324754 09=0.01889066759324754 10=0.01889066759324754 11=0.01889066759324754.]
     >>> print (alloc)
-    Alice gets {01,07} with value nan.
-    Bruce gets {04,05,06} with value nan.
-    Carl gets {02,03} with value nan.
-    <BLANKLINE>
+    {'Alice': ['01', '07'], 'Bruce': ['04', '05', '06'], 'Carl': ['02', '03']}
     >>> print (remaining_items)
     ['08', '09', '10', '11']
     
@@ -804,10 +797,7 @@ def tentative_assignment(agents: List[AdditiveAgent], items: List[str])->Tuple[L
     >>> print(remaining_agents)
     []
     >>> print (alloc)
-    Alice gets {01,07} with value nan.
-    Bruce gets {04,05,06} with value nan.
-    Carl gets {02,03} with value nan.
-    <BLANKLINE>
+    {'Alice': ['01', '07'], 'Bruce': ['04', '05', '06'], 'Carl': ['02', '03']}
     >>> print ( remaining_items)
     ['08', '09', '10']
     """
@@ -816,7 +806,7 @@ def tentative_assignment(agents: List[AdditiveAgent], items: List[str])->Tuple[L
 
     n = len(agents)
     if(n>len(items)):
-        return agents, Allocation(agents=agent_names,bundles=ag_alloc), items
+        return agents, ag_alloc, items
 
     #deepcopy of items and agents
     agents_temp = list()
@@ -923,7 +913,7 @@ def tentative_assignment(agents: List[AdditiveAgent], items: List[str])->Tuple[L
 
         si=si+1
         
-    return agents_temp,Allocation(agents=agent_names,bundles=ag_alloc), items_temp  
+    return agents_temp, ag_alloc, items_temp  
 
 def compute_n21(normelized_agents,items)->int:
     """
