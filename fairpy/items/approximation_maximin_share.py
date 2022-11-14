@@ -12,7 +12,7 @@ Date: 2022-05
 
 from fairpy import Allocation
 from fairpy import AdditiveAgent, AgentList
-from typing import List,Any,Tuple
+from typing import List,Any,Tuple,Dict
 from copy import deepcopy
 import logging
 import math
@@ -21,23 +21,20 @@ logger = logging.getLogger(__name__)
 three_quarters = 0.75                # The approximation ratio of the algorithm
 
 
-def three_quarters_MMS_allocation(agents: AgentList, items:List[Any]=None)-> Allocation:
+def three_quarters_MMS_allocation(agents: AgentList, items:List[Any]=None)-> Dict[str,List[Any]]:
     """
         Compute a 3/4-mms allocation (all items are allocated)
 
         >>> data=AgentList({'agent0': {'x0': 1000.0, 'x1': 0.0, 'x2': 0.0}, 'agent1': {'x0': 0.0, 'x1': 1000.0, 'x2': 0.0}})
         >>> alloc_after_dividing_remaining_items=three_quarters_MMS_allocation(data)
         >>> alloc_after_dividing_remaining_items
-        agent0 gets {x0} with value 1e+03.
-        agent1 gets {x1} with value 1e+03.
-        <BLANKLINE>
+        {'agent0': ['x0'], 'agent1': ['x1']}
+
         >>> data=AgentList([[1000.0,0.0,0.0],[0.0,1000.0,0.0]])
         >>> alloc_after_dividing_remaining_items=three_quarters_MMS_allocation(data)
         >>> alloc_after_dividing_remaining_items
-        Agent #0 gets {0} with value 1e+03.
-        Agent #1 gets {1} with value 1e+03.
-        <BLANKLINE>
-    """
+        {'Agent #0': [0], 'Agent #1': [1]}
+        """
     if items is None: items = agents.all_items()
     items = list(items)
 
@@ -45,15 +42,13 @@ def three_quarters_MMS_allocation(agents: AgentList, items:List[Any]=None)-> All
 
     # Build the real allocations with the values    
     # Map the result to somting like this "{'Alice': ['x3'], 'Bruce': ['x2'], 'Carl': ['x1']}"
-    dict_alloc=dict(alloc.map_agent_to_bundle())
+    # dict_alloc=dict(alloc.map_agent_to_bundle())
    
-    alloc_with_dividing_remaining_items=assign_remaining_items(dict_alloc,remaining_items,agents)
-    alloc_with_dividing_remaining_items = Allocation(agents, alloc_with_dividing_remaining_items)
-
+    alloc_with_dividing_remaining_items=assign_remaining_items(alloc,remaining_items,agents)
     return alloc_with_dividing_remaining_items
 
 
-def assign_remaining_items(alloc:dict,remaining_items:List[str],agents:List[AdditiveAgent])->dict:
+def assign_remaining_items(alloc:dict, remaining_items:List[str], agents:AgentList)->dict:
     alloc=deepcopy(alloc)
     flag_some_agent_want=True
 
@@ -71,13 +66,13 @@ def assign_remaining_items(alloc:dict,remaining_items:List[str],agents:List[Addi
     return alloc
 
 
-def three_quarters_MMS_allocation_algorithm(agents: AgentList, items:List[Any]=None)-> Tuple[Allocation,List[str]]:
+def three_quarters_MMS_allocation_algorithm(agents: AgentList, items:List[Any]=None)-> Tuple[List[List[Any]],List[Any]]:
     """
         Compute a 3/4-mms allocation, and possibly some remaining items.
 
         :param agents: list of agents in diffrent formattes, to preform alloction to
         :param items: list of items names, if wants to assing only some the items the agents has valuations to.
-        :return allocation: alpha-mms Allocation to each agent.  
+        :return allocation: alpha-mms allocation to each agent.  
         :return remaining_items: items tha remained after each agent got at least 3/4 of it's mms allocations. 
 
         ### allocation for 2 agents, 3 objects, with 0 valuations.
@@ -85,9 +80,7 @@ def three_quarters_MMS_allocation_algorithm(agents: AgentList, items:List[Any]=N
         >>> agents=AgentList(data)
         >>> alloc, remaining_items=three_quarters_MMS_allocation_algorithm(agents)
         >>> alloc
-        agent0 gets {x0} with value 1e+03.
-        agent1 gets {} with value 0.
-        <BLANKLINE>
+        {'agent0': ['x0'], 'agent1': []}
         >>> remaining_items
         ['x1', 'x2']
 
@@ -96,8 +89,7 @@ def three_quarters_MMS_allocation_algorithm(agents: AgentList, items:List[Any]=N
         >>> agents=AgentList([a])
         >>> alloc, remaining_items = three_quarters_MMS_allocation_algorithm(agents)
         >>> alloc
-        Alice gets {x} with value 2.
-        <BLANKLINE>
+        {'Alice': ['x']}
         >>> remaining_items
         []
 
@@ -107,9 +99,7 @@ def three_quarters_MMS_allocation_algorithm(agents: AgentList, items:List[Any]=N
         >>> agents = AgentList([a, b])
         >>> alloc, remaining_items  =  three_quarters_MMS_allocation_algorithm(agents)
         >>> print(alloc)
-        Alice gets {x} with value 2.
-        Blice gets {y} with value 2.
-        <BLANKLINE>
+        {'Alice': ['x'], 'Blice': ['y']}
         >>> remaining_items
         []
         
@@ -117,10 +107,7 @@ def three_quarters_MMS_allocation_algorithm(agents: AgentList, items:List[Any]=N
         ### allocation for 3 agents, 3 objects 
         >>> alloc, remaining_items = three_quarters_MMS_allocation_algorithm(AgentList([[2,3,1],[4,4,4],[2,5,3]]))
         >>> print(alloc)
-        Agent #0 gets {1} with value 3.
-        Agent #1 gets {0} with value 4.
-        Agent #2 gets {2} with value 3.
-        <BLANKLINE>
+        {'Agent #0': [1], 'Agent #1': [0], 'Agent #2': [2]}
         >>> remaining_items
         []
 
@@ -131,11 +118,8 @@ def three_quarters_MMS_allocation_algorithm(agents: AgentList, items:List[Any]=N
         "Bruce":{"x1":1,"x2":35,"x3":17.5,"x4":17.5,"x5":17.5,"x6":19,"x7":1,"x8":1,"x9":1,"x10":35.5,"x11":1},\
         "Carl":{"x1":35.5,"x2":35,"x3":1,"x4":17.5,"x5":17.5,"x6":1,"x7":17.5,"x8":1,"x9":19,"x10":1,"x11":1}})
         >>> alloc,remaining_items =  three_quarters_MMS_allocation_algorithm(agents)
-        >>> print(alloc.str_with_values(precision=7))
-        Alice gets {x2,x5} with value 70.5.
-        Bruce gets {x10,x6} with value 54.5.
-        Carl gets {x1,x9} with value 54.5.
-        <BLANKLINE>
+        >>> print(alloc)
+        {'Alice': ['x5', 'x2'], 'Bruce': ['x10', 'x6'], 'Carl': ['x1', 'x9']}
         >>> remaining_items
         ['x3', 'x4', 'x7', 'x8', 'x11']
     """
@@ -149,12 +133,12 @@ def three_quarters_MMS_allocation_algorithm(agents: AgentList, items:List[Any]=N
     alloc_for_ordered_valuations = three_quarters_MMS_subroutine(ordered_agents, items)
 
     # Map the result to somting like this "{'Alice': ['x3'], 'Bruce': ['x2'], 'Carl': ['x1']}"
-    alloc_for_ordered_valuations=dict(alloc_for_ordered_valuations.map_agent_to_bundle())
+    # alloc_for_ordered_valuations=dict(alloc_for_ordered_valuations.map_agent_to_bundle())
     
     # algo 8 - Get the real allocation
     real_alloc, remaining_items=get_alpha_MMS_allocation_to_unordered_instance(agents, alloc_for_ordered_valuations, items)
 
-    return Allocation(agents=agents,bundles=real_alloc),remaining_items
+    return real_alloc, remaining_items
 
 ####
 #### Algorithm 1
@@ -168,61 +152,54 @@ def alpha_MMS_allocation(agents: List[AdditiveAgent], alpha: float, mms_values: 
     :param mms_values: mms_values of each agent inorder to normalize by them.
     :param items: items names sorted from the highest valued to the lowest
     :return allocation: alpha-mms Allocation to each agent.
-    >>> ### allocation for 1 agent, 1 object
+
+    ### allocation for 1 agent, 1 object
     >>> a = AdditiveAgent({"x": 2}, name="Alice")
     >>> agents=[a]
     >>> a1 = alpha_MMS_allocation(agents,0.5,[2],['x'])
     >>> print(a1)
-    Alice gets {x} with value 2.
-    <BLANKLINE>
-    >>> ### allocation for 1 agent, 2 objects
+    {'Alice': ['x']}
+
+    ### allocation for 1 agent, 2 objects
     >>> b = AdditiveAgent({"x": 2, "y": 1}, name="Blice")
     >>> agents=[b]
     >>> a1 = alpha_MMS_allocation(agents,0.6,[3],['x','y'])
     >>> print(a1)
-    Blice gets {x} with value 2.
-    <BLANKLINE>
-    >>> ### allocation for 2 agents, 2 objects
+    {'Blice': ['x']}
+
+    ### allocation for 2 agents, 2 objects
     >>> a = AdditiveAgent({"x": 2, "y": 1}, name="Alice")
     >>> agents = [a, b]
     >>> a1 = alpha_MMS_allocation(agents,1,[1,1],['x','y'])
     >>> print(a1)
-    Alice gets {x} with value 2.
-    Blice gets {y} with value 1.
-    <BLANKLINE>
-    >>> ### allocation for 3 agents, 3 objects (low alpha)
+    {'Alice': ['x'], 'Blice': ['y']}
+
+    ### allocation for 3 agents, 3 objects (low alpha)
     >>> a = AdditiveAgent({"x1": 3, "x2": 2, "x3": 1}, name="A")
     >>> b = AdditiveAgent({"x1": 4, "x2": 4, "x3": 4}, name="B")
     >>> c = AdditiveAgent({"x1": 5, "x2": 2, "x3": 1}, name="C")
     >>> agents=[a,b,c]
     >>> a1 = alpha_MMS_allocation(agents,0.2,[1,4,1],['x1','x2','x3'])
     >>> print(a1)
-    A gets {x1} with value 3.
-    B gets {x2} with value 4.
-    C gets {x3} with value 1.
-    <BLANKLINE>
-    >>> ### allocation with 3 agents, 8 objects
+    {'A': ['x1'], 'B': ['x2'], 'C': ['x3']}
+        
+    ### allocation with 3 agents, 8 objects
     >>> a = AdditiveAgent({"x1": 11, "x2": 10, "x3": 8,"x4": 7, "x5": 6, "x6": 5,"x7": 3, "x8": 2}, name="A")
     >>> b = AdditiveAgent({"x1": 100, "x2": 55, "x3": 50,"x4": 33, "x5": 12, "x6": 5,"x7": 4, "x8": 1}, name="B")
     >>> c = AdditiveAgent({"x1": 15, "x2": 15, "x3": 12,"x4": 9, "x5": 8, "x6": 8,"x7": 7, "x8": 5}, name="C")
     >>> agents=[a,b,c]
     >>> a1 = alpha_MMS_allocation(agents,0.75,[17,77,25],['x1','x2','x3','x4','x5','x6','x7','x8'])
     >>> print(a1)
-    A gets {x3,x4} with value 15.
-    B gets {x1} with value 100.
-    C gets {x2,x5} with value 23.
-    <BLANKLINE>
-    >>> ### allocation with 3 agents, 8 objects
+    {'B': ['x1'], 'A': ['x3', 'x4'], 'C': ['x2', 'x5']}
+        
+    ### allocation with 3 agents, 8 objects
     >>> a = AdditiveAgent({"x1": 1, "x2": 1, "x3": 1,"x4": 1, "x5": 1, "x6": 1,"x7": 1, "x8": 1, "x9": 1, "x10": 1,"x11": 1, "x12": 1}, name="A")
     >>> b = AdditiveAgent({"x1": 2, "x2": 2, "x3": 2,"x4": 2, "x5": 2, "x6": 2,"x7": 1, "x8": 1, "x9": 1, "x10": 1,"x11": 1, "x12": 1}, name="B")
     >>> c = AdditiveAgent({"x1": 2, "x2": 2, "x3": 2,"x4": 2, "x5": 2, "x6": 2,"x7": 2, "x8": 2, "x9": 1, "x10": 1,"x11": 1, "x12": 1}, name="C")
     >>> agents=[a,b,c]
     >>> a1 = alpha_MMS_allocation(agents,0.9,[4,6,6],['x1','x2','x3','x4','x5','x6','x7','x8','x9','x10','x11','x12'])
     >>> print(a1)
-    A gets {x1,x11,x12,x4} with value 4.
-    B gets {x10,x2,x3,x9} with value 6.
-    C gets {x5,x6,x7} with value 6.
-    <BLANKLINE>
+    {'C': ['x5', 'x6', 'x7'], 'A': ['x1', 'x4', 'x12', 'x11'], 'B': ['x2', 'x3', 'x10', 'x9']}
     """
     num_agents=len(agents)
    
@@ -233,11 +210,11 @@ def alpha_MMS_allocation(agents: List[AdditiveAgent], alpha: float, mms_values: 
     if len(agents)==0 or len(agents)>len(items):
        return Allocation(agents=agents, bundles={})
     normelized_agents=normalize(agents,mms_values,items)
-    alloc_initial_assignment=initial_assignment_alpha_MSS(normelized_agents,items,alpha)
+    alloc_initial_assignment = initial_assignment_alpha_MSS(normelized_agents,items,alpha)
     if(len(normelized_agents)==0):
-        return combine_allocations([alloc_initial_assignment],agents)#use function to get value of alloc
+        return combine_allocations([alloc_initial_assignment],agents) #use function to get value of alloc
     alloc_bag_filling=bag_filling_algorithm_alpha_MMS(items,normelized_agents,alpha)
-          
+
     return combine_allocations([alloc_initial_assignment,alloc_bag_filling], agents)
 
 
@@ -289,47 +266,44 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
     :param items: items names sorted from the highest valued to the lowest
     :param alpha: parameter for how much to approximate MMS allocation.
     :return Allocation:  whats been allocated so far (in this function), items and agents are update during function
-    >>> ### allocation for 1 agent, 1 object (this pass!)
+
+    ### allocation for 1 agent, 1 object (this pass!)
     >>> a = AdditiveAgent({"x": 1}, name="Alice")
     >>> agents=[a]
     >>> a1 = initial_assignment_alpha_MSS(agents,['x'],0.75)
     >>> print(a1, agents)
-    Alice gets {x} with value nan.
-     []
-    >>> ### allocation for 1 agent, 2 object
+    {'Alice': ['x']} []
+    
+    ### allocation for 1 agent, 2 object
     >>> b = AdditiveAgent({"x": 0.5, "y": 0.4}, name="Blice")
     >>> agents=[b]
     >>> a1 = initial_assignment_alpha_MSS(agents,['x','y'],0.6)
     >>> print(a1, agents)
-    Blice gets {x,y} with value nan.
-     []
-    >>> ### allocation for 2 agent, 2 object
+    {'Blice': ['x', 'y']} []
+
+    ### allocation for 2 agent, 2 object
     >>> a = AdditiveAgent({"x": 0.8, "y": 0.7}, name="Alice")
     >>> b = AdditiveAgent({"x": 0.7, "y": 0.7}, name="Blice")
     >>> agents=[a,b]
     >>> a1= initial_assignment_alpha_MSS(agents,['x','y'],0.6)
     >>> print(a1, agents)
-    Alice gets {x} with value nan.
-    Blice gets {y} with value nan.
-     []
-    >>> ### allocation for 2 agent, 8 object
+    {'Alice': ['x'], 'Blice': ['y']} []
+    
+    ### allocation for 2 agent, 8 object
     >>> a = AdditiveAgent({"x1": 0.647059, "x2": 0.588235, "x3": 0.470588, "x4": 0.411765, "x5": 0.352941, "x6": 0.294118, "x7": 0.176471, "x8": 0.117647}, name="A")
     >>> b = AdditiveAgent({"x1": 1.298701, "x2": 0.714286, "x3": 0.649351, "x4": 0.428571, "x5": 0.155844, "x6": 0.064935, "x7": 0.051948, "x8": 0.012987}, name="B")
     >>> c =  AdditiveAgent({"x1": 0.6, "x2": 0.6, "x3": 0.48, "x4": 0.36, "x5": 0.32, "x6": 0.32, "x7": 0.28, "x8": 0.04}, name="C")
     >>> agents=[a,b,c]
     >>> a1 = initial_assignment_alpha_MSS(agents,['x1','x2','x3','x4','x5','x6','x7','x8'],0.75)
     >>> print(a1, agents) # x6, x7, x8 weren't divided
-    A gets {x3,x4} with value nan.
-    B gets {x1} with value nan.
-    C gets {x2,x5} with value nan.
-     []
+    {'B': ['x1'], 'A': ['x3', 'x4'], 'C': ['x2', 'x5']} []
     """
 
     ag_alloc = {} 
     n = len(agents)-1
     #if thereare less object than agents, mms is 0 for every one.
     if(n+1>len(items)):
-        return Allocation(ag_alloc,agents)
+        return ag_alloc
         #return None 
     agent_names=[agent.name() for agent in agents]
 
@@ -364,7 +338,7 @@ def initial_assignment_alpha_MSS(agents: List[AdditiveAgent], items: List[str], 
                 break
             elif si==s4_bundle:
                 # no agent is satisfied by any of the si bundles
-                return  Allocation (agent_names,ag_alloc) #end of function
+                return  ag_alloc #end of function
 
 
 
@@ -380,29 +354,29 @@ def bag_filling_algorithm_alpha_MMS(items: List[str],agents: List[AdditiveAgent]
     and valuation are ordered in ascending order
     :param alpha: parameter for how much to approximate MMS allocation
     :return allocation: allocation for the agents. agents and items are updated during function.
-    >>> ### allocation for 1 agent, 0 object
+    
+    ### allocation for 1 agent, 0 object
     >>> a = AdditiveAgent({"x": 1}, name="Alice" )
     >>> agents=[a]
     >>> a1 = bag_filling_algorithm_alpha_MMS(['x'],agents, 1)
     Traceback (most recent call last):
     ...
     Exception: ERROR. Could not create an MMS allocation that satisfies agents.
-    >>> ### allocation for 1 agent, 3 object (high alpha)
+    
+    ### allocation for 1 agent, 3 object (high alpha)
     >>> a = AdditiveAgent({"x1": 0.54, "x2": 0.3, "x3": 0.12}, name="Alice")
     >>> agents=[a]
     >>> a1 = bag_filling_algorithm_alpha_MMS(['x1','x2','x3'],agents, 0.9)
     >>> print(a1)
-    Alice gets {x1,x2,x3} with value nan.
-    <BLANKLINE>
-    >>> ### allocation for 2 agent, 9 object
+    {'Alice': ['x1', 'x2', 'x3']}
+
+    ### allocation for 2 agent, 9 object
     >>> a = AdditiveAgent({"x1": 0.25, "x2": 0.25, "x3": 0.25, "x4": 0.25, "x5": 0.25, "x6": 0.25, "x7": 0.25, "x8": 0.25, "x9": 0.25 }, name="A")
     >>> b = AdditiveAgent({"x1": 0.333333, "x2": 0.333333, "x3": 0.333333, "x4": 0.333333, "x5": 0.166667, "x6": 0.166667, "x7": 0.166667, "x8": 0.166667, "x9": 0.166667 }, name="B")
     >>> agents=[a,b]
     >>> a1 = bag_filling_algorithm_alpha_MMS(['x1','x2','x3','x4','x5','x6','x7','x8','x9'],agents,0.9)
     >>> print(a1)
-    A gets {x1,x4,x8,x9} with value nan.
-    B gets {x2,x3,x6,x7} with value nan.
-    <BLANKLINE>
+    {'A': ['x1', 'x4', 'x9', 'x8'], 'B': ['x2', 'x3', 'x7', 'x6']}
     """
 
     agents_num=len(agents)
@@ -444,7 +418,7 @@ def bag_filling_algorithm_alpha_MMS(items: List[str],agents: List[AdditiveAgent]
         else:
             raise Exception("ERROR. Could not create an MMS allocation that satisfies agents.")
 
-    return Allocation(agents=agent_names, bundles=bundles)
+    return bundles
 
 
 def normalize(agents: List[AdditiveAgent], divided_by_values: List[float],items: List[str])->List[AdditiveAgent]:
@@ -480,46 +454,45 @@ def normalize(agents: List[AdditiveAgent], divided_by_values: List[float],items:
 def combine_allocations(allocations: List[Allocation], agents: List[AdditiveAgent])->Allocation:
     """
     combine list of allocations to a single alloation,
-    also allows for different valuations of agents in the returned allcation
-    assume:
+    also allows for different valuations of agents in the returned allcation.
+
+    Assume:
     1. if agents is allocated in one allocation, there isn't another allocation for him
     2. no item is allocated twice
+
     :param allocations: list of Allocation to be combined
-    :param agents: valuations of agents, valuation are ordered in assenting order (the full list of agents from all the different allocations)
+    :param agents: valuations of agents, valuation are ordered in ascending order (the full list of agents from all the different allocations)
     :return allocation: the combined allocations
-    >>> ### combine a few allocation
+
+    ### combine a few allocation
+    >>> from dicttools import stringify
     >>> a = AdditiveAgent({"x1": 1, "x2": 2, "x3": 3, "x4": 4, "x5": 5, "x6": 6}, name="Alice")
     >>> b = AdditiveAgent({"x1": 1, "x2": 2, "x3": 3, "x4": 4, "x5": 5, "x6": 6}, name="Bruce")
-    >>> a1 = Allocation(agents=["Alice","Bruce"],bundles={"Alice":{}, "Bruce": {"x1","x5","x3"}})
-    >>> a2 = Allocation(agents=["Alice","Bruce"],bundles={"Alice":{"x2","x6"}, "Bruce": {}})
-    >>> combine_allocations([a1,a2], [a,b])
-    Alice gets {x2,x6} with value 8.
-    Bruce gets {x1,x3,x5} with value 9.
-    <BLANKLINE>
-    >>> ### same allcations, different valuations
-    >>> c = AdditiveAgent({"x1": 0.1, "x2": 0.2, "x3": 0.3, "x4": 0.4, "x5": 0.5, "x6": 0.6}, name="Alice")
-    >>> d = AdditiveAgent({"x1": 0.1, "x2": 0.2, "x3": 0.3, "x4": 0.4, "x5": 0.5, "x6": 0.6}, name="Bruce")
-    >>> combine_allocations([a1,a2], [c,d])
-    Alice gets {x2,x6} with value 0.8.
-    Bruce gets {x1,x3,x5} with value 0.9.
-    <BLANKLINE>
+    >>> a1 = {"Alice":[], "Bruce": ["x1","x5","x3"]}
+    >>> a2 = {"Alice":["x2","x6"], "Bruce": {}}
+    >>> combined = combine_allocations([a1,a2], [a,b])
+    >>> stringify(combined)
+    "{Alice:['x2', 'x6'], Bruce:['x1', 'x5', 'x3']}"
+
+    # ### same allcations, different valuations
+    # >>> c = AdditiveAgent({"x1": 0.1, "x2": 0.2, "x3": 0.3, "x4": 0.4, "x5": 0.5, "x6": 0.6}, name="Alice")
+    # >>> d = AdditiveAgent({"x1": 0.1, "x2": 0.2, "x3": 0.3, "x4": 0.4, "x5": 0.5, "x6": 0.6}, name="Bruce")
+    # >>> combine_allocations([a1,a2], [c,d])
+    # Alice gets {x2,x6} with value 0.8.
+    # Bruce gets {x1,x3,x5} with value 0.9.
+    # <BLANKLINE>
     """
-    is_first=True
-    combined_bundle=None
+    from copy import copy
+    combined_allocation=None
     for alloc in allocations:
-        if alloc!=None:
-            if is_first:
-                    combined_bundle=alloc.map_agent_to_bundle().copy()
-                    is_first=False
-            else:
-                map_agent_to_bundle=alloc.map_agent_to_bundle()
-                for name,assignment in map_agent_to_bundle.items():
-                    if len(combined_bundle[name])==0:
-                        combined_bundle[name]=assignment.copy()
-
-    return Allocation(agents=agents, bundles=combined_bundle)
-
-
+        if alloc is None: continue
+        if combined_allocation is None:
+            combined_allocation=copy(alloc)
+        else:
+            for name,assignment in alloc.items():
+                if name not in combined_allocation or len(combined_allocation[name])==0:
+                    combined_allocation[name]=copy(assignment)
+    return combined_allocation
 
 
 
@@ -535,55 +508,50 @@ def three_quarters_MMS_subroutine(agents: List[AdditiveAgent], items: List[str])
     :param agents: valuations of agents, valuation are ordered in assending order
     :param items: items names sorted from the highest valued to the lowest
     :return allocation: three-quarters MMS-allocation for all agents for ordered valuations.
-    >>> ### allocation for 1 agent, 1 object
+    
+    ### allocation for 1 agent, 1 object
     >>> a = AdditiveAgent({"x": 2}, name="Alice")
     >>> agents=[a]
     >>> a1 = three_quarters_MMS_subroutine(agents,["x"])
     >>> print(a1)
-    Alice gets {x} with value 2.
-    <BLANKLINE>
-    >>> ### allocation for 1 agent, 2 objects
+    {'Alice': ['x']}
+
+    ### allocation for 1 agent, 2 objects
     >>> b = AdditiveAgent({"x": 2, "y": 1}, name="Blice")
     >>> agents=[b]
     >>> a1 = three_quarters_MMS_subroutine(agents,["x","y"])
     >>> print(a1)
-    Blice gets {x,y} with value 3.
-    <BLANKLINE>
-    >>> ### allocation for 2 agents, 2 objects
+    {'Blice': ['x', 'y']}
+
+    ### allocation for 2 agents, 2 objects
     >>> a = AdditiveAgent({"x": 2, "y": 1}, name="Alice")
     >>> agents = [a, b]
     >>> a1 = three_quarters_MMS_subroutine(agents,["x","y"])
     >>> print(a1)
-    Alice gets {x} with value 2.
-    Blice gets {y} with value 1.
-    <BLANKLINE>
-    >>> ### allocation for 3 agents, 3 objects (low alpha)
+    {'Alice': ['x'], 'Blice': ['y']}
+
+    ### allocation for 3 agents, 3 objects (low alpha)
     >>> a = AdditiveAgent({"x1": 3, "x2": 2, "x3": 1}, name="A")
     >>> b = AdditiveAgent({"x1": 4, "x2": 4, "x3": 4}, name="B")
     >>> c = AdditiveAgent({"x1": 5, "x2": 2, "x3": 1}, name="C")
     >>> agents=[a,b,c]
     >>> a1 = three_quarters_MMS_subroutine(agents,["x1","x2","x3"])
     >>> print(a1)
-    A gets {x1} with value 3.
-    B gets {x2} with value 4.
-    C gets {x3} with value 1.
-    <BLANKLINE>
-    >>> ### detailed example: enter loop and adjusted by alpha.
-    >>> ### 3 agents 11 objects
+    {'A': ['x1'], 'B': ['x2'], 'C': ['x3']}
+        
+    ### detailed example: enter loop and adjusted by alpha.
+    ### 3 agents 11 objects
     >>> agents = AdditiveAgent.list_from({"Alice":{"x1":35.5,"x2":35,"x3":19,"x4":17.5,"x5":17.5,"x6":17.5,"x7":1,"x8":1,"x9":1,"x10":1,"x11":1},\
     "Bruce":{"x1":35.5,"x2":35,"x3":19,"x4":17.5,"x5":17.5,"x6":17.5,"x7":1,"x8":1,"x9":1,"x10":1,"x11":1},\
     "Carl":{"x1":35.5,"x2":35,"x3":19,"x4":17.5,"x5":17.5,"x6":17.5,"x7":1,"x8":1,"x9":1,"x10":1,"x11":1}})
     >>> alloc = three_quarters_MMS_subroutine(agents,['x1','x2','x3','x4','x5','x6','x7','x8','x9','x10','x11'])
-    >>> print(alloc.str_with_values(precision=7))
-    Alice gets {x3,x4} with value 36.5.
-    Bruce gets {x2,x5} with value 52.5.
-    Carl gets {x1,x6} with value 53.
-    <BLANKLINE>
+    >>> print(alloc)
+    {'Alice': ['x3', 'x4'], 'Bruce': ['x2', 'x5'], 'Carl': ['x1', 'x6']}
     """
     items=deepcopy(items)
     num_agents=len(agents)
     if num_agents==0 or num_agents>len(items):
-       return Allocation(agents=agents, bundles={})
+       return {}
     
     #normalize
     divide_by_array=[0]*num_agents
@@ -632,7 +600,7 @@ def three_quarters_MMS_subroutine(agents: List[AdditiveAgent], items: List[str])
 #### Algorithm 5
 ####
 
-def fixed_assignment(agents: List[AdditiveAgent], items: List[str])->Allocation:
+def fixed_assignment(agents: List[AdditiveAgent], items: List[str])->Dict[str,List[Any]]:
     """
     The function allocates what can be allocated without harting others
     (each allocated agent gets 3/4 of his own MMS value,
@@ -640,35 +608,34 @@ def fixed_assignment(agents: List[AdditiveAgent], items: List[str])->Allocation:
     :param agents: valuations of agents, normalized such that MMS <=1 for all agents
     :param items: items names sorted from the highest valued to the lowest
     :return allocation: What been allocated so far, and changes values of agents and items 
-    >>> ### fixed_assignment for one agent, one object
+    
+    ### fixed_assignment for one agent, one object
     >>> a = AdditiveAgent({"x": 1}, name="Alice")
     >>> agents=[a]
     >>> alloc=fixed_assignment(agents,["x"])
     >>> print(alloc)
-    Alice gets {x} with value nan.
-    <BLANKLINE>
+    {'Alice': ['x']}
     >>> agents #check agents changed
     []
-    >>> ### fixed_assignment for two agent, one objects
+
+    ### fixed_assignment for two agent, one objects
     >>> b = AdditiveAgent({"x": 3.333333}, name="Bruce")
     >>> c = AdditiveAgent({"x":2}, name="Carl")
     >>> agents=[b,c]
     >>> alloc=fixed_assignment(agents,["x"])
     >>> print(alloc)
-    Bruce gets {} with value nan.
-    Carl gets {} with value nan.
-    <BLANKLINE>
+    {}
+
     >>> agents #check agents hasn't changed
     [Bruce is an agent with a Additive valuation: x=3.333333., Carl is an agent with a Additive valuation: x=2.]
-    >>> ### fixed_assignment for two agent, three objects #
+    
+    ### fixed_assignment for two agent, three objects #
     >>> b = AdditiveAgent({"x": 1.2,"y": 0.24, "z":0.56}, name="Bruce")
     >>> c = AdditiveAgent({"x":1.125,"y": 0.875,"z":0.25}, name="Carl")
     >>> agents=[b,c]
     >>> alloc=fixed_assignment(agents,["x","y","z"])
     >>> print(alloc)
-    Bruce gets {x} with value nan.
-    Carl gets {y} with value nan.
-    <BLANKLINE>
+    {'Bruce': ['x'], 'Carl': ['y']}
     >>> agents #check agents changed
     []
     """
@@ -676,7 +643,7 @@ def fixed_assignment(agents: List[AdditiveAgent], items: List[str])->Allocation:
     agent_names=[agent.name() for agent in agents]
     n = len(agents)
     if(n>len(items)): #if there are more agents then object- mms is 0 for everyone.
-        return Allocation(agents=agent_names,bundles=ag_alloc)#return empty alloc 
+        return ag_alloc #return empty alloc 
     
     val_arr = dict() #values of agents
     i=0
@@ -770,7 +737,7 @@ def fixed_assignment(agents: List[AdditiveAgent], items: List[str])->Allocation:
                  
         si=si+1
 
-    return Allocation(agents=agent_names,bundles=ag_alloc)
+    return ag_alloc
 
 
 
@@ -790,10 +757,8 @@ def tentative_assignment(agents: List[AdditiveAgent], items: List[str])->Tuple[L
     :return remaining_agents: agents (and objects) that still need allocation
     :return allocation: whats been temporarily allocated so far
     :return remaining_items: items that remained after  whats been allocated so far
-    >>> ### doesn't find any allocation.
-    >>> agents = AdditiveAgent.list_from({"Alice":[],\
-                                          "Bruce":[],\
-                                           "Carl":[]})
+
+    ### doesn't find any allocation.
     >>> a = AdditiveAgent({"01": 0.724489796, "02": 0.714285714, "03": 0.387755102, "04": 0.357142857, "05": 0.357142857, "06": 0.357142857, "07": 0.020408163, "08": 0.020408163, "09": 0.020408163, "10": 0.020408163, "11": 0.020408163}, name="Alice")
     >>> b = AdditiveAgent({"01": 0.724489796, "02": 0.714285714, "03": 0.387755102, "04": 0.357142857, "05": 0.357142857, "06": 0.357142857, "07": 0.020408163, "08": 0.020408163, "09": 0.020408163, "10": 0.020408163, "11": 0.020408163}, name="Bruce")
     >>> c = AdditiveAgent({"01": 0.724489796, "02": 0.714285714, "03": 0.387755102, "04": 0.357142857, "05": 0.357142857, "06": 0.357142857, "07": 0.020408163, "08": 0.020408163, "09": 0.020408163, "10": 0.020408163, "11": 0.020408163}, name="Carl")
@@ -809,7 +774,8 @@ def tentative_assignment(agents: List[AdditiveAgent], items: List[str])->Tuple[L
     <BLANKLINE>
     >>> print(remaining_items)
     ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11']
-    >>> ### 3 agents 11 objects - ex 1
+    
+    ### 3 agents 11 objects - ex 1
     >>> a = AdditiveAgent({"01": 0.727066, "02": 0.727066, "03": 0.39525, "04": 0.351334, "05": 0.351334, "06": 0.346454, "07": 0.022934, "08": 0.022934, "09": 0.022934, "10": 0.022934, "11": 0.022934}, name="Alice")
     >>> b = AdditiveAgent({"01": 0.723887, "02": 0.723887, "03": 0.393522, "04": 0.349798, "05": 0.349798, "06": 0.344939, "07": 0.022834, "08": 0.022834, "09":  0.022834, "10": 0.022834, "11": 0.022834}, name="Bruce")
     >>> c = AdditiveAgent({"01": 0.723887, "02": 0.723887, "03": 0.393522, "04": 0.349798, "05": 0.349798, "06": 0.344939, "07": 0.022834, "08": 0.022834, "09": 0.022834, "10": 0.022834, "11": 0.022834}, name="Carl")
@@ -827,7 +793,8 @@ def tentative_assignment(agents: List[AdditiveAgent], items: List[str])->Tuple[L
     <BLANKLINE>
     >>> print (remaining_items)
     ['08', '09', '10', '11']
-    >>> ### 3 agents 10 object
+    
+    ### 3 agents 10 object
     >>> a = AdditiveAgent({"01": 0.727272, "02": 0.727272, "03": 0.318182, "04": 0.318182, "05": 0.318182, "06": 0.318182, "07": 0.090909, "08": 0.090909, "09": 0.045454, "10": 0.045454}, name="Alice")
     >>> b = AdditiveAgent({"01": 0.727272, "02": 0.727272, "03": 0.318182, "04": 0.318182, "05": 0.318182, "06": 0.318182, "07": 0.090909, "08": 0.090909, "09": 0.045454, "10": 0.045454}, name="Bruce")
     >>> c = AdditiveAgent({"01": 0.727272, "02": 0.727272, "03": 0.318182, "04": 0.318182, "05": 0.318182, "06": 0.318182, "07": 0.090909, "08": 0.090909, "09": 0.045454, "10": 0.045454}, name="Carl")
@@ -1398,20 +1365,26 @@ def update_val(items_remove: List[str], val_arr: dict(), n: int)->dict() :
 
 if __name__ == '__main__':
     import doctest
+
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
 
     # Testing specific functions:
+
+    # doctest.run_docstring_examples(three_quarters_MMS_subroutine, globals())
+
+    # doctest.run_docstring_examples(fixed_assignment, globals())
+
+    # doctest.run_docstring_examples(initial_assignment_alpha_MSS, globals())
+    # doctest.run_docstring_examples(bag_filling_algorithm_alpha_MMS, globals())
+    # doctest.run_docstring_examples(combine_allocations, globals())
+    # doctest.run_docstring_examples(alpha_MMS_allocation, globals())
+
     # doctest.run_docstring_examples(three_quarters_MMS_allocation_algorithm, globals())
     # doctest.run_docstring_examples(update_bound, globals())
     # doctest.run_docstring_examples(compute_alphas, globals())
-    # doctest.run_docstring_examples(initial_assignment_alpha_MSS, globals())
-    # doctest.run_docstring_examples(bag_filling_algorithm_alpha_MMS, globals())
-    # doctest.run_docstring_examples(alpha_MMS_allocation, globals())
-    # doctest.run_docstring_examples(fixed_assignment, globals())
     # doctest.run_docstring_examples(tentative_assignment, globals())
     # doctest.run_docstring_examples(three_quarters_MMS_allocation, globals())
     # doctest.run_docstring_examples(agents_conversion_to_ordered_instance, globals())
     # doctest.run_docstring_examples(get_alpha_MMS_allocation_to_unordered_instance, globals())
 
-    

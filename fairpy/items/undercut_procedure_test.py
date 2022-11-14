@@ -9,10 +9,10 @@ Date: 2022-05
 The undercut procedure is a procedure for fair item assignment between *two* people.
 """
 
-from fairpy.items.undercut_procedure  import undercut
-from fairpy import Allocation, AgentList
-import unittest
 import fairpy
+from fairpy.items.undercut_procedure  import undercut
+from fairpy import AgentList
+import unittest
 
 
 class TestAlgo(unittest.TestCase):
@@ -36,21 +36,18 @@ class TestAlgo(unittest.TestCase):
         Alex = fairpy.agents.AdditiveAgent({}, name="Alex")
         George = fairpy.agents.AdditiveAgent({}, name="George")
         allocation = undercut(AgentList([Alex,George]),[])
-        # allocation2 =  Allocation(AgentList([Alex,George]),[[],[]])
         self.assertEqual(allocation, [[],[]])
         
         #same values
         agents_dict = AgentList({"Alice":{"a": 4, "b": 4, "c": 4, "d":4},"Bob":{"a": 4, "b": 4, "c": 4, "d":4}})
         bundles = {"Alice": {'a', 'd'}, "Bob":{'b', 'c'}}
         allocation = undercut(agents_dict,['a','b','c','d'])
-        # allocation2 =  Allocation(agents_dict,bundles)
         self.assertEqual(allocation, [('a','d'),('b','c')])
         
         
         Alice = fairpy.agents.AdditiveAgent({"a": 1,"b": 2, "c": 3, "d":4,"e": 5, "f":14}, name="Alice")
         Bob = fairpy.agents.AdditiveAgent({"a":1,"b": 1, "c": 1, "d":1,"e": 1, "f":7}, name="Bob")
         allocation = undercut(AgentList([Alice,Bob]),['a','b','c','d','e','f'])  
-        # allocation2 = Allocation(AgentList([Alice,Bob]),[['a','b','c','d','e'],['f']])  
         self.assertEqual(allocation, [['a','b','c','d','e'],['f']])
         
         #no allocation
