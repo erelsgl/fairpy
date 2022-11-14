@@ -15,6 +15,7 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 logger.setLevel(logging.INFO)
 
 from fairpy import solve
+from fairpy.items.adaptors import divide
 
 solve.logger.addHandler(logging.StreamHandler(sys.stdout))
 solve.logger.setLevel(logging.INFO)
@@ -27,14 +28,14 @@ cvxpy_leximin.LOGGER.setLevel(logging.INFO)
 
 def show(title, v):
     print("\n", "###", title)
-    z = leximin_optimal_allocation(v, upper_tolerance=1.02).round(3)
+    z = divide(leximin_optimal_allocation, v, upper_tolerance=1.02).round(3)
     # print(type(z))
     # print("agent_bundle_value_matrix\n", z.agent_bundle_value_matrix)
     print("allocation = \n", z)
     print("utility profile\n", z.utility_profile())
 
 
-# show("3 agents, competitive", [[3,2,1],[1,2,3],[2,2,2]])
+show("3 agents, competitive", [[3,2,1],[1,2,3],[2,2,2]])
 # show("3 agents, non-competitive", [[3,0,0],[0,4,0],[0,0,5]])
 # show("3 agents, non-competitive", [[3,0,0],[0,3,0],[0,0,5]])
 # show("4 agents, partially-competitive", [[4,0,0],[0,3,0],[5,5,10],[5,5,10]])

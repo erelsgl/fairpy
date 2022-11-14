@@ -79,9 +79,9 @@ def divide(
     <BLANKLINE>
 
     ### Dict mapping agent names to dicts of values, converted to a ValuationMatrix:
-    >>> divide(algorithm=fairpy.items.leximin_optimal_allocation, input={"Alice": {"w":11,"x":22,"y":44,"z":0}, "George": {"w":22,"x":11,"y":66,"z":33}})
-    Alice gets { 100.0% of x, 90.0% of y} with value 61.6.
-    George gets { 100.0% of w, 10.0% of y, 100.0% of z} with value 61.6.
+    >>> divide(algorithm=fairpy.items.max_sum_allocation, input={"Alice": {"w":11,"x":22,"y":44,"z":0}, "George": {"w":22,"x":11,"y":66,"z":33}})
+    Alice gets { 100.0% of x} with value 22.
+    George gets { 100.0% of w, 100.0% of y, 100.0% of z} with value 121.
     <BLANKLINE>
 
     >>> divide(algorithm=fairpy.items.undercut, input={"Alex":{"a": 1,"b": 2, "c": 3, "d":4,"e": 5, "f":14},"Bob":{"a":1,"b": 1, "c": 1, "d":1,"e": 1, "f":7}})

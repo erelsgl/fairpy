@@ -19,11 +19,10 @@ from typing import Any
 import logging
 logger = logging.getLogger(__name__)
 
-@convert_input_to_valuation_matrix
-def max_welfare_allocation(instance:Any, welfare_function, welfare_constraint_function=None, allocation_constraint_function=None) -> Allocation:
+def max_welfare_allocation(v: ValuationMatrix, welfare_function, welfare_constraint_function=None, allocation_constraint_function=None) -> Allocation:
     """
     Find an allocation maximizing a given social welfare function. 
-    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
     :param welfare_function:   a monotonically-increasing function w: R -> R representing the welfare function to maximize.
     :param welfare_constraint: a predicate w: R -> {true,false} representing an additional constraint on the utility of each agent.
     :param allocation_constraint_function: a predicate w: R -> {true,false} representing an additional constraint on the allocation variables.
@@ -32,7 +31,6 @@ def max_welfare_allocation(instance:Any, welfare_function, welfare_constraint_fu
 
     For usage examples, see the functions max_sum_allocation, max_product_allocation, max_minimum_allocation.
     """
-    v = ValuationMatrix(instance)
     allocation_vars = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
     feasibility_constraints = [
         sum([allocation_vars[i][o] for i in v.agents()])==1
@@ -53,31 +51,29 @@ def max_welfare_allocation(instance:Any, welfare_function, welfare_constraint_fu
         allocation_constraints = []
     max_welfare = maximize(welfare_function(utilities), feasibility_constraints+positivity_constraints+welfare_constraints+allocation_constraints)
     logger.info("Maximum welfare is %g",max_welfare)
-    allocation_matrix = allocation_vars.value
+    allocation_matrix = allocation_vars.value + 0
+    allocation_matrix[allocation_matrix==0]=0   # Remove negative zeros: https://stackoverflow.com/a/26786119/827927
     return allocation_matrix
 
 
-
-@convert_input_to_valuation_matrix
-def max_welfare_envyfree_allocation(instance:Any, welfare_function, allocation_constraint_function=None) -> Allocation:
+def max_welfare_envyfree_allocation(v: ValuationMatrix, welfare_function, allocation_constraint_function=None) -> Allocation:
     """
     Find an allocation maximizing a given social welfare function subject to envy-freeness.
-    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
     :param welfare_function:   a monotonically-increasing function w: R -> R representing the welfare function to maximize.
     :param welfare_constraint: a predicate w: R -> {true,false} representing an additional constraint on the utility of each agent.
     :param allocation_constraint_function: a predicate w: R -> {true,false} representing an additional constraint on the allocation variables.
 
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
 
-    >>> v = {"Alice": [6,12] , "Bob": [12,18]}
-    >>> max_welfare_envyfree_allocation(v,
+    >>> v = ValuationMatrix([[6,12],[12,18]])
+    >>> print(max_welfare_envyfree_allocation(v,
     ...     welfare_function=lambda utilities: sum([cvxpy.log(utility) for utility in utilities]),
     ...     allocation_constraint_function=lambda z: sum(z)==1
-    ...     ).round(3).matrix
+    ...     ).round(3))
     [[0.5 0.5]
      [0.5 0.5]]
     """
-    v = ValuationMatrix(instance)
     allocation_vars = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
     feasibility_constraints = [
         sum([allocation_vars[i][o] for i in v.agents()])==1
@@ -103,7 +99,9 @@ def max_welfare_envyfree_allocation(instance:Any, welfare_function, allocation_c
     max_welfare = maximize(welfare_function(utilities), feasibility_constraints+positivity_constraints+allocation_constraints+envyfreeness_constraints)
     logger.info("Maximum welfare is %g",max_welfare)
     allocation_matrix = allocation_vars.value
+    allocation_matrix[allocation_matrix==0]=0   # Remove negative zeros: https://stackoverflow.com/a/26786119/827927
     return allocation_matrix
+
 
 
 from fairpy.families import AllocationToFamilies, map_agent_to_family
@@ -144,75 +142,73 @@ def max_welfare_allocation_for_families(instance, families:list, welfare_functio
     return AllocationToFamilies(v, alloc.value, families)
 
 
-
-
-def max_sum_allocation(instance, allocation_constraint_function=None) -> Allocation:
+def max_sum_allocation(v:ValuationMatrix, allocation_constraint_function=None) -> Allocation:
     """
     Find the max-sum (aka Utilitarian) allocation.
-    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
     The allocation should maximize the product (= sum of logs) of utilities
-    >>> max_sum_allocation([ [3] , [5] ]).round(3).matrix   # single item
+    >>> print(max_sum_allocation(ValuationMatrix([ [3] , [5] ])).round(3))   # single item
     [[0.]
      [1.]]
-    >>> max_sum_allocation([ [3,3] , [1,1] ]).round(3).matrix   # two identical items
+    >>> print(max_sum_allocation(ValuationMatrix([ [3,3] , [1,1] ])).round(3))   # two identical items
     [[1. 1.]
      [0. 0.]]
-    >>> max_sum_allocation([ [3,2] , [1,4] ]).round(3).matrix   # two different items
+    >>> print(max_sum_allocation(ValuationMatrix([ [3,2] , [1,4] ])).round(3))   # two different items
     [[1. 0.]
      [0. 1.]]
     """
-    return max_welfare_allocation(instance,
+    return max_welfare_allocation(v,
         welfare_function=lambda utilities: sum(utilities),
         welfare_constraint_function=lambda utility: utility >= 0,
         allocation_constraint_function = allocation_constraint_function)
 
-def pareto_dominating_allocation(instance, original_utilities:list, allocation_constraint_function=None) -> Allocation:
+def pareto_dominating_allocation(v:ValuationMatrix, original_utilities:list, allocation_constraint_function=None) -> Allocation:
     """
     Find an allocation that Pareto-dominates the given allocation.
     Essentially, it finds an allocation that maximizes the sum of utilities over all allocations that give each agent at least as much utility.
 
-    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
     :param original_utilities: a vector u of utilities in the original allocation. u[i] is the original utility of agent i.
 
     :return a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
-    >>> pareto_dominating_allocation([ [3,2] , [1,4] ], [2,2]).round(3).matrix   
+    >>> print(pareto_dominating_allocation(ValuationMatrix([ [3,2] , [1,4] ]), [2,2]).round(3))
     [[1. 0.]
      [0. 1.]]
-    >>> pareto_dominating_allocation([ [3,2] , [1,4] ], [4,0]).round(3).matrix   
+    >>> print(pareto_dominating_allocation(ValuationMatrix([ [3,2] , [1,4] ]), [4,0]).round(3))
     [[1.  0.5]
      [0.  0.5]]
     """
     original_utilities_iterator = iter(original_utilities)
-    return max_welfare_allocation(instance,
+    return max_welfare_allocation(v,
         welfare_function=lambda utilities: sum(utilities),
         welfare_constraint_function=lambda utility: utility >= next(original_utilities_iterator),
         allocation_constraint_function = allocation_constraint_function)
 
-def max_power_sum_allocation(instance, power:float, allocation_constraint_function=None) -> Allocation:
+def max_power_sum_allocation(v:ValuationMatrix, power:float, allocation_constraint_function=None) -> Allocation:
     """
     Find the maximum of sum of utility to the given power.
     * When power=1, it is equivalent to max-sum;
     * When power -> 0, it converges to max-product;
     * When power -> -infinity, it converges to leximin.
-    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
     The allocation should maximize the product (= sum of logs) of utilities
-    >>> max_power_sum_allocation([ [3] , [5] ], 1).round(3).matrix
+    >>> print(max_power_sum_allocation(ValuationMatrix([ [3] , [5] ]), 1).round(3)+0)
     [[0.]
      [1.]]
-    >>> max_power_sum_allocation([ [3] , [5] ], 0.1).round(3).matrix
+    >>> print(max_power_sum_allocation(ValuationMatrix([ [3] , [5] ]), 0.1).round(3))
     [[0.486]
      [0.514]]
-    >>> max_power_sum_allocation([ [3] , [5] ], 0).round(3).matrix
+    >>> print(max_power_sum_allocation(ValuationMatrix([ [3] , [5] ]), 0).round(3))
     [[0.5]
      [0.5]]
-    >>> max_power_sum_allocation([ [3] , [5] ], -0.1).round(3).matrix
+    >>> print(max_power_sum_allocation(ValuationMatrix([ [3] , [5] ]), -0.1).round(3))
     [[0.512]
      [0.488]]
-    >>> max_power_sum_allocation([ [3] , [5] ], -1).round(3).matrix
+    >>> print(max_power_sum_allocation(ValuationMatrix([ [3] , [5] ]), -1).round(3))
     [[0.564]
      [0.436]]
     """
@@ -222,65 +218,59 @@ def max_power_sum_allocation(instance, power:float, allocation_constraint_functi
         welfare_function=lambda utilities: -sum([utility**power for utility in utilities])
     else:
         welfare_function=lambda utilities: sum([cvxpy.log(utility) for utility in utilities])
-    return max_welfare_allocation(instance,
+    return max_welfare_allocation(v,
         welfare_function=welfare_function,
         welfare_constraint_function=lambda utility: utility >= 0,
         allocation_constraint_function=allocation_constraint_function)
 
 
-def max_product_allocation(instance, allocation_constraint_function=None) -> Allocation:
+def max_product_allocation(v:ValuationMatrix, allocation_constraint_function=None) -> Allocation:
     """
     Find the max-product (aka Max Nash Welfare) allocation.
-    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
     The allocation should maximize the product (= sum of logs) of utilities
-    >>> max_product_allocation([ [3] , [5] ]).round(3).matrix   # single item
+    >>> print(max_product_allocation(ValuationMatrix([ [3] , [5] ])).round(3))  # single item
     [[0.5]
      [0.5]]
-    >>> max_product_allocation([ [3,3] , [1,1] ]).round(3).matrix   # two identical items
+    >>> print(max_product_allocation(ValuationMatrix([ [3,3] , [1,1] ])).round(3))   # two identical items
     [[0.5 0.5]
      [0.5 0.5]]
-    >>> max_product_allocation([ [3,2] , [1,4] ]).round(3).matrix   # two different items
+    >>> print(max_product_allocation(ValuationMatrix([ [3,2] , [1,4] ])).round(3)+0)   # two different items
     [[1. 0.]
      [0. 1.]]
     """
-    return max_welfare_allocation(instance,
+    return max_welfare_allocation(v,
         welfare_function=lambda utilities: sum([cvxpy.log(utility) for utility in utilities]),
         welfare_constraint_function=lambda utility: utility >= 0,
         allocation_constraint_function = allocation_constraint_function)
 
 
-def max_minimum_allocation(instance, allocation_constraint_function=None) -> Allocation:
+def max_minimum_allocation(v:ValuationMatrix, allocation_constraint_function=None) -> Allocation:
     """
     Find the max-minimum (aka Egalitarian) allocation.
-    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
 
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
     The allocation should maximize the leximin vector of utilities.
-    >>> a = max_minimum_allocation([ [3] , [5] ])   # single item
-    >>> a
-    Agent #0 gets { 62.5% of 0} with value 1.88.
-    Agent #1 gets { 37.5% of 0} with value 1.88.
-    <BLANKLINE>
-    >>> a.matrix
+    >>> a = max_minimum_allocation(ValuationMatrix([ [3] , [5] ]))   # single item
+    >>> print(a)
     [[0.625]
      [0.375]]
-    >>> max_minimum_allocation([ [4,2] , [1,4] ]).round(3).matrix   # two different items
+    >>> print(max_minimum_allocation(ValuationMatrix([ [4,2] , [1,4] ])).round(3))   # two different items
     [[1. 0.]
      [0. 1.]]
-    >>> alloc = max_minimum_allocation([ [3,3] , [1,1] ]).round(3).matrix   # two identical items
-    >>> [sum(alloc[i]) for i in alloc.agents()]
+    >>> alloc = max_minimum_allocation(ValuationMatrix([ [3,3] , [1,1] ])).round(3)   # two identical items
+    >>> [sum(alloc[i]) for i in range(len(alloc))]
     [0.5, 1.5]
-    >>> v = [ [4,2] , [1,3] ]   # two different items
+    >>> v = ValuationMatrix([ [4,2] , [1,3] ])     # two different items
     >>> a = max_minimum_allocation(v).round(3)
-    >>> a.matrix
+    >>> print(a)
     [[0.8 0. ]
      [0.2 1. ]]
-    >>> print(a.utility_profile())
-    [3.2 3.2]
     """
-    return max_welfare_allocation(instance,
+    return max_welfare_allocation(v,
         welfare_function=lambda utilities: cvxpy.min(cvxpy.hstack(utilities)),
         welfare_constraint_function=lambda utility: utility >= 0,
         allocation_constraint_function = allocation_constraint_function)
@@ -346,3 +336,8 @@ if __name__ == '__main__':
     import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
+
+    # Testing specific functions:
+    # doctest.run_docstring_examples(max_welfare_envyfree_allocation, globals())
+    # doctest.run_docstring_examples(max_sum_allocation, globals())
+
