@@ -8,8 +8,7 @@ Programmer: Erel Segal-Halevi
 Since:  2020-07
 """
 
-import fairpy
-from fairpy import Allocation, AgentList
+from fairpy import AgentList
 
 import logging
 logger = logging.getLogger(__name__)
@@ -17,18 +16,21 @@ logger = logging.getLogger(__name__)
 from typing import List, Any
 
 
-def round_robin(agents:AgentList, agent_order:List[int]=None, items:List[Any]=None) -> Allocation:
+def round_robin(agents:AgentList, agent_order:List[int]=None, items:List[Any]=None) -> List[List[Any]]:
     """
     Allocate the given items to the given agents using the round-robin protocol, in the given agent-order.
+    :param agents a list of Agent objects.
+    :param agent_order (optional): an alternative picking order. Default is 0, 1, ..., num-1
+    :param items (optional): a list of items to allocate. Default is allocate all items.
+    :return a list of bundles; each bundle is a list of items.
 
     ### Dividing all items:
-    >>> Alice = fairpy.agents.AdditiveAgent({"x": 11, "y": 22, "z": 44, "w":0}, name="Alice")
-    >>> George = fairpy.agents.AdditiveAgent({"x": 22, "y": 11, "z": 66, "w":33}, name="George")
-    >>> allocation = round_robin(AgentList([Alice,George]), agent_order=[0,1])
+    >>> from fairpy import AdditiveAgent
+    >>> Alice = AdditiveAgent({"x": 11, "y": 22, "z": 44, "w":0}, name="Alice")
+    >>> George = AdditiveAgent({"x": 22, "y": 11, "z": 66, "w":33}, name="George")
+    >>> allocation = round_robin(AgentList([Alice,George]), agent_order=[0,1])    # Alice gets {z,y} and George gets {w,x}
     >>> allocation
-    Alice gets {y,z} with value 66.
-    George gets {w,x} with value 55.
-    <BLANKLINE>
+    [['z', 'y'], ['w', 'x']]
     >>> Alice.is_EF1(allocation[0], allocation)
     True
     >>> George.is_EF1(allocation[1], allocation)
@@ -40,38 +42,31 @@ def round_robin(agents:AgentList, agent_order:List[int]=None, items:List[Any]=No
 
     ### Dividing only some of the items:
     >>> round_robin(AgentList([Alice,George]), agent_order=[0,1], items={"x","y","z"})
-    Alice gets {y,z} with value 66.
-    George gets {x} with value 22.
-    <BLANKLINE>
+    [['z', 'y'], ['x']]
 
     ### Different input formats:
     >>> round_robin(AgentList([[11,22,44,0],[22,11,66,33]]), agent_order=[0,1], items={0,1,2,3})
-    Agent #0 gets {1,2} with value 66.
-    Agent #1 gets {0,3} with value 55.
-    <BLANKLINE>
+    [[2, 1], [3, 0]]
+
     >>> round_robin(AgentList([[11,22,44,0],[22,11,66,33]]), agent_order=[0,1], items={0,1,2,3})
-    Agent #0 gets {1,2} with value 66.
-    Agent #1 gets {0,3} with value 55.
-    <BLANKLINE>
+    [[2, 1], [3, 0]]
     """
     assert isinstance(agents, AgentList)
-
     if agent_order is None: agent_order = range(len(agents))
     agent_order = list(agent_order)
-
     if items is None: items = agents.all_items()
 
     remaining_items = list(items)
     logger.info("\nRound Robin with agent-order %s and items %s", agent_order, remaining_items)
-    allocations = [[] for _ in agents]
+    bundles = [[] for _ in agents]
     while True:
         for agent_index in agent_order:
             if len(remaining_items)==0:
-                return Allocation(agents, allocations)
+                return bundles
             agent = agents[agent_index]
             best_item_for_agent = max(remaining_items, key=agent.value)
             best_item_value = agent.value(best_item_for_agent)
-            allocations[agent_index].append(best_item_for_agent)
+            bundles[agent_index].append(best_item_for_agent)
             logger.info("%s takes %s (value %d)", agent.name(), best_item_for_agent, best_item_value)
             remaining_items.remove(best_item_for_agent)
 

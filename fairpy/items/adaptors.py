@@ -11,7 +11,8 @@ Since: 2022-10
 """
 
 from typing import Callable, Any
-from fairpy import AgentList
+from fairpy import AgentList, Allocation
+from dicttools import stringify
 
 
 def divide(
@@ -39,16 +40,16 @@ def divide(
 
     >>> import fairpy
 
-    ### List of lists of values:
-    >>> divide(algorithm=fairpy.items.round_robin, instance=[[11,22,44,0],[22,11,66,33]])
-    Agent #0 gets {1,2} with value 66.
-    Agent #1 gets {0,3} with value 55.
-    <BLANKLINE>
-
-    ### List of lists of values, plus an optional parameter:
+    ### List of lists of values, plus an optional parameter::
     >>> divide(algorithm=fairpy.items.round_robin, instance=[[11,22,44,0],[22,11,66,33]], agent_order=[1,0])
     Agent #0 gets {0,1} with value 33.
     Agent #1 gets {2,3} with value 99.
+    <BLANKLINE>
+
+    ### Dict mapping agent names to lists of values
+    >>> divide(algorithm=fairpy.items.round_robin, instance={"Alice": [11,22,44,0], "George": [22,11,66,33]})
+    Alice gets {1,2} with value 66.
+    George gets {0,3} with value 55.
     <BLANKLINE>
 
     ### Dict mapping agent names to lists of values:
@@ -72,13 +73,44 @@ def divide(
     Alice gets {y} with value 44.
     George gets {w,x,z} with value 66.
     <BLANKLINE>
+
+    >>> prefs = AgentList({"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}, "gadi": {"x":3, "y":2}})
+    >>> alloc = divide(fairpy.items.utilitarian_matching, prefs, item_capacities={"x":2, "y":2})
+    >>> stringify(alloc.map_agent_to_bundle())
+    "{avi:['x'], beni:['y'], gadi:['x']}"
+    >>> stringify(alloc.map_item_to_agents())
+    "{x:['avi', 'gadi'], y:['beni']}"
+    >>> agent_weights = {"avi":1, "gadi":10, "beni":100}
+    >>> stringify(alloc.map_item_to_agents(sortkey=lambda name: -agent_weights[name]))
+    "{x:['gadi', 'avi'], y:['beni']}"
+
+    >>> alloc = divide(fairpy.items.utilitarian_matching, prefs, item_capacities={"x":2, "y":2}, agent_capacities={"avi":2,"beni":1,"gadi":1})
+    >>> stringify(alloc.map_agent_to_bundle())
+    "{avi:['x', 'y'], beni:['y'], gadi:['x']}"
+
+    >>> prefs = AgentList([[5,4],[3,2]])
+    >>> alloc = divide(fairpy.items.utilitarian_matching, prefs)
+    >>> stringify(alloc.map_agent_to_bundle())
+    '{Agent #0:[1], Agent #1:[0]}'
+    >>> stringify(alloc.map_item_to_agents())
+    "{0:['Agent #1'], 1:['Agent #0']}"
+
+    >>> agents = AgentList({"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}})
+    >>> alloc = divide(fairpy.items.iterated_maximum_matching, agents, item_capacities={"x":1,"y":1,"z":1,"w":1})
+    >>> stringify(alloc.map_agent_to_bundle())
+    "{avi:['x', 'y'], beni:['w', 'z']}"
+    >>> stringify(alloc.map_item_to_agents())
+    "{w:['beni'], x:['avi'], y:['avi'], z:['beni']}"
     """
     if "agents" in algorithm.__annotations__:
         agents = AgentList(instance)
         allocation = algorithm(agents, **kwargs)
     else:
         allocation = algorithm(instance, **kwargs)
-    return allocation
+    if isinstance(allocation, Allocation):
+        return allocation
+    else:
+        return Allocation(agents, allocation)
 
 
 if __name__ == "__main__":

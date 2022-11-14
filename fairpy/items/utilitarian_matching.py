@@ -16,13 +16,62 @@ Since : 2021-04
 
 import networkx
 from typing import *
-from dicttools import stringify
 from collections import defaultdict
-import fairpy
-from fairpy import Allocation, AgentList
+from fairpy import AgentList
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+
+
+def utilitarian_matching(
+    agents: AgentList, 
+    agent_weights: Dict[str, int]=None, 
+    item_capacities: Dict[str,int]=None, 
+    agent_capacities: Dict[str,int]=None, 
+    maxcardinality=True)->Dict[str,str]:
+    """
+    Finds a maximum-weight matching with the given preferences, agent_weights and capacities.
+    :param agents: maps each agent to a map from an item's name to its value for the agent.
+    :param agent_weights [optional]: maps each agent to an integer priority. The weights of each agent are multiplied by WEIGHT_BASE^priority.
+    :param item_capacities [optional]: maps each item to its number of units. Default is 1.
+    :param maxcardinality: True to require maximum weight subject to maximum cardinality. False to require only maximum weight.
+
+    >>> from dicttools import stringify
+    >>> prefs = AgentList({"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}})
+    >>> map_agent_name_to_bundle = utilitarian_matching(prefs)
+    >>> stringify(map_agent_name_to_bundle)
+    "{avi:['x'], beni:['y']}"
+
+    >>> prefs = AgentList({"avi": {"x":5, "y": -2}, "beni": {"x":2, "y":-3}})
+    >>> stringify(utilitarian_matching(prefs, maxcardinality=True))
+    "{avi:['x'], beni:['y']}"
+    >>> stringify(utilitarian_matching(prefs, maxcardinality=False))
+    "{avi:['x']}"
+
+    >>> prefs = AgentList({"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}, "gadi": {"x":3, "y":2}})
+    >>> map_agent_name_to_bundle = utilitarian_matching(prefs, item_capacities={"x":2, "y":2})
+    >>> stringify(map_agent_name_to_bundle)
+    "{avi:['x'], beni:['y'], gadi:['x']}"
+
+    >>> map_agent_name_to_bundle = utilitarian_matching(prefs, item_capacities={"x":2, "y":2}, agent_capacities={"avi":2,"beni":1,"gadi":1})
+    >>> stringify(map_agent_name_to_bundle)
+    "{avi:['x', 'y'], beni:['y'], gadi:['x']}"
+
+    >>> prefs = AgentList([[5,4],[3,2]])
+    >>> map_agent_name_to_bundle = utilitarian_matching(prefs)
+    >>> stringify(map_agent_name_to_bundle)
+    '{Agent #0:[1], Agent #1:[0]}'
+    """
+    assert isinstance(agents, AgentList)
+    graph = instance_to_graph(agents, agent_weights=agent_weights, item_capacities=item_capacities, agent_capacities=agent_capacities)
+    logger.info("Graph edges: %s", list(graph.edges.data()))
+    matching = networkx.max_weight_matching(graph, maxcardinality=maxcardinality)
+    logger.info("Matching: %s", matching)
+    map_agent_name_to_bundle = matching_to_allocation(matching, agent_names=agents.agent_names())
+    return map_agent_name_to_bundle
+    # return Allocation(agents, map_agent_name_to_bundle)
 
 
 
@@ -98,23 +147,24 @@ def matching_to_allocation(matching: list, agent_names:list)->Dict[str,str]:
     :param matching: a list of pairs (agent,item).
     :param agent_names: the names of the agents. Used for distinguishing, in each edge, between the agent and the item (since the edges are not ordered).
 
-    :return a dict, mapping an agent to its bundle.
+    :return a dict, mapping an agent name to its bundle.
 
+    >>> from dicttools import stringify
     >>> matching = [("a", "xxx"), ("yyy", "b"), ("c", "yyy")]
-    >>> map_agent_to_bundle = matching_to_allocation(matching, ["a","b","c"])
-    >>> stringify(map_agent_to_bundle)
+    >>> map_agent_name_to_bundle = matching_to_allocation(matching, ["a","b","c"])
+    >>> stringify(map_agent_name_to_bundle)
     "{a:['xxx'], b:['yyy'], c:['yyy']}"
     >>> matching = [("a", ("xxx",0)), ("b", ("xxx",1)), ("c", "yyy")]
-    >>> map_agent_to_bundle = matching_to_allocation(matching, ["a","b","c"])
-    >>> stringify(map_agent_to_bundle)
+    >>> map_agent_name_to_bundle = matching_to_allocation(matching, ["a","b","c"])
+    >>> stringify(map_agent_name_to_bundle)
     "{a:['xxx'], b:['xxx'], c:['yyy']}"
     >>> matching = [(("a",0), "xxx"), ("yyy", ("a",1)), ("c", "yyy")]
-    >>> map_agent_to_bundle = matching_to_allocation(matching, ["a","b","c"])
-    >>> stringify(map_agent_to_bundle)
+    >>> map_agent_name_to_bundle = matching_to_allocation(matching, ["a","b","c"])
+    >>> stringify(map_agent_name_to_bundle)
     "{a:['xxx', 'yyy'], c:['yyy']}"
     >>> matching = [(("a",0), ("xxx",0)), ("yyy", ("a",1)), ("c", ("xxx",1))]
-    >>> map_agent_to_bundle = matching_to_allocation(matching, ["a","b","c"])
-    >>> stringify(map_agent_to_bundle)
+    >>> map_agent_name_to_bundle = matching_to_allocation(matching, ["a","b","c"])
+    >>> stringify(map_agent_name_to_bundle)
     "{a:['xxx', 'yyy'], c:['xxx']}"
     """
     # utility function to remove the unit-index from a tuple representing a single unit of an item or agent
@@ -124,7 +174,7 @@ def matching_to_allocation(matching: list, agent_names:list)->Dict[str,str]:
         else:
             return id
 
-    map_agent_to_bundle = defaultdict(list)
+    map_agent_name_to_bundle = defaultdict(list)
     for edge in matching:
         edge = (_remove_unit_index(edge[0]), _remove_unit_index(edge[1]))
         if edge[0] in agent_names:  
@@ -133,66 +183,11 @@ def matching_to_allocation(matching: list, agent_names:list)->Dict[str,str]:
             (good,agent)=edge
         else:
             raise ValueError(f"Cannot find an agent in {edge}")
-        map_agent_to_bundle[agent].append(good)
-    for agent,bundle in map_agent_to_bundle.items():
+        map_agent_name_to_bundle[agent].append(good)
+    for agent,bundle in map_agent_name_to_bundle.items():
         bundle.sort()
-    return map_agent_to_bundle
+    return map_agent_name_to_bundle
     
-
-
-
-def utilitarian_matching(agents: AgentList, agent_weights: Dict[str, int]=None, item_capacities: Dict[str,int]=None, agent_capacities: Dict[str,int]=None, maxcardinality=True):
-    """
-    Finds a maximum-weight matching with the given preferences, agent_weights and capacities.
-    :param agents: maps each agent to a map from an item's name to its value for the agent.
-    :param agent_weights [optional]: maps each agent to an integer priority. The weights of each agent are multiplied by WEIGHT_BASE^priority.
-    :param item_capacities [optional]: maps each item to its number of units. Default is 1.
-    :param maxcardinality: True to require maximum weight subject to maximum cardinality. False to require only maximum weight.
-
-    >>> prefs = AgentList({"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}})
-    >>> alloc = utilitarian_matching(prefs)
-    >>> stringify(alloc.map_agent_to_bundle())
-    "{avi:['x'], beni:['y']}"
-    >>> stringify(alloc.map_item_to_agents())
-    "{x:['avi'], y:['beni']}"
-
-    >>> prefs = AgentList({"avi": {"x":5, "y": -2}, "beni": {"x":2, "y":-3}})
-    >>> utilitarian_matching(prefs, maxcardinality=True)
-    avi gets {x} with value 5.
-    beni gets {y} with value -3.
-    <BLANKLINE>
-    >>> utilitarian_matching(prefs, maxcardinality=False)
-    avi gets {x} with value 5.
-    beni gets {} with value 0.
-    <BLANKLINE>
-
-    >>> prefs = AgentList({"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}, "gadi": {"x":3, "y":2}})
-    >>> alloc = utilitarian_matching(prefs, item_capacities={"x":2, "y":2})
-    >>> stringify(alloc.map_agent_to_bundle())
-    "{avi:['x'], beni:['y'], gadi:['x']}"
-    >>> stringify(alloc.map_item_to_agents())
-    "{x:['avi', 'gadi'], y:['beni']}"
-    >>> agent_weights = {"avi":1, "gadi":10, "beni":100}
-    >>> stringify(alloc.map_item_to_agents(sortkey=lambda name: -agent_weights[name]))
-    "{x:['gadi', 'avi'], y:['beni']}"
-    >>> alloc = utilitarian_matching(prefs, item_capacities={"x":2, "y":2}, agent_capacities={"avi":2,"beni":1,"gadi":1})
-    >>> stringify(alloc.map_agent_to_bundle())
-    "{avi:['x', 'y'], beni:['y'], gadi:['x']}"
-
-    >>> prefs = AgentList([[5,4],[3,2]])
-    >>> alloc = utilitarian_matching(prefs)
-    >>> stringify(alloc.map_agent_to_bundle())
-    '{Agent #0:[1], Agent #1:[0]}'
-    >>> stringify(alloc.map_item_to_agents())
-    "{0:['Agent #1'], 1:['Agent #0']}"
-    """
-    assert isinstance(agents, AgentList)
-    graph = instance_to_graph(agents, agent_weights=agent_weights, item_capacities=item_capacities, agent_capacities=agent_capacities)
-    logger.info("Graph edges: %s", list(graph.edges.data()))
-    matching = networkx.max_weight_matching(graph, maxcardinality=maxcardinality)
-    logger.info("Matching: %s", matching)
-    map_agent_to_bundle = matching_to_allocation(matching, agent_names=agents.agent_names())
-    return Allocation(agents, map_agent_to_bundle)
 
 
 if __name__ == "__main__":

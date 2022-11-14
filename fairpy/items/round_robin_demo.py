@@ -30,8 +30,8 @@ print("\n### One alternative input format:")
 print(fairpy.items.divide(algorithm=round_robin, instance=[[11,22,44,0],[22,11,66,33]], agent_order=[1,0], items={0,1,2,3}))
 
 
-# items = ["green", "red", "blue", "yellow"]
-# agents = {
-#     "Avi": {"green": 8, "red":7, "blue": 6, "yellow": 5},
-#     "Batya": {"green": 12, "red":8, "blue": 4, "yellow": 2} }
-# print(round_robin(agents, agent_order=[0,1], items=items))
+items = ["green", "red", "blue", "yellow"]
+agents = {
+    "Avi": {"green": 8, "red":7, "blue": 6, "yellow": 5},
+    "Batya": {"green": 12, "red":8, "blue": 4, "yellow": 2} }
+print(fairpy.items.divide(round_robin, agents, agent_order=[0,1], items=items))
