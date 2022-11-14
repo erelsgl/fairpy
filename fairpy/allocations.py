@@ -215,8 +215,10 @@ class Allocation:
 
         if isinstance(agents,dict) or (isinstance(agents,list) and isinstance(agents[0],list)):       # If "agents" is a dict mapping an agent name to its valuation...
             agents = AgentList(agents)  # ... convert it to a list mapping an agent index to its valuation.
-
-        map_agent_index_to_name = self.map_agent_index_to_name = fairpy.agent_names_from(agents)
+            map_agent_index_to_name = agents.agent_names()
+        else:
+            map_agent_index_to_name = fairpy.agent_names_from(agents)
+        self.map_agent_index_to_name = map_agent_index_to_name
 
         if isinstance(bundles,dict):       # If "bundles" is a dict mapping an agent name to its bundle... 
             bundles = [bundles.get(name,None) for name in map_agent_index_to_name]  # ... convert it to a list mapping an agent index to its bundle.

@@ -47,7 +47,6 @@ def iterated_maximum_matching(agents: AgentList, item_capacities: Dict[str,int]=
     <BLANKLINE>
     """
     assert isinstance(agents, AgentList)
-    agent_names = fairpy.agent_names_from(agents)
     all_items = agents[0].all_items()
     if item_capacities is None:
         item_capacities = {item:1 for item in all_items}
@@ -57,7 +56,7 @@ def iterated_maximum_matching(agents: AgentList, item_capacities: Dict[str,int]=
         logger.info("Graph edges: %s", list(graph.edges.data()))
         matching = networkx.max_weight_matching(graph, maxcardinality=False)
         logger.info("Matching: %s", matching)
-        map_agent_to_bundle = matching_to_allocation(matching, agent_names=agent_names)
+        map_agent_to_bundle = matching_to_allocation(matching, agent_names=agents.agent_names())
         for agent,bundle in map_agent_to_bundle.items():
             map_agent_to_final_bundle[agent] += bundle
         allocated_items = sum([bundle for bundle in map_agent_to_bundle.values()], [])
@@ -99,8 +98,8 @@ def iterated_maximum_matching_categories(agents: AgentList, categories: List[Lis
     <BLANKLINE>
     """
     assert isinstance(agents, AgentList)
-    agent_names = fairpy.agent_names_from(agents)
-    map_agent_to_final_bundle = {agent.name(): [] for agent in agents}
+    agent_names=agents.agent_names()
+    map_agent_to_final_bundle = {name: [] for name in agent_names}
     for index,category in enumerate(categories):
         graph = instance_to_graph(agents, agent_weights=agent_weights, item_capacities={item:1 for item in category})
         logger.info("Category %d:",index)

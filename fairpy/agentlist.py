@@ -59,13 +59,19 @@ class AgentList:
         if isinstance(input, AgentList):
             self.agents = input.agents
         else:
-            self.agents = agents_from(input)
+            self.agents = _agents_from(input)
 
     def all_items(self):
         return self.agents[0].all_items()
 
+    def agent_names(self):
+        return [agent.name() for agent in self.agents]
+
     def __getitem__(self, i:int):
         return self.agents[i]
+
+    def remove(self, index):
+        self.agents.remove(index)
 
     def __repr__(self):
         return repr(self.agents)
@@ -80,32 +86,32 @@ class AgentList:
 
 
 
-def agents_from(input:Any)->List[Agent]:
+def _agents_from(input:Any)->List[Agent]:
     """
     Attempts to construct a list of agents from various input formats.
     The returned value is a list of Agent objects.
 
     >>> ### From dict of dicts:
-    >>> agents_from({"Alice":{"x":1,"y":2}, "George":{"x":3,"y":4}})[0]
+    >>> _agents_from({"Alice":{"x":1,"y":2}, "George":{"x":3,"y":4}})[0]
     Alice is an agent with a Additive valuation: x=1 y=2.
-    >>> agents_from({"Alice":[1,2], "George":[3,4]})[1]
+    >>> _agents_from({"Alice":[1,2], "George":[3,4]})[1]
     George is an agent with a Additive valuation: v0=3 v1=4.
     >>> ### From list of dicts:
-    >>> agents_from([{"x":1,"y":2}, {"x":3,"y":4}])[0]
+    >>> _agents_from([{"x":1,"y":2}, {"x":3,"y":4}])[0]
     Agent #0 is an agent with a Additive valuation: x=1 y=2.
     >>> ### From list of lists:
-    >>> agents_from([[1,2],[3,4]])[1]
+    >>> _agents_from([[1,2],[3,4]])[1]
     Agent #1 is an agent with a Additive valuation: v0=3 v1=4.
     >>> ### From numpy array:
-    >>> agents_from(np.ones([2,4]))[1]
+    >>> _agents_from(np.ones([2,4]))[1]
     Agent #1 is an agent with a Additive valuation: v0=1.0 v1=1.0 v2=1.0 v3=1.0.
 
     >>> ### From list of valuations:
-    >>> l = agents_from([AdditiveValuation([1,2]), BinaryValuation("xy")])
+    >>> l = _agents_from([AdditiveValuation([1,2]), BinaryValuation("xy")])
     >>> l[0]
     Agent #0 is an agent with a Additive valuation: v0=1 v1=2.
     >>> ### From list of agents:
-    >>> agents_from([AdditiveAgent([1,2]), BinaryAgent("xy")])[0]
+    >>> _agents_from([AdditiveAgent([1,2]), BinaryAgent("xy")])[0]
     Anonymous is an agent with a Additive valuation: v0=1 v1=2.
     """
     if isinstance(input,np.ndarray):

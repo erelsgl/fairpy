@@ -129,7 +129,7 @@ def almost_equal_cut(group_,agent_num, agents,values,bob_val_for_alice_items,ali
         else: There is no envy-free division
     
     >>> agent_dict = {"Alice":{"a": 7, "b": 4, "c": 3, "d":2},"George":{"a": 7, "b": 1, "c": 3, "d":2}}
-    >>> agents= fairpy.agents_from(agent_dict)
+    >>> agents = AgentList(agent_dict)
     >>> print(almost_equal_cut([('a','d'),('b','c')],0,agents,{0:9,1:4},9,7))
     Alice gets {b,c,d} with value 9.
     George gets {a} with value 7.
@@ -140,7 +140,7 @@ def almost_equal_cut(group_,agent_num, agents,values,bob_val_for_alice_items,ali
         
     
     >>> agent_dict = {"Alice":{"a": 8, "b": 7, "c": 6, "d":3},"George":{"a": 8, "b": 7, "c": 6, "d":3}}
-    >>> agents= fairpy.agents_from(agent_dict)
+    >>> agents= AgentList(agent_dict)
     >>> print(almost_equal_cut([('b','c'),('a','d')],0,agents,{0:13,1:11},13,13))
     There is no envy-free division
     >>> #The {b,c} group is an almost equal cut for Alice and George
@@ -187,7 +187,7 @@ def search_subgroup(agents,agent_num,items_for_alice,items_for_bob,val1,val2,val
         else: There is no envy-free division
         
     >>> agent_dict = {"Alice":{"a": 7, "b": 4, "c": 3, "d":2},"George":{"a": 7, "b": 1, "c": 3, "d":2}}
-    >>> agents= fairpy.agents_from(agent_dict)
+    >>> agents= AgentList(agent_dict)
     >>> print(search_subgroup(agents,"1",('a','d'),('b','c'),9,7,4))
     Alice gets {b,c,d} with value 9.
     George gets {a} with value 7.
@@ -197,7 +197,7 @@ def search_subgroup(agents,agent_num,items_for_alice,items_for_bob,val1,val2,val
     >>> #Alice will accept the new offer because this is an almost equal cut for her
     
     >>> agent_dict = {"Alice":{"a": 8, "b": 7, "c": 6, "d":3},"George":{"a": 8, "b": 7, "c": 6, "d":3}}
-    >>> agents= fairpy.agents_from(agent_dict)
+    >>> agents= AgentList(agent_dict)
     >>> print(search_subgroup(agents,"1",('b','c'),('a','d'),13,11,11))
     There is no envy-free division
     >>> #The {b,c} group is an almost equal cut for Alice and George
@@ -226,14 +226,14 @@ def one_item(agents: List[Agent], items: List[Any]) -> Allocation:
         Allocation: an envey free allocation if it exists
         
     >>> agent_dict = {"Alice":{"a":-5},"Bob":{"a":5}}
-    >>> agents= fairpy.agents_from(agent_dict)
+    >>> agents= AgentList(agent_dict)
     >>> print(one_item(agents,['a']))
     Alice gets {} with value 0.
     Bob gets {a} with value 5.
     <BLANKLINE>
     
     >>> agent_dict = {"Alice":{"a":6},"Bob":{"a":5}}
-    >>> agents= fairpy.agents_from(agent_dict)
+    >>> agents= AgentList(agent_dict)
     >>> print(one_item(agents,['a']))
     There is no envy-free division
     """

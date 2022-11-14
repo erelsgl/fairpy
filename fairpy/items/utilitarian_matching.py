@@ -191,8 +191,7 @@ def utilitarian_matching(agents: AgentList, agent_weights: Dict[str, int]=None, 
     logger.info("Graph edges: %s", list(graph.edges.data()))
     matching = networkx.max_weight_matching(graph, maxcardinality=maxcardinality)
     logger.info("Matching: %s", matching)
-    agent_names = fairpy.agent_names_from(agents)
-    map_agent_to_bundle = matching_to_allocation(matching, agent_names=agent_names)
+    map_agent_to_bundle = matching_to_allocation(matching, agent_names=agents.agent_names())
     return Allocation(agents, map_agent_to_bundle)
 
 
