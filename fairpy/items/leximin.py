@@ -17,7 +17,7 @@ Since:  2021-05
 """
 
 import cvxpy, numpy as np
-from fairpy import Allocation, AllocationToFamilies, map_agent_to_family, ValuationMatrix, convert_input_to_valuation_matrix
+from fairpy import AllocationToFamilies, map_agent_to_family, ValuationMatrix
 from fairpy.solve import solve
 
 from cvxpy_leximin import Problem, Leximin
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 ##### Find a leximin-optimal allocation for individual agents
 
 
-def leximin_optimal_allocation(v: ValuationMatrix, allocation_constraint_function=None, **solver_options) -> Allocation:
+def leximin_optimal_allocation(v: ValuationMatrix, allocation_constraint_function=None, **solver_options) -> np.array:
     """
     Find the leximin-optimal (aka Egalitarian) allocation.
     :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
@@ -113,7 +113,7 @@ def leximin_optimal_allocation(v: ValuationMatrix, allocation_constraint_functio
     # return Allocation(v, allocation_matrix)
 
 
-def leximin_optimal_envyfree_allocation(v: ValuationMatrix, allocation_constraint_function=None, **solver_options) -> Allocation:
+def leximin_optimal_envyfree_allocation(v: ValuationMatrix, allocation_constraint_function=None, **solver_options) -> np.array:
     """
     Find the leximin-optimal allocation subject to envy-vreeness.
     :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.

@@ -22,15 +22,13 @@ print(allocation.utility_profile_matrix())
 #' With this information, you can compute various metrics on the allocation, such as:
 #' its utilitarian value, egalitarian value, number of envy-pairs or largest envy magnitude.
 
-#' Some algorithms return an allocation matrix, where each element z[i,j] is the fraction given to agent i from item j:
-
-allocation = fairpy.items.leximin_optimal_allocation(agent_values)
-print(allocation.matrix)
+#' Some algorithms accept a valuation matrix and return an allocation matrix, where each element z[i,j] is the fraction given to agent i from item j:
+allocation = fairpy.items.leximin_optimal_allocation(fairpy.ValuationMatrix([[4,5],[2,3],[3,2]]))
+print(allocation)
 
 #' The allocation matrix is inaccurate due to floating point issues; you can round it:
 
 allocation.round(3)
-print(allocation.matrix)
 print(allocation)
 
 

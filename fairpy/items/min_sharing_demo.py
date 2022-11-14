@@ -7,6 +7,9 @@ Author: Erel Segal-Halevi
 Since:  2021-03
 """
 
+import fairpy
+divide = fairpy.items.divide
+
 import logging
 import sys
 
@@ -24,18 +27,18 @@ def demo(title:str, v):
 	print(f"\n## {title} ##")
 	print("v = \n",v)
 	start = now()
-	z = proportional_allocation_with_min_sharing(v).round(3)
+	z = divide(proportional_allocation_with_min_sharing, v).round(3)
 	print("Allocation:\n",z, "Time: ", now()-start)
 	start = now()
-	z = envyfree_allocation_with_min_sharing(v).round(3)
+	z = divide(envyfree_allocation_with_min_sharing, v).round(3)
 	print("Allocation:\n",z, "Time: ", now()-start)
 	start = now()
-	z = max_product_allocation(v).round(3)
+	z = divide(max_product_allocation, v).round(3)
 	print("\nAn arbitrary max-product allocation, with ",z.num_of_sharings()," sharings:\n",z, "Time: ", now()-start)
 	start = now()
-	z = maxproduct_allocation_with_min_sharing(v).round(3)
+	z = divide(maxproduct_allocation_with_min_sharing, v).round(3)
 	print("Allocation:\n",z, "Time: ", now()-start)
-	z = maxproduct_allocation_with_min_sharing(v, tolerance=0.001).round(3)
+	z = divide(maxproduct_allocation_with_min_sharing, v, tolerance=0.001).round(3)
 	print("Allocation:\n",z, "Time: ", now()-start)
 
 demo(

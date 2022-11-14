@@ -6,7 +6,7 @@
     Since:  2020
 """
 
-from fairpy import ValuationMatrix
+from fairpy import ValuationMatrix, AllocationMatrix
 from fairpy.items.max_welfare import max_product_allocation
 from fairpy.items.min_sharing_impl.FairThresholdAllocationProblem import FairThresholdAllocationProblem
 
@@ -20,7 +20,7 @@ class FairMaxProductAllocationProblem(FairThresholdAllocationProblem):
     Finds a Nash-optimal (aka max-product) allocation with minimum sharing.
 
     >>> from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
-    >>> v = [[1, 2, 3,4], [4, 5, 6,5], [7, 8, 9,6]]
+    >>> v = ValuationMatrix([[1, 2, 3,4], [4, 5, 6,5], [7, 8, 9,6]])
     >>> fpap =FairMaxProductAllocationProblem(v)
     >>> g1 = [[0.0, 0.0, 0.0, 1], [1, 1, 1, 1], [0.0, 0.0, 0.0, 1]]
     >>> g = ConsumptionGraph(g1)
@@ -71,10 +71,9 @@ class FairMaxProductAllocationProblem(FairThresholdAllocationProblem):
     >>> # print(fpap.find_allocation_for_graph(g).round(3))
     """
 
-    def __init__(self, valuation_matrix, tolerance=0.01):
-        valuation_matrix = ValuationMatrix(valuation_matrix)
+    def __init__(self, valuation_matrix:ValuationMatrix, tolerance=0.01):
         mpa = max_product_allocation(valuation_matrix)
-        mpa_utilities = mpa.utility_profile()
+        mpa_utilities = AllocationMatrix(mpa).utility_profile(valuation_matrix)
         logger.info("The max-product allocation is:\n%s,\nwith utility profile: %s",mpa,mpa_utilities)
         thresholds = mpa_utilities * (1-tolerance)
         logger.info("The thresholds are: %s",thresholds)

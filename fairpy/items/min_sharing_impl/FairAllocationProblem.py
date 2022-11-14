@@ -14,28 +14,27 @@ from fairpy.items.min_sharing_impl.GraphGenerator import GraphGenerator
 
 from fairpy.items.min_sharing_impl.time_limit import time_limit, TimeoutException
 
-import numpy as np
 from abc import ABC, abstractmethod
-import datetime, cvxpy
+import datetime, cvxpy, numpy as np
+from typing import Tuple
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-class FairAllocationProblem():
+class FairAllocationProblem(ABC):
     """
-    ‎This is an abstract class for solving a fair allocation problem.
+    This is an abstract class for solving a fair allocation problem.
     """
 
-    def __init__(self ,valuation_matrix):
-        valuation_matrix = ValuationMatrix(valuation_matrix)
+    def __init__(self ,valuation_matrix:ValuationMatrix):
+        assert isinstance(valuation_matrix, ValuationMatrix)
         self.valuation = valuation_matrix
         self.min_sharing_number = valuation_matrix.num_of_agents
         self.min_sharing_allocation = None
         self.graph_generator = GraphGenerator(valuation_matrix)
         self.find = False
 
-    @abstractmethod
     def fairness_adjective(self)->str:
         """ 
         Return an adjective that describes the fairness criterion. For display and logging.
@@ -88,7 +87,7 @@ class FairAllocationProblem():
         return allocation
 
 
-    def find_min_sharing_allocation_with_time_limit(self, num_of_decimal_digits:int=3, time_limit_in_seconds=999)->(str,float,AllocationMatrix,float):
+    def find_min_sharing_allocation_with_time_limit(self, num_of_decimal_digits:int=3, time_limit_in_seconds=999)->Tuple[str,float,AllocationMatrix,float]:
         """
         Wraps the above algorithm with a time-limit.
 

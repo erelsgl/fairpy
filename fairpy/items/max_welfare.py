@@ -11,15 +11,14 @@ Author: Erel Segal-Halevi
 Since:  2021-05
 """
 
-import cvxpy
-from fairpy import ValuationMatrix, Allocation, AllocationToFamilies, convert_input_to_valuation_matrix
+import cvxpy, numpy as np
+from fairpy import ValuationMatrix, AllocationToFamilies
 from fairpy.solve import maximize
-from typing import Any
 
 import logging
 logger = logging.getLogger(__name__)
 
-def max_welfare_allocation(v: ValuationMatrix, welfare_function, welfare_constraint_function=None, allocation_constraint_function=None) -> Allocation:
+def max_welfare_allocation(v: ValuationMatrix, welfare_function, welfare_constraint_function=None, allocation_constraint_function=None) -> np.array:
     """
     Find an allocation maximizing a given social welfare function. 
     :param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
@@ -56,7 +55,7 @@ def max_welfare_allocation(v: ValuationMatrix, welfare_function, welfare_constra
     return allocation_matrix
 
 
-def max_welfare_envyfree_allocation(v: ValuationMatrix, welfare_function, allocation_constraint_function=None) -> Allocation:
+def max_welfare_envyfree_allocation(v: ValuationMatrix, welfare_function, allocation_constraint_function=None) -> np.array:
     """
     Find an allocation maximizing a given social welfare function subject to envy-freeness.
     :param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
@@ -142,7 +141,7 @@ def max_welfare_allocation_for_families(instance, families:list, welfare_functio
     return AllocationToFamilies(v, alloc.value, families)
 
 
-def max_sum_allocation(v:ValuationMatrix, allocation_constraint_function=None) -> Allocation:
+def max_sum_allocation(v:ValuationMatrix, allocation_constraint_function=None) -> np.array:
     """
     Find the max-sum (aka Utilitarian) allocation.
     :param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
@@ -164,7 +163,7 @@ def max_sum_allocation(v:ValuationMatrix, allocation_constraint_function=None) -
         welfare_constraint_function=lambda utility: utility >= 0,
         allocation_constraint_function = allocation_constraint_function)
 
-def pareto_dominating_allocation(v:ValuationMatrix, original_utilities:list, allocation_constraint_function=None) -> Allocation:
+def pareto_dominating_allocation(v:ValuationMatrix, original_utilities:list, allocation_constraint_function=None) -> np.array:
     """
     Find an allocation that Pareto-dominates the given allocation.
     Essentially, it finds an allocation that maximizes the sum of utilities over all allocations that give each agent at least as much utility.
@@ -186,7 +185,7 @@ def pareto_dominating_allocation(v:ValuationMatrix, original_utilities:list, all
         welfare_constraint_function=lambda utility: utility >= next(original_utilities_iterator),
         allocation_constraint_function = allocation_constraint_function)
 
-def max_power_sum_allocation(v:ValuationMatrix, power:float, allocation_constraint_function=None) -> Allocation:
+def max_power_sum_allocation(v:ValuationMatrix, power:float, allocation_constraint_function=None) -> np.array:
     """
     Find the maximum of sum of utility to the given power.
     * When power=1, it is equivalent to max-sum;
@@ -224,7 +223,7 @@ def max_power_sum_allocation(v:ValuationMatrix, power:float, allocation_constrai
         allocation_constraint_function=allocation_constraint_function)
 
 
-def max_product_allocation(v:ValuationMatrix, allocation_constraint_function=None) -> Allocation:
+def max_product_allocation(v:ValuationMatrix, allocation_constraint_function=None) -> np.array:
     """
     Find the max-product (aka Max Nash Welfare) allocation.
     :param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
@@ -247,7 +246,7 @@ def max_product_allocation(v:ValuationMatrix, allocation_constraint_function=Non
         allocation_constraint_function = allocation_constraint_function)
 
 
-def max_minimum_allocation(v:ValuationMatrix, allocation_constraint_function=None) -> Allocation:
+def max_minimum_allocation(v:ValuationMatrix, allocation_constraint_function=None) -> np.array:
     """
     Find the max-minimum (aka Egalitarian) allocation.
     :param v: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.

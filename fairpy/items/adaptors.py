@@ -15,11 +15,7 @@ from fairpy import AgentList, Allocation, ValuationMatrix, AllocationMatrix, Fra
 import numpy as np
 
 
-def divide(
-    algorithm: Callable,
-    input: Any,
-    **kwargs
-):
+def divide(algorithm: Callable, input: Any, *args, **kwargs):
     """
     An adaptor function for item allocation.
 
@@ -129,7 +125,7 @@ def divide(
     ### Convert input to AgentList
     if first_argument_type==AgentList:
         agent_list = AgentList(input)
-        output = algorithm(agent_list, **kwargs)
+        output = algorithm(agent_list, *args, **kwargs)
         if isinstance(output,Allocation):
             return output
         else:
@@ -161,7 +157,7 @@ def divide(
             raise TypeError(f"Unsupported input type: {type(input)}")
 
         # Step 2. Run the algorithm:
-        output = algorithm(valuation_matrix, **kwargs)
+        output = algorithm(valuation_matrix, *args, **kwargs)
         # Step 3. Adapt the output:
         if isinstance(output,Allocation):
             return output
@@ -189,7 +185,7 @@ def divide(
             raise TypeError(f"Unsupported output type: {type(output)}")
 
     else:
-        return algorithm(input, **kwargs)
+        return algorithm(input, *args, **kwargs)
 
 
 

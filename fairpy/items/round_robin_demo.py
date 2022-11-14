@@ -21,13 +21,13 @@ print(Alice)
 print(George)
 
 print("\n### Round-robin when Alice plays first:")
-print(fairpy.items.divide(algorithm=round_robin, instance=[Alice, George], agent_order=[0,1], items="wxyz"))
+print(fairpy.items.divide(round_robin, [Alice, George], agent_order=[0,1], items="wxyz"))
 
 print("\n### Round-robin when George plays first:")
-print(fairpy.items.divide(algorithm=round_robin, instance=[Alice, George], agent_order=[1,0], items="wxyz"))
+print(fairpy.items.divide(round_robin, [Alice, George], agent_order=[1,0], items="wxyz"))
 
 print("\n### One alternative input format:")
-print(fairpy.items.divide(algorithm=round_robin, instance=[[11,22,44,0],[22,11,66,33]], agent_order=[1,0], items={0,1,2,3}))
+print(fairpy.items.divide(round_robin, [[11,22,44,0],[22,11,66,33]], agent_order=[1,0], items={0,1,2,3}))
 
 
 items = ["green", "red", "blue", "yellow"]

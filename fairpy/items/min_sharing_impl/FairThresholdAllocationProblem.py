@@ -37,6 +37,7 @@ class FairThresholdAllocationProblem(FairAllocationProblem):
         :param valuations: the agents' valuations, V[i][o] for each agent i and object o
         :param thresholds: the agents' value-thresholds, T[i] for each agent i.
         """
+        assert isinstance(valuation_matrix, ValuationMatrix)
         super().__init__(valuation_matrix)
         self.thresholds = thresholds
 
@@ -58,10 +59,11 @@ class FairThresholdAllocationProblem(FairAllocationProblem):
         and update it if needed.
         :param consumption_graph: some given consumption graph.
         :return: update "min_sharing_allocation"
+
         # the test are according to the result of ver 1 in GraphCheck
-        >>> v = [[1, 2, 3,4], [4, 5, 6,5], [7, 8, 9,6]]
+        >>> v = ValuationMatrix([[1, 2, 3,4], [4, 5, 6,5], [7, 8, 9,6]])
         >>> thresholds = [10/3, 20/3, 30/3]  # equivalent to proportional
-        >>> fpap =FairThresholdAllocationProblem(v,thresholds)
+        >>> fpap = FairThresholdAllocationProblem(v,thresholds)
         >>> g1 = [[0.0, 0.0, 0.0, 1], [1, 1, 1, 1], [0.0, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
         >>> print(fpap.find_allocation_for_graph(g))
@@ -100,7 +102,9 @@ class FairThresholdAllocationProblem(FairAllocationProblem):
         [[0.   0.   0.   0.86]
          [0.   0.47 1.   0.14]
          [1.   0.53 0.   0.  ]]
-        >>> v = [ [465,0,535] , [0,0,1000]  ]  # This example exposed a bug in OSQP solver!
+
+        # This example exposed a bug in OSQP solver!
+        >>> v = ValuationMatrix([ [465,0,535] , [0,0,1000]  ]) 
         >>> fpap =FairThresholdAllocationProblem(v,thresholds)
         >>> g1 = [[1,1,1],[0,0,1]]
         >>> g = ConsumptionGraph(g1)

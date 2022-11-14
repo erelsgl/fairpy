@@ -89,6 +89,13 @@ class AllocationMatrix:
                 self._z[i][j] = fraction
         return self
 
+    def utility_profile(self, v:ValuationMatrix)->np.array:
+        return np.array([
+            self[i] @ v[i]
+            for i in v.agents()
+        ])
+
+
     def __getitem__(self, key):
         if isinstance(key,tuple):
             return self._z[key[0]][key[1]]  # 'key' (agent index, item index); return this agent's valuation for that item.

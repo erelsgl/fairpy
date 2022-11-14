@@ -9,14 +9,14 @@ Since:  2021-10
 
 from typing import *
 import cvxpy, logging, numpy as np
-from fairpy import convert_input_to_valuation_matrix, Allocation, ValuationMatrix
+from fairpy import ValuationMatrix, AllocationMatrix
 from fairpy.solve import solve
 from fairpy.items.max_welfare import max_product_allocation
 
 logger = logging.getLogger(__name__)
 
-@convert_input_to_valuation_matrix
-def dominating_allocation_with_bounded_sharing(instance:Any, thresholds:List) -> Allocation:
+# @convert_input_to_valuation_matrix
+def dominating_allocation_with_bounded_sharing(v:ValuationMatrix, thresholds:List) -> np.array:
     """
     Finds an allocation in which each agent i gets value at least thresholds[i],
     and has at most n-1 sharings, where n is the number of agents.
@@ -25,26 +25,20 @@ def dominating_allocation_with_bounded_sharing(instance:Any, thresholds:List) ->
     NOTE: some solvers return a BFS by default (particularly, those running Simplex).
 
     >>> logger.setLevel(logging.WARNING)
-    >>> instance = [[8,2],[5,5]]
-    >>> dominating_allocation_with_bounded_sharing(instance, thresholds=[0,0]).round(3)
-    Agent #0 gets {} with value 0.
-    Agent #1 gets { 100.0% of 0, 100.0% of 1} with value 10.
-    <BLANKLINE>
-    >>> dominating_allocation_with_bounded_sharing(instance, thresholds=[1,1]).round(3)
-    Agent #0 gets { 12.5% of 0} with value 1.
-    Agent #1 gets { 87.5% of 0, 100.0% of 1} with value 9.38.
-    <BLANKLINE>
-    >>> dominating_allocation_with_bounded_sharing(instance, thresholds=[2,2]).round(3)
-    Agent #0 gets { 25.0% of 0} with value 2.
-    Agent #1 gets { 75.0% of 0, 100.0% of 1} with value 8.75.
-    <BLANKLINE>
-    >>> dominating_allocation_with_bounded_sharing(instance, thresholds=[5,5]).round(3)
-    Agent #0 gets { 62.5% of 0} with value 5.
-    Agent #1 gets { 37.5% of 0, 100.0% of 1} with value 6.88.
-    <BLANKLINE>
+    >>> v = ValuationMatrix([[8,2],[5,5]])
+    >>> print(dominating_allocation_with_bounded_sharing(v, thresholds=[0,0]).round(3)+0)
+    [[0. 0.]
+     [1. 1.]]
+    >>> print(dominating_allocation_with_bounded_sharing(v, thresholds=[1,1]).round(3)+0)
+    [[0.125 0.   ]
+     [0.875 1.   ]]
+    >>> print(dominating_allocation_with_bounded_sharing(v, thresholds=[2,2]).round(3)+0)
+    [[0.25 0.  ]
+     [0.75 1.  ]]
+    >>> print(dominating_allocation_with_bounded_sharing(v, thresholds=[5,5]).round(3)+0)
+    [[0.625 0.   ]
+     [0.375 1.   ]]
     """
-    # logger.info("Finding an allocation with thresholds %s", thresholds)
-    v = ValuationMatrix(instance)
     allocation_vars = cvxpy.Variable((v.num_of_agents, v.num_of_objects))
     feasibility_constraints = [
         sum([allocation_vars[i][o] for i in v.agents()])==1
@@ -75,9 +69,7 @@ def dominating_allocation_with_bounded_sharing(instance:Any, thresholds:List) ->
         raise cvxpy.SolverError(f"No optimal solution found: status is {problem.status}")
 
 
-
-@convert_input_to_valuation_matrix
-def proportional_allocation_with_bounded_sharing(instance:Any, entitlements:List=None) -> Allocation:
+def proportional_allocation_with_bounded_sharing(v:ValuationMatrix, entitlements:List=None) -> np.array:
     """
     Finds a Pareto-optimal and proportional allocation
           with at most n-1 sharings, where n is the number of agents.
@@ -89,21 +81,17 @@ def proportional_allocation_with_bounded_sharing(instance:Any, entitlements:List
     NOTE: some solvers return a BFS by default (particularly, those running Simplex).
 
     >>> logger.setLevel(logging.WARNING)
-    >>> instance = [[8,2],[5,5]]
-    >>> proportional_allocation_with_bounded_sharing(instance).round(3)
-    Agent #0 gets { 62.5% of 0} with value 5.
-    Agent #1 gets { 37.5% of 0, 100.0% of 1} with value 6.88.
-    <BLANKLINE>
-    >>> proportional_allocation_with_bounded_sharing(instance, entitlements=[4,1]).round(3)
-    Agent #0 gets { 100.0% of 0} with value 8.
-    Agent #1 gets { 100.0% of 1} with value 5.
-    <BLANKLINE>
-    >>> proportional_allocation_with_bounded_sharing(instance, entitlements=[3,2]).round(3)
-    Agent #0 gets { 75.0% of 0} with value 6.
-    Agent #1 gets { 25.0% of 0, 100.0% of 1} with value 6.25.
-    <BLANKLINE>
+    >>> instance = ValuationMatrix([[8,2],[5,5]])
+    >>> print(proportional_allocation_with_bounded_sharing(instance).round(3)+0)
+    [[0.625 0.   ]
+     [0.375 1.   ]]
+    >>> print(proportional_allocation_with_bounded_sharing(instance, entitlements=[4,1]).round(3)+0)
+    [[1. 0.]
+     [0. 1.]]
+    >>> print(proportional_allocation_with_bounded_sharing(instance, entitlements=[3,2]).round(3)+0)
+    [[0.75 0.  ]
+     [0.25 1.  ]]
     """
-    v = ValuationMatrix(instance)
     if entitlements is None:
         entitlements = np.ones(v.num_of_agents)
     else:
@@ -117,7 +105,7 @@ def proportional_allocation_with_bounded_sharing(instance:Any, entitlements:List
 
 
 
-def efficient_envyfree_allocation_with_bounded_sharing(instance:Any) -> Allocation:
+def efficient_envyfree_allocation_with_bounded_sharing(v:ValuationMatrix) -> np.array:
     """
     Finds a max-product allocation, which is known to be envy-free and Pareto-optimal.
           and has at most n-1 sharings, where n is the number of agents.
@@ -125,22 +113,34 @@ def efficient_envyfree_allocation_with_bounded_sharing(instance:Any) -> Allocati
     :param instance: a valuation profile in any supported format.
 
     >>> logger.setLevel(logging.WARNING)
-    >>> instance = [[8,2],[5,5]]
-    >>> efficient_envyfree_allocation_with_bounded_sharing(instance).round(3)
-    Agent #0 gets { 100.0% of 0} with value 8.
-    Agent #1 gets { 100.0% of 1} with value 5.
-    <BLANKLINE>
+    >>> v = ValuationMatrix([[8,2],[5,5]])
+    >>> print(efficient_envyfree_allocation_with_bounded_sharing(v).round(3)+0)
+    [[1. 0.]
+     [0. 1.]]
+    >>> v = ValuationMatrix([[3,7],[5,5]])
+    >>> print(efficient_envyfree_allocation_with_bounded_sharing(v).round(3)+0)
+    [[0. 1.]
+     [1. 0.]]
     """
-    max_prod_allocation = max_product_allocation(instance)
-    thresholds = max_prod_allocation.utility_profile()
-    return dominating_allocation_with_bounded_sharing(instance, thresholds)
+    max_prod_allocation = max_product_allocation(v)
+    thresholds = AllocationMatrix(max_prod_allocation).utility_profile(v)
+    logger.info("thresholds: %s",thresholds)
+    return dominating_allocation_with_bounded_sharing(v, thresholds)
 
 
 if __name__ == '__main__':
-    import sys
-    solve.logger.addHandler(logging.StreamHandler(sys.stdout))
-    solve.logger.setLevel(logging.INFO)
+    logger.addHandler(logging.StreamHandler())
+    # logger.setLevel(logging.INFO)
+
+    solve.logger.addHandler(logging.StreamHandler())
+    # solve.logger.setLevel(logging.INFO)
 
     import doctest
+
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
+    
+    # Testing specific functions:
+    doctest.run_docstring_examples(dominating_allocation_with_bounded_sharing, globals())
+    doctest.run_docstring_examples(proportional_allocation_with_bounded_sharing, globals())
+    doctest.run_docstring_examples(efficient_envyfree_allocation_with_bounded_sharing, globals())

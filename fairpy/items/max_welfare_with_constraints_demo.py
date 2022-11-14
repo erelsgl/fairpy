@@ -6,7 +6,9 @@ A demo program for finding welfare maximizing allocations with constraints.
 Author: Erel Segal-Halevi
 Since:  2021-05
 """
-
+import fairpy
+divide = fairpy.items.divide
+from fairpy import Allocation
 from fairpy.items.max_welfare import *
 from fairpy.items.leximin import *
 import numpy as np
@@ -66,18 +68,18 @@ def test(title:str, v:dict):
     #         ).round(3)
     # show("balanced-EF max-min",z,v)
 
-    z = leximin_optimal_allocation(v,
+    z = divide(leximin_optimal_allocation, v,
             allocation_constraint_function=lambda z: sum(z)==1
             ).round(3)
     show("balanced leximin",z,v)
 
-    z = leximin_optimal_envyfree_allocation(v,
+    z = divide(leximin_optimal_envyfree_allocation, v,
             allocation_constraint_function=lambda z: sum(z)==1
             ).round(3)
     show("balanced-EF leximin",z,v)
 
     original_utilities = z.utility_profile()
-    z = pareto_dominating_allocation(v,
+    z = divide(pareto_dominating_allocation, v,
             original_utilities,
             allocation_constraint_function=lambda z: sum(z)==1
             ).round(3)

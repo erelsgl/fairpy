@@ -10,7 +10,7 @@
 import numpy as np
 import cvxpy
 
-from fairpy import AllocationMatrix
+from fairpy import AllocationMatrix, ValuationMatrix
 from fairpy.items.min_sharing_impl.ConsumptionGraph import ConsumptionGraph
 from fairpy.items.min_sharing_impl.FairAllocationProblem import FairAllocationProblem
 
@@ -54,7 +54,7 @@ class FairEnvyFreeAllocationProblem(FairAllocationProblem):
         :param consumption_graph: some given consumption graph
         :return: update "min_sharing_allocation"
         # the test are according to the result of ver 1 in GraphCheck
-        >>> v = [[5, 2, 1.5,1], [9, 1, 3,2.5], [10, 3, 2,4]]
+        >>> v = ValuationMatrix([[5, 2, 1.5,1], [9, 1, 3,2.5], [10, 3, 2,4]])
         >>> fefap =FairEnvyFreeAllocationProblem(v)
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 0.0], [1, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
