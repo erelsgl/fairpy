@@ -11,13 +11,13 @@ Since: 2022-10
 """
 
 from typing import Callable, Any
-from fairpy import AgentList, Allocation
-from dicttools import stringify
+from fairpy import AgentList, Allocation, ValuationMatrix, AllocationMatrix, FractionalBundle
+import numpy as np
 
 
 def divide(
     algorithm: Callable,
-    instance: Any,
+    input: Any,
     **kwargs
 ):
     """
@@ -26,7 +26,7 @@ def divide(
     :param algorithm: a specific fair item allocation algorithm. Should accept (at least) the following parameters: 
         agents: List[Agent]
 
-    :param instance: can be one of the following:
+    :param input: the input to the algorithm, in one of the following forms:
        * dict of dicts mapping agent names to their valuations, e.g.: {"Alice":{"x":1,"y":2}, "George":{"x":3,"y":4}}
        * list of dicts, e.g. [{"x":1,"y":2}, {"x":3,"y":4}]. Agents are called by their number: "Agent #0", "Agent #1", etc.
        * list of lists, e.g. [[1,2],[3,4]]. Agents and items are called by their number.
@@ -38,38 +38,58 @@ def divide(
 
     :return: an allocation of the items among the agents.
 
+    >>> from dicttools import stringify
     >>> import fairpy
 
-    ### List of lists of values, plus an optional parameter::
-    >>> divide(algorithm=fairpy.items.round_robin, instance=[[11,22,44,0],[22,11,66,33]], agent_order=[1,0])
+    ### List of lists of values, plus an optional parameter:
+    >>> divide(algorithm=fairpy.items.round_robin, input=[[11,22,44,0],[22,11,66,33]], agent_order=[1,0])
     Agent #0 gets {0,1} with value 33.
     Agent #1 gets {2,3} with value 99.
     <BLANKLINE>
 
+    ### List of list of values, converted to a ValuationMatrix:
+    >>> divide(algorithm=fairpy.items.leximin_optimal_allocation, input=[[3,3],[0,5]]).round(3)
+    Agent #0 gets { 100.0% of 0, 25.0% of 1} with value 3.75.
+    Agent #1 gets { 75.0% of 1} with value 3.75.
+    <BLANKLINE>
+
     ### Dict mapping agent names to lists of values
-    >>> divide(algorithm=fairpy.items.round_robin, instance={"Alice": [11,22,44,0], "George": [22,11,66,33]})
+    >>> divide(algorithm=fairpy.items.round_robin, input={"Alice": [11,22,44,0], "George": [22,11,66,33]})
     Alice gets {1,2} with value 66.
     George gets {0,3} with value 55.
     <BLANKLINE>
 
+
+    ### Dict mapping agent names to lists of values, converted to a ValuationMatrix
+    >>> divide(algorithm=fairpy.items.leximin_optimal_envyfree_allocation, input={"Alice": [3,3], "George": [0,5]})
+    Alice gets { 100.0% of 0, 25.0% of 1} with value 3.75.
+    George gets { 75.0% of 1} with value 3.75.
+    <BLANKLINE>
+
     ### Dict mapping agent names to lists of values:
-    >>> divide(algorithm=fairpy.items.utilitarian_matching, instance={"Alice": [11,22,44,0], "George": [22,11,66,33]})
+    >>> divide(algorithm=fairpy.items.utilitarian_matching, input={"Alice": [11,22,44,0], "George": [22,11,66,33]})
     Alice gets {1} with value 22.
     George gets {2} with value 66.
     <BLANKLINE>
 
     ### Dict mapping agent names to dicts of values:
-    >>> divide(algorithm=fairpy.items.iterated_maximum_matching, instance={"Alice": {"w":11,"x":22,"y":44,"z":0}, "George": {"w":22,"x":11,"y":66,"z":33}})
+    >>> divide(algorithm=fairpy.items.iterated_maximum_matching, input={"Alice": {"w":11,"x":22,"y":44,"z":0}, "George": {"w":22,"x":11,"y":66,"z":33}})
     Alice gets {w,x} with value 33.
     George gets {y,z} with value 99.
     <BLANKLINE>
 
-    >>> divide(algorithm=fairpy.items.undercut, instance={"Alex":{"a": 1,"b": 2, "c": 3, "d":4,"e": 5, "f":14},"Bob":{"a":1,"b": 1, "c": 1, "d":1,"e": 1, "f":7}})
+    ### Dict mapping agent names to dicts of values, converted to a ValuationMatrix:
+    >>> divide(algorithm=fairpy.items.leximin_optimal_allocation, input={"Alice": {"w":11,"x":22,"y":44,"z":0}, "George": {"w":22,"x":11,"y":66,"z":33}})
+    Alice gets { 100.0% of x, 90.0% of y} with value 61.6.
+    George gets { 100.0% of w, 10.0% of y, 100.0% of z} with value 61.6.
+    <BLANKLINE>
+
+    >>> divide(algorithm=fairpy.items.undercut, input={"Alex":{"a": 1,"b": 2, "c": 3, "d":4,"e": 5, "f":14},"Bob":{"a":1,"b": 1, "c": 1, "d":1,"e": 1, "f":7}})
     Alex gets {a,b,c,d,e} with value 15.
     Bob gets {f} with value 7.
     <BLANKLINE>
 
-    >>> divide(algorithm=fairpy.items.three_quarters_MMS_allocation, instance={"Alice": {"w":11,"x":22,"y":44,"z":0}, "George": {"w":22,"x":11,"y":66,"z":33}})
+    >>> divide(algorithm=fairpy.items.three_quarters_MMS_allocation, input={"Alice": {"w":11,"x":22,"y":44,"z":0}, "George": {"w":22,"x":11,"y":66,"z":33}})
     Alice gets {y} with value 44.
     George gets {w,x,z} with value 66.
     <BLANKLINE>
@@ -102,15 +122,75 @@ def divide(
     >>> stringify(alloc.map_item_to_agents())
     "{w:['beni'], x:['avi'], y:['avi'], z:['beni']}"
     """
-    if "agents" in algorithm.__annotations__:
-        agents = AgentList(instance)
-        allocation = algorithm(agents, **kwargs)
+    annotations_list = list(algorithm.__annotations__.items())
+    first_argument_type = annotations_list[0][1]
+
+
+    ### Convert input to AgentList
+    if first_argument_type==AgentList:
+        agent_list = AgentList(input)
+        output = algorithm(agent_list, **kwargs)
+        if isinstance(output,Allocation):
+            return output
+        else:
+            return Allocation(agent_list, output)
+
+
+    ### Convert input to ValuationMatrix
+    elif first_argument_type==ValuationMatrix:
+        # Step 1. Adapt the input:
+        valuation_matrix = list_of_valuations = object_names = agent_names = None
+        if isinstance(input, ValuationMatrix): # instance is already a valuation matrix
+            valuation_matrix = input
+        elif isinstance(input, np.ndarray):    # instance is a numpy valuation matrix
+            valuation_matrix = ValuationMatrix(input)
+        elif isinstance(input, list) and isinstance(input[0], list):            # list of lists
+            list_of_valuations = input
+            valuation_matrix = ValuationMatrix(list_of_valuations)
+        elif isinstance(input, dict):  
+            agent_names = list(input.keys())
+            list_of_valuations = list(input.values())
+            if isinstance(list_of_valuations[0], dict): # maps agent names to dicts of valuations
+                object_names = list(list_of_valuations[0].keys())
+                list_of_valuations = [
+                    [valuation[object] for object in object_names]
+                    for valuation in list_of_valuations
+                ]
+            valuation_matrix = ValuationMatrix(list_of_valuations)
+        else:
+            raise TypeError(f"Unsupported input type: {type(input)}")
+
+        # Step 2. Run the algorithm:
+        output = algorithm(valuation_matrix, **kwargs)
+        # Step 3. Adapt the output:
+        if isinstance(output,Allocation):
+            return output
+        if agent_names is None:
+            agent_names = [f"Agent #{i}" for i in valuation_matrix.agents()]
+        if isinstance(output, np.ndarray) or isinstance(output, AllocationMatrix):  # allocation matrix
+            allocation_matrix = AllocationMatrix(output)
+            if isinstance(input, dict):
+                list_of_bundles = [FractionalBundle(allocation_matrix[i], object_names) for i in allocation_matrix.agents()]
+                dict_of_bundles = dict(zip(agent_names,list_of_bundles))
+                return Allocation(input, dict_of_bundles, matrix=allocation_matrix)
+            else:
+                return Allocation(valuation_matrix, allocation_matrix)
+        elif isinstance(output, list):
+            if object_names is None:
+                list_of_bundles = output
+            else:
+                list_of_bundles = [
+                    [object_names[object_index] for object_index in bundle]
+                    for bundle in output
+                ]
+            dict_of_bundles = dict(zip(agent_names,list_of_bundles))
+            return Allocation(input if isinstance(input,dict) else valuation_matrix, dict_of_bundles)
+        else:
+            raise TypeError(f"Unsupported output type: {type(output)}")
+
     else:
-        allocation = algorithm(instance, **kwargs)
-    if isinstance(allocation, Allocation):
-        return allocation
-    else:
-        return Allocation(agents, allocation)
+        return algorithm(input, **kwargs)
+
 
 
 if __name__ == "__main__":
