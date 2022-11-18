@@ -10,13 +10,13 @@ Programmer: Eliyahu Sattat
 Since:  2020
 """
 
-from fairpy import ValuationMatrix, Allocation
+from fairpy import ValuationMatrix, AllocationMatrix
 
 from fairpy.items.min_sharing_impl.FairProportionalAllocationProblem import FairProportionalAllocationProblem
 from fairpy.items.min_sharing_impl.FairEnvyFreeAllocationProblem import FairEnvyFreeAllocationProblem
 from fairpy.items.min_sharing_impl.FairMaxProductAllocationProblem import FairMaxProductAllocationProblem
 
-def proportional_allocation_with_min_sharing(instance:ValuationMatrix, num_of_decimal_digits=3)->Allocation:
+def proportional_allocation_with_min_sharing(instance:ValuationMatrix, num_of_decimal_digits=3)->AllocationMatrix:
     """
     Finds a proportional allocation with a minimum number of sharings.
 
@@ -34,7 +34,7 @@ def proportional_allocation_with_min_sharing(instance:ValuationMatrix, num_of_de
     return FairProportionalAllocationProblem(instance).find_allocation_with_min_sharing(num_of_decimal_digits)
 
 
-def envyfree_allocation_with_min_sharing(instance:ValuationMatrix, num_of_decimal_digits=3)->Allocation:
+def envyfree_allocation_with_min_sharing(instance:ValuationMatrix, num_of_decimal_digits=3)->AllocationMatrix:
     """
     Finds an envy-free allocation with a minimum number of sharings.
 
@@ -52,7 +52,7 @@ def envyfree_allocation_with_min_sharing(instance:ValuationMatrix, num_of_decima
     return FairEnvyFreeAllocationProblem(instance).find_allocation_with_min_sharing(num_of_decimal_digits)
 
 
-def maxproduct_allocation_with_min_sharing(instance:ValuationMatrix, tolerance:float=0.01, num_of_decimal_digits=3)->Allocation:
+def maxproduct_allocation_with_min_sharing(instance:ValuationMatrix, tolerance:float=0.01, num_of_decimal_digits=3)->AllocationMatrix:
     """
     Finds an approximate max-product (aka max Nash welfare) allocation with a minimum number of sharings.
     The utility of each agent will be at least (1-tolerance) of his utility in the max Nash welfare allocation.

@@ -8,7 +8,7 @@ Programmer: Erel Segal-Halevi
 Since:  2021-04
 """
 
-from fairpy import Allocation, ValuationMatrix
+from fairpy import ValuationMatrix
 from typing import List
 import numpy as np
 
@@ -163,27 +163,20 @@ class SequentialAllocation:
 #####################
 
 
-def one_directional_bag_filling(values, thresholds:List[float]):
+def one_directional_bag_filling(values: ValuationMatrix, thresholds:List[float]):
 	"""
 	The simplest bag-filling procedure: fills a bag in the given order of objects.
 	
 	:param valuations: a valuation matrix (a row for each agent, a column for each object).
 	:param thresholds: determines, for each agent, the minimum value that should be in a bag before the agent accepts it.
 
-	>>> one_directional_bag_filling(values=[[11,33],[44,22]], thresholds=[30,30])
-	Agent #0 gets {1} with value 33.
-	Agent #1 gets {0} with value 44.
-	<BLANKLINE>
-	>>> one_directional_bag_filling(values=[[11,33],[44,22]], thresholds=[10,10])
-	Agent #0 gets {0} with value 11.
-	Agent #1 gets {1} with value 22.
-	<BLANKLINE>
-	>>> one_directional_bag_filling(values=[[11,33],[44,22]], thresholds=[40,30])
-	Agent #0 gets {} with value 0.
-	Agent #1 gets {0} with value 44.
-	<BLANKLINE>
+	>>> one_directional_bag_filling(values=ValuationMatrix([[11,33],[44,22]]), thresholds=[30,30])
+	[[1], [0]]
+	>>> one_directional_bag_filling(values=ValuationMatrix([[11,33],[44,22]]), thresholds=[10,10])
+	[[0], [1]]
+	>>> one_directional_bag_filling(values=ValuationMatrix([[11,33],[44,22]]), thresholds=[40,30])
+	[None, [0]]
 	"""
-	values = ValuationMatrix(values)
 	if len(thresholds) != values.num_of_agents:
 		raise ValueError(f"Number of valuations {values.num_of_agents} differs from number of thresholds {len(thresholds)}")
 
@@ -194,7 +187,7 @@ def one_directional_bag_filling(values, thresholds:List[float]):
 		if willing_agent is None:  break
 		allocation.let_agent_get_objects(willing_agent, allocated_objects)
 		bag.reset()
-	return Allocation(values, allocation.bundles)
+	return allocation.bundles
 
 
 

@@ -18,7 +18,7 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 # logger.setLevel(logging.INFO)
 
 
-def show(title:str, z:Allocation, v):
+def show(title:str, z:Allocation, v:ValuationMatrix):
     utility_profile = z.utility_profile()
     utility_profile_matrix = z.utility_profile_matrix()
     print("\n", title, " = \n",z, "\n", utility_profile_matrix,"\n","product = ", np.prod(utility_profile))

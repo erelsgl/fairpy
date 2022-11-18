@@ -6,15 +6,15 @@ Programmer: Erel Segal-Halevi
 Since:  2021-04
 """
 
-from fairpy import ValuationMatrix, Allocation
+from fairpy import ValuationMatrix
 from fairpy.items.bag_filling import Bag, SequentialAllocation
 
-from typing import List
+from typing import List, Any
 
 import logging
 logger = logging.getLogger(__name__)
 
-def bidirectional_bag_filling(valuation_matrix:ValuationMatrix, thresholds:List[float]) -> Allocation:
+def bidirectional_bag_filling(valuation_matrix:ValuationMatrix, thresholds:List[float]) -> List[List[Any]]:
     """
     Runs a bi-directional bag-filling algorithm.
     Assumes that the instance is ordered: item 0 is the highest-valued for all agents, then item 1, etc.

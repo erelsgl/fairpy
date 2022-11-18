@@ -9,16 +9,15 @@ Since: 2022
 import logging
 import sys
 
-from typing import List, Any
+from typing import List, Dict, Any
 
 import fairpy
-from fairpy import Agent
-from fairpy.allocations import Allocation
+from fairpy import AgentList
 
 logger = logging.getLogger(__name__)
 
 
-def two_agents_ef1(agents: List[Agent], items: List[Any]) -> Allocation:
+def two_agents_ef1(agents: AgentList, items: List[Any]) -> Dict[str,List[Any]]:
     """
     Algorithm No 1
 
@@ -29,58 +28,49 @@ def two_agents_ef1(agents: List[Agent], items: List[Any]) -> Allocation:
     :param items: The items which are being allocated.
     :return: An allocation for each of the agents.
 
-
-    >>> ### identical valuations:
+    ### identical valuations:
     >>> Alice = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":1,"e":1,"f":7,"g":15}, name="Alice")
     >>> George = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":1,"e":1,"f":7,"g":15}, name="George")
     >>> allocation = two_agents_ef1([Alice,George],["a", "b", "c", "d", "e", "f", "g"])
     >>> allocation
-    Alice gets {g} with value 15.
-    George gets {a,b,c,d,e,f} with value 20.
-    <BLANKLINE>
-    >>> Alice.is_EF1(allocation[0], allocation) and George.is_EF1(allocation[1], allocation)
+    {'Alice': ['g'], 'George': ['a', 'b', 'c', 'd', 'e', 'f']}
+    >>> _is_allocation_EF1(allocation, [Alice,George])
     True
     >>> Alice = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":1,"e":4,"f":7,"g":12}, name="Alice")
     >>> George = fairpy.agents.AdditiveAgent({"a": 3, "b": 5, "c": 4, "d":1,"e":2,"f":10,"g":15}, name="George")
     >>> allocation = two_agents_ef1([Alice,George],["a", "b", "c", "d", "e", "f", "g"])
     >>> allocation
-    Alice gets {a,b,c,d,e} with value 16.
-    George gets {f,g} with value 25.
-    <BLANKLINE>
-    >>> Alice.is_EF1(allocation[0], allocation) and George.is_EF1(allocation[1], allocation)
+    {'Alice': ['a', 'b', 'c', 'd', 'e'], 'George': ['f', 'g']}
+    >>> _is_allocation_EF1(allocation, [Alice,George])
     True
-    >>> ### ONLY ONE OBJECT
+
+    ### ONLY ONE OBJECT
     >>> Alice = fairpy.agents.AdditiveAgent({"a": 2}, name="Alice")
     >>> George = fairpy.agents.AdditiveAgent({"a": 2}, name="George")
     >>> allocation = two_agents_ef1([Alice,George],["a"])
     >>> allocation
-    Alice gets {} with value 0.
-    George gets {a} with value 2.
-    <BLANKLINE>
-    >>> Alice.is_EF1(allocation[0], allocation) and George.is_EF1(allocation[1], allocation)
+    {'Alice': [], 'George': ['a']}
+    >>> _is_allocation_EF1(allocation, [Alice,George])
     True
-    >>> ### nothing to allocate
+
+    ### nothing to allocate
     >>> Alice = fairpy.agents.AdditiveAgent({}, name="Alice")
     >>> George = fairpy.agents.AdditiveAgent({}, name="George")
     >>> allocation = two_agents_ef1([Alice,George],[])
     >>> allocation
-    Alice gets {} with value 0.
-    George gets {} with value 0.
-    <BLANKLINE>
-    >>> Alice.is_EF1(allocation[0], allocation) and George.is_EF1(allocation[1], allocation)
+    {'Alice': [], 'George': []}
+    >>> _is_allocation_EF1(allocation, [Alice,George])
     True
     >>> Alice = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":3,"e":1,"f":7,"g":15,"h":21,"i":4,"j":22,"k":7,"l":10,"m":11,"n":22,"o":6,"p":7,"q":16,"r":12,"s":3,"t":28,"u":39,"v":4,"w":9,"x":1,"y":17,"z":99}, name="Alice")
     >>> George = fairpy.agents.AdditiveAgent({"a": 2, "b": 4, "c": 3, "d":1,"e":0,"f":7,"g":16,"h":21,"i":4,"j":23,"k":7,"l":10,"m":11,"n":22,"o":6,"p":9,"q":16,"r":10,"s":3,"t":24,"u":39,"v":2,"w":9,"x":5,"y":17,"z":100}, name="George")
     >>> allocation = two_agents_ef1([Alice,George],["a", "b", "c", "d", "e", "f", "g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"])
     >>> allocation
-    Alice gets {a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s} with value 178.
-    George gets {t,u,v,w,x,y,z} with value 196.
-    <BLANKLINE>
-    >>> Alice.is_EF1(allocation[0], allocation) and George.is_EF1(allocation[1], allocation)
+    {'Alice': ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's'], 'George': ['t', 'u', 'v', 'w', 'x', 'y', 'z']}
+    >>> _is_allocation_EF1(allocation, [Alice,George])
     True
     """
     if len(agents) != 2:
-        raise Exception("wrong number of agents")
+        raise ValueError("wrong number of agents")
     logger.info("\nTwo Agents %s %s and items %s", agents[0].name(), agents[1].name(), items)
     Lg_value = 0
     Rg_value = agents[0].total_value()
@@ -114,83 +104,68 @@ def two_agents_ef1(agents: List[Agent], items: List[Any]) -> Allocation:
     logger.info("g is %s, Lg = %s (total value %d), Rg = %s (total value %d)", rightmost, Lg, Lg_value, Rg,
                 Rg_value)
     if agents[1].value(Rg) > agents[1].value(Lg):
-        allocation = Allocation(agents=agents, bundles={agents[0].name(): Lg, agents[1].name(): Rg})
+        allocation = {agents[0].name(): Lg, agents[1].name(): Rg}
     else:
-        allocation = Allocation(agents=agents, bundles={agents[0].name(): Rg, agents[1].name(): Lg})
+        allocation = {agents[0].name(): Rg, agents[1].name(): Lg}
     return allocation
 
 
-def three_agents_IAV(agents: List[Agent], items: List[Any]) -> Allocation:
+def three_agents_IAV(agents: AgentList, items: List[Any]) -> Dict[str,List[Any]]:
     """
     Algorithm No 2 - three agents with Identical Additive Valuations
     Allocating the given items to three agents while satisfying EF1 condition
+
     >>> Alice = fairpy.agents.AdditiveAgent({"a":4,"b":3,"c":2,"d":1}, name="Alice")
     >>> Bob = fairpy.agents.AdditiveAgent({"a":4,"b":3,"c":2,"d":1}, name="Bob")
     >>> George = fairpy.agents.AdditiveAgent({"a":4,"b":3,"c":2,"d":1}, name="George")
     >>> allocation = three_agents_IAV([Alice,Bob,George],["a","b","c","d"])
     >>> allocation
-    Alice gets {c,d} with value 3.
-    Bob gets {b} with value 3.
-    George gets {a} with value 4.
-    <BLANKLINE>
-    >>> Alice.is_EF1(allocation[0], allocation) and Bob.is_EF1(allocation[1], allocation) and George.is_EF1(allocation[2], allocation)
+    {'Alice': ['d', 'c'], 'Bob': ['b'], 'George': ['a']}
+    >>> _is_allocation_EF1(allocation, [Alice,George])
     True
     >>> Alice = fairpy.agents.AdditiveAgent({"a":5,"b":6,"c":1,"d":2,"e":2,"f":2,"g":4}, name="Alice")
     >>> Bob = fairpy.agents.AdditiveAgent({"a":5,"b":6,"c":1,"d":2,"e":2,"f":2,"g":4}, name="Bob")
     >>> George = fairpy.agents.AdditiveAgent({"a":5,"b":6,"c":1,"d":2,"e":2,"f":2,"g":4}, name="George")
     >>> allocation = three_agents_IAV([Alice,Bob,George],["a","b","c","d","e","f","g"])
     >>> allocation
-    Alice gets {a,b} with value 11.
-    Bob gets {c,d,e} with value 5.
-    George gets {f,g} with value 6.
-    <BLANKLINE>
-    >>> Alice.is_EF1(allocation[0], allocation) and Bob.is_EF1(allocation[1], allocation) and George.is_EF1(allocation[2], allocation)
+    {'Alice': ['a', 'b'], 'Bob': ['c', 'd', 'e'], 'George': ['g', 'f']}
+    >>> _is_allocation_EF1(allocation, [Alice,George])
     True
     >>> Alice = fairpy.agents.AdditiveAgent({"a":5,"b":6,"c":1,"d":2,"e":2,"f":2,"g":4,"h":5,"i":0,"j":9,"k":8,"l":2,"m":8,"n":7}, name="Alice")
     >>> Bob = fairpy.agents.AdditiveAgent({"a":5,"b":6,"c":1,"d":2,"e":2,"f":2,"g":4,"h":5,"i":0,"j":9,"k":8,"l":2,"m":8,"n":7}, name="Bob")
     >>> George = fairpy.agents.AdditiveAgent({"a":5,"b":6,"c":1,"d":2,"e":2,"f":2,"g":4,"h":5,"i":0,"j":9,"k":8,"l":2,"m":8,"n":7}, name="George")
     >>> allocation = three_agents_IAV([Alice,Bob,George],["a","b","c","d","e","f","g","h","i","j","k","l","m","n"])
     >>> allocation
-    Alice gets {a,b,c,d,e,f} with value 18.
-    Bob gets {g,h,i,j} with value 18.
-    George gets {k,l,m,n} with value 25.
-    <BLANKLINE>
-    >>> Alice.is_EF1(allocation[0], allocation) and Bob.is_EF1(allocation[1], allocation) and George.is_EF1(allocation[2], allocation)
+    {'Alice': ['a', 'b', 'c', 'd', 'e', 'f'], 'Bob': ['g', 'h', 'i', 'j'], 'George': ['l', 'm', 'n', 'k']}
+    >>> _is_allocation_EF1(allocation, [Alice,George])
     True
-    >>> ### TOTALLY UNFAIR CASE
+
+    ### TOTALLY UNFAIR CASE
     >>> Alice = fairpy.agents.AdditiveAgent({"a":30,"b":1,"c":1,"d":1,"e":1,"f":1,"g":1,"h":1}, name="Alice")
     >>> Bob = fairpy.agents.AdditiveAgent({"a":30,"b":1,"c":1,"d":1,"e":1,"f":1,"g":1,"h":1}, name="Bob")
     >>> George = fairpy.agents.AdditiveAgent({"a":30,"b":1,"c":1,"d":1,"e":1,"f":1,"g":1,"h":1}, name="George")
     >>> allocation = three_agents_IAV([Alice,Bob,George],["a","b","c","d","e","f","g","h"])
     >>> allocation
-    Alice gets {e,f,g,h} with value 4.
-    Bob gets {b,c,d} with value 3.
-    George gets {a} with value 30.
-    <BLANKLINE>
-    >>> Alice.is_EF1(allocation[0], allocation) and Bob.is_EF1(allocation[1], allocation) and George.is_EF1(allocation[2], allocation)
+    {'Alice': ['h', 'g', 'f', 'e'], 'Bob': ['d', 'c', 'b'], 'George': ['a']}
+    >>> _is_allocation_EF1(allocation, [Alice,George])
     True
-    >>> ### TOTALLY UNFAIR CASE
+
+    ### TOTALLY UNFAIR CASE
     >>> Alice = fairpy.agents.AdditiveAgent({"a":1,"b":1,"c":1,"d":1,"e":1,"f":1,"g":1,"h":30}, name="Alice")
     >>> Bob = fairpy.agents.AdditiveAgent({"a":1,"b":1,"c":1,"d":1,"e":1,"f":1,"g":1,"h":30}, name="Bob")
     >>> George = fairpy.agents.AdditiveAgent({"a":1,"b":1,"c":1,"d":1,"e":1,"f":1,"g":1,"h":30}, name="George")
     >>> allocation = three_agents_IAV([Alice,Bob,George],["a","b","c","d","e","f","g","h"])
     >>> allocation
-    Alice gets {a,b,c,d} with value 4.
-    Bob gets {e,f,g} with value 3.
-    George gets {h} with value 30.
-    <BLANKLINE>
-    >>> Alice.is_EF1(allocation[0], allocation) and Bob.is_EF1(allocation[1], allocation) and George.is_EF1(allocation[2], allocation)
+    {'Alice': ['a', 'b', 'c', 'd'], 'Bob': ['e', 'f', 'g'], 'George': ['h']}
+    >>> _is_allocation_EF1(allocation, [Alice,George])
     True
     >>> Alice = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":1,"e":1,"f":7,"g":15,"h":21,"i":4,"j":23,"k":7,"l":10,"m":11,"n":22,"o":6,"p":9,"q":16,"r":12,"s":3,"t":28,"u":39,"v":2,"w":9,"x":1,"y":17,"z":100}, name="Alice")
     >>> Bob = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":1,"e":1,"f":7,"g":15,"h":21,"i":4,"j":23,"k":7,"l":10,"m":11,"n":22,"o":6,"p":9,"q":16,"r":12,"s":3,"t":28,"u":39,"v":2,"w":9,"x":1,"y":17,"z":100}, name="Bob")
     >>> George = fairpy.agents.AdditiveAgent({"a": 2, "b": 6, "c": 3, "d":1,"e":1,"f":7,"g":15,"h":21,"i":4,"j":23,"k":7,"l":10,"m":11,"n":22,"o":6,"p":9,"q":16,"r":12,"s":3,"t":28,"u":39,"v":2,"w":9,"x":1,"y":17,"z":100}, name="George")
     >>> allocation = three_agents_IAV([Alice,Bob,George],["a", "b", "c", "d", "e", "f", "g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"])
     >>> allocation
-    Alice gets {x,y,z} with value 118.
-    Bob gets {o,p,q,r,s,t,u,v,w} with value 124.
-    George gets {a,b,c,d,e,f,g,h,i,j,k,l,m,n} with value 133.
-    <BLANKLINE>
-    >>> Alice.is_EF1(allocation[0], allocation) and Bob.is_EF1(allocation[1], allocation) and George.is_EF1(allocation[1], allocation)
+    {'Alice': ['z', 'y', 'x'], 'Bob': ['w', 'v', 'u', 't', 's', 'r', 'q', 'p', 'o'], 'George': ['m', 'l', 'k', 'j', 'i', 'h', 'g', 'f', 'e', 'd', 'c', 'b', 'a', 'n']}
+    >>> _is_allocation_EF1(allocation, [Alice,George])
     True
     """
     if len(agents) != 3:
@@ -221,7 +196,7 @@ def three_agents_IAV(agents: List[Agent], items: List[Any]) -> Allocation:
     logger.info("A = %s, B = %s, C = %s", A, B, C)
     if agents[0].value(C) >= agents[0].value(B_copy):
         logger.info("u(C) >= u(B\\{g2})")
-        allocation = Allocation(agents=agents, bundles={agents[0].name(): A, agents[1].name(): B, agents[2].name(): C})
+        allocation = {agents[0].name(): A, agents[1].name(): B, agents[2].name(): C}
     else:
         C_tag = Rg2.copy()
         C_tag.append(g2)
@@ -229,12 +204,11 @@ def three_agents_IAV(agents: List[Agent], items: List[Any]) -> Allocation:
         [remaining_goods.remove(arg) for arg in C_tag]  # G \ C'
         A_tag, B_tag = _Lemma4_1(remaining_goods, agents[0])
         logger.info("A' = %s, B' = %s, C' = %s", A_tag, B_tag, C_tag)
-        allocation = Allocation(agents=agents,
-                                bundles={agents[0].name(): A_tag, agents[1].name(): B_tag, agents[2].name(): C_tag})
+        allocation = {agents[0].name(): A_tag, agents[1].name(): B_tag, agents[2].name(): C_tag}
     return allocation
 
 
-def _are_identical_valuations(agents: List[Agent]) -> bool:
+def _are_identical_valuations(agents: AgentList) -> bool:
     """
     this function make sure that the valuations entered by the user
     are equal for all agents
@@ -342,6 +316,13 @@ def _Lemma4_1(remaining_goods: list, agent):
         else:
             break
     return A_tag, B_tag
+
+
+def _is_allocation_EF1(allocation:Dict[str,List[Any]], agents:AgentList):
+    for agent in agents:
+        if not agent.is_EF1(allocation[agent.name()], allocation.values()):
+            return False
+    return True
 
 
 two_agents_ef1.logger = logger

@@ -12,13 +12,11 @@ Programmer: Erel Segal-Halevi
 Since : 2021-05
 """
 
-import fairpy
 
 import networkx
 from typing import *
-from collections import defaultdict
 from fairpy.items.utilitarian_matching import instance_to_graph, matching_to_allocation
-from fairpy import Allocation, AgentList
+from fairpy import AgentList
 
 import logging
 logger = logging.getLogger(__name__)

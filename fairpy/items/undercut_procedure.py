@@ -11,8 +11,7 @@ The undercut procedure is a procedure for fair item assignment between *two* peo
 """
 
 
-import fairpy
-from fairpy import Allocation, Agent, AgentList
+from fairpy import AgentList
 
 from typing import List, Any
 import logging
@@ -29,6 +28,7 @@ def undercut(agents:AgentList, items: List[Any]=None) -> List[List[Any]]:
     :param items: The items which are divided
     :return: An envy-free allocation if it exists
         
+    >>> import fairpy
     >>> Alice = fairpy.agents.AdditiveAgent({"a": 7, "b": 4, "c": 3, "d":2}, name="Alice")
     >>> George = fairpy.agents.AdditiveAgent({"a": 1, "b": 7, "c": 3, "d":2}, name="George")
     >>> items=['a','b','c','d']
@@ -159,7 +159,7 @@ def almost_equal_cut(group_,agent_num, agents,values,bob_val_for_alice_items,ali
     return result
     
                     
-def search_subgroup(agents,agent_num,items_for_alice,items_for_bob,val1,val2,value) -> Allocation:
+def search_subgroup(agents,agent_num,items_for_alice,items_for_bob,val1,val2,value) -> List[List[Any]]:
     """
     A function that searches for a subgroup so that there will be a envy-free division by 
     removing one item from the group of the agent who rejected the offer
