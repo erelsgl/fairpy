@@ -15,7 +15,6 @@ from fairpy.items.max_welfare import max_product_allocation
 
 logger = logging.getLogger(__name__)
 
-# @convert_input_to_valuation_matrix
 def dominating_allocation_with_bounded_sharing(v:ValuationMatrix, thresholds:List) -> np.array:
     """
     Finds an allocation in which each agent i gets value at least thresholds[i],

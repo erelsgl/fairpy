@@ -9,7 +9,6 @@ from fairpy.allocations import *
 from fairpy.families import *
 from fairpy.agents import *
 from fairpy.agentlist import *
-from fairpy.decorators import *
 
 class items:
 	from fairpy.items.adaptors import divide

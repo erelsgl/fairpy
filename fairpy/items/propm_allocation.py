@@ -12,9 +12,8 @@ Since:  2021-05
 
 import networkx as nx
 import numpy as np
-from fairpy import ValuationMatrix, Allocation, convert_input_to_valuation_matrix
+from fairpy import ValuationMatrix
 from typing import List
-from copy import deepcopy
 import logging
 
 logger = logging.getLogger(__name__)
@@ -24,38 +23,118 @@ logger = logging.getLogger(__name__)
 ### Main function
 ###
 
-def propm_allocation(instance) -> Allocation:
+
+def propm_allocation(v: ValuationMatrix) -> List[List[int]]:
     """
-    Function that takes a valuation matrix and returns PROPm allocation of goods.
+    recursive function which takes valuations and returns a PROPm allocation
+    as a list of bundles
     >>> import numpy as np
-    >>> v = np.array([
+
+    >>> v = ValuationMatrix([
     ... [0.25, 0.25, 0.25, 0.25, 0, 0],
     ... [0.25, 0, 0.26, 0, 0.25, 0.24],
     ... [0.25, 0, 0.24, 0, 0.25, 0.26]
     ... ])
     >>> propm_allocation(v)
-    Agent #0 gets {2,3} with value 0.5.
-    Agent #1 gets {1,5} with value 0.24.
-    Agent #2 gets {0,4} with value 0.5.
-    <BLANKLINE>
-    >>> propm_allocation(v[np.ix_([0, 1, 2], [0, 2, 1, 3, 4, 5])])
-    Agent #0 gets {2,3} with value 0.5.
-    Agent #1 gets {0,1} with value 0.51.
-    Agent #2 gets {4,5} with value 0.51.
-    <BLANKLINE>
+    [[2, 3], [1, 5], [4, 0]]
 
-    >>> v = {"Alice":  {"z":12, "y":10, "x":8, "w":7, "v":4, "u":1},\
-            "Dina":   {"z":14, "y":9, "x":15, "w":4, "v":9, "u":12},\
-            "George": {"z":19, "y":16, "x":8, "w":6, "v":5, "u":1},\
-            }
+    >>> partial_matrix = v._v[np.ix_([0, 1, 2], [0, 2, 1, 3, 4, 5])]  # rows 0,1,2 and columns 0,2,1,3,4,5
+    >>> propm_allocation(ValuationMatrix(partial_matrix))
+    [[2, 3], [0, 1], [4, 5]]
+
+    >>> v = ValuationMatrix([
+    ... [0, 0, 0, 0, 0, 0],
+    ... [1, 2, 3, 4, 5, 6],
+    ... [10, 20, 30, 40, 50, 60]
+    ... ])
     >>> propm_allocation(v)
-    Alice gets {x,y} with value 18.
-    Dina gets {u,v,w} with value 25.
-    George gets {z} with value 19.
-    <BLANKLINE>
+    [[], [0, 1, 2, 3], [4, 5]]
     """
-    return convert_input_to_valuation_matrix(solve)(instance)
+    if v.num_of_agents == 0 or v.num_of_objects == 0:
+        return []
 
+    logger.info("Looking for PROPm allocation for %d agents and %d items", v.num_of_agents, v.num_of_objects)
+    logger.info("Solving a problem defined by valuation matrix:\n %s", v)
+
+    for agent in v.agents():
+        if np.allclose(v[agent], 0.0):  # irrelevant agent - values everything at 0
+            allocation = propm_allocation(v.without_agent(agent))
+            allocation.insert(agent, [])
+            return allocation
+
+    total_value = v.normalize()
+
+    logger.info("Normalized matrix:\n %s", v)
+
+    for agent in v.agents():
+        for item in v.objects():
+            if v[agent][item] * v.num_of_agents > total_value:
+                logger.info(
+                    "Allocating item %d to agent %d as she values it as %f > 1/n",
+                    item,
+                    agent,
+                    v[agent][item] / total_value,
+                )
+
+                allocation = propm_allocation(v.without_agent(agent).without_object(item))
+                insert_agent_into_allocation(agent, item, allocation)
+                return allocation
+
+    bundles = divide_into_bundles(v)
+    logger.info("Divider divides items into following bundles: %s", str(bundles))
+
+    remaining_agents = set(range(1, v.num_of_agents))
+
+    logger.info("Building decomposition:")
+    decomposition = Decomposition(v)
+    for t in range(1, v.num_of_agents + 1):
+        considered_items = sum(bundles[:t], [])
+
+        candidates = list(
+            filter(
+                lambda a: v.num_of_agents * v.agent_value_for_bundle(a, considered_items) > t * total_value,
+                remaining_agents,
+            )
+        )
+        logger.info(
+            "There are %s remaining agents that prefer sharing first %s bundles rather than last %s: %s",
+            len(candidates),
+            str(candidates),
+            t,
+            v.num_of_agents - t,
+        )
+
+        while len(candidates) > 0 and decomposition.num_of_agents() < t:
+            logger.info("Current decomposition:\n %s", str(decomposition))
+
+            decomposition.update(candidates[0], bundles[t - 1])
+
+            remaining_agents = set(range(1, v.num_of_agents)).difference(decomposition.get_all_agents())
+            candidates = list(
+                filter(
+                    lambda a: v.num_of_agents * v.agent_value_for_bundle(a, considered_items) > t * total_value,
+                    remaining_agents,
+                )
+            )
+
+        if decomposition.num_of_agents() < t:
+            decomposition.agents.append(remaining_agents)
+            decomposition.bundles.append(sum(bundles[t:], []))
+            logger.info("Final decomposition:\n %s", str(decomposition))
+
+            logger.info("Allocating bundle %d to divider agent", t)
+            allocation = list([[] for _ in range(v.num_of_agents)])
+            allocation[0] = bundles[t - 1]
+
+            for agents, bundle in zip(decomposition.agents, decomposition.bundles):
+                agents = list(sorted(agents))
+                sub_problem = v.submatrix(agents, bundle)
+                solution = propm_allocation(sub_problem)
+                for i, agent in enumerate(agents):
+                    for j in solution[i]:
+                        allocation[agent].append(bundle[j])
+
+            return allocation
 
 
 ###
@@ -83,12 +162,12 @@ def insert_agent_into_allocation(agent: int, item: int, allocated_bundles: List[
     allocated_bundles.insert(agent, [item])
 
 
-def divide(v: ValuationMatrix) -> List[List[int]]:
+def divide_into_bundles(v: ValuationMatrix) -> List[List[int]]:
     """ "
     In stage 1 the divider agent having index 0 partitions the goods into bundles.
-    >>> divide(ValuationMatrix([[0.5, 0, 0.5], [1/3, 1/3, 1/3]]))
+    >>> divide_into_bundles(ValuationMatrix([[0.5, 0, 0.5], [1/3, 1/3, 1/3]]))
     [[1, 0], [2]]
-    >>> divide(ValuationMatrix([[0.25, 0.25, 0.25, 0.25, 0, 0], [0.25, 0, 0.26, 0, 0.25, 0.24], [0.25, 0, 0.24, 0, 0.25, 0.26]]))
+    >>> divide_into_bundles(ValuationMatrix([[0.25, 0.25, 0.25, 0.25, 0, 0], [0.25, 0, 0.26, 0, 0.25, 0.24], [0.25, 0, 0.24, 0, 0.25, 0.26]]))
     [[4, 5, 0], [1], [2, 3]]
     """
     total_value = v.verify_normalized()
@@ -251,118 +330,6 @@ class Decomposition:
         self.agents = [self.get_all_agents().union({candidate})]
         self.bundles = [self.get_all_items() + bundle]
 
-
-def solve(agents) -> List[List[int]]:
-    """
-    recursive function which takes valuations and returns a PROPm allocation
-    as a list of bundles
-    >>> import numpy as np
-
-    >>> v = np.array([
-    ... [0.25, 0.25, 0.25, 0.25, 0, 0],
-    ... [0.25, 0, 0.26, 0, 0.25, 0.24],
-    ... [0.25, 0, 0.24, 0, 0.25, 0.26]
-    ... ])
-    >>> solve(v)
-    [[2, 3], [1, 5], [4, 0]]
-
-    >>> solve(v[np.ix_([0, 1, 2], [0, 2, 1, 3, 4, 5])])
-    [[2, 3], [0, 1], [4, 5]]
-
-    >>> v = np.array([
-    ... [0, 0, 0, 0, 0, 0],
-    ... [1, 2, 3, 4, 5, 6],
-    ... [10, 20, 30, 40, 50, 60]
-    ... ])
-    >>> solve(v)
-    [[], [0, 1, 2, 3], [4, 5]]
-    """
-    v = ValuationMatrix(agents)
-    if v.num_of_agents == 0 or v.num_of_objects == 0:
-        return []
-
-    logger.info("Looking for PROPm allocation for %d agents and %d items", v.num_of_agents, v.num_of_objects)
-    logger.info("Solving a problem defined by valuation matrix:\n %s", v)
-
-    for agent in v.agents():
-        if np.allclose(v[agent], 0.0):  # irrelevant agent - values everything at 0
-            allocation = solve(v.without_agent(agent))
-            allocation.insert(agent, [])
-            return allocation
-
-    total_value = v.normalize()
-
-    logger.info("Normalized matrix:\n %s", v)
-
-    for agent in v.agents():
-        for item in v.objects():
-            if v[agent][item] * v.num_of_agents > total_value:
-                logger.info(
-                    "Allocating item %d to agent %d as she values it as %f > 1/n",
-                    item,
-                    agent,
-                    v[agent][item] / total_value,
-                )
-
-                allocation = solve(v.without_agent(agent).without_object(item))
-                insert_agent_into_allocation(agent, item, allocation)
-                return allocation
-
-    bundles = divide(v)
-    logger.info("Divider divides items into following bundles: %s", str(bundles))
-
-    remaining_agents = set(range(1, v.num_of_agents))
-
-    logger.info("Building decomposition:")
-    decomposition = Decomposition(v)
-    for t in range(1, v.num_of_agents + 1):
-        considered_items = sum(bundles[:t], [])
-
-        candidates = list(
-            filter(
-                lambda a: v.num_of_agents * v.agent_value_for_bundle(a, considered_items) > t * total_value,
-                remaining_agents,
-            )
-        )
-        logger.info(
-            "There are %s remaining agents that prefer sharing first %s bundles rather than last %s: %s",
-            len(candidates),
-            str(candidates),
-            t,
-            v.num_of_agents - t,
-        )
-
-        while len(candidates) > 0 and decomposition.num_of_agents() < t:
-            logger.info("Current decomposition:\n %s", str(decomposition))
-
-            decomposition.update(candidates[0], bundles[t - 1])
-
-            remaining_agents = set(range(1, v.num_of_agents)).difference(decomposition.get_all_agents())
-            candidates = list(
-                filter(
-                    lambda a: v.num_of_agents * v.agent_value_for_bundle(a, considered_items) > t * total_value,
-                    remaining_agents,
-                )
-            )
-
-        if decomposition.num_of_agents() < t:
-            decomposition.agents.append(remaining_agents)
-            decomposition.bundles.append(sum(bundles[t:], []))
-            logger.info("Final decomposition:\n %s", str(decomposition))
-
-            logger.info("Allocating bundle %d to divider agent", t)
-            allocation = list([[] for _ in range(v.num_of_agents)])
-            allocation[0] = bundles[t - 1]
-
-            for agents, bundle in zip(decomposition.agents, decomposition.bundles):
-                agents = list(sorted(agents))
-                sub_problem = v.submatrix(agents, bundle)
-                solution = solve(sub_problem)
-                for i, agent in enumerate(agents):
-                    for j in solution[i]:
-                        allocation[agent].append(bundle[j])
-
-            return allocation
 
 
 propm_allocation.logger = logger

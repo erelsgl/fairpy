@@ -29,8 +29,6 @@ To verify that everything was installed correctly, run one of the example progra
 
 1. [Optional logging](examples/loggers.md), to learn and understand how the algorithms work.
 
-1. [Decorators](examples/decorators.md), to easily code new algorithms.
-
 1. [Item allocation algorithms](examples/items.md), for both divisible and indivisible items.
 
 1. [Cake-cutting algorithms](examples/cake.md).

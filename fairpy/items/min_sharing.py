@@ -10,61 +10,63 @@ Programmer: Eliyahu Sattat
 Since:  2020
 """
 
-from fairpy import ValuationMatrix, Allocation, convert_input_to_valuation_matrix
-from typing import Any
+from fairpy import ValuationMatrix, Allocation
 
 from fairpy.items.min_sharing_impl.FairProportionalAllocationProblem import FairProportionalAllocationProblem
 from fairpy.items.min_sharing_impl.FairEnvyFreeAllocationProblem import FairEnvyFreeAllocationProblem
 from fairpy.items.min_sharing_impl.FairMaxProductAllocationProblem import FairMaxProductAllocationProblem
 
-@convert_input_to_valuation_matrix
-def proportional_allocation_with_min_sharing(instance:Any, num_of_decimal_digits=3)->Allocation:
+def proportional_allocation_with_min_sharing(instance:ValuationMatrix, num_of_decimal_digits=3)->Allocation:
     """
     Finds a proportional allocation with a minimum number of sharings.
 
-    >>> proportional_allocation_with_min_sharing([ [3] , [5] ]).round(2).matrix   # single item
+    >>> print(proportional_allocation_with_min_sharing(ValuationMatrix([ [3] , [5] ])).round(2))   # single item
     [[0.5]
      [0.5]]
-    >>> proportional_allocation_with_min_sharing([ [3,2] , [1,4] ]).round(2).matrix   # two items
+    >>> print(proportional_allocation_with_min_sharing(ValuationMatrix([ [3,2] , [1,4] ])).round(2))   # two items
     [[1. 0.]
      [0. 1.]]
-    >>> proportional_allocation_with_min_sharing([ [10,18,1,1] , [10,18,1,1] , [10,10,5,5] ]).num_of_sharings()   # three items
-    0
+    >>> print(proportional_allocation_with_min_sharing(ValuationMatrix([ [10,18,1,1] , [10,18,1,1] , [10,10,5,5] ])))   # three items
+    [[1. 0. 0. 0.]
+     [0. 1. 0. 0.]
+     [0. 0. 1. 1.]]
     """
     return FairProportionalAllocationProblem(instance).find_allocation_with_min_sharing(num_of_decimal_digits)
 
 
-@convert_input_to_valuation_matrix
-def envyfree_allocation_with_min_sharing(instance:Any, num_of_decimal_digits=3)->Allocation:
+def envyfree_allocation_with_min_sharing(instance:ValuationMatrix, num_of_decimal_digits=3)->Allocation:
     """
     Finds an envy-free allocation with a minimum number of sharings.
 
-    >>> envyfree_allocation_with_min_sharing([ [3] , [5] ]).round(2).matrix   # single item
+    >>> print(envyfree_allocation_with_min_sharing(ValuationMatrix([ [3] , [5] ])).round(2))   # single item
     [[0.5]
      [0.5]]
-    >>> envyfree_allocation_with_min_sharing([ [3,2] , [1,4] ]).round(2).matrix   # two items
+    >>> print(envyfree_allocation_with_min_sharing(ValuationMatrix([ [3,2] , [1,4] ])).round(2))   # two items
     [[1. 0.]
      [0. 1.]]
-    >>> envyfree_allocation_with_min_sharing([ [10,18,1,1] , [10,18,1,1] , [10,10,5,5] ]).num_of_sharings()   # three items
-    1
+    >>> print(envyfree_allocation_with_min_sharing(ValuationMatrix([ [10,18,1,1] , [10,18,1,1] , [10,10,5,5] ])))   # three items
+    [[1.    0.    0.    0.   ]
+     [0.    0.556 0.    0.   ]
+     [0.    0.444 1.    1.   ]]
     """
     return FairEnvyFreeAllocationProblem(instance).find_allocation_with_min_sharing(num_of_decimal_digits)
 
 
-@convert_input_to_valuation_matrix
-def maxproduct_allocation_with_min_sharing(instance, tolerance:float=0.01, num_of_decimal_digits=3)->Allocation:
+def maxproduct_allocation_with_min_sharing(instance:ValuationMatrix, tolerance:float=0.01, num_of_decimal_digits=3)->Allocation:
     """
     Finds an approximate max-product (aka max Nash welfare) allocation with a minimum number of sharings.
     The utility of each agent will be at least (1-tolerance) of his utility in the max Nash welfare allocation.
 
-    >>> maxproduct_allocation_with_min_sharing([ [3] , [5] ]).round(2).matrix   # single item
+    >>> print(maxproduct_allocation_with_min_sharing(ValuationMatrix([ [3] , [5] ])).round(2))  # single item
     [[0.5]
      [0.5]]
-    >>> maxproduct_allocation_with_min_sharing([ [3,2] , [1,4] ]).round(2).matrix   # two items
+    >>> print(maxproduct_allocation_with_min_sharing(ValuationMatrix([ [3,2] , [1,4] ])).round(2))   # two items
     [[1. 0.]
      [0. 1.]]
-    >>> maxproduct_allocation_with_min_sharing([ [10,18,1,1] , [10,18,1,1] , [10,10,5,5] ]).num_of_sharings()   # three items
-    2
+    >>> print(maxproduct_allocation_with_min_sharing(ValuationMatrix([ [10,18,1,1] , [10,18,1,1] , [10,10,5,5] ])))   # three items
+    [[0.73  0.295 0.    0.   ]
+     [0.    0.705 0.    0.   ]
+     [0.27  0.    1.    1.   ]]
     """
     return FairMaxProductAllocationProblem(instance,tolerance).find_allocation_with_min_sharing(num_of_decimal_digits)
 
