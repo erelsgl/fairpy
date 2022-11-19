@@ -21,6 +21,10 @@ To verify that everything was installed correctly, run one of the example progra
     python examples/items.py
     python examples/cake.py
 
+or run the tests:
+
+    pytest
+
 ## Usage
 
 The function `fairpy.divide` can be used to activate all fair division algorithms. For example:
@@ -55,21 +59,16 @@ The function `fairpy.divide` can be used to activate all fair division algorithm
 1. [Optional logging](examples/loggers.md), to learn and understand how the algorithms work.
 
 
-## Implemented algorithms
+## Adding new algorithms
 
-For a partial list of algorithms and their implementation status, see:
+To add a new algorithm for item allocation, write a function that accepts one of the following parameters:
 
-* [Cake-cutting algorithms](fairpy/cake/README.md)
-* [Item allocation algorithms](fairpy/items/README.md)
+* [AgentList](fairpy/agentlist.py) - a list of [Agent](fairpy/agents.py) objects. See e.g. [the implementation of Round Robin](fairpy/items/round_robin.py) for usage example.
+* [ValuationMatrix](fairpy/valuations.py) - a matrix v where v[i,j] is the value of agent i to item j. See e.g. [the implementation of Leximin](fairpy/items/leximin.py) for usage example.
+
+Your function may accept any other custom parameters.
 
 
-## Development
+## See also
 
-Many algorithms can be added to `fairpy`. See:
-
-* [Cake-cutting algorithms for future work](fairpy/cake/README-future.md)  
-* [Item allocation algorithms for future work](fairpy/items/README-future.md)
-
-You can run all doctests by either `pytest` or `tox`.
-
-**See also**: [other open-source projects related to fairness](related.md).
+* [other open-source projects related to fairness](related.md).
