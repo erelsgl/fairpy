@@ -2,14 +2,14 @@
 
 from typing import *
 
-from fairpy.agents import Agent, PiecewiseConstantAgent
+from fairpy import Agent, PiecewiseConstantAgent, AgentList
 from fairpy.cake.improve_ef4_algo.allocation import CakeAllocation, Marking
 from fairpy.cake.improve_ef4_algo.cake import CakeSlice
 from fairpy.cake.improve_ef4_algo.preference import find_favorite_slice, Preferences
 
 
 def mark_by_preferences(agent: Agent, preferences: Preferences, marking: Marking,
-                        excluded_agents: List[Agent]) -> Tuple[CakeSlice, float]:
+                        excluded_agents: AgentList) -> Tuple[CakeSlice, float]:
     """
     Marks slices by the preference of agent and conflicts it has with other agents,
     as defined by the envy-free algorithm's core protocol lines 7-12 regarding 

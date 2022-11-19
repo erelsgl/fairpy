@@ -13,14 +13,13 @@ Programmer: Erel Segal-Halevi
 Since: 2019-12
 """
 
-from fairpy import Allocation
-from fairpy.agents import Agent
+from fairpy import Allocation, Agent, AgentList
 
 from typing import List, Any
 import logging
 logger = logging.getLogger(__name__)
 
-def last_diminisher(agents: List[Agent])->Allocation:
+def last_diminisher(agents: AgentList)->Allocation:
     """
     :param agents: a list of Agent objects.
     :return: a proportional cake-allocation.
@@ -57,7 +56,7 @@ def last_diminisher(agents: List[Agent])->Allocation:
     return Allocation(agents, pieces)
 
 
-def last_diminisher_recursive(start:float, agents: List[Agent], active_agents:List[int], pieces:List[Any]):
+def last_diminisher_recursive(start:float, agents: AgentList, active_agents:List[int], pieces:List[Any]):
     """
     A recursive subroutine for last-diminisher.
     :param start: the leftmost end of the cake that should be allocated.

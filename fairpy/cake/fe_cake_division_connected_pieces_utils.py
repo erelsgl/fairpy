@@ -7,8 +7,8 @@ Programmer: Ori Zitzer
 Since: 2019-12
 """
 
-from fairpy import Allocation
-from fairpy.agents import *
+from fairpy import Allocation, Agent, AgentList, PiecewiseConstantAgent1Segment, PiecewiseConstantAgent
+from typing import List, Any
 import random
 
 import logging
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 
-def agentNormalize(agents: List[Agent])->List[Agent]:
+def agentNormalize(agents: AgentList)->AgentList:
     """
     replace all the agents with PiecewiseConstantAgent1Segment that normalize to (0,1) segment
     :param agents: a list of agents that need to be normalized
@@ -62,7 +62,7 @@ def findRemainIntervals(pieces: List[Any])->List[tuple]:
     return remain
 
 
-def checkWhile(agents: List[Agent], pieces:List[Any], remain:List[tuple], epsilon:float)->tuple:
+def checkWhile(agents: AgentList, pieces:List[Any], remain:List[tuple], epsilon:float)->tuple:
     """
     Check the while condition that in the algorithm
     :param agents: A list of agents
@@ -134,7 +134,7 @@ def checkWhile(agents: List[Agent], pieces:List[Any], remain:List[tuple], epsilo
 
 
 
-def getC(agents: List[Agent], pieces:List[Any], epsilon:float, interval:tuple)->List[Agent]:
+def getC(agents: AgentList, pieces:List[Any], epsilon:float, interval:tuple)->AgentList:
     """
     Get the C group from the Algorithm
     :param agents: A list of agents
@@ -222,7 +222,7 @@ def findPiece(reamin:List[tuple], attr:float , leftOrRight:int)->tuple:
     return None
 
 
-def setRemain(partialAlloc:List[List[tuple]], agents: List[Agent])->List[List[tuple]]:
+def setRemain(partialAlloc:List[List[tuple]], agents: AgentList)->List[List[tuple]]:
     """
     Set the remain intervals to the agents
     :param allocation: A partial allocation of (0,1)
@@ -294,7 +294,7 @@ def intervalUnionFromList(intervals:List[tuple])->tuple:
     return (minimum,maximum)
 
 
-def allocationToOnePiece(alloction:List[List[tuple]],agents:List[Agent])->Allocation:
+def allocationToOnePiece(alloction:List[List[tuple]],agents:AgentList)->Allocation:
     """
     Get a fully allocation of (0,1) that every agent have a list of adjacent pieces and return allocation
         of the union of each list

@@ -17,7 +17,7 @@ from fairpy import AgentList
 logger = logging.getLogger(__name__)
 
 
-def two_agents_ef1(agents: AgentList, items: List[Any]) -> Dict[str,List[Any]]:
+def two_agents_ef1(agents: AgentList, items: List[Any]=None) -> Dict[str,List[Any]]:
     """
     Algorithm No 1
 
@@ -71,6 +71,8 @@ def two_agents_ef1(agents: AgentList, items: List[Any]) -> Dict[str,List[Any]]:
     """
     if len(agents) != 2:
         raise ValueError("wrong number of agents")
+    if items is None:
+        items = agents.all_items()
     logger.info("\nTwo Agents %s %s and items %s", agents[0].name(), agents[1].name(), items)
     Lg_value = 0
     Rg_value = agents[0].total_value()
@@ -110,7 +112,7 @@ def two_agents_ef1(agents: AgentList, items: List[Any]) -> Dict[str,List[Any]]:
     return allocation
 
 
-def three_agents_IAV(agents: AgentList, items: List[Any]) -> Dict[str,List[Any]]:
+def three_agents_IAV(agents: AgentList, items: List[Any]=None) -> Dict[str,List[Any]]:
     """
     Algorithm No 2 - three agents with Identical Additive Valuations
     Allocating the given items to three agents while satisfying EF1 condition
@@ -172,6 +174,8 @@ def three_agents_IAV(agents: AgentList, items: List[Any]) -> Dict[str,List[Any]]
         raise Exception("wrong number of agents")
     if _are_identical_valuations(agents) is False:
         raise Exception("valuations are not identical")
+    if items is None:
+        items = agents.all_items()
     logger.info("\nThree Agents %s %s %s and items %s", agents[0].name(), agents[1].name(), agents[2].name(), items)
     A = []
     G = items.copy()

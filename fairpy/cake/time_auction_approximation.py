@@ -13,8 +13,7 @@ Programmers: Naama Berman and Yonatan Lifshitz
 Since: 2019-12
 """
 
-from fairpy.agents import *
-from fairpy import Allocation
+from fairpy import Allocation, AgentList, Agent, PiecewiseConstantAgent
 
 import random, logging
 from typing import *
@@ -31,7 +30,7 @@ def stringify_edge_set(s: set):
     """ Convert an agent-piece graph into a string, for display and testing """
     return str(sorted([(agent.name(), piece) for (agent,piece) in s]))
 
-def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
+def equally_sized_pieces(agents: AgentList, piece_size: float) -> Allocation:
     """
     Algorithm 1.
     Approximation algorithm of the optimal auction for uniform-size pieces.
@@ -132,7 +131,7 @@ def equally_sized_pieces(agents: List[Agent], piece_size: float) -> Allocation:
     return Allocation(chosen_agents, pieces)
 
 
-def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> Allocation:
+def discrete_setting(agents: AgentList, pieces: List[Tuple[float, float]]) -> Allocation:
     """
     Algorithm 2.
     Approximation algorithm of the optimal auction for a discrete cake with known piece sizes.
@@ -208,7 +207,7 @@ def discrete_setting(agents: List[Agent], pieces: List[Tuple[float, float]]) -> 
     return Allocation(chosen_agents, pieces)
 
 
-def continuous_setting(agents: List[Agent]) -> Allocation:
+def continuous_setting(agents: AgentList) -> Allocation:
     """
     Algorithm 3.
     Approximation algorithm of the optimal auction for a continuous cake.
@@ -375,7 +374,7 @@ def calculate_weight(g: Graph, edges_set: Set[Tuple[Agent, Tuple[float, float]]]
     return ret
 
 
-def create_matching_graph(left: List[Agent], right: List[Tuple[float, float]],
+def create_matching_graph(left: AgentList, right: List[Tuple[float, float]],
                           weights: Dict[Tuple[Agent, Tuple[float, float]], float])-> Graph:
     """
     Used in algorithm 2 and 3.

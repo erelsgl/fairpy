@@ -3,7 +3,7 @@
 import logging
 from typing import *
 
-from fairpy.agents import PiecewiseConstantAgent, Agent
+from fairpy import PiecewiseConstantAgent, Agent, AgentList
 from fairpy.cake.improve_ef4_algo.allocation import CakeAllocation
 from fairpy.cake.improve_ef4_algo.cake import CakeSlice, full_cake_slice, slice_equally
 from fairpy.cake.improve_ef4_algo.domination import get_most_satisfied_agent, get_least_satisfied_agent, is_dominated_by_all
@@ -15,7 +15,7 @@ from fairpy.cake.improve_ef4_algo.util import exclude_from_list
 
 class Algorithm(object):
 
-    def __init__(self, agents: List[Agent], logger: logging.Logger):
+    def __init__(self, agents: AgentList, logger: logging.Logger):
         self._agents = agents
         self._logger = logger
 
@@ -192,7 +192,7 @@ class Algorithm(object):
         self._logger.info("finished")
         return total_allocation
 
-    def _core(self, cutter: Agent, residue: List[CakeSlice], agents: List[Agent],
+    def _core(self, cutter: Agent, residue: List[CakeSlice], agents: AgentList,
               exclude_from_competition: Agent = None) -> CakeAllocation:
         """
         Runs the core protocol of "An Improved Envy-Free Cake Cutting Protocol for Four Agents".

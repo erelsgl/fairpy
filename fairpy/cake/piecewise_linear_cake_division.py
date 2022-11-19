@@ -12,8 +12,7 @@ Since: 2020-2
 """
 
 from fairpy.criteria import is_envyfree
-from fairpy import Allocation
-from fairpy.agents import Agent
+from fairpy import Allocation, Agent, AgentList
 from typing import *
 
 from itertools import permutations
@@ -33,7 +32,7 @@ it is recommended that when using these algorithms the cake will be in a large
 size, in order to prevent calculation errors as much as possible.
 """
 
-def Cover(a: float, b: float, agents: List[Agent], roundAcc = 6)->List:
+def Cover(a: float, b: float, agents: AgentList, roundAcc = 6)->List:
     """
     creates a cover of seperating intervals for a given interval.
     each interval in the cover is guarenteed to be worth at most proportionally
@@ -106,7 +105,7 @@ def Cover(a: float, b: float, agents: List[Agent], roundAcc = 6)->List:
     logger.info('cover complete.')
     return ret
 
-def EFAllocate(agents: List[Agent], roundAcc = 2)->Allocation:
+def EFAllocate(agents: AgentList, roundAcc = 2)->Allocation:
     """
     Envy Free cake cutting protocol for piecewise agents that runs
     in a polynomial time complexity.

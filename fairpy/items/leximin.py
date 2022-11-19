@@ -125,7 +125,7 @@ def leximin_optimal_envyfree_allocation(v: ValuationMatrix, allocation_constrain
     >>> logger.setLevel(logging.WARNING)
     >>> np.set_printoptions(precision=3)
 
-    >>> a = leximin_optimal_envyfree_allocation(ValuationMatrix([[5,0],[3,3]])).round(3)
+    >>> a = leximin_optimal_envyfree_allocation(ValuationMatrix([[5,0],[3,3]])).round(2)
     >>> print(a)
     [[0.75 0.  ]
      [0.25 1.  ]]

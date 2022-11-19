@@ -1,8 +1,9 @@
 #' # Output formats
-#' The output of a fair division allocation is usually an `Allocation` object.
 
 import fairpy
-divide = fairpy.items.divide
+divide = fairpy.divide
+
+#' The output of a fair division allocation is usually an `Allocation` object.
 
 agent_values = {"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}, "gadi": {"x":3, "y":2}}
 agent_capacities = {"avi":2,"beni":1,"gadi":1}
@@ -23,7 +24,7 @@ print(allocation.utility_profile_matrix())
 #' its utilitarian value, egalitarian value, number of envy-pairs or largest envy magnitude.
 
 #' Some algorithms accept a valuation matrix and return an allocation matrix, where each element z[i,j] is the fraction given to agent i from item j:
-allocation = fairpy.items.leximin_optimal_allocation(fairpy.ValuationMatrix([[4,5],[2,3],[3,2]]))
+allocation = divide(fairpy.items.leximin_optimal_allocation, [[4,5],[2,3],[3,2]])
 print(allocation)
 
 #' The allocation matrix is inaccurate due to floating point issues; you can round it:

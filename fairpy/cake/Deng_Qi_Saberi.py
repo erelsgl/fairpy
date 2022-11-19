@@ -10,8 +10,7 @@ Programmer: Dvir Fried
 Since: 2020-01
 """
 
-from fairpy.agents import *
-from fairpy import Allocation
+from fairpy import AgentList, Allocation, PiecewiseConstantAgent
 
 from typing import *
 import numpy as np
@@ -274,7 +273,7 @@ class SimplexSolver:
                     return self.recursive_algorithm1(i1, i2, k3, k2)
 
 
-def elaborate_simplex_solution(agents: List[Agent], epsilon) -> Allocation:
+def elaborate_simplex_solution(agents: AgentList, epsilon) -> Allocation:
     """
     according to the algorithm in theirs essay, the algorithm will create class that solves the problem with simplex
     and return allocation.

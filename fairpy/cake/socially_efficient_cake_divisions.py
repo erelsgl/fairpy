@@ -12,15 +12,14 @@ Programmer: Jonathan Diamant
 Since: 2019-12
 """
 
-from fairpy import Allocation
+from fairpy import Allocation, AgentList, Agent
 from fairpy.cake.pieces import round_allocation
-from fairpy.agents import Agent
 from typing import List
 
 import sys, logging
 logger = logging.getLogger(__name__)
 
-def discretization_procedure(agents: List[Agent], epsilon:float):
+def discretization_procedure(agents: AgentList, epsilon:float):
     """
     reduce the continuous cake into a sequence of discrete items.
     the algorithm below receives a list of agents and a parameter epsilon,
@@ -65,7 +64,7 @@ def discretization_procedure(agents: List[Agent], epsilon:float):
 
 
 
-def get_players_valuation(agents: List[Agent], c : List[float]):
+def get_players_valuation(agents: AgentList, c : List[float]):
     """
     this function calculates for each player its valuation of a discrete cut of the cake.
     for each player, it calulates the valuation of each item.
@@ -277,7 +276,7 @@ def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items
 
     return [S,T]
 
-def divide(agents: List[Agent], epsilon:float) -> Allocation:
+def divide(agents: AgentList, epsilon:float) -> Allocation:
     """
     this function gets a list of agents and epsilon and returns an approximation of the division
     :param agents: the players

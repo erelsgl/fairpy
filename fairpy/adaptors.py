@@ -19,8 +19,10 @@ def divide(algorithm: Callable, input: Any, *args, **kwargs):
     """
     An adaptor function for item allocation.
 
-    :param algorithm: a specific fair item allocation algorithm. Should accept (at least) the following parameters: 
-        agents: List[Agent]
+    :param algorithm: a specific fair item allocation algorithm. Should accept one the following parameters: 
+        agents: AgentList - a list of Agent objects;
+        valuation_matrix: ValuationMatrix - a matrix V where V[i,j] is the value of agent i to item j.
+    It can also accept additional parameters.
 
     :param input: the input to the algorithm, in one of the following forms:
        * dict of dicts mapping agent names to their valuations, e.g.: {"Alice":{"x":1,"y":2}, "George":{"x":3,"y":4}}
@@ -117,6 +119,20 @@ def divide(algorithm: Callable, input: Any, *args, **kwargs):
     "{avi:['x', 'y'], beni:['w', 'z']}"
     >>> stringify(alloc.map_item_to_agents())
     "{w:['beni'], x:['avi'], y:['avi'], z:['beni']}"
+
+    ### Cake-cutting algorithm
+    >>> from fairpy.agents import PiecewiseConstantAgent
+    >>> from fairpy.cake import cut_and_choose
+    >>> Alice = PiecewiseConstantAgent([33,33], "Alice")
+    >>> George = PiecewiseConstantAgent([11,55], "George")
+    >>> divide(algorithm=cut_and_choose.asymmetric_protocol, input=[Alice, George])
+    Alice gets {(0, 1.0)} with value 33.
+    George gets {(1.0, 2)} with value 55.
+    <BLANKLINE>
+    >>> divide(algorithm=cut_and_choose.asymmetric_protocol, input=[George, Alice])
+    George gets {(1.4, 2)} with value 33.
+    Alice gets {(0, 1.4)} with value 46.2.
+    <BLANKLINE>
     """
     annotations_list = list(algorithm.__annotations__.items())
     first_argument_type = annotations_list[0][1]

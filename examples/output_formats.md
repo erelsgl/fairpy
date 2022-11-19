@@ -1,14 +1,22 @@
 # Output formats
-The output of a fair division allocation is usually an `Allocation` object.
 
 
 ```python
 import fairpy
+divide = fairpy.divide
+```
+
+
+
+The output of a fair division allocation is usually an `Allocation` object.
+
+
+```python
 agent_values = {"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}, "gadi": {"x":3, "y":2}}
 agent_capacities = {"avi":2,"beni":1,"gadi":1}
 agent_weights = {"avi":1, "gadi":10, "beni":100}
 item_capacities = {"x":2, "y":2}
-allocation = fairpy.items.utilitarian_matching(agent_values, item_capacities=item_capacities, agent_capacities=agent_capacities, agent_weights=agent_weights)
+allocation = divide(fairpy.items.utilitarian_matching, agent_values, item_capacities=item_capacities, agent_capacities=agent_capacities, agent_weights=agent_weights)
 ```
 
 
@@ -66,18 +74,17 @@ print(allocation.utility_profile_matrix())
 With this information, you can compute various metrics on the allocation, such as:
 its utilitarian value, egalitarian value, number of envy-pairs or largest envy magnitude.
 
-Some algorithms return an allocation matrix, where each element z[i,j] is the fraction given to agent i from item j:
-
+Some algorithms accept a valuation matrix and return an allocation matrix, where each element z[i,j] is the fraction given to agent i from item j:
 
 ```python
-allocation = fairpy.items.leximin_optimal_allocation(agent_values)
-print(allocation.matrix)
+allocation = divide(fairpy.items.leximin_optimal_allocation, [[4,5],[2,3],[3,2]])
+print(allocation)
 ```
 
 ```
-[[ 0.249895  0.250075]
- [-0.        0.749925]
- [ 0.750105 -0.      ]]
+Agent #0 gets { 25.0% of 0, 25.0% of 1} with value 2.25.
+Agent #1 gets { 75.0% of 1} with value 2.25.
+Agent #2 gets { 75.0% of 0} with value 2.25.
 ```
 
 
@@ -87,19 +94,15 @@ The allocation matrix is inaccurate due to floating point issues; you can round 
 
 ```python
 allocation.round(3)
-print(allocation.matrix)
 print(allocation)
 ```
 
 ```
-[[0.25 0.25]
- [0.   0.75]
- [0.75 0.  ]]
-avi gets { 25.0% of x, 25.0% of y} with value 2.25.
-beni gets { 75.0% of y} with value 2.25.
-gadi gets { 75.0% of x} with value 2.25.
+Agent #0 gets { 25.0% of 0, 25.0% of 1} with value 2.25.
+Agent #1 gets { 75.0% of 1} with value 2.25.
+Agent #2 gets { 75.0% of 0} with value 2.25.
 ```
 
 
 ---
-Markdown generated automatically from [output_formats.py](output_formats.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2022-02-02.
+Markdown generated automatically from [output_formats.py](output_formats.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2022-11-19.

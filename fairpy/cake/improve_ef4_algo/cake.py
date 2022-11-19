@@ -2,7 +2,7 @@
 
 from typing import *
 
-from fairpy.agents import Agent, PiecewiseConstantAgent
+from fairpy import Agent, PiecewiseConstantAgent, AgentList
 
 
 class CakeSlice(object):
@@ -179,7 +179,7 @@ class CakeSlice(object):
         return CakeSlice(start, end)
 
 
-def full_cake_slice(agents: List[Agent]) -> CakeSlice:
+def full_cake_slice(agents: AgentList) -> CakeSlice:
     """
     Returns the full cake to be divided among the given agents.
 

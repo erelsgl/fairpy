@@ -21,17 +21,38 @@ To verify that everything was installed correctly, run one of the example progra
     python examples/items.py
     python examples/cake.py
 
+## Usage
+
+The function `fairpy.divide` can be used to activate all fair division algorithms. For example:
+
+    import fairpy
+
+    valuations = {"Alice": {"w":11,"x":22,"y":44,"z":0}, "George": {"w":22,"x":11,"y":66,"z":33}}
+
+    ### Allocating indivisible items using the Iterated Maximum Matching algorithm:
+    fairpy.divide(algorithm=fairpy.items.iterated_maximum_matching, input=valuations)
+
+    ### Allocating divisible goods using the leximin algorithm:
+    fairpy.divide(fairpy.items.leximin, valuations)
+
+    ### Dividing a cake using cut-and-choose:
+    from fairpy import PiecewiseConstantAgent
+    Alice = PiecewiseConstantAgent([33,33], "Alice")
+    George = PiecewiseConstantAgent([11,55], "George")
+    fairpy.divide(algorithm=fairpy.cake.cut_and_choose.asymmetric_protocol, input=[George, Alice])
+
+
 ## Features and Examples
 
-1. [Various input formats](examples/input_formats.md), to easily use by both researchers and end-users.
+1. [Item allocation algorithms](examples/items.md), for both divisible and indivisible items;
 
-1. [Various output formats](examples/output_formats.md).
+1. [Cake-cutting algorithms](examples/cake.md);
+
+1. [Various input formats](examples/input_formats.md), to easily use by both researchers and end-users;
+
+1. [Various output formats](examples/output_formats.md);
 
 1. [Optional logging](examples/loggers.md), to learn and understand how the algorithms work.
-
-1. [Item allocation algorithms](examples/items.md), for both divisible and indivisible items.
-
-1. [Cake-cutting algorithms](examples/cake.md).
 
 
 ## Implemented algorithms

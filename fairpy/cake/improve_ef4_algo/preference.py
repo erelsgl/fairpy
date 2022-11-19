@@ -2,7 +2,7 @@
 
 from typing import *
 
-from fairpy.agents import Agent, PiecewiseConstantAgent
+from fairpy import Agent, PiecewiseConstantAgent, AgentList
 from fairpy.cake.improve_ef4_algo.cake import CakeSlice
 
 
@@ -38,8 +38,8 @@ class Preferences(object):
             raise KeyError('No preference for agent')
         return self._agents_to_preferences[agent]
 
-    def find_agents_with_preference_for(self, slice: CakeSlice, exclude_agents: List[Agent] = None) \
-            -> Tuple[List[Agent], List[Agent]]:
+    def find_agents_with_preference_for(self, slice: CakeSlice, exclude_agents: AgentList = None) \
+            -> Tuple[AgentList, AgentList]:
         """
         Searches amongst all the agent preferences for preferences for `slice` is either a first or second
         preference.
@@ -154,7 +154,7 @@ def get_agent_preference(agent: Agent, slices: List[CakeSlice]) -> Tuple[CakeSli
     return first, second, third
 
 
-def get_preferences_for_agents(agents: List[Agent], slices: List[CakeSlice]) -> Preferences:
+def get_preferences_for_agents(agents: AgentList, slices: List[CakeSlice]) -> Preferences:
     """
     Gets the preferences of all agents out of given slices.
     :param agents: agents whose preference to find

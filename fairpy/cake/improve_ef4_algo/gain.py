@@ -3,13 +3,13 @@
 import itertools
 from typing import List
 
-from fairpy.agents import Agent, PiecewiseConstantAgent
+from fairpy import Agent, PiecewiseConstantAgent, AgentList
 from fairpy.cake.improve_ef4_algo.allocation import CakeAllocation, CakeSlice
 from fairpy.cake.improve_ef4_algo.domination import get_agent_satisfaction, value_for_slices
 from fairpy.cake.improve_ef4_algo.util import exclude_from_list
 
 
-def get_agent_gain(agent: Agent, other_agents: List[Agent], allocation: CakeAllocation) -> float:
+def get_agent_gain(agent: Agent, other_agents: AgentList, allocation: CakeAllocation) -> float:
     """
     Gets the gain of an agent in the scope of a given allocation, where gain(agent)
     is defined by how agent is satisfied with their allocation, in comparison to others in the allocation.
@@ -50,7 +50,7 @@ def get_agent_gain(agent: Agent, other_agents: List[Agent], allocation: CakeAllo
                 for oagent in other_agents])
 
 
-def is_allocation_gain_larger_then_others(agent: Agent, other_agents: List[Agent], allocation: CakeAllocation,
+def is_allocation_gain_larger_then_others(agent: Agent, other_agents: AgentList, allocation: CakeAllocation,
                                           other_allocations: List[CakeAllocation]) -> bool:
     """
     Gets whether or not an agent's gain, as defined by `get_agent_gain` in an allocation scope,
@@ -77,7 +77,7 @@ def is_allocation_gain_larger_then_others(agent: Agent, other_agents: List[Agent
     return gain_for_allocation > gain_for_other_allocations
 
 
-def allocation_with_lowest_gain(agents: List[Agent], allocations: List[CakeAllocation]) -> CakeAllocation:
+def allocation_with_lowest_gain(agents: AgentList, allocations: List[CakeAllocation]) -> CakeAllocation:
     """
     Finds an allocation such that for all agents, gain(agent) (as defined by `get_agent_gain`) in that
     allocation scope is less than the sum of gain(agent) for all other allocation scopes.

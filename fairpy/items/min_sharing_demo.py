@@ -8,7 +8,7 @@ Since:  2021-03
 """
 
 import fairpy
-divide = fairpy.items.divide
+divide = fairpy.divide
 
 import logging
 import sys

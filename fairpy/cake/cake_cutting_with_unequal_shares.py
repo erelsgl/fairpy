@@ -18,12 +18,11 @@ Since:  2021-02
 """
 
 
-from fairpy import Allocation
-from fairpy.agents import Agent
-from typing import List, Dict
+from fairpy import Allocation, AgentList
+from typing import Dict
 import logging
 
-def proportional_division_with_unequal_shares(agents: List[Agent], agents_demands: Dict[str,int], start: float, end: float)->Allocation:
+def proportional_division_with_unequal_shares(agents: AgentList, agents_demands: Dict[str,int], start: float, end: float)->Allocation:
     """
     An algorithm for proportional cake division, with unequal shares. Best known complexity! 2(n-1)*celling(log2(D)), where D is the value of the whole cake.
     All agents must value the cake with the same value D, which is the sum of their demands.
@@ -93,7 +92,7 @@ def proportional_division_with_unequal_shares(agents: List[Agent], agents_demand
     return
 
 
-def proportional_division_with_irrational_demands(agents: List[Agent], agents_demands: Dict[str,float], allocation: Allocation, start: float, end: float):
+def proportional_division_with_irrational_demands(agents: AgentList, agents_demands: Dict[str,float], allocation: Allocation, start: float, end: float):
     return
 
 

@@ -13,10 +13,8 @@ Since: 2020-07
 """
 
 import logging
-from typing import List
 
-from fairpy import Allocation
-from fairpy.agents import Agent
+from fairpy import Allocation, AgentList
 import fairpy.cake.improve_ef4_algo.improve_ef4_impl as impl
 
 from fairpy.cake.pieces import round_allocation
@@ -24,7 +22,7 @@ from fairpy.cake.pieces import round_allocation
 logger = logging.getLogger(__name__)
 
 
-def improve_ef4_protocol(agents: List[Agent]) -> Allocation:
+def improve_ef4_protocol(agents: AgentList) -> Allocation:
     """
     Runs the "An Improved Envy-Free Cake Cutting Protocol for Four Agents" to allocate
     a cake to 4 agents.

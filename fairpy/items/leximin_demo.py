@@ -14,8 +14,8 @@ import sys
 logger.addHandler(logging.StreamHandler(sys.stdout))
 logger.setLevel(logging.INFO)
 
+import fairpy
 from fairpy import solve
-from fairpy.items.adaptors import divide
 
 solve.logger.addHandler(logging.StreamHandler(sys.stdout))
 solve.logger.setLevel(logging.INFO)
@@ -28,7 +28,7 @@ cvxpy_leximin.LOGGER.setLevel(logging.INFO)
 
 def show(title, v):
     print("\n", "###", title)
-    z = divide(leximin_optimal_allocation, v, upper_tolerance=1.02).round(3)
+    z = fairpy.divide(leximin_optimal_allocation, v, upper_tolerance=1.02).round(3)
     # print(type(z))
     # print("agent_bundle_value_matrix\n", z.agent_bundle_value_matrix)
     print("allocation = \n", z)

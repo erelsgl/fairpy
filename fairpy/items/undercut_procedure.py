@@ -207,7 +207,7 @@ def one_item(agents: AgentList, items: List[Any]) -> List[List[Any]]:
     If there is one item there will be a envy free division only if for one of 
     the agents the benefit is negative
     Args:
-        agents (List[Agent]): agents preferences
+        agents (AgentList): agents preferences
         items (List[Any]):  the items which are divided
     Returns:
         List[List[Any]]: a list of bundles, where each bundle is a list of items

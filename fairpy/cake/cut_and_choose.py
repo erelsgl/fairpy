@@ -11,15 +11,14 @@ Programmer: Erel Segal-Halevi
 Since: 2019-11
 """
 
-from fairpy.agents import *
-from fairpy import Allocation
+from fairpy import Allocation, AgentList, Agent, PiecewiseConstantAgent
 from typing import *
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-def asymmetric_protocol(agents: List[Agent])->Allocation:
+def asymmetric_protocol(agents: AgentList)->Allocation:
     """
     Asymmetric cut-and-choose protocol: one cuts and the other chooses.
 
@@ -70,7 +69,7 @@ def asymmetric_protocol(agents: List[Agent])->Allocation:
 
 
 
-def symmetric_protocol(agents: List[Agent])->Allocation:
+def symmetric_protocol(agents: AgentList)->Allocation:
     """
     Symmetric cut-and-choose protocol: both agents cut, the manager chooses who gets what.
 

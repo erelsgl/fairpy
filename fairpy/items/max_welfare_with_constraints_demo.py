@@ -7,7 +7,7 @@ Author: Erel Segal-Halevi
 Since:  2021-05
 """
 import fairpy
-divide = fairpy.items.divide
+divide = fairpy.divide
 from fairpy import Allocation
 from fairpy.items.max_welfare import *
 from fairpy.items.leximin import *

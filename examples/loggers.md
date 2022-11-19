@@ -12,7 +12,7 @@ instance = {
 
 fairpy.items.round_robin.logger.addHandler(logging.StreamHandler(sys.stdout))
 fairpy.items.round_robin.logger.setLevel(logging.INFO)
-fairpy.items.round_robin(instance)
+fairpy.divide(fairpy.items.round_robin, instance)
 ```
 
 ```
@@ -36,7 +36,7 @@ Another run with different parameters:
 
 
 ```python
-fairpy.items.round_robin(instance, agent_order=[1,0], items=["green", "red", "blue"])
+fairpy.divide(fairpy.items.round_robin, instance, agent_order=[1,0], items=["green", "red", "blue"])
 ```
 
 ```
@@ -59,7 +59,7 @@ You can turn off logging for each module separately:
 
 ```python
 fairpy.items.round_robin.logger.setLevel(logging.WARNING)
-fairpy.items.round_robin(instance)
+fairpy.divide(fairpy.items.round_robin, instance)
 ```
 
 ```
@@ -69,4 +69,4 @@ Tami gets {red,yellow} with value 10.
 
 
 ---
-Markdown generated automatically from [loggers.py](loggers.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2022-02-02.
+Markdown generated automatically from [loggers.py](loggers.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2022-11-19.

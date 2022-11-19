@@ -17,7 +17,8 @@ Programmer: Erel Segal-Halevi
 Since: 2019-11
 """
 
-from fairpy.agents import *
+from fairpy import AgentList, Agent
+import numpy as np
 
 import matplotlib.pyplot as pyplot
 import time, logging
@@ -78,7 +79,7 @@ def plot_1_agent(agent:Agent, axes=None, samples_per_side:float=0.01):
 
 
 
-def plot_many_agents(agents:List[Agent], axes=None, samples_per_side:float=0.01):
+def plot_many_agents(agents:AgentList, axes=None, samples_per_side:float=0.01):
     """
     Plot the partition-simplexex of several different agents, overlayed one above the other.
     The color of each point is determined by the piece that each agent wants in that partition:
@@ -111,3 +112,8 @@ def plot_many_agents(agents:List[Agent], axes=None, samples_per_side:float=0.01)
     colormap.plot(axes, "{} agents".format(num_of_agents), scale)
 
 
+
+if __name__ == "__main__":
+    import doctest
+    (failures, tests) = doctest.testmod(report=True)
+    print("{} failures, {} tests".format(failures, tests))

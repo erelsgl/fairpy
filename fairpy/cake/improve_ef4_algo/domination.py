@@ -2,7 +2,7 @@
 
 from typing import List
 
-from fairpy.agents import Agent, PiecewiseConstantAgent
+from fairpy import Agent, PiecewiseConstantAgent, AgentList
 from fairpy.cake.improve_ef4_algo.allocation import CakeAllocation
 from fairpy.cake.improve_ef4_algo.cake import CakeSlice
 
@@ -49,7 +49,7 @@ def get_agent_satisfaction(agent: Agent, allocation: CakeAllocation) -> float:
     return value_for_slices(agent, allocation.get_allocation_for_agent(agent))
 
 
-def get_most_satisfied_agent(agents: List[Agent], allocation: CakeAllocation) -> Agent:
+def get_most_satisfied_agent(agents: AgentList, allocation: CakeAllocation) -> Agent:
     """
     Gets the agent with the highest satisfaction, as described in `get_agent_satisfaction`, value
     among the given agents in the scope of an allocation.
@@ -83,7 +83,7 @@ def get_most_satisfied_agent(agents: List[Agent], allocation: CakeAllocation) ->
     return max([agent for agent in agents], key=lambda x: get_agent_satisfaction(x, allocation))
 
 
-def get_least_satisfied_agent(agents: List[Agent], allocation: CakeAllocation) -> Agent:
+def get_least_satisfied_agent(agents: AgentList, allocation: CakeAllocation) -> Agent:
     """
     Gets the agent with the lowest satisfaction, as described in `get_agent_satisfaction`, value
     among the given agents in the scope of an allocation.
@@ -145,7 +145,7 @@ def is_dominated_by(agent: Agent, dominator: Agent, allocation: CakeAllocation) 
     return get_agent_satisfaction(agent, allocation) < get_agent_satisfaction(dominator, allocation)
 
 
-def is_dominated_by_all(agent: Agent, others: List[Agent], allocation: CakeAllocation) -> bool:
+def is_dominated_by_all(agent: Agent, others: AgentList, allocation: CakeAllocation) -> bool:
     """
     Get whether or not agent is dominated by other agents in the scope of a given cake allocation,
     where foreach agent in others, `is_dominated_by(agent, other, allocation)` follows as true

@@ -1,10 +1,19 @@
 # Fair cake-cutting algorithms
+
+
+```python
+import fairpy
+divide = fairpy.divide
+```
+
+
+
 Cake-cutting algorithms require `Agent` objects that can answer `mark` and `eval` queries.
 Some such Agent objects are already defined.
 
 
 ```python
-from fairpy.agents import PiecewiseUniformAgent, PiecewiseConstantAgent, agents_from
+from fairpy import PiecewiseUniformAgent, PiecewiseConstantAgent
 ```
 
 
@@ -36,11 +45,10 @@ George is an agent with a Piecewise-constant valuation with values [1
 
 Now, we can let our agents play 'cut and choose'.
 
-
 ```python
 from fairpy.cake import cut_and_choose
 
-allocation = cut_and_choose.asymmetric_protocol([Alice, George])
+allocation = divide(cut_and_choose.asymmetric_protocol, [Alice, George])
 print(allocation)
 ```
 
@@ -59,8 +67,7 @@ import logging, sys
 cut_and_choose.logger.addHandler(logging.StreamHandler(sys.stdout))
 cut_and_choose.logger.setLevel(logging.INFO)
 
-print(cut_and_choose.asymmetric_protocol([Alice, George]))
-print(cut_and_choose.asymmetric_protocol([George, Alice]))
+print(divide(cut_and_choose.asymmetric_protocol, [Alice, George]))
 ```
 
 ```
@@ -68,19 +75,18 @@ The cutter (Alice) cuts at 4.00.
 The chooser (George) chooses the leftmost piece.
 Alice gets {(4.0, 6)} with value 2.
 George gets {(0, 4.0)} with value 16.
-
-The cutter (George) cuts at 2.80.
-The chooser (Alice) chooses the rightmost piece.
-George gets {(0, 2.8)} with value 8.
-Alice gets {(2.8, 6)} with value 3.
 ```
 
 
 
+
+
+print(divide(cut_and_choose.asymmetric_protocol, [George, Alice]))
+
 Here is another protocol - symmetric cut-and-choose:
 
 ```python
-print(cut_and_choose.symmetric_protocol([Alice, George]))
+print(divide(cut_and_choose.symmetric_protocol, [Alice, George]))
 ```
 
 ```
@@ -103,12 +109,12 @@ last_diminisher.logger.addHandler(logging.StreamHandler(sys.stdout))
 last_diminisher.logger.setLevel(logging.INFO)
 
 from fairpy.cake.valuations import PiecewiseConstantValuation
-print(last_diminisher.last_diminisher(agents_from([
+print(divide(last_diminisher.last_diminisher, [
     PiecewiseConstantValuation([1,3,5,7]), 
     PiecewiseConstantValuation([7,5,3,1]),
     PiecewiseConstantValuation([4,4,4,4]),
     PiecewiseConstantValuation([16,0,0,0]),
-    ])))
+    ]))
 ```
 
 ```
@@ -161,4 +167,4 @@ For more information see:
 * [List of cake-cutting algorithms for future work](../fairpy/cake/README-future.md).
 
 ---
-Markdown generated automatically from [cake.py](cake.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2022-02-02.
+Markdown generated automatically from [cake.py](cake.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2022-11-19.

@@ -7,8 +7,7 @@ Programmer: Ori Zitzer
 Since: 2019-12
 """
 
-from fairpy import Allocation
-from fairpy.agents import *
+from fairpy import Allocation, AgentList, PiecewiseConstantAgent
 from fairpy.cake.fe_cake_division_connected_pieces_utils import *
 import numpy as np
 import logging
@@ -17,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 
-def ALG(agents: List[Agent], epsilon:float)->Allocation:
+def ALG(agents: AgentList, epsilon:float)->Allocation:
     """
     ALG: Algorithm that find Fair and Efficient Cake Division with Connected Pieces
 
