@@ -46,7 +46,7 @@ def divide(algorithm: Callable, input: Any, *args, **kwargs):
     <BLANKLINE>
 
     ### List of list of values, converted to a ValuationMatrix:
-    >>> divide(algorithm=fairpy.items.leximin_optimal_allocation, input=[[3,3],[0,5]]).round(3)
+    >>> divide(algorithm=fairpy.items.leximin_optimal_allocation, input=[[3,3],[0,5]]).round(2)
     Agent #0 gets { 100.0% of 0, 25.0% of 1} with value 3.75.
     Agent #1 gets { 75.0% of 1} with value 3.75.
     <BLANKLINE>
@@ -59,7 +59,7 @@ def divide(algorithm: Callable, input: Any, *args, **kwargs):
 
 
     ### Dict mapping agent names to lists of values, converted to a ValuationMatrix
-    >>> divide(algorithm=fairpy.items.leximin_optimal_envyfree_allocation, input={"Alice": [3,3], "George": [0,5]})
+    >>> divide(algorithm=fairpy.items.leximin_optimal_envyfree_allocation, input={"Alice": [3,3], "George": [0,5]}).round(2)
     Alice gets { 100.0% of 0, 25.0% of 1} with value 3.75.
     George gets { 75.0% of 1} with value 3.75.
     <BLANKLINE>
