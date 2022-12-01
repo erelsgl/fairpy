@@ -2,6 +2,8 @@
 
 ![PyTest result](https://github.com/erelsgl/fairpy/workflows/pytest/badge.svg)
 
+### This repository was forked from [here](https://github.com/erelsgl/fairpy).
+
 An open-source library of [fair division algorithms](https://en.wikipedia.org/wiki/Fair_division) in Python.
 Designed for three target audiences:
 
