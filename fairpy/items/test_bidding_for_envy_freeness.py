@@ -71,12 +71,12 @@ def test_calculate_discounts():
 
     envy_mat = bfef.bidding_to_envy()
 
-    assert bfef.calculate_discounts(envy_mat) == ValuationMatrix([[0,  10, -50,  0,  0],
-                                                                  [-10,  10,
-                                                                      10,  5, 10],
-                                                                  [-5,   0,
-                                                                      10, -5, 10],
-                                                                  [-5, -15,  10,  5,  5]])
+    assert bfef.calculate_discounts() == ValuationMatrix([[0,  10, -50,  0,  0],
+                                                          [-10,  10,
+                                                           10,  5, 10],
+                                                          [-5,   0,
+                                                           10, -5, 10],
+                                                          [-5, -15,  10,  5,  5]])
 
 
 def test_full_cases():
