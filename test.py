@@ -54,18 +54,22 @@ class TestMain(unittest.TestCase):
         self.assertEqual(algorithm2(ex3, 1000, {'Alice': 600, 'Bob': 500}),
                          {"Alice": {1: 600}, "Bob": {2: 318.75}})
 
-        # Need to continue from here
-        ex4 = AgentList({"Alice": {'1': 250, '2': 250, '3': 500}, "Bob": {'1': 250, '2': 250, '3': 500},
-                         "Clair": {'1': 250, '2': 500, '3': 250}})
-        self.assertEqual(algorithm2(ex4, 1000, {'Alice': 250, 'Bob': 320, 'Clair': 430}),
-                         (920, "(Alice gets {1} with rent 130, Bob gets {2} with rent 270,"
-                               "Clair gets {3} with rent 520)"))
+        ex4 = AgentList({"Alice": {'1': 250, '2': 750}, "Bob": {'1': 350, '2': 650}})
+        self.assertEqual(algorithm2(ex4, 1000, {'Alice': 500, 'Bob': 600}),
+                         {{"Alice": {2: 520}, "Bob": {1: 350}}})
 
+        # No Strongly connected component
         ex5 = AgentList({"Alice": {'1': 250, '2': 250, '3': 500}, "Bob": {'1': 250, '2': 250, '3': 500},
-                         "Clair": {'1': 250, '2': 500, '3': 250}})
-        self.assertEqual(algorithm2(ex5, 1000, {'Alice': 250, 'Bob': 320, 'Clair': 430}),
-                         (920, "(Alice gets {1} with rent 130, Bob gets {2} with rent 270,"
-                               "Clair gets {3} with rent 520)"))
+                         "Clair": {'1': 250, '2': 250, '3': 500}})
+        self.assertEqual(algorithm2(ex5, 1000, {'Alice': 250, 'Bob': 320, 'Clair': 430}), "no solution")
+
+        # Negative values
+        ex6 = AgentList({"Alice": {'1': -250, '2': 750}, "Bob": {'1': 350, '2': -650}})
+        self.assertEqual(algorithm2(ex6, 1000, {'Alice': 500, 'Bob': 600}), "no solution")
+
+        # Zero values
+        ex7 = AgentList({"Alice": {'1': 0, '2': 0}, "Bob": {'1': 0, '2': 0}})
+        self.assertEqual(algorithm2(ex7, 1000, {'Alice': 250, 'Bob': 250}), "no solution")
 
 
 if __name__ == '__main__':
