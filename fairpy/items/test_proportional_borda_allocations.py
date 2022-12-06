@@ -1,3 +1,13 @@
+
+#!python3
+"""
+Tests to proportional_borda_allocations
+
+Programmer: Shlomo Glick
+Since:  2022-12
+"""
+
+
 from fairpy.items.proportional_borda_allocations import *
 from fairpy import AgentList
 import pytest
