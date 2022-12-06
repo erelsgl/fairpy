@@ -25,14 +25,44 @@ def calculateSW(res: dict, v: ValuationMatrix):
     return items_values - payments
 
 
-def bundle_value(idx: int, d: dict):
-    return sum(d["bundles"][idx]) - d["payments"][idx]
+def bundle_value(idx: int, d: dict, v: ValuationMatrix):
+    """
+    get value of bundle by valuation function of idx agent.
+    """
+    ans = 0
+    if d["bundles"][idx]:
+        ans = sum(v[idx][i] for i in d["bundles"][idx])
+    return ans - d["payments"][idx]
 
 
-def agent_is_EF(idx: int, d: dict):
-    value = bundle_value(idx, d)
+def bundle_value_subjective(own: int, other: int, d: dict, v: ValuationMatrix):
+    """
+    get value of bundle of other agent by valuation function of own agent.
+    """
+    ans = 0
+    if d["bundles"][other]:
+        ans = sum(v[own][i] for i in d["bundles"][other])
+    return ans - d["payments"][other]
+
+
+def agent_is_EF(idx: int, d: dict, v: ValuationMatrix):
+    """
+    check if idx agent is envy-free.
+    """
+    value = bundle_value(idx, d, v)
     for i in range(len(d["bundles"])):
-        if bundle_value(i, d) <= value:
+        if bundle_value_subjective(idx, i, d, v) > value:
+            return False
+    return True
+
+
+def agent_is_EQ(idx: int, d: dict, v: ValuationMatrix):
+    """
+    check if utility of idx agent is equal to other agents.
+    """
+    value = bundle_value(idx, d, v)
+    for i in range(len(d["bundles"])):
+        if bundle_value(i, d, v) > value:
             return False
     return True
 
@@ -46,7 +76,9 @@ class TestApproximationDivison(unittest.TestCase):
         self.v2 = [[50, -10, 72, 22, -15, -30],
                    [-62, -24, 10, 71, 20, -10],
                    [10, 13, -45, 36, 41, -60],
-                   [-34, 12, 10, -7, -6, -5]]
+                   [-34, 12, 10, -14, -6, -5],
+                   [-11, -20, 10, 38, 17, 12],
+                   [14, 32, 5, -7, -9, 15]]
         self.a1 = np.zeros_like(self.v).tolist()
         for i in range(len(self.a1)):
             self.a1[i][i] = 1
@@ -61,12 +93,18 @@ class TestApproximationDivison(unittest.TestCase):
         self.allocationResult2 = envy_free_approximation(self.allocationBefore2)
 
     def test_sw(self):
+        """
+        check that SW of forst allocation <= SW of result allocation
+        """
         self.assertLessEqual(calculateSW(self.allocationBefore1, self.v),
                              calculateSW(envy_free_approximation(self.allocationBefore1), self.v))
         self.assertLessEqual(calculateSW(self.allocationBefore2, self.v2),
                              calculateSW(envy_free_approximation(self.allocationBefore2), self.v2))
 
     def test_init(self):
+        """
+        check that algorithm run for many agents and bundles.
+        """
         mat = [[1 + x + y * 50 for x in range(50)] for y in range(50)]
         amt = np.zeros_like(mat).tolist()
         for i in range(len(amt)):
@@ -83,24 +121,14 @@ class TestApproximationDivison(unittest.TestCase):
         self.assertIsNotNone(envy_free_approximation(alloc2))
 
     def test_ef(self):
+        """
+        chaeck that all agents are envy-free.
+        """
         for i in range(len(self.allocationResult1["bundles"])):
-            self.assertTrue(agent_is_EF(i, self.allocationResult1))
+            self.assertTrue(agent_is_EF(i, self.allocationResult1,ValuationMatrix(self.v)))
         for i in range(len(self.allocationResult2["bundles"])):
-            self.assertTrue(agent_is_EF(i, self.allocationResult2))
+            self.assertTrue(agent_is_EF(i, self.allocationResult2,ValuationMatrix(self.v2)))
+
 
 if __name__ == '__main__':
     unittest.main()
-# v = [[15, 10, 90, 35],
-#      [35, 21, 95, 48],
-#      [9, 28, 5, 72],
-#      [4, 25, 28, 75]]
-# # z = ["X", "y", "z", "w"]
-# # dic = {k: {v} for k in range(4), v in range(4)}
-# agent_dict = {"A": {"x": 15, "y": 10, "z": 90, "w": 35},
-#               "B": {"x": 35, "y": 21, "z": 95, "w": 48},
-#               "C": {"x": 9, "y": 28, "z": 5, "w": 72},
-#               "D": {"x": 4, "y": 25, "z": 28, "w": 75}}
-# AllocationBefore = Allocation(agents=ValuationMatrix(v),
-#                               bundles=AllocationMatrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]))
-# print(calculateSW(AllocationBefore,ValuationMatrix(v)))
-# # print(AllocationBefore.utility_profile())
