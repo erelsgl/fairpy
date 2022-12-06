@@ -13,7 +13,7 @@ from fairpy.cake.valuations  import *
 from fairpy.agents import Agent, AdditiveAgent, BinaryAgent
 
 class AgentList:
-    def __init__(self, input:Any):
+    def __init__(self, input:Any) -> object:
         """
         Attempts to construct a list of agents from various input formats.
         The returned value is a list of Agent objects.
