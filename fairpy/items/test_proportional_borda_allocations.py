@@ -4,11 +4,7 @@ import pytest
 from itertools import permutations, combinations
 
 
-# xx = proportional_division(agents=AgentList([[0,1,2,3,4,5,6,7,8,9],[0,1,2,3,4,5,6,7,8,9]]),items=[0,1,2,3,4,5,6,7,8,9]).map_agent_to_bundle()
-# print(xx)
-# print(proportional_division())
-
-size_big = 1000
+size_big = 1001
 big_agents = AgentList([list(range(size_big)) for i in range(size_big)])
 def get_matrix_permutations(n):
     ans = []
@@ -18,7 +14,7 @@ def get_matrix_permutations(n):
             break
     return ans
 
-def is_proportional(alocation:Allocation,approximately:bool=False):
+def is_proportional(alocation:Allocation, approximately:bool=False):
     n = len(alocation)
     value_of_all_items = n*(n-1)/2
     threshold = value_of_all_items/n
@@ -42,11 +38,11 @@ def test_proportional_division_equal_number_of_items_and_players():
         ansI = proportional_division_equal_number_of_items_and_players(agents=agentsI, items=itemsI)
         assert ansI is None or is_proportional(ansI)
 
-
+    # if len(agents) != len(items)
     with pytest.raises(ValueError):
-        proportional_division_equal_number_of_items_and_players(agents=agents1000, items=items2000)
-        proportional_division_equal_number_of_items_and_players(agents=agents1000, items=items500)
-        proportional_division_equal_number_of_items_and_players(agents=agents1000, items=[0,1,2])
+        proportional_division_equal_number_of_items_and_players(agents=big_agents, items=items2000)
+        proportional_division_equal_number_of_items_and_players(agents=big_agents, items=items500)
+        proportional_division_equal_number_of_items_and_players(agents=big_agents, items=[0,1,2])
 
 def test_proportional_division_with_p_even():
     size3 = 3
@@ -70,20 +66,41 @@ def test_proportional_division_with_p_even():
     assert is_proportional(ans_big)
 
 
- 
+def test_proportional_division_with_number_of_agents_odd():
+    size = 3
+    agents3 = AgentList([list(range(size)) for i in range(size)])
+    items10 = list(range(3*size+1))
+    items4 = list(range(size+1))
 
+    # if k/n=p not integer resies error
+    with pytest.raises(ValueError):
+        proportional_division_with_number_of_agents_odd(agents=agents3, items=items4)
+        proportional_division_with_number_of_agents_odd(agents=agents3, items=items10)
 
+    for i in range(1,50,2): # i odd
+        agentsI = get_matrix_permutations(i)
+        for j in range(10):
+            itemsI = list(range(j*i))  # len(items)/i is integer
+            ansI = proportional_division_with_number_of_agents_odd(agents=agentsI, items=itemsI)
+            assert is_proportional(ansI)
 
-def test_raise():
-    with pytest.raises(TypeError):
-        proportional_division('fdsf','ffdsd')
+    ans_big = proportional_division_with_number_of_agents_odd(agents=big_agents, items=list(range(2*size_big)))
+    assert is_proportional(ans_big)
 
+def test_proportional_division():
+    size = 4
+    agents4 = AgentList([list(range(size)) for i in range(size)])
+    items13 = list(range(3*size+1))
+    items17 = list(range(5*size+2))
 
+    # if k/n=p not integer resies error
+    with pytest.raises(ValueError):
+        proportional_division_with_number_of_agents_odd(agents=agents4, items=items13)
+        proportional_division_with_number_of_agents_odd(agents=agents4, items=items17)
 
-if __name__ == "__main__":
-
-    # agents = get_matrix_permutations(100)
-    # agents = get_matrix_permutations(3)
-    # check_proportional(agents)
-    # print(len(agents))
-    # print(int((3+6)/2))
+    for n in range(0,50,2): # n even
+        agentsI = get_matrix_permutations(n)
+        for j in range(1,10,2):
+            itemsI = list(range(j*n))  # len(items)/n is integer odd
+            ansI = proportional_division_with_number_of_agents_odd(agents=agentsI, items=itemsI)
+            assert is_proportional(ansI, approximately=True)
