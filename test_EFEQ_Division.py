@@ -1,6 +1,5 @@
 import unittest
 import numpy as np
-
 from fairpy import Allocation, AllocationMatrix, ValuationMatrix
 from envy_freeness_and_equitability_with_payments import envy_freeness_and_equitability_with_payments
 from test_EnvyFreeApproximation import agent_is_EF, agent_is_EQ, calculateSW
@@ -8,6 +7,7 @@ from test_EnvyFreeApproximation import agent_is_EF, agent_is_EQ, calculateSW
 
 class MyTestCase(unittest.TestCase):
     def setUp(self) -> None:
+        # init allocations
         self.v = [[0, 15, 23, 14],
                   [41, 17, 32, 68],
                   [35, 9, 16, 14],

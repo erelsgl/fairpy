@@ -1,13 +1,7 @@
 import unittest
-from typing import List, Any
-
 import numpy as np
-
 from fairpy import Allocation, Valuation, ValuationMatrix, AllocationMatrix, compute_agent_bundle_value_matrix
 from envy_free_approximation_division import envy_free_approximation
-
-
-# import numpy as np
 
 
 def calculateSW(res: dict, v: ValuationMatrix):
@@ -68,7 +62,8 @@ def agent_is_EQ(idx: int, d: dict, v: ValuationMatrix):
 
 
 class TestApproximationDivison(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
+        # init allocations
         self.v = [[15, 10, 90, 35],
                   [35, 21, 95, 48],
                   [9, 28, 5, 72],
