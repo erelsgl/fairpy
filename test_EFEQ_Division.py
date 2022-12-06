@@ -73,9 +73,9 @@ class MyTestCase(unittest.TestCase):
         check that utility of each agent equal to utility of each other agent.
         """
         for i in range(len(self.allocationResult1["bundles"])):
-            assert agent_is_EQ(i, self.allocationResult1, ValuationMatrix(self.v))
+            self.assertTrue(agent_is_EQ(i, self.allocationResult1, ValuationMatrix(self.v)))
         for i in range(len(self.allocationResult2["bundles"])):
-            assert agent_is_EQ(i, self.allocationResult2, ValuationMatrix(self.v2))
+            self.assertTrue(agent_is_EQ(i, self.allocationResult2, ValuationMatrix(self.v2)))
 
 
 if __name__ == '__main__':
