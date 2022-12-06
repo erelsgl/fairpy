@@ -102,7 +102,6 @@ def proportional_division(agents: AgentList, items: List[Any]=None) -> Allocatio
 
 if __name__ == "__main__":
     import doctest
-    # (failures,tests) = doctest.testmod(report=True)
-    print(doctest.testmod())
-    # print ("{} failures, {} tests".format(failures,tests))
+    (failures,tests) = doctest.testmod(report=True)
+    print ("{} failures, {} tests".format(failures,tests))
     
