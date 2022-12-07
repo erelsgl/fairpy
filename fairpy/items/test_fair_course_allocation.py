@@ -12,7 +12,7 @@ from fairpy.items.valuations import ValuationMatrix
 """
     Since the definition of fairness is not unambiguous in this algorithm,
     and mainly depends on the budget given to each of the agents,
-    there is no way to know the results of the algorithm.
+    it is very difficult to find the results of the algorithm.
     That's why I prepared tests for large inputs in order to make sure that the algorithm does not get stuck.
 """
 
