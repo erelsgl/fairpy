@@ -5,7 +5,7 @@ import pytest
 
 import numpy as np
 from typing import List, Dict, Callable, Set, Any
-from fairpy.items.fair_course_allocation import course_allocation, neighbors, score
+from fairpy.items.fair_course_allocation import course_allocation, neighbors, score, max_utility
 from fairpy.items.valuations import ValuationMatrix
 
 # class testCourse_allocation(unittest.TestCase):
@@ -17,7 +17,7 @@ from fairpy.items.valuations import ValuationMatrix
 """
 
 
-def test_course_allocation():
+def test_big_input1():
     """
     5 courses and 10 students:
     """
@@ -38,10 +38,21 @@ def test_course_allocation():
     prices: List[float] = [1.9, 0.3, 1.6, 1.2, 0.8]
     capacity: List[int] = [2, 2, 2, 2, 2]
 
-    assert course_allocation(utilities, neighbors, score, bound, budgets, prices, capacity) == [0]
+    placements = []
+    for i in utilities.agents():
+        placements.append(max_utility(utilities[i], budgets[i], prices))
+
+    # course_allocation test:
+    assert course_allocation(utilities, neighbors, score, bound, budgets, prices, capacity) == []
+    # neighbors test:
+    assert neighbors(utilities, budgets, prices, capacity) == []
+    # score test:
+    assert score(ValuationMatrix(placements), capacity) == -1
+    # max_utility test:
+    assert max_utility(utilities[0], budgets[0], prices) == [0, 0, 0, 0, 1]
 
 
-def big_input2():
+def test_big_input2():
     """
     5 courses and 15 students:
     """
@@ -63,19 +74,29 @@ def big_input2():
                                           [77, 90, 34, 21, 63]])
 
     bound: float = 0
-    budgets: List[float] = [1.0, 1.11, 1.222, 1.7, 1.56, 1.3, 1.41, 1.62, 1.52, 1.435, 1.932, 1.685, 1.24, 1.27, 1.666]
+    budgets: List[float] = [1.5, 1.11, 1.222, 1.7, 1.56, 1.3, 1.41, 1.62, 1.52, 1.435, 1.932, 1.685, 1.24, 1.27, 1.666]
     prices: List[float] = [1.0, 0.0, 1.2, 1.22, 0.3]
     capacity: List[int] = [3, 3, 3, 3, 3]
 
-    assert course_allocation(utilities, neighbors, score, bound, budgets, prices, capacity) == [0]
+    placements = []
+    for i in utilities.agents():
+        placements.append(max_utility(utilities[i], budgets[i], prices))
 
+    # course_allocation test:
+    assert course_allocation(utilities, neighbors, score, bound, budgets, prices, capacity) == []
+    # neighbors test:
+    assert neighbors(utilities, budgets, prices, capacity) == []
+    # score test:
+    assert score(ValuationMatrix(placements), capacity) == -1
+    # max_utility test:
+    assert max_utility(utilities[0], budgets[0], prices) == [0, 0, 0, 1, 0]
 
-def big_input3():
+def test_big_input3():
     """
     5 courses and 20 students:
     """
 
-    utilities = ValuationMatrix([[3, 7, 1, 64, 34, 23, 24, 5, 77, 32, 12, 22, 34, 18, 51],
+    utilities = ValuationMatrix([[3, 7, 1, 13, 34, 23, 24, 5, 77, 32, 12, 22, 34, 18, 51],
                                           [5, 2, 7, 33, 14, 58, 95, 33, 5, 2, 77, 90, 34, 21, 63],
                                           [76, 2, 7, 33, 14, 58, 95, 33, 5, 2, 77, 90, 34, 21, 63],
                                           [22, 3, 7, 33, 14, 58, 95, 33, 5, 2, 77, 90, 34, 21, 63],
@@ -102,5 +123,17 @@ def big_input3():
     prices: List[float] = [1.0, 0.0, 1.2, 1.22, 0.3, 1.32, 1.65, 1.222, 1.7, 0.2, 0.2, 0.6, 0.66, 1.4, 2.1]
     capacity: List[int] = [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1]
 
-    assert course_allocation(utilities, neighbors, score, bound, budgets, prices, capacity) == [0]
+    placements = []
+    for i in utilities.agents():
+        placements.append(max_utility(utilities[i], budgets[i], prices))
+
+    # course_allocation test:
+    assert course_allocation(utilities, neighbors, score, bound, budgets, prices, capacity) == []
+    # neighbors test:
+    assert neighbors(utilities, budgets, prices, capacity) == []
+    # score test:
+    assert score(ValuationMatrix(placements), capacity) == -1
+    # max_utility test:
+    assert max_utility(utilities[0], budgets[0], prices) == [0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0]
+
 

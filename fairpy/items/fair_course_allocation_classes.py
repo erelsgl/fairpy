@@ -11,6 +11,7 @@ class Agent:
         self.budget = budget
 
     def max_utility(self, prices: List[float]) -> List[bool]:
+
         """
         Given a price vector for the courses, the program will return
         the most affordable course package for the student,
