@@ -1,9 +1,5 @@
-# def test_course_allocation():
-#     assert False
 
-import pytest
 
-import numpy as np
 from typing import List, Dict, Callable, Set, Any
 from fairpy.items.fair_course_allocation import course_allocation, neighbors, score, max_utility
 from fairpy.items.valuations import ValuationMatrix
