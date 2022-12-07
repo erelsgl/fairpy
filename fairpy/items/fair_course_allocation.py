@@ -51,8 +51,8 @@ def course_allocation(utilities: ValuationMatrix, neighbors_func: Callable, scor
     Example 4: input with popular courses.
     >>> course_allocation(ValuationMatrix([[49, 40, 10, 1], [53, 29, 15, 3], [61, 30, 7, 2]]), neighbors, score, 0, [1.3, 1.2, 1.0], [0.2, 0.5, 0.4, 0.6], [2,2,2,2])
     ValuationMatrix([0, 0, 1, 1], [1, 0, 1, 0], [1, 1, 0, 0])
-
     """
+
     pass
 
 
@@ -77,6 +77,7 @@ def neighbors(utilities: ValuationMatrix, budgets: List[float], prices: List[flo
     >>> neighbors(ValuationMatrix([[49, 40, 10, 1], [53, 29, 15, 3], [61, 30, 7, 2]]), [1.3, 1.2, 1.0], [0.2, 0.5, 0.4, 0.6], [2,2,2,2])
     [[1, 1, 0, 0], [0.61, 0.5, 0.4, 0.6], [0.2, 0.81, 0.4, 0.6]]
     """
+
     pass
 
 
@@ -124,4 +125,5 @@ def max_utility(utility: List[float], budget: float, prices: List[float],
     >>> max_utility([36, 35, 13, 10, 4, 2], 1.0, [0.9, 0.3, 0.9, 1.1, 1.0, 0.2])
     [1, 0, 0, 0, 0, 0]
     """
+
     pass
