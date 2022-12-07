@@ -1,6 +1,6 @@
 from typing import List, Dict, Callable, Set, Any
 from fairpy.items.valuations import ValuationMatrix
-import numpy as np
+
 
 """
 Article Name: 

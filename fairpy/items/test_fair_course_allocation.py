@@ -8,7 +8,7 @@ from typing import List, Dict, Callable, Set, Any
 from fairpy.items.fair_course_allocation import course_allocation, neighbors, score, max_utility
 from fairpy.items.valuations import ValuationMatrix
 
-# class testCourse_allocation(unittest.TestCase):
+
 """
     Since the definition of fairness is not unambiguous in this algorithm,
     and mainly depends on the budget given to each of the agents,
