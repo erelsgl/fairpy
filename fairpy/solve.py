@@ -65,13 +65,13 @@ def minimize(objective, constraints, solvers:list=DEFAULT_SOLVERS):
 
 	>>> import numpy as np
 	>>> x = cvxpy.Variable()
-	>>> minimize(x, [x>=1, x<=3])
+	>>> np.round(minimize(x, [x>=1, x<=3]),3)
 	1.0
-	>>> minimize(x, [x>=1, x<=3], solvers=[(cvxpy.OSQP,{}),(cvxpy.SCS,{})])
+	>>> np.round(minimize(x, [x>=1, x<=3], solvers=[(cvxpy.MOSEK,{}),(cvxpy.SCS,{})]),3)
 	1.0
-	>>> np.round(minimize(x, [x>=1, x<=3], solvers=[(cvxpy.SCS,{}),(cvxpy.OSQP,{})]),2)
+	>>> np.round(minimize(x, [x>=1, x<=3], solvers=[(cvxpy.SCS,{}),(cvxpy.MOSEK,{})]),2)
 	1.0
-	>>> minimize(x, [x>=1, x<=3], solvers=[(cvxpy.MOSEK,{'bfs':True}),(cvxpy.SCIPY,{'method':'highs'})])
+	>>> np.round(minimize(x, [x>=1, x<=3], solvers=[(cvxpy.MOSEK,{'bfs':True}),(cvxpy.SCIPY,{'method':'highs'})]),3)
 	1.0
 	"""
 	problem = cvxpy.Problem(cvxpy.Minimize(objective), constraints)
