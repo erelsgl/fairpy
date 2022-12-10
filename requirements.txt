@@ -1,0 +1,15 @@
+cmake
+numpy>=1.21.3
+scipy>=1.6.1
+networkx
+matplotlib
+repackage
+pytest
+cvxpy_base>=1.1.17
+cvxpy_leximin>=0.4.4
+prtpy>=0.7.0
+more_itertools
+dicttools @ git+https://github.com/trzemecki/dicttools.git
+osqp
+scs
+ecos
