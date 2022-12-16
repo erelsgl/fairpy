@@ -38,7 +38,7 @@ def is_proportional(alocation:Allocation, approximately:bool=False):
 def test_proportional_division_equal_number_of_items_and_players():
     items1000 = list(range(size_big))
     items2000 = list(range(2*size_big))
-    items500 = list(range(size_big/2))
+    items500 = list(range(int(size_big/2)))
     t1000 = proportional_division_equal_number_of_items_and_players(agents=big_agents, items=items1000) 
     assert t1000 is None  # Validation is the same for all agents
 

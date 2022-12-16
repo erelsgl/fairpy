@@ -12,6 +12,8 @@ Since:  2022-12
 from fairpy import AgentList
 from fairpy.allocations import Allocation
 from typing import List, Any, Dict
+import networkx as nx
+import matplotlib.pyplot as plt
 
 agents_to_test_0 = AgentList({"Shlomo": {"A": 0, "B": 1, "C": 2, "D": 3},"Shira": {"A": 2, "B": 0, "C": 1, "D": 3},"Hadar": {"A": 2, "B": 0, "C": 1, "D": 3},"Or": {"A": 3, "B": 2, "C": 1, "D": 0}})
 def proportional_division_equal_number_of_items_and_players(agents: AgentList, items: List[Any]=None) -> Allocation:
@@ -37,8 +39,55 @@ def proportional_division_equal_number_of_items_and_players(agents: AgentList, i
     >>> proportional_division_equal_number_of_items_and_players(agents=AgentList([[0]]),items=[0]).map_agent_to_bundle()
     {'Agent #0': [0]}
     """
-    return Allocation([''],[['']])
 
+    items = list(agents.all_items())
+    n = len(agents)
+    k = len(items)
+    if k != n:
+        print('errror')
+        return
+
+    G = nx.Graph()
+    G.add_nodes_from(items)
+    G.add_nodes_from(agents.agent_names())
+    threshold = (k-1)/2
+    for agent in agents:
+        for item in items:
+            val_item = agent.value(item)
+            if val_item > threshold:
+                G.add_edge(item, agent.name())
+
+    ans = nx.maximal_matching(G)
+    print(ans)
+    # if len(ans) < len(agents):
+    #     print('not exists')
+    #     return
+
+    # names = []
+    # aloc = []
+    # for a in ans:
+    #     print(agents.agent_names().index(a[1]))
+
+        # names.append(a[1])
+        # print(a[0])
+        # agents.
+        # aloc.append(a[1],agents[a[1]].value(a[0]))
+    
+    # print(G)
+    # draw_options = {
+    #     "font_size": 10,
+    #     "node_size": 700,
+    #     "node_color": "yellow",
+    #     "edgecolors": "black",
+    #     "linewidths": 1,
+    #     "width": 1,
+    #     "with_labels": True
+    # }
+    # nx.draw(G,  **draw_options)
+    # print('ddd')
+    # plt.show()
+    
+    return Allocation([''],[['']])
 
 def proportional_division_with_p_even(agents: AgentList, items: List[Any]=None) -> Allocation:
     """
@@ -101,8 +150,23 @@ def proportional_division(agents: AgentList, items: List[Any]=None) -> Allocatio
 ### MAIN
 
 if __name__ == "__main__":
-    import doctest
-    # (failures,tests) = doctest.testmod(report=True)
-    print(doctest.testmod())
+
+
+
+
+
+
+    # proportional_division_equal_number_of_items_and_players(agents=agents_to_test_0, items=['A','B','C','D']).map_agent_to_bundle()
+    agents_to_test_0 = AgentList({"Shlomo": {"A": 0, "B": 1, "C": 2, "D": 3},"Shira": {"A": 2, "B": 0, "C": 1, "D": 3},"Hadar": {"A": 2, "B": 0, "C": 1, "D": 3},"Or": {"A": 3, "B": 2, "C": 1, "D": 0}})
+    
+    # print(len(agents_to_test_0))
+    # print()
+    tt = proportional_division_equal_number_of_items_and_players(agents=agents_to_test_0, items=['A','B','C','D'])
+    print(tt)
+
+
+    # import doctest
+    # # (failures,tests) = doctest.testmod(report=True)
+    # print(doctest.testmod())
     # print ("{} failures, {} tests".format(failures,tests))
     
