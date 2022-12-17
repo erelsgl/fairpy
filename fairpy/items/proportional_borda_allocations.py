@@ -63,7 +63,7 @@ def proportional_division_equal_number_of_items_and_players(agents: AgentList) -
     {'Agent #0': [0]}
     """
     if not isBordaCount(agents):
-        return
+        raise ValueError(f'Evaluation of items by the agents must be defined by "Board scores". but it is not')
     items = list(agents.all_items())
     n = len(agents)
     k = len(items)
