@@ -65,14 +65,13 @@ def proportional_division_equal_number_of_items_and_players(agents: AgentList) -
     if not isBordaCount(agents):
         raise ValueError(f'Evaluation of items by the agents must be defined by "Board scores". but it is not')
     items = list(agents.all_items())
-    n = len(agents)
     k = len(items)
-    if k != n:
-        raise ValueError(f"Numbers of agents and items must be identical, but they are not: {n}, {k}")
+    if k != len(agents):
+        raise ValueError(f"Numbers of agents and items must be identical, but they are not: {len(agents)}, {k}")
     threshold = (k-1)/2
     G = reduction_to_graph(agents, items, threshold)
     match = nx.max_weight_matching(G)
-    if len(match) < len(agents):
+    if len(match) < k:
         return  # There is no proportional allocation
     bundles = bundles_from_edges(match, G)
     return Allocation(agents, bundles)
