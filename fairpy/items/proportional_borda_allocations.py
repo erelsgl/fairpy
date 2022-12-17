@@ -150,30 +150,7 @@ def proportional_division(agents: AgentList, items: List[Any]=None) -> Allocatio
 ### MAIN
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-
-
-
-
-
-
-    # proportional_division_equal_number_of_items_and_players(agents=agents_to_test_0, items=['A','B','C','D']).map_agent_to_bundle()
-    agents_to_test_0 = AgentList({"Shlomo": {"A": 0, "B": 1, "C": 2, "D": 3},"Shira": {"A": 2, "B": 0, "C": 1, "D": 3},"Hadar": {"A": 2, "B": 0, "C": 1, "D": 3},"Or": {"A": 3, "B": 2, "C": 1, "D": 0}})
-    
-    # print(len(agents_to_test_0))
-    # print()
-    tt = proportional_division_equal_number_of_items_and_players(agents=agents_to_test_0, items=['A','B','C','D'])
-    print(tt)
-
-
-    # import doctest
-    # # (failures,tests) = doctest.testmod(report=True)
-    # print(doctest.testmod())
-    # print ("{} failures, {} tests".format(failures,tests))
-    
-=======
     import doctest
     (failures,tests) = doctest.testmod(report=True)
     print ("{} failures, {} tests".format(failures,tests))
     
->>>>>>> 1aa126ce664ae49214ed02a036e19ffd1efbce8d
