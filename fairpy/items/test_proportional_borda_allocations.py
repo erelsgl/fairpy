@@ -36,23 +36,19 @@ def is_proportional(alocation:Allocation, approximately:bool=False):
     return True
 
 def test_proportional_division_equal_number_of_items_and_players():
-    items1000 = list(range(size_big))
-    items2000 = list(range(2*size_big))
-    items500 = list(range(int(size_big/2)))
-    t1000 = proportional_division_equal_number_of_items_and_players(agents=big_agents, items=items1000) 
+    t1000 = proportional_division_equal_number_of_items_and_players(agents=big_agents) 
     assert t1000 is None  # Validation is the same for all agents
 
     for i in range(50):
         agentsI = get_matrix_permutations(i)
-        itemsI = list(range(i))
-        ansI = proportional_division_equal_number_of_items_and_players(agents=agentsI, items=itemsI)
+        ansI = proportional_division_equal_number_of_items_and_players(agents=agentsI)
         assert ansI is None or is_proportional(ansI)
 
     # if len(agents) != len(items)
     with pytest.raises(ValueError):
-        proportional_division_equal_number_of_items_and_players(agents=big_agents, items=items2000)
-        proportional_division_equal_number_of_items_and_players(agents=big_agents, items=items500)
-        proportional_division_equal_number_of_items_and_players(agents=big_agents, items=[0,1,2])
+        # proportional_division_equal_number_of_items_and_players(agents=big_agents)
+        # proportional_division_equal_number_of_items_and_players(agents=big_agents)
+        proportional_division_equal_number_of_items_and_players(agents=big_agents)
 
 def test_proportional_division_with_p_even():
     size3 = 3
