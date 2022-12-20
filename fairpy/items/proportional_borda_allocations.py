@@ -73,7 +73,7 @@ def proportional_division_with_p_even(agents: AgentList) -> Allocation:
     if not isBordaCount(agents):
         raise ValueError(f'Evaluation of items by the agents must be defined by "Board scores". but it is not')
     p = k/n
-    if p % 2 != 0:
+    if not isEven(p):
         raise ValueError(f"The number of items divided by the number of agents must be even but it is not:{k}/{n}={p}")
     unselected_items = list(agents.all_items())
     allocation = [[] for i in range(n)]
@@ -89,14 +89,14 @@ def proportional_division_with_number_of_agents_odd(agents: AgentList) -> Alloca
     :param items: The items which are being allocated.
     :return: the proportional allocation, There is always a proportional allocation
     Notes: 
-        1. len(agents) must be an odd positive integer and len(items)/len(agents) must be an positive integer
+        1. len(agents) must be an odd positive integer and  len(items)/len(agents) must be a positive integer of at least 3
         2. Valuation of agents is defined by "Borda scores" see https://en.wikipedia.org/wiki/Borda_count
     
     >>> proportional_division_with_number_of_agents_odd(agents=agents_to_test_1).map_agent_to_bundle()
     {'Agent #0': [0, 4, 8, 9, 14], 'Agent #1': [1, 5, 6, 10, 13], 'Agent #2': [2, 3, 7, 11, 12]}
     """
     n = len(agents)
-    if n % 2 != 1:
+    if isEven(n):
         raise ValueError(f"The number of agents must be odd but it is not: {n}")
     # If n is even, there is a proportional division and the proportional_division function returns it
     return proportional_division(agents)  
@@ -111,7 +111,7 @@ def proportional_division(agents: AgentList) -> Allocation:
         or an approximately proportional allocation if no proportional allocation exists.
 
     Notes: 
-    1. len(items)/len(agents) must be an positive integer
+    1. len(items)/len(agents) must be an positive integer and len(items)/len(agents) ≥ 3
     2. approximately proportional allocation If and only if  
             valuation[i][items of agent[i]]  ≥  |  valuation[i](items)/len(agents) | for each agent i
                                                 |__                              __|
@@ -126,15 +126,15 @@ def proportional_division(agents: AgentList) -> Allocation:
     """
     n = len(agents)
     k = len(agents.all_items())
-    if k % n != 0:
+    if not k % n == 0:
         raise ValueError(f"The number of items must be multiple of the number of agents, but they are not: {k}, {n}")
-    if k/n % 2 == 0:
+    if isEven(k/n):
         return proportional_division_with_p_even(agents)
     if k/n == 1:
-        return proportional_division_equal_number_of_items_and_players(agents)
+            raise ValueError(f"len(items)/len(agents) must be at least 3, but {k}/{n} == 1")
     if not isBordaCount(agents):
         raise ValueError(f'Evaluation of items by the agents must be defined by "Board scores". but it is not')
-    p = k/n - 3                 # 3 ≤ k/n is odd
+    p = k/n - 3     # 3 ≤ k/n is odd
     q1 = [i for i in range(n)]
     q2 = [i-1 for i in range(n, 0, -2)]
     q3 = [i-1 for i in range(n-1, 0, -2)]
@@ -147,7 +147,7 @@ def proportional_division(agents: AgentList) -> Allocation:
 
 
 
-#################        Helper function    #################
+#################    Helper function    #################
 def bundles_from_edges(match:set, G:nx.Graph) -> dict:
     bundles = {}
     for edge in match:
@@ -195,7 +195,8 @@ def selection_by_order(agents:AgentList, items:list, allocation:List[list], num_
             items.remove(favorite)
     return items, allocation
 
-
+def isEven(n):
+    return n % 2 == 0
 
 
 ### MAIN
