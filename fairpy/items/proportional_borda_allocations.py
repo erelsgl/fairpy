@@ -13,6 +13,8 @@ from fairpy import AgentList
 from fairpy.allocations import Allocation
 from typing import List, Tuple
 import networkx as nx
+import logging
+logger = logging.getLogger(__name__)
 
 agents_to_test_0 = AgentList({"Shlomo": {"A": 0, "B": 1, "C": 2, "D": 3},"Shira": {"A": 2, "B": 0, "C": 1, "D": 3},"Hadar": {"A": 2, "B": 0, "C": 1, "D": 3},"Or": {"A": 3, "B": 2, "C": 1, "D": 0}})
 def proportional_division_equal_number_of_items_and_players(agents: AgentList) -> Allocation:
@@ -38,10 +40,13 @@ def proportional_division_equal_number_of_items_and_players(agents: AgentList) -
     >>> proportional_division_equal_number_of_items_and_players(agents=AgentList([[0]])).map_agent_to_bundle()
     {'Agent #0': [0]}
     """
+    # logger.info("Starting an empty bag. %d agents and %d objects.", self.values.num_of_agents, self.values.num_of_objects)
+    logger.info("Sta items.")
     if not isBordaCount(agents):
         raise ValueError(f'Evaluation of items by the agents must be defined by "Board scores". but it is not')
     items = list(agents.all_items())
     k = len(items)
+    logger.info("Starti. %d agents and %d items.", len(agents), k )
     if k != len(agents):
         raise ValueError(f"Numbers of agents and items must be identical, but they are not: {len(agents)}, {k}")
     threshold = (k-1)/2
@@ -198,10 +203,19 @@ def selection_by_order(agents:AgentList, items:list, allocation:List[list], num_
 def isEven(n):
     return n % 2 == 0
 
-
 ### MAIN
-
+import sys
 if __name__ == "__main__":
-    import doctest
-    (failures,tests) = doctest.testmod(report=True)
-    print ("{} failures, {} tests".format(failures,tests))
+    import sys
+    formatter = logging.Formatter('%(asctime)s: %(levelname)s: %(name)s: Line %(lineno)d: %(message)s')
+    hendler = logging.StreamHandler(sys.stdout)
+    hendler.setFormatter(formatter)
+    logger.setLevel(logging.INFO)
+    logger.addHandler(hendler)
+    print(logger.level)
+	# logger.setLevel(logging.DEBUG)
+
+    proportional_division_equal_number_of_items_and_players(agents=agents_to_test_0).map_agent_to_bundle()
+    # import doctest
+    # (failures, tests) = doctest.testmod(report=True)
+    # print("{} failures, {} tests".format(failures, tests))

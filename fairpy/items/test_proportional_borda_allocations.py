@@ -88,7 +88,7 @@ def test_general():
             else:
                 assert is_proportional(allocationI, agentsI.all_items())
 
-#################   Helper function    #################
+#################    Helper function    #################
 def get_agents_with_permutations_of_valuations(n,k):
     ans = []
     if n == 0 or k == 0:
