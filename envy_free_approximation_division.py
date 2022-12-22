@@ -1,3 +1,4 @@
+import doctest
 from typing import List, Any
 
 import numpy as np
@@ -6,22 +7,47 @@ from fairpy import AllocationMatrix, Allocation, ValuationMatrix
 
 
 def swap_columns(matrix: np.array, idx_1: int, idx_2: int) -> None:
+    """
+    >>> mat = np.array([[1,2,3],[4,5,6],[7,8,9]])
+    >>> swap_columns(mat,0,2)
+    >>> np.array_equal(mat, np.array([[3,2,1],[6,5,4],[9,8,7]]))
+    True
+    """
     temp = np.copy(matrix[:, idx_1])
     matrix[:, idx_1] = matrix[:, idx_2]
     matrix[:, idx_2] = temp
 
 
 def get_max(agent_valuation: np.array, payments: np.array) -> float:
+    """
+    >>> av = np.array([1.,2.,3.,4.])
+    >>> p = np.array([2.,2.,1.,3.])
+    >>> get_max(av,p)
+    2.0
+    >>> get_max(np.array([-1.,0.,2.,4.]),np.array([2.,-2.,-3.,1.5]))
+    5.0
+    """
     m = max(zip(agent_valuation, payments), key=lambda x: x[0] - x[1])
     return m[0] - m[1]
 
 
 def get_argmax(agent_valuation: np.array, payments: np.array) -> int:
-    key = lambda x: x[0] - x[1]
-    return np.argmax([key(x) for x in zip(agent_valuation, payments)])
+    """
+    >>> get_argmax(np.array([1.,2.,3.,4.]),np.array([2.,2.,1.,3.]))
+    2
+    >>> get_argmax(np.array([-1.,2.,-3.,2.]),np.array([-5.,2.,1.,-1.]))
+    0
+    """
+    return np.argmax([x[0] - x[1] for x in zip(agent_valuation, payments)])
 
 
 def get_second_max(idx: int, agent_valuation: np.array, payments: np.array) -> float:
+    """
+    >>> get_second_max(2, np.array([1.,2.,3.,4.]),np.array([2.,2.,1.,3.]))
+    1.0
+    >>> get_second_max(0, np.array([-1.,2.,-3.,2.]),np.array([-5.,2.,1.,-1.]))
+    3.0
+    """
     temp_a = agent_valuation[np.arange(len(agent_valuation)) != idx]
     temp_p = payments[np.arange(len(payments)) != idx]
     m = max(zip(temp_a, temp_p), key=lambda x: x[0] - x[1])
@@ -85,3 +111,6 @@ def envy_free_approximation(a: Allocation) -> dict:
             flag = check_envy(i, value_matrix, payments, bundles) or flag
 
     return {"bundles": bundles, "payments": payments.tolist()}
+
+if __name__ == '__main__':
+    doctest.testmod()
