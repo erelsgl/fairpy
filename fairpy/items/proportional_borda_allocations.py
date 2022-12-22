@@ -40,20 +40,20 @@ def proportional_division_equal_number_of_items_and_players(agents: AgentList) -
     >>> proportional_division_equal_number_of_items_and_players(agents=AgentList([[0]])).map_agent_to_bundle()
     {'Agent #0': [0]}
     """
-    # logger.info("Starting an empty bag. %d agents and %d objects.", self.values.num_of_agents, self.values.num_of_objects)
-    logger.info("Sta items.")
     if not isBordaCount(agents):
         raise ValueError(f'Evaluation of items by the agents must be defined by "Board scores". but it is not')
     items = list(agents.all_items())
     k = len(items)
-    logger.info("Starti. %d agents and %d items.", len(agents), k )
+    logger.info("Started proportional division maintaining one item per agent. with %d agents and %d items", len(agents), k)
     if k != len(agents):
         raise ValueError(f"Numbers of agents and items must be identical, but they are not: {len(agents)}, {k}")
     threshold = (k-1)/2
     G = reduction_to_graph(agents, items, threshold)
     match = nx.max_weight_matching(G)
     if len(match) < k:
-        return  # There is no proportional allocation
+        logger.info("No maximum match was found in the graph, therefore there is no proportional division")
+        return
+    logger.info("A proportional division was found")
     bundles = bundles_from_edges(match, G)
     return Allocation(agents, bundles)
 
@@ -80,6 +80,8 @@ def proportional_division_with_p_even(agents: AgentList) -> Allocation:
     p = k/n
     if not isEven(p):
         raise ValueError(f"The number of items divided by the number of agents must be even but it is not:{k}/{n}={p}")
+    
+    logger.info("Started to apply proportional division in case n/k is even. For k=%d, n=%d, p=%d", k,n,p)
     unselected_items = list(agents.all_items())
     allocation = [[] for i in range(n)]
     _, allocation = selection_by_order(agents=agents, items=unselected_items ,allocation=allocation, num_iteration=int(p/2))
@@ -103,8 +105,8 @@ def proportional_division_with_number_of_agents_odd(agents: AgentList) -> Alloca
     n = len(agents)
     if isEven(n):
         raise ValueError(f"The number of agents must be odd but it is not: {n}")
-    # If n is even, there is a proportional division and the proportional_division function returns it
-    return proportional_division(agents)  
+    logger.info("The number of agents n equals %d is odd, therefore There is a proportional division and the proportional division function returns it", n)
+    return proportional_division(agents)
 
 def proportional_division(agents: AgentList) -> Allocation:
     """
@@ -134,11 +136,13 @@ def proportional_division(agents: AgentList) -> Allocation:
     if not k % n == 0:
         raise ValueError(f"The number of items must be multiple of the number of agents, but they are not: {k}, {n}")
     if isEven(k/n):
+        logger.info("k/n equals %d is even, so we will run the appropriate function", int(k/n))
         return proportional_division_with_p_even(agents)
     if k/n == 1:
             raise ValueError(f"len(items)/len(agents) must be at least 3, but {k}/{n} == 1")
     if not isBordaCount(agents):
         raise ValueError(f'Evaluation of items by the agents must be defined by "Board scores". but it is not')
+    logger.info("K/n is equal to %d odd, so the division is carried out according to the order that appears in the article", int(k/n))
     p = k/n - 3     # 3 ≤ k/n is odd
     q1 = [i for i in range(n)]
     q2 = [i-1 for i in range(n, 0, -2)]
@@ -210,12 +214,10 @@ if __name__ == "__main__":
     formatter = logging.Formatter('%(asctime)s: %(levelname)s: %(name)s: Line %(lineno)d: %(message)s')
     hendler = logging.StreamHandler(sys.stdout)
     hendler.setFormatter(formatter)
-    logger.setLevel(logging.INFO)
     logger.addHandler(hendler)
-    print(logger.level)
-	# logger.setLevel(logging.DEBUG)
+    # logger.setLevel(logging.INFO)
 
-    proportional_division_equal_number_of_items_and_players(agents=agents_to_test_0).map_agent_to_bundle()
-    # import doctest
-    # (failures, tests) = doctest.testmod(report=True)
-    # print("{} failures, {} tests".format(failures, tests))
+
+    import doctest
+    (failures, tests) = doctest.testmod(report=True)
+    print("{} failures, {} tests".format(failures, tests))
