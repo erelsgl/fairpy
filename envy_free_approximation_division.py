@@ -2,42 +2,44 @@ from typing import List, Any
 
 import numpy as np
 
-from fairpy import AllocationMatrix, Allocation, ValuationMatrix, MonotoneValuation
+from fairpy import AllocationMatrix, Allocation, ValuationMatrix
 
 
-def swap_columns(matrix, idx_1, idx_2):
+def swap_columns(matrix: np.array, idx_1: int, idx_2: int) -> None:
     temp = np.copy(matrix[:, idx_1])
     matrix[:, idx_1] = matrix[:, idx_2]
     matrix[:, idx_2] = temp
 
 
-def get_max(arr, payments) -> float:
-    m = max(zip(arr, payments), key=lambda x: x[0] - x[1])
+def get_max(agent_valuation: np.array, payments: np.array) -> float:
+    m = max(zip(agent_valuation, payments), key=lambda x: x[0] - x[1])
     return m[0] - m[1]
 
 
-def get_argmax(arr, payments):
+def get_argmax(agent_valuation: np.array, payments: np.array) -> int:
     key = lambda x: x[0] - x[1]
-    return np.argmax([key(x) for x in zip(arr, payments)])
+    return np.argmax([key(x) for x in zip(agent_valuation, payments)])
 
 
-def get_second_max(idx, arr, payments) -> float:
-    temp_a = arr[np.arange(len(arr)) != idx]
+def get_second_max(idx: int, agent_valuation: np.array, payments: np.array) -> float:
+    temp_a = agent_valuation[np.arange(len(agent_valuation)) != idx]
     temp_p = payments[np.arange(len(payments)) != idx]
     m = max(zip(temp_a, temp_p), key=lambda x: x[0] - x[1])
     return m[0] - m[1]
 
 
-def check_envy(agent_i, matrix, payments: np.array, bundles: list):
+def check_envy(agent_i, matrix, payments: np.array, bundles: list) -> bool:
     if matrix[agent_i][agent_i] - payments[agent_i] < get_max(matrix[agent_i], payments):
         agent_j = get_argmax(matrix[agent_i], payments)
         u1 = get_max(matrix[agent_i], payments)
         u2 = get_second_max(agent_j, matrix[agent_i], payments)
-        swap_columns(matrix, agent_i, agent_j)
+
+        # replace payment value
         temp_p = payments[agent_i]
         payments[agent_i] = payments[agent_j] + (u1 - u2)
         payments[agent_j] = temp_p
-
+        # replace bundles
+        swap_columns(matrix, agent_i, agent_j)
         temp = bundles[agent_i]
         bundles[agent_i] = bundles[agent_j]
         bundles[agent_j] = temp
