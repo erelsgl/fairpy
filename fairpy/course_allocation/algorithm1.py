@@ -53,7 +53,7 @@ def algorithm1(max_budget:int, map_price_demand:callable, sort_alpha:callable, t
     ... s5 = Student(name='s5', budget=15, preferences=([a, b, c]))
     ... students = [s1, s2, s3, s4, s5]
     >>> algorithm1(15,map_price_demand,sort_alpha,4)
-    (3,9,4.5)
+    [3,9,4.5]
     >>> a = Course(name='a', price=12, max_capacity=5)
     ... b = Course(name='b', price=3, max_capacity=3)
     ... c = Course(name='c', price=4.5, max_capacity=5)
@@ -66,7 +66,7 @@ def algorithm1(max_budget:int, map_price_demand:callable, sort_alpha:callable, t
     ... s5 = Student(name='s5', budget=15, preferences=([a, b, c]))
     ... students = [s1, s2, s3, s4, s5]
     >>> algorithm1(15,map_price_demand,sort_alpha,0)
-    (3,9,4.5)
+    [3,9,4.5]
     '''
     pass
 
