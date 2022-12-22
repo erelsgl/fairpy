@@ -11,17 +11,60 @@ Programmers: Barak Amram, Adi Dahari
 Since: 2022-12
 '''
 
+import sys
+from itertools import permutations
+import pandas as pd
 from fairpy.items.valuations import ValuationMatrix
+import logging
+
+INF = float('inf')
+
+logger = logging.getLogger(__name__)
 
 
 class BiddingForEnvyFreeness:
-    def __init__(self, b: ValuationMatrix):
-        self.m = 0
-        self.c = 0
-        self.bidding_table = b
-        self.discounts = dict()
 
-    def find_m_c(self) -> tuple:
+    def __init__(self, matrix: ValuationMatrix):
+        self.dct = dict()
+        self.m, self.c, self.best = self.find_m_c_best(matrix)
+        logger.info(
+            f'best: option {self.best} --- {self.players_options[self.best]}')
+        logger.info(f'C: {self.c}')
+        logger.info(f'M: {self.m}')
+        self.MC = self.m - self.c
+        logger.info(f'M - C: {self.MC}')
+        opt = list(self.players_options[self.best])
+        logger.info(f'best opt: {opt}')
+        self.options_list = self.player_package(opt)
+
+        logger.info(self.options_list)
+        self.table = self.bidding_to_envy(matrix, opt)
+        self.res = self.calculate_discounts(2)
+
+    def __str__(self):
+        return f'{self.dct}'
+
+    def make_list(self, values: ValuationMatrix, players_options: list):
+        res = []
+        for i in range(0, len(players_options)):
+            sum = 0
+            for j in range(0, values.num_of_agents):
+                sum += values[players_options[i][j]][j]
+            res.append(sum)
+        return res
+
+    def best_option(self, options: list):
+        best = -1
+        m = -INF
+        for i in range(0, len(options)):
+            if m < options[i]:
+                m, best = options[i], i
+        return best, m
+
+    def switch_row_column(self, matrix: list):
+        return pd.DataFrame(data=matrix)
+
+    def find_m_c_best(self, matrix: ValuationMatrix) -> tuple:
         '''
         This function intitalizes the algorithm M and C values,
         Where:
@@ -51,17 +94,40 @@ class BiddingForEnvyFreeness:
 
         TESTS:
         >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 25, 10], [40, 25, 20], [35, 25, 25]]))
-        >>> m.find_m_c()
+        >>> m.find_m_c_best()
         (100, 85)
         >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 30, 50], [45, 35, 40], [10, 20, 35]]))
-        >>> m.find_m_c()
+        >>> m.find_m_c_best()
         (120, 85)
         >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 45, 10, 25], [30, 35, 20, 10], [50, 40, 35, 0], [50, 35, 35, 20]]))
-        >>> m.find_m_c()
+        >>> m.find_m_c_best()
         (140, 95)
         '''
+        players_num = list(range(matrix.num_of_agents))
 
-    def bidding_to_envy(self) -> ValuationMatrix:
+        self.players_options = list(permutations(players_num))
+        options = self.make_list(
+            values=matrix, players_options=self.players_options)
+        best, m = self.best_option(options)
+        c = INF
+        for x in range(matrix.num_of_agents):
+            sum = 0
+            for j in range(0, len(matrix[x])):
+                sum += matrix[j][x]
+            if c > sum:
+                c = sum
+        return m, c, best
+
+    def player_package(self, opt: list):
+        res = []
+        for i in range(0, len(opt)):
+            temp = []
+            temp.append(i)
+            temp.append(opt[i])
+            res.append(temp)
+        return res
+
+    def bidding_to_envy(self, matrix: ValuationMatrix, options) -> ValuationMatrix:
         '''
         The 1st stage of the algorithm, initialize a table of envy values based the bidding matrix,
         by the following rules:
@@ -96,8 +162,22 @@ class BiddingForEnvyFreeness:
         >>> m.bidding_to_envy()
         [[0, -20, 0, 0, 0], [10, 0, 5, 0, 0], [-25, -15, 0, 0, 0], [5, -10, -20, 0, 0]]
         '''
+        table = list(list())
+        for x in range(0, matrix.num_of_agents):
+            y = x
+            sub = matrix[x][options[x]]
+            print(f'sub: {sub}')
+            temp = list()
+            x = matrix[x]
+            for j in range(0, len(x)):
+                # print(x[j] -sub)
+                temp.append(x[j] - sub) if y == j else temp.append(x[j] - sub)
+            temp.append(0)
+            table.append(temp)
+        logger.debug(f'Stage 1: Making a table\n{table}')
+        return table
 
-    def calculate_discounts(self) -> ValuationMatrix:
+    def calculate_discounts(self, stage: int) -> ValuationMatrix:
         '''
         This recursive function calculates the discounts for each agent,
         based on the envy values in the envy matrix, which being manipulated along the way.
@@ -121,3 +201,49 @@ class BiddingForEnvyFreeness:
 
         Where the last column represents the final discounts for each agent.
         '''
+        g = self.switch_row_column(self.table)
+        # print(g)
+        count = 0
+        for i in range(0, len(g)):
+            m = 0
+            for j in g[i]:
+                if g[self.options_list[i][0]][self.options_list[i][1]] < j and j != i and m < j:
+                    m = j - g[i][i]
+                    logger.debug(f'--- Player {i+1}: discount {j} ---')
+            if m > 0:
+                count += 1
+                for x in range(0, len(g[i])+1):
+                    self.table[i][x] += m
+                # print(self.table)
+            self.MC -= m
+        if self.MC < 0:
+            logger.warning('There is no good division for this problem')
+            raise NameError('There is no good division for this problem')
+        if count == 0:
+            c = 1
+            for x in self.table:
+                self.dct[c] = x[len(self.table)]
+                c += 1
+            dis = self.MC/len(self.table)
+            result = ''
+            for x in range(1, len(self.dct)+1):
+                self.dct[x] += dis
+                # print(self.options_list[x-1][1])
+                result += f'player {x} got package: {self.options_list[x-1][1]+1} with discount: {self.dct[x]}\n'
+            logger.info(
+                f'Final Stage:\n{result}\n--------------------------\n')
+            # print(f'Final Stage:\n{self.dct}\n--------------------------\n')
+            return self.dct.__str__()
+        logger.debug(f'\nStage {stage}:\n{self.table}\n')
+        self.calculate_discounts(stage+1)
+
+
+def run(matrix: ValuationMatrix):
+    BiddingForEnvyFreeness(matrix)
+
+
+if __name__ == "__main__":
+    logger.addHandler(logging.StreamHandler(sys.stdout))
+    logger.setLevel(logging.DEBUG)
+    b1 = [[25, 40, 35], [50, 25, 25], [10, 20, 25]]
+    run(ValuationMatrix(b1))
