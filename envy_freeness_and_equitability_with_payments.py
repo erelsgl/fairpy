@@ -1,6 +1,7 @@
 from fairpy import Allocation, MonotoneValuation
-
-# def envy_freeness_and_equitability_with_payments(allocation: dict, evaluation: dict):
+import numpy as np
+from statistics import mean
+def envy_freeness_and_equitability_with_payments(allocation: dict, evaluation: dict):
     # """
     # "Achieving Envy-freeness and Equitability with Monetary Transfers" by Haris Aziz (2021),
     # https://ojs.aaai.org/index.php/AAAI/article/view/16645
@@ -29,28 +30,66 @@ from fairpy import Allocation, MonotoneValuation
     #  {"bundles":[[],[0,1,2],[3],[]],"payments":[-27.75,62.25,-6.75,-27.75]}
     # """
     #
-    # pass
+    envy2 = True
+    while envy2:
+        envy2 = False
+        for curr_agent in allocation:
+            envy = compare_2_bundles(curr_agent, allocation, evaluation)
+            if envy:
+                envy2 = True
+    print(allocation)
+    print(calcuSW(allocation, evaluation))
+    sw = calcuSW(allocation, evaluation)
 
-eval = {"a": {"x": 40, "y":20, "r": 30, "rx": 80, "rxy": 100}, "b": {"x": 10, "y":30, "r": 70, "rx": 79, "rxy": 90}}
+
+eval = {"a": {"x": 40, "y": 20, "r": 30, "rx": 80, "rxy": 100}, "b": {"x": 10, "y":30, "r": 70, "rx": 79, "rxy": 90}}
 allocation = {"a": ["y"], "b": ["x", "r"]}
 
+agent_dict = {"A": {"x": 70}, "B": {"x": 60},"C": {"x": 40}, "D": {"x": 80}, "E": {"x": 55}}
+bundles = {"A": ["x"], "B": [], "C": [], "D": [], "E": []}
 
-def get_value(agent, boundle_of_agent: list, eval_func :dict):
+eq_value = {"x":10,"y":5,"z":15, "xy": 15, "yz": 20, "xz": 25}
+agent_dict2 = {"A":eq_value,"B":eq_value,"C":eq_value}
+bundles2={"A":["x"],"B":["y"],"C":["z"]}
+
+def get_value(agent, boundle_of_agent: list, eval_func: dict):
     curr_bundles = "".join(map(str, sorted(boundle_of_agent)))
-    return eval_func[agent][curr_bundles ]
+    if curr_bundles:
+        return eval_func[agent][curr_bundles]
+    return 0
 
 # print(get_value("a",["y"], eval))
 # print(get_value("b",["x", "r"], eval))
-# print([] + [5, 6, 8])
 
-def compare_2_bundles(agent_a, agent_b, allo: dict, eval_func: dict):
-    if get_value(agent_a, allo[agent_a] + allo[agent_b], eval_func) > get_value(agent_a, allo[agent_a], eval_func) + get_value(agent_b, allo[agent_b], eval_func):
-        allo[agent_a] = allo[agent_a] + allo[agent_b]
-        allo[agent_b] = []
-        return True
-    return False
 
-# print(compare_2_bundles("b","a", allocation, eval))
-# print(allocation)
-print(compare_2_bundles("a","b", allocation, eval))
-print(allocation)
+def compare_2_bundles(agent_a, allo: dict, eval_func: dict):
+    envy = False
+    for agent_b in allo:
+        if agent_b != agent_a:
+            if get_value(agent_a, allo[agent_a] + allo[agent_b], eval_func) > get_value(agent_a, allo[agent_a], eval_func) + get_value(agent_b, allo[agent_b], eval_func):
+                allo[agent_a] = allo[agent_a] + allo[agent_b]
+                allo[agent_b] = []
+                envy = True
+    return envy
+
+
+def calcuSW(allocation, evaluation: dict):
+    sum = 0
+    for agent in allocation:
+        if allocation[agent] == []:
+            continue
+        else:
+            sum = sum + evaluation[agent]["".join(allocation[agent])]
+        # print("-----")
+        # sum = sum + evaluation[agent][allocation[agent]]
+    # sum_sw = sum(evaluation[allocation.keys()][allocation.values()]))
+    # ave = mean(evaluation(allocation))
+    return sum / len(allocation)
+
+# def get_from_evaliation(eval: dict, agent, bundle):
+#     if eval[agent][b] == []:
+#         return 0
+#     return eval[agent]
+
+envy_freeness_and_equitability_with_payments(bundles, agent_dict)
+envy_freeness_and_equitability_with_payments(bundles2, agent_dict2)
