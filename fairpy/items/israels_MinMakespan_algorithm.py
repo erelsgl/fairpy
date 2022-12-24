@@ -1,7 +1,15 @@
-from typing import Callable
+# data structures
 import numpy as np
+from fairpy import ValuationMatrix
+# psedu random functions
 from numpy.random import randint, random
+# convex optimization
+import cvxopt as cvx
+# oop
 from abc import ABC, abstractclassmethod
+# data types
+from typing import Callable, Tuple
+
 
 ''' 
 This is an implementation of 2 - approximating algorithm for the min-makespan problome.
@@ -18,10 +26,6 @@ Cornell University, Ithaca, NY, USA
 '''
 
 
-CostMatrix =   np.ndarray.astype(float)
-ScedualMatrix = np.ndarray.astype(bool)
-
-
 class scedual(ABC):
 
     ''' custom output class '''
@@ -29,45 +33,107 @@ class scedual(ABC):
     def __init__(self) -> None:
         super().__init__()
 
+        self.costs : ValuationMatrix
+        self.assignments : np.ndarray.astype(bool)
+
+
+    @property
+    def Jobs(self) -> int: return self.costs.objects()
+
+    @property
+    def Mechines(self) -> int: return self.costs.agents()
+
+    @property
+    def resolution(self) -> float:
+
+        ''' smallest entry '''
+
+        if self.costs is None: raise RuntimeError('data hasn\'nt been initialised yet')
+
+        return min(min(self.costs, key = min))
+
+    @property
+    def shape(self) -> Tuple[int]: return self.Mechines, self.Jobs
+
+
     # lazy initilization
-    def build(self, cost_matrix: CostMatrix):
+    def build(self, cost_matrix: ValuationMatrix):
 
         # different algorithms can use an instance with the same cost matrix
-        # flyweight desighn
+        # flyweight design
         self.costs = cost_matrix
-        self.assignments = np.zeros(cost_matrix.shape)
+        self.assignments = np.zeros(self.shape).astype(bool)
 
+    def scedual(self, mechine: int, job: int):
 
-    @abstractclassmethod
-    def scedual(self, mechine: int, job: int): pass
+        if self.assignments[mechine, job]: raise KeyError('assignment already scedualed')
+        self.assignments[mechine, job] = True
+
+    def clear(self):
+        ''' delet all assignments, start over '''
+        self.assignments = np.zeros(self.shape).astype(bool) 
+
 
     @abstractclassmethod
     def extract_scedual(self): pass
+
 
 class scedual_makespan(scedual):
 
     '''
     implementation that keeps track of the actuall makespan
+
+    >>> scd = scedual_makespan()
+    >>> scd.build(ValuationMatrix([[1, 1], [1, 1]]))
+    >>> scd.scedual(0, 0)
+    >>> scd.scedual(1, 1)
+    >>> print(scd.extract_scedual())
+    {0 : 0, 1 : 1}
     '''
 
-    def scedual(self, nechine: int, job: int): pass
-    def extract_scedual(self): pass
+    def extract_scedual(self): 
+        return { 
+                    mechine : job
+                    for mechine in range(self.Mechines)
+                    for job in range(self.Jobs)
+                    if self.assignments[mechine, job]
+                }
 
 class scedual_assignment(scedual):
 
     '''
     implementation that keeps track of the assignment
+
+    >>> scd = scedual_makespan()
+    >>> scd.build(ValuationMatrix([[1, 1], [1, 1]]))
+    >>> scd.scedual(0, 0)
+    >>> scd.scedual(1, 1)
+    >>> print(scd.extract_scedual())
+    1
+    >>> scd.scedual(0, 1)
+    >>> print(scd.extract_scedual())
+    2
     '''
 
-    def scedual(self, nechine: int, job: int): pass
-    def extract_scedual(self): pass
-    
+    def extract_scedual(self):
+
+        return max(sum((
+                            self.costs[mechine, job]
+                            for job in range(self.Jobs)
+                            if self.assignments[mechine, job]
+                        ))
+                        for mechine in range(self.Mechines)
+                    )
 
 
-MinMakespanAlgo = Callable[[CostMatrix], scedual]
+
+""" Algorithms """
 
 
-def greedy(input: CostMatrix) -> scedual:
+MinMakespanAlgo = Callable[[scedual], None]
+
+
+def greedy(output: scedual) -> None:
     
     ''' 
     greedy scedualing.
@@ -85,9 +151,10 @@ def greedy(input: CostMatrix) -> scedual:
     4
     '''
 
-    pass
+    for job in range(output.costs.objects()):
+        output.scedual(min((mechine for mechine in range(output.costs.agents())), key = lambda m : output.costs[m, job]), job)
 
-def apprx(input: CostMatrix) -> scedual:
+def apprx(output: scedual) -> None:
 
     '''
     closing in on the optimal solution with binry search
@@ -103,11 +170,51 @@ def apprx(input: CostMatrix) -> scedual:
     >>> print(apprx(np.array([[[1, 2, 3], [2, 5, 3],[1, 3, 7], [10, 3, 10]]])).extract_scedual() <= 6)
     True
     '''
-    
+
+    # bounds on solution via a greedy solution
+
+    greedy_sol = scedual_makespan(output.costs)
+    greedy(greedy_sol)
+
+    upper = output.extract_scedual()
+    lower = upper / output.costs.agents()
+
+    del greedy_sol
+
+
+    smallest_step = output.resolution
+
+    while lower <= upper:
+
+        middle = (upper + lower) / 2
+
+        output.clear()
+        feasable = LinearProgram(output)
+
+        if not feasable:
+            upper = middle
+        else:
+            lower = middle +smallest_step
+
+
+
+def LinearProgram(output: scedual, deadlines: np.ndarray.astype(float), aprrx_bound: float) -> bool:
+
+
+    ''' The linear program fassioned in the paper '''
+
     pass
 
 
-def MinMakespan(algo: MinMakespanAlgo, input: CostMatrix, output: scedual, **kwargs):
+def Round(output: scedual, fractional_sol: np.ndarray.astype(float)):
+
+    ''' The rounding theorem for the LP's solution fassioned in the paper '''
+
+    pass
+
+
+
+def MinMakespan(algo: MinMakespanAlgo, input: ValuationMatrix, output: scedual, **kwargs):
 
     '''
     generic function for the min-makespan problome
@@ -119,15 +226,16 @@ def MinMakespan(algo: MinMakespanAlgo, input: CostMatrix, output: scedual, **kwa
     '''
 
     output.build(input)
-    return algo(output, **kwargs).extract_scedual()
+    algo(output, **kwargs)
+    return output.extract_scedual()
 
 
 def RandomTesting(algo: MinMakespanAlgo, output: scedual, iteration: int, **kwargs):
 
     '''spesefied amount of random tests generator'''
 
-    mechines = randint(1, 300)
-    jobs = randint(mechines // 5, mechines * 5)
+    mechines = randint(1, 500)
+    jobs = randint(1, 500)
 
     for i in range(iteration):
         yield MinMakespan(algo, random(0, 3, (jobs, mechines)), output, **kwargs)
