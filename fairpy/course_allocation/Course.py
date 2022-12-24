@@ -13,10 +13,3 @@ class Course:
             return (a.capacity - a.max_capacity) - (b.capacity - b.max_capacity)
         if(a.mark): return -1
         if(b.mark): return 1
-    def __deepcopy__(self, memo):
-        cls = self.__class__
-        result = cls.__new__(cls)
-        memo[id(self)] = result
-        for k, v in self.__dict__.items():
-            setattr(result, k, deepcopy(v, memo))
-        return result
