@@ -11,6 +11,7 @@ Programmers: Barak Amram, Adi Dahari
 Since: 2022-12
 '''
 
+import doctest
 import sys
 from itertools import permutations
 import pandas as pd
@@ -51,8 +52,12 @@ class BiddingForEnvyFreeness:
         logger.debug(self.options_list)
         self.table = self.bidding_to_envy(matrix, opt)
         self.res = self.calculate_discounts(2)
-        self.calculated_discounts = {
-            p: self.res[p] for p in self.res.keys()}
+        if self.res:
+            self.calculated_discounts = {
+                p: self.res[p] for p in self.res.keys()}
+        else:
+            self.calculated_discounts = {
+                p: 0 for p in self.bundle_allocation.keys()}
         self.final_result = {f'Player {p}': {
             'Allocated Bundle': self.bundle_allocation[p],
             'Discount': self.calculated_discounts[p]
@@ -120,18 +125,18 @@ class BiddingForEnvyFreeness:
         C = Min(C1, C2, C3) = 85
 
         And the output will be the following tuple (M, C):
-            (M, C) = (115, 85)
+            (M, C, best) = (115, 85, 1)
 
         TESTS:
         >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 25, 10], [40, 25, 20], [35, 25, 25]]))
         >>> m.find_m_c_best()
-        (100, 85)
-        >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 30, 50], [45, 35, 40], [10, 20, 35]]))
+        (100, 85, 0)
+        >>> m = BiddingForEnvyFreeness(ValuationMatrix([[45, 35, 40], [50, 30, 50], [10, 20, 35]]))
         >>> m.find_m_c_best()
-        (120, 85)
+        (120, 85, 2)
         >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 45, 10, 25], [30, 35, 20, 10], [50, 40, 35, 0], [50, 35, 35, 20]]))
         >>> m.find_m_c_best()
-        (140, 95)
+        (140, 95, 15)
         '''
         players_num = list(range(matrix.num_of_agents))
 
@@ -272,7 +277,8 @@ def run(matrix: ValuationMatrix):
 
 
 if __name__ == "__main__":
+    # doctest.testmod()
     logger.addHandler(logging.StreamHandler(sys.stdout))
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
     b1 = [[25, 40, 35], [50, 25, 25], [10, 20, 25]]
     run(ValuationMatrix(b1))
