@@ -4,7 +4,9 @@ from fairpy import ValuationMatrix
 # psedu random functions
 from numpy.random import randint, random
 # convex optimization
-import cvxopt as cvx
+import cvxpy as cvx
+# graph search algorithms
+import networkx as nx
 # oop
 from abc import ABC, abstractclassmethod
 # data types
@@ -12,7 +14,7 @@ from typing import Callable, Tuple
 
 
 ''' 
-This is an implementation of 2 - approximating algorithm for the min-makespan problome.
+This is an implementation of 2 - approximating algorithm for the min-makespan problom.
 That is: scedualing on unrelated unperallel mechines
 
 Proposed in 1990 by:
@@ -65,7 +67,7 @@ class scedual(ABC):
         self.assignments = np.zeros(self.shape).astype(bool)
 
     def scedual(self, mechine: int, job: int):
-
+        '''assigning a job to a mechine to process'''
         if self.assignments[mechine, job]: raise KeyError('assignment already scedualed')
         self.assignments[mechine, job] = True
 
@@ -151,8 +153,8 @@ def greedy(output: scedual) -> None:
     4
     '''
 
-    for job in range(output.costs.objects()):
-        output.scedual(min((mechine for mechine in range(output.costs.agents())), key = lambda m : output.costs[m, job]), job)
+    for job in range(output.Jobs):
+        output.scedual(min(range(output.Mechines), key = lambda mechine : output.costs[mechine, job]), job)
 
 def apprx(output: scedual) -> None:
 
@@ -181,6 +183,7 @@ def apprx(output: scedual) -> None:
 
     del greedy_sol
 
+    # homing on the best solution with binary search
 
     smallest_step = output.resolution
 
@@ -189,28 +192,83 @@ def apprx(output: scedual) -> None:
         middle = (upper + lower) / 2
 
         output.clear()
-        feasable = LinearProgram(output)
+        feasable = LinearProgram(output, np.array([middle] * output.Mechines), middle)
 
-        if not feasable:
-            upper = middle
-        else:
-            lower = middle +smallest_step
+        if not feasable:    upper = middle
+        else:               lower = middle + smallest_step
 
 
 
-def LinearProgram(output: scedual, deadlines: np.ndarray.astype(float), aprrx_bound: float) -> bool:
+def LinearProgram(output: scedual, deadlines: np.ndarray, aprrx_bound: float) -> bool:
 
 
     ''' The linear program fassioned in the paper '''
 
-    pass
+    variables = cvx.Variable(output.shape)
+
+    constraints = [variables >= np.zeros(output.shape)]
+
+    # out of all mechines that can do job j in time <= aprrx_bound
+    # only 1 may be assgned to handle it, for j in all Jobs
+    constraints += [
+                    sum((
+                            variables[mechine, job]
+                            for mechine in range(output.Mechines)
+                            if output.costs[mechine, job] <= aprrx_bound
+                        ))
+                        == 1
+                    for job in range(output.Jobs)
+                    ]
+    # out of all jobs that mechine m can do in time <= aprrx_bound
+    # m can handle at most deadline-m worth of processing time, for m in all Mechines
+    constraints += [
+                    sum((
+                            variables[mechine, job]
+                            for job in range(output.Jobs)
+                            if output.costs[mechine, job] <= aprrx_bound
+                        ))
+                        <= deadlines[mechine]
+                    for mechine in range(output.Mechines)
+                    ]
+
+    # minmise maximum workload aka makespan
+    objective = cvx.Minimize(max((sum(
+                                        variables[mechine, job]
+                                        for job in range(output.Jobs))
+                                        for mechine in range(output.Mechines)
+                            )))
+
+    prob = cvx.Problem(objective, constraints)
+    prob.solve()
+    # rounding to an integral solution
+    Round(output, prob)
 
 
-def Round(output: scedual, fractional_sol: np.ndarray.astype(float)):
+
+def Round(output: scedual, fractional_sol: cvx.Problem):
 
     ''' The rounding theorem for the LP's solution fassioned in the paper '''
 
-    pass
+    G : nx.Graph = nx.union(nx.Graph(range(output.Mechines)), nx.Graph(range(output.Jobs)), rename = ('M', 'J'))
+    G.add_weighted_edges_from({
+                                 (mechine, job, fractional_sol[mechine, job])
+                                 for mechine, job in zip(range(output.Mechines), range(output.Jobs))
+                                 if fractional_sol[mechine, job > 0]
+                              })
+
+    # adopting integral assignments
+    for mechine, job in zip(range(output.Mechines), range(output.Jobs)):
+        if fractional_sol[mechine, job] == 1:
+
+            output.scedual(mechine, job)
+            G.remove_edge(mechine, job)
+
+
+    if not nx.bipartite.is_bipartite(G):    raise RuntimeError('G[fractional solution] should be bipartite')
+
+    # assigning the rest acording to the algo, via max match
+    for mechine, job in nx.algorithms.bipartite.maximum_matching(G).items():   output.scedual(mechine, job)
+
 
 
 
