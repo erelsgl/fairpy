@@ -1,8 +1,6 @@
 import doctest
-from typing import List, Any
-
+import logging
 import numpy as np
-
 from fairpy import AllocationMatrix, Allocation, ValuationMatrix
 
 
@@ -13,9 +11,12 @@ def swap_columns(matrix: np.array, idx_1: int, idx_2: int) -> None:
     >>> np.array_equal(mat, np.array([[3,2,1],[6,5,4],[9,8,7]]))
     True
     """
+    logger.info('swap_columns( %s, %g , %g )', matrix, idx_1, idx_2)
+    logger.debug('matrix before swap: %s', matrix)
     temp = np.copy(matrix[:, idx_1])
     matrix[:, idx_1] = matrix[:, idx_2]
     matrix[:, idx_2] = temp
+    logger.debug('matrix after swap: %s', matrix)
 
 
 def get_max(agent_valuation: np.array, payments: np.array) -> float:
@@ -27,7 +28,9 @@ def get_max(agent_valuation: np.array, payments: np.array) -> float:
     >>> get_max(np.array([-1.,0.,2.,4.]),np.array([2.,-2.,-3.,1.5]))
     5.0
     """
+    logger.info('get_max( %s, %s )', agent_valuation, payments)
     m = max(zip(agent_valuation, payments), key=lambda x: x[0] - x[1])
+    logger.debug('get max (tuple): %s', m)
     return m[0] - m[1]
 
 
@@ -38,6 +41,7 @@ def get_argmax(agent_valuation: np.array, payments: np.array) -> int:
     >>> get_argmax(np.array([-1.,2.,-3.,2.]),np.array([-5.,2.,1.,-1.]))
     0
     """
+    logger.info('get_argmax( %s, %s )', agent_valuation, payments)
     return np.argmax([x[0] - x[1] for x in zip(agent_valuation, payments)])
 
 
@@ -48,29 +52,12 @@ def get_second_max(idx: int, agent_valuation: np.array, payments: np.array) -> f
     >>> get_second_max(0, np.array([-1.,2.,-3.,2.]),np.array([-5.,2.,1.,-1.]))
     3.0
     """
+    logger.info('get_second_max( %g, %s, %s )', idx, agent_valuation, payments)
     temp_a = agent_valuation[np.arange(len(agent_valuation)) != idx]
     temp_p = payments[np.arange(len(payments)) != idx]
     m = max(zip(temp_a, temp_p), key=lambda x: x[0] - x[1])
+    logger.debug('get second max (tuple): %s', m)
     return m[0] - m[1]
-
-
-def check_envy(agent_i, matrix, payments: np.array, bundles: list) -> bool:
-    if matrix[agent_i][agent_i] - payments[agent_i] < get_max(matrix[agent_i], payments):
-        agent_j = get_argmax(matrix[agent_i], payments)
-        u1 = get_max(matrix[agent_i], payments)
-        u2 = get_second_max(agent_j, matrix[agent_i], payments)
-
-        # replace payment value
-        temp_p = payments[agent_i]
-        payments[agent_i] = payments[agent_j] + (u1 - u2)
-        payments[agent_j] = temp_p
-        # replace bundles
-        swap_columns(matrix, agent_i, agent_j)
-        temp = bundles[agent_i]
-        bundles[agent_i] = bundles[agent_j]
-        bundles[agent_j] = temp
-        return True
-    return False
 
 
 def envy_free_approximation(a: Allocation) -> dict:
@@ -108,9 +95,32 @@ def envy_free_approximation(a: Allocation) -> dict:
     while flag:
         flag = False
         for i in range(len(value_matrix)):
-            flag = check_envy(i, value_matrix, payments, bundles) or flag
+            if value_matrix[i][i] - payments[i] < get_max(value_matrix[i], payments):
+                agent_j = get_argmax(value_matrix[i], payments)
+                u1 = get_max(value_matrix[i], payments)
+                u2 = get_second_max(agent_j, value_matrix[i], payments)
+                logger.debug("u1,u2: %g, %g", u1, u2)
+                # replace payment value
+                temp_p = payments[i]
+                payments[i] = payments[agent_j] + (u1 - u2)
+                payments[agent_j] = temp_p
+                # replace bundles
+                swap_columns(value_matrix, i, agent_j)
+                temp = bundles[i]
+                bundles[i] = bundles[agent_j]
+                bundles[agent_j] = temp
+                flag = True
 
     return {"bundles": bundles, "payments": payments.tolist()}
 
+
 if __name__ == '__main__':
+    logging.basicConfig(filename="ev.log", level=logging.INFO)
+    logger = logging.getLogger("")
+    # console = logging.StreamHandler()
+    # logger.handlers = [console]
+    # logger.setLevel(logging.INFO)
+    v = [[20, 15, 24, 35], [12, 30, 18, 24], [20, 10, 15, 25], [15, 25, 22, 20]]
+    a = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+    envy_free_approximation(Allocation(agents=ValuationMatrix(v), bundles=AllocationMatrix(a)))
     doctest.testmod()
