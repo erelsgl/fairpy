@@ -32,7 +32,7 @@ Cornell University, Ithaca, NY, USA
 
 class scedual(ABC, Iterable):
 
-    ''' custom output class '''
+    ''' custom output class to wrap the libraries ValuationMatrix for this programs needs '''
 
     def __init__(self) -> None:
         super().__init__()
@@ -50,15 +50,6 @@ class scedual(ABC, Iterable):
     @property
     def shape(self) -> Tuple[int]: return self.Mechines, self.Jobs
 
-    # a mesure of the smallest value that may make a difference in the instance
-    @property
-    def resolution(self) -> float:
-
-        if self.costs is None: raise RuntimeError('data hasn\'nt been initialised yet')
-
-        def accuracy(num: float) -> int: return len(str(float(num)).split('.')[1])
-
-        return 1 / 10 ** max(accuracy(self.costs[mechine, job])  for mechine, job in self)
 
     # iterator for indexes covering exactly the data structure
     def __iter__(self) -> Iterator[int]:
@@ -209,18 +200,14 @@ def apprx(output: scedual) -> None:
 
     # bounds on solution via a greedy solution
 
-    greedy_sol = scedual_makespan()
-    greedy_sol.build(output.costs)
-    greedy(greedy_sol)
+    greedy(output)
 
     upper = output.extract_result()
     lower = upper / output.Mechines
 
-    del greedy_sol
+    output.clear()
 
     # homing on the best solution with binary search
-
-    smallest_step = output.resolution
 
     while lower <= upper:
 
@@ -229,8 +216,8 @@ def apprx(output: scedual) -> None:
         output.clear()
         feasable = LinearProgram(output, np.array([middle] * output.Mechines), middle)
 
-        if not feasable:    upper = middle
-        else:               lower = middle + smallest_step
+        if not feasable:    upper = middle - 0.0001
+        else:               lower = middle + 0.0001
 
 
 
@@ -241,43 +228,54 @@ def LinearProgram(output: scedual, deadlines: np.ndarray, aprrx_bound: float) ->
 
     variables = cvx.Variable(output.shape)
 
+    # all variables are at least 0
     constraints = [variables >= np.zeros(output.shape)]
 
     # out of all mechines that can do job j in time <= aprrx_bound
     # only 1 may be assigned to handle it, for j in all Jobs
-    constraints += [
-                    sum(
-                            variables[mechine, job]
-                            for mechine in range(output.Mechines)
-                            if output.costs[mechine, job] <= aprrx_bound
-                        )
-                        == 1
-                    for job in range(output.Jobs)
-                    ]
+    for job in range(output.Jobs):
+
+        var = variables[0, job]
+        for mechine in range(1, output.Mechines):
+            if output.costs[mechine, job] <= aprrx_bound:
+                var += variables[mechine, job]
+
+        constraints.append(var == 1)
+
+
     # out of all jobs that mechine m can do in time <= aprrx_bound
     # m can handle at most deadline-m worth of processing time of'em, for m in all Mechines
-    constraints += [
-                    sum(
-                            variables[mechine, job]
-                            for job in range(output.Jobs)
-                            if output.costs[mechine, job] <= aprrx_bound
-                        )
-                        <= deadlines[mechine]
-                    for mechine in range(output.Mechines)
-                    ]
+    for mechine in range(output.Mechines):
+
+        var = variables[mechine, 0]
+        for job in range(1, output.Jobs):
+            if output.costs[mechine, job] <= aprrx_bound:
+                var += variables[mechine, job]
+
+        constraints.append(var <= deadlines[mechine])
+
 
     # minimise maximum workload aka makespan
-    objective = cvx.Minimize(max(sum(
-                                        variables[mechine, job]
-                                        for job in range(output.Jobs)
-                                    )
-                                    for mechine in range(output.Mechines)
-                                ))
+    workloads = []
+
+    for mechine in range(output.Mechines):
+
+        load = variables[mechine, 0]
+        for job in range(1, output.Jobs):
+            load += variables[mechine, job]
+        
+        workloads.append(load)
+
+
+    objective = cvx.Minimize(cvx.maximum( * workloads))
 
     prob = cvx.Problem(objective, constraints)
     prob.solve()
+    if prob.status != 'optimal': return False
+
     # rounding to an integral solution
     Round(output, prob)
+    return True
 
 
 
@@ -338,4 +336,11 @@ def RandomTesting(algo: MinMakespanAlgo, output: scedual, iteration: int, **kwar
 if __name__ == '__main__':
 
     import doctest
-    doctest.testmod(verbose = True)    
+    #doctest.testmod(verbose = True)
+
+
+    scd = scedual_makespan()
+    scd.build(ValuationMatrix(np.ones((3, 3))))
+    apprx(scd)
+    print(scd.extract_result())
+    
