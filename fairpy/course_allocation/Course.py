@@ -13,3 +13,6 @@ class Course:
             return (a.capacity - a.max_capacity) - (b.capacity - b.max_capacity)
         if(a.mark): return -1
         if(b.mark): return 1
+    
+    def __str__(self) -> str:
+        return  f"course name: {self.name} capacity {self.capacity}/{self.max_capacity} and priced {self.price}"

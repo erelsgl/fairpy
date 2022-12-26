@@ -10,6 +10,23 @@ import doctest
 def reset_update_prices(price_vector, courses:list[Course]):
     '''
     reset prices of courses and capacity
+    >>> a = Course(name='a', price=0, max_capacity=5)
+    >>> b = Course(name='b', price=0, max_capacity=3)
+    >>> c = Course(name='c', price=0, max_capacity=5)
+    >>> courses = [a, b, c]
+
+    >>> s1 = Student(name='s1', budget=15, preferences=([c, b]))
+    >>> s2 = Student(name='s2', budget=15, preferences=([b, c, a]))
+    >>> s3 = Student(name='s3', budget=15, preferences=([b, a]))
+    >>> s4 = Student(name='s4', budget=15, preferences=([a, c]))
+    >>> s5 = Student(name='s5', budget=15, preferences=([a, b, c]))
+    >>> students = [s1, s2, s3, s4, s5]
+    >>> max_budget = 15
+    >>> reset_update_prices([7,8,9], courses)
+    >>> [course.capacity for course in courses]
+    [0, 0, 0]
+    >>> [course.price for course in courses]
+    [7, 8, 9]
     '''
     i = 0 
     for course in courses:
@@ -20,6 +37,23 @@ def reset_update_prices(price_vector, courses:list[Course]):
 def reset_students(students:list[Student], max_budget: float):
     '''
     reset budget and courses for students
+    >>> a = Course(name='a', price=0, max_capacity=5)
+    >>> b = Course(name='b', price=0, max_capacity=3)
+    >>> c = Course(name='c', price=0, max_capacity=5)
+    >>> courses = [a, b, c]
+
+    >>> s1 = Student(name='s1', budget=0, preferences=([c, b]))
+    >>> s2 = Student(name='s2', budget=0, preferences=([b, c, a]))
+    >>> s3 = Student(name='s3', budget=0, preferences=([b, a]))
+    >>> s4 = Student(name='s4', budget=0, preferences=([a, c]))
+    >>> s5 = Student(name='s5', budget=0, preferences=([a, b, c]))
+    >>> students = [s1, s2, s3, s4, s5]
+    >>> max_budget = 15
+    >>> reset_students(students, max_budget)
+    >>> [student.budget for student in students]
+    [15, 15, 15, 15, 15]
+    >>> [student.courses for student in students]
+    [[], [], [], [], []]
     '''
     for student in students:
             student.budget = max_budget 
@@ -29,6 +63,22 @@ def map_price_demand(price_vector:list[float], max_budget: float, students:list[
                      courses:list[Course]):
         '''
         mapping price vector to demands of students
+        >>> a = Course(name='a', price=0, max_capacity=5)
+        >>> b = Course(name='b', price=0, max_capacity=3)
+        >>> c = Course(name='c', price=0, max_capacity=5)
+        >>> courses = [a, b, c]
+
+        >>> s1 = Student(name='s1', budget=0, preferences=([c, b]))
+        >>> s2 = Student(name='s2', budget=0, preferences=([b, c, a]))
+        >>> s3 = Student(name='s3', budget=0, preferences=([b, a]))
+        >>> s4 = Student(name='s4', budget=0, preferences=([a, c]))
+        >>> s5 = Student(name='s5', budget=0, preferences=([a, b, c]))
+        >>> students = [s1, s2, s3, s4, s5]
+        >>> max_budget = 15
+        >>> price_vector = [7,8,7]
+        >>> map_price_demand(price_vector, max_budget, students, courses)
+        >>> [str(course) for course in courses]
+        ['course name: a capacity 3/5 and priced 7', 'course name: b capacity 4/3 and priced 8', 'course name: c capacity 3/5 and priced 7']
         '''
         reset_update_prices(price_vector, courses)
         reset_students(students, max_budget)

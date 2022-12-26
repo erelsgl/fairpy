@@ -7,6 +7,22 @@ import doctest
 
 
 def csp_mapping(students:list[Student],courses:list[Course]):
+    '''
+    >>> a = Course(name='a', price=2.4, capacity=0, max_capacity=5)
+    >>> b = Course(name='b', price=5, capacity=0, max_capacity=4)
+    >>> c = Course(name='c', price=10.4, capacity=0, max_capacity=5)
+    >>> courses = [a, b, c]
+    >>> s1 = Student(name='s1', budget=18, year=1, courses=[], preferences=([c, b]))
+    >>> s2 = Student(name='s2', budget=18, year=1, courses=[], preferences=([b, c, a]))
+    >>> s3 = Student(name='s3', budget=18, year=1, courses=[], preferences=([b, a]))
+    >>> s4 = Student(name='s4', budget=18, year=1, courses=[], preferences=([a, c]))
+    >>> s5 = Student(name='s5', budget=18, year=1, courses=[], preferences=([a, b, c]))
+    >>> s6 = Student(name='s6', budget=18, year=1, courses=[], preferences=([a, c, b]))
+    >>> students = [s1, s2, s3, s4, s5, s6]
+    >>> csp_mapping(students, courses)
+    >>> [str(course) for course in courses]
+    ['course name: a capacity 5/5 and priced 2.4', 'course name: b capacity 5/4 and priced 5', 'course name: c capacity 5/5 and priced 10.4']
+    '''
     def get_course(s) -> bool:
         for i in range(0, len(s.preferences)):
             if (s.budget >= s.preferences[i].price and 

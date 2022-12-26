@@ -4,11 +4,35 @@ from functools import cmp_to_key
 import doctest
 
 def mapping_csp(courses:list[Course], students:list[Student], helper:dict, students_matrix:list[list[bool]]):
+    '''
+    >>> a = Course(name='a', price=12, capacity=1 ,max_capacity=5)
+    >>> b = Course(name='b', price=2, capacity=3 ,max_capacity=3)
+    >>> c = Course(name='c', price=4.5, capacity=3 ,max_capacity=5)
+    >>> courses = [a, b, c]
+
+    >>> s1 = Student(name='s1', budget=10.5, courses=[b,c],preferences=([c, b]))
+    >>> s2 = Student(name='s2', budget=10.5, courses=[b,c] ,year=2 ,preferences=([b, c, a]))
+    >>> s3 = Student(name='s3', budget=15, courses=[b], year=3, preferences=([b, a]))
+    >>> s4 = Student(name='s4', budget=0.5, courses=[a,c], year=3, preferences=([a, c]))
+    >>> s5 = Student(name='s5', budget=4, courses=[a], preferences=([a, b, c]))
+    >>> students = [s1, s2, s3, s4, s5]
+    
+    >>> students_matrix = [[False,True,True],[False,True,True],[False,True,False],[True,False,True],[True,False,False]]
+    >>> helper = {}
+    >>> count = 0
+    >>> for course in courses:
+    ...     helper[course.name] = count
+    ...     count += 1
+    >>> mapping_csp( courses ,students, helper ,students_matrix)
+    >>> [str(course) for course in courses]
+    ['course name: a capacity 2/5 and priced 12', 'course name: b capacity 3/3 and priced 2', 'course name: c capacity 3/5 and priced 4.5']
+    '''
     def get_course(s: Student, stud_num:int) -> bool:
         for i in range(0, len(s.preferences)):
             if (s.budget >= s.preferences[i].price and
                    students_matrix[stud_num][helper.get(s.preferences[i].name)] == False and
-                   s.preferences[i] not in s.courses):
+                   s.preferences[i] not in s.courses and
+                   s.preferences[i].capacity < s.preferences[i].max_capacity):
                 s.courses.append(s.preferences[i])
                 s.budget = s.budget - s.preferences[i].price
                 s.preferences[i].capacity += 1
@@ -67,20 +91,20 @@ def algorithm3(courses, students, students_matrix:list[list[bool]],csp_students:
 
 
 def test1():
-    a = Course(name='a', price=12, max_capacity=5)
-    b = Course(name='b', price=2, max_capacity=3)
-    c = Course(name='c', price=4.5, max_capacity=5)
+    a = Course(name='a', price=12, capacity=1 ,max_capacity=5)
+    b = Course(name='b', price=2, capacity=3 ,max_capacity=3)
+    c = Course(name='c', price=4.5, capacity=3 ,max_capacity=5)
     courses = [a, b, c]
 
     s1 = Student(name='s1', budget=10.5, courses=[b,c],preferences=([c, b]))
     s2 = Student(name='s2', budget=10.5, courses=[b,c] ,year=2 ,preferences=([b, c, a]))
     s3 = Student(name='s3', budget=15, courses=[b], year=3, preferences=([b, a]))
     s4 = Student(name='s4', budget=0.5, courses=[a,c], year=3, preferences=([a, c]))
-    s5 = Student(name='s5', budget=4, courses=[a,b], preferences=([a, b, c]))
+    s5 = Student(name='s5', budget=4, courses=[a], preferences=([a, b, c]))
     students = [s1, s2, s3, s4, s5]
     
-    students_matrix = [[False,True,True],[False,True,True],[False,True,False],[True,False,True],[True,True,False]]
-    assert algorithm3(courses, students, students_matrix,mapping_csp) == [[False, True, True], [False, True, True], [True, True, False], [True, False, True], [True, True, False]]
+    students_matrix = [[False,True,True],[False,True,True],[False,True,False],[True,False,True],[True,False,False]]
+    assert algorithm3(courses, students, students_matrix,mapping_csp) == [[False, True, True], [False, True, True], [True, True, False], [True, False, True], [True, False, False]]
 
 def test2():
     a = Course(name='a', price=3.4, capacity=4, max_capacity=5)
