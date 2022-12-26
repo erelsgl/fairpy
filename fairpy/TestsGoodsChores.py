@@ -7,9 +7,10 @@ from fairpy.agentlist import AgentList
 from fairpy.goods_chores import Double_RoundRobin_Algorithm, Generalized_Adjusted_Winner_Algorithm, Generalized_Moving_knife_Algorithm
 
 
-def is_continuous(allocation):
-    for i in range(len(allocation) -1):
-        if not (int(allocation[i]) == (int(allocation[i+1])+1)):
+def is_continuous(allocation:list):
+    # print(allocation)
+    for i in range(0,len(allocation) -1):
+        if not (int(allocation[i])+1) == int(allocation[i+1]):
             return False
     return True
 
@@ -76,41 +77,55 @@ class Mytes(unittest.TestCase):
         # --------------------------------------------------- Tests for algo 3 -----------------------------------------
 
     # large input and continuous validation
-    def test6(self):
+    def test8(self):
         agents = {}
+        prop = {}
+        result = {}
         prop_shares = []
-        for i in range(10000):
+        for i in range(1,100):
             agentI = "Agent" + str(i)
             agents[agentI] = {}
-            for j in range(1, 6):
+            sum = 0
+            for j in range(1, 1001):
                 agents[agentI][str(j)] = randint(-10, 10)
-        res = Generalized_Moving_knife_Algorithm(agents)
+                sum += agents[agentI][str(j)]
+            prop[agentI] = sum/100
+            result[agentI] = []
+        # print(agents)
+        res = Generalized_Moving_knife_Algorithm(AgentList(agents) , prop_values=prop, remain_interval=[0,1000] , result=result)
         for allocation in res:
-            self.assertTrue(is_continuous(allocation))
+            self.assertTrue(is_continuous(res[allocation]))
 
     # large random input and prop1 validation
-    def test7(self):
+    def test9(self):
         agents = {}
+        prop = {}
+        result = {}
         prop_shares = []
-        for i in range(10000):
+        for i in range(100):
             agentI = "Agent"+str(i)
             agents[agentI] = {}
-            for j in range(1,6):
+            s = 0
+            for j in range(1,1001):
                 agents[agentI][str(j)] = randint(-10,10)
-            prop_shares.append((sum(agents[agentI].values()))/10000)
-        res = Generalized_Moving_knife_Algorithm(agents)
-        for i in range(10000):
-            max = -10
-            min = 10
+                s += agents[agentI][str(j)]
+            prop[agentI] = s / 1000
+            result[agentI] = []
+            prop_shares.append(sum(list(agents[agentI].values()))/1000)
+        res = Generalized_Moving_knife_Algorithm(AgentList(agents) , prop_values=prop, remain_interval=[0,1000] , result=result)
+        for i in range(100):
+            maxim = -10
+            minim = 10
             agentI = "Agent" + str(i)
-            for j in range(1,6):
-                if j not in res[i] and agents[agentI][j] >= max:
-                    max = agents[agentI][j]
-                if j in res[i] and agents[agentI][j] <= min:
-                    min = agents[agentI][j]
-            plus1 = prop_shares[i] + max/10000
-            minus1 = prop_shares[i] - min/10000
-            self.assertTrue(sum(res[i]) >= prop_shares[i] or sum(res[i]) >= plus1 or sum(res[i]) <= minus1)
+            for j in range(1,1001):
+                if str(j) not in res[agentI] and agents[agentI][str(j)] >= maxim:
+                    maxim = int(agents[agentI][str(j)])
+                if str(j) in res[agentI] and agents[agentI][str(j)] <= minim:
+                    minim = int(agents[agentI][str(j)])
+            plus1 = prop[agentI] + (maxim/10)
+            minus1 = prop[agentI] - (minim/10)
+            sum_res_i = sum([int(x) for x in res[agentI]])
+            self.assertTrue(sum_res_i >= prop[agentI] or sum_res_i >= plus1 or sum_res_i >= minus1)
 
 
 if __name__ == '__main__':
