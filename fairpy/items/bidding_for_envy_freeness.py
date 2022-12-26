@@ -37,6 +37,7 @@ class BiddingForEnvyFreeness:
         '''
         logger.info('Bidding for Envy Freeness')
         logger.info(f'Initial Bidding Matrix: \n{pprint.pformat(matrix)}')
+        self.bidding_matrix = matrix
         self.dct = dict()
         self.m, self.c, self.best = self.find_m_c_best(matrix)
         logger.debug(
@@ -129,14 +130,14 @@ class BiddingForEnvyFreeness:
 
         TESTS:
         >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 25, 10], [40, 25, 20], [35, 25, 25]]))
-        >>> m.find_m_c_best()
-        (100, 85, 0)
+        >>> m.find_m_c_best(ValuationMatrix([[50, 25, 10], [40, 25, 20], [35, 25, 25]]))
+        (100, 55, 0)
         >>> m = BiddingForEnvyFreeness(ValuationMatrix([[45, 35, 40], [50, 30, 50], [10, 20, 35]]))
-        >>> m.find_m_c_best()
+        >>> m.find_m_c_best(ValuationMatrix([[45, 35, 40], [50, 30, 50], [10, 20, 35]]))
         (120, 85, 2)
         >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 45, 10, 25], [30, 35, 20, 10], [50, 40, 35, 0], [50, 35, 35, 20]]))
-        >>> m.find_m_c_best()
-        (140, 95, 15)
+        >>> m.find_m_c_best(ValuationMatrix([[50, 45, 10, 25], [30, 35, 20, 10], [50, 40, 35, 0], [50, 35, 35, 20]]))
+        (145, 55, 15)
         '''
         players_num = list(range(matrix.num_of_agents))
 
@@ -185,17 +186,21 @@ class BiddingForEnvyFreeness:
 
         TESTS:
         >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 40, 35], [25, 25, 25], [10, 20, 35]]))
-        >>> m.bidding_to_envy()
-        [[0, -10, -15, 0], [0, 0, 0, 0], [-15, -5, 0, 0]]
+        >>> m.bidding_to_envy(m.bidding_matrix, list(m.players_options[m.best]))
+        [[0, -10, -15, 0], [0, 0, 0, 0], [-25, -15, 0, 0]]
+
         >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 30, 50], [45, 35, 40], [10, 20, 35]]))
-        >>> m.bidding_to_envy()
+        >>> m.bidding_to_envy(m.bidding_matrix, list(m.players_options[m.best]))
         [[0, -20, 0, 0], [10, 0, 5, 0], [-25, -15, 0, 0]]
+
         >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 60, 0, 50], [20, 40, 40, 35], [10, 15, 25, 10], [20, 10, 35, 30]]))
-        >>> m.bidding_to_envy()
+        >>> m.bidding_to_envy(m.bidding_matrix, list(m.players_options[m.best]))
         [[0, 10, -50, 0, 0], [-20, 0, 0, -5, 0], [-15, -10, 0, -15, 0], [-10, -20, 5, 0, 0]]
+
         >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 30, 50, 50], [45, 35, 40, 35], [10, 20, 35, 35], [25, 10, 0, 20]]))
-        >>> m.bidding_to_envy()
-        [[0, -20, 0, 0, 0], [10, 0, 5, 0, 0], [-25, -15, 0, 0, 0], [5, -10, -20, 0, 0]]
+        >>> m.bidding_to_envy(m.bidding_matrix, list(m.players_options[m.best]))
+        [[0, -20, 0, 0, 0], [10, 0, 5, 0, 0], [0, 10, 25, 25, 0], [25, 10, 0, 20, 0]]
+
         '''
         table = list(list())
         for x in range(0, matrix.num_of_agents):
@@ -277,8 +282,8 @@ def run(matrix: ValuationMatrix):
 
 
 if __name__ == "__main__":
-    # doctest.testmod()
-    logger.addHandler(logging.StreamHandler(sys.stdout))
-    logger.setLevel(logging.DEBUG)
-    b1 = [[25, 40, 35], [50, 25, 25], [10, 20, 25]]
-    run(ValuationMatrix(b1))
+    doctest.testmod()
+    # logger.addHandler(logging.StreamHandler(sys.stdout))
+    # logger.setLevel(logging.DEBUG)
+    # b1 = ValuationMatrix([[50, 25, 10], [40, 25, 20], [35, 25, 25]])
+    # run(b1)
