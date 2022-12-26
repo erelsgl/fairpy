@@ -4,7 +4,7 @@ from typing import List
 from fairpy.agentlist import AgentList
 
 
-def  Double_RoundRobin_Algorithm(agent_list :AgentList)->List:
+def  Double_RoundRobin_Algorithm(agent_list :AgentList)->dict:
     """
     "Fair allocation of indivisible goods and chores" by  Ioannis Caragiannis ,
         Ayumi Igarashi, Toby Walsh and Haris Aziz.(2021) , link
@@ -14,28 +14,96 @@ def  Double_RoundRobin_Algorithm(agent_list :AgentList)->List:
         >>> Double_RoundRobin_Algorithm(AgentList({"Agent1":{"1":-2,"2":1,"3":0,"4":1,"5":-1,"6":4},"Agent2":{"1":1,"2":-3,"3":-4,"4":3,"5":2,"6":-1},"Agent3":{"1":1,"2":0,"3":0,"4":6,"5":0,"6":0}}))
         {"Agent1":["6"],"Agent2":["5","2"],"Agent3":["1","3","4"]}
         Example 2:
-        >>>>Double_RoundRobin_Algorithm(AgentList({"Agent1":{"1":-2,"2":-2,"3":1,"4":0,"5":5,"6":3,"7":-2},"Agent2":{"1":3,"2":-1,"3":0,"4":0,"5":7,"6":2,"7":-1},
+        >>>Double_RoundRobin_Algorithm(AgentList({"Agent1":{"1":-2,"2":-2,"3":1,"4":0,"5":5,"6":3,"7":-2},"Agent2":{"1":3,"2":-1,"3":0,"4":0,"5":7,"6":2,"7":-1},
         >>>"Agent3":{"1":4,"2":-3,"3":6,"4":-2,"5":4,"6":1,"7":0},"Agent4":{"1":3,"2":-4,"3":2,"4":0,"5":3,"6":-1,"7":-4}}))
         {"Agent1":["6"],"Agent2":["5"],"Agent3":["7","3"],"Agent4":["1","2","4"]}
     """
     pass
-def  Generalized_Adjusted_Winner_Algorithm(agent_list :AgentList)->List:
+
+
+
+def is_EF1(winner, looser, Winner_bundle, Looser_bundle):
+
+    looser_total = sum([looser.value(x) for x in Looser_bundle])
+    winner_total = sum([looser.value(x) for x in Winner_bundle])
+
+    if looser_total >= winner_total:
+        return True
+
+    for item in Winner_bundle:
+        if (looser_total + looser.value(item) >= (winner_total - looser.value(item))):
+            return True
+
+    for item in Looser_bundle:
+        if (looser_total - looser.value(item) >= (winner_total + looser.value(item))):
+            return True
+    return False
+
+
+def  Generalized_Adjusted_Winner_Algorithm(agent_list :AgentList)->dict:
     """
     "Fair allocation of indivisible goods and chores" by  Ioannis Caragiannis ,
         Ayumi Igarashi, Toby Walsh and Haris Aziz.(2021) , link
         Algorithm 2:  Finding an EF1 and PO allocation
         Programmer: Yair Raviv , Rivka Strilitz
         Example 1:
-        >>> Generalized_Adjusted_Winner_Algorithm(AgentList({"Agent1":{"1":1,"2":-1,"3":-2,"4":3,"5":5,"6":0,"7":0,"8":-1,"9":2,"10":3},
-        >>>"Agent2":{"1":-3,"2":4,"3":-6,"4":2,"5":4,"6":-3,"7":2,"8":-2,"9":4,"10":5}}))
-        {"Agent1":["6","1","4","10","5"],"Agent2":["2","7","8","3","9"]}
+        >>> Generalized_Adjusted_Winner_Algorithm(AgentList({"Agent1":{"1":1,"2":-1,"3":-2,"4":3,"5":5,"6":0,"7":0,"8":-1,"9":2,"10":3},"Agent2":{"1":-3,"2":4,"3":-6,"4":2,"5":4,"6":-3,"7":2,"8":-2,"9":4,"10":5}}))
+        {'Agent1': ['1', '4', '5', '6', '9', '10'], 'Agent2': ['2', '3', '7', '8']}
+
         Example 2:
-        >>> Generalized_Adjusted_Winner_Algorithm(AgentList({"Agent1":{"1":1,"2":-1,"3":-2},
-        >>>"Agent2":{"1":-3,"2":4,"3":-6}}))
-        {"Agent1":["1"],"Agent2":["2","3"]}
+        >>> Generalized_Adjusted_Winner_Algorithm(AgentList({"Agent1":{"1":1,"2":-1,"3":-2}, "Agent2":{"1":-3,"2":4,"3":-6}}))
+        {'Agent1': ['1'], 'Agent2': ['2', '3']}
 
     """
-    pass
+    if len(agent_list) != 2:
+        raise "Invalid agents number"
+
+    winner = agent_list[0]
+    looser = agent_list[1]
+    all_items = list(winner.all_items())
+
+    O_plus = [x for x in all_items if winner.value(x) > 0 and looser.value(x) > 0]
+    O_minus = [x for x in all_items if winner.value(x) < 0 and looser.value(x) < 0]
+    O_w = [x for x in all_items if winner.value(x) >= 0 and looser.value(x) <= 0]
+    O_l = [x for x in all_items if winner.value(x) <= 0 and looser.value(x) >= 0]
+
+
+    for x in O_l:
+        if x in O_w:
+            O_l.remove(x)
+
+    Winner_bundle = [x for x in O_plus]
+    for x in O_w:
+        if x not in Winner_bundle:
+            Winner_bundle.append(x)
+
+    Looser_bundle = [x for x in O_minus]
+    for x in O_l:
+        if x not in Looser_bundle:
+            Looser_bundle.append(x)
+
+    O_plus_O_minus = sorted((O_plus + O_minus) , key=lambda x : (abs(looser.value(x)) / abs(winner.value(x))) , reverse=True)
+
+    for t in O_plus_O_minus:
+        if is_EF1(winner , looser , Winner_bundle , Looser_bundle):
+            return {"Agent1" : sorted(Winner_bundle , key=lambda x: int(x)) , "Agent2" : sorted(Looser_bundle , key=lambda x: int(x))}
+        if t in O_plus:
+            Winner_bundle.remove(t)
+            Looser_bundle.append(t)
+        else:
+            Winner_bundle.append(t)
+            Looser_bundle.remove(t)
+    return {}
+
+
+
+
+
+
+
+
+
+
 def  Generalized_Moving_knife_Algorithm(agent_list :AgentList , prop_values: dict , remain_interval:list , result : dict)->dict:
     """
     "Fair allocation of indivisible goods and chores" by  Ioannis Caragiannis ,
@@ -112,5 +180,14 @@ if __name__ == '__main__':
     (failures, tests) = doctest.testmod(report=True, optionflags=doctest.NORMALIZE_WHITESPACE + doctest.ELLIPSIS)
     print("{} failures, {} tests".format(failures, tests))
 
+    # print(Generalized_Adjusted_Winner_Algorithm(AgentList({"Agent1":{"1":1,"2":-1,"3":-2,"4":3,"5":5,"6":0,"7":0,"8":-1,"9":2,"10":3},"Agent2":{"1":-3,"2":4,"3":-6,"4":2,"5":4,"6":-3,"7":2,"8":-2,"9":4,"10":5}})))
 
 
+    # print(Generalized_Moving_knife_Algorithm(AgentList({"Agent1":{"1":0,"2":-1,"3":2,"4":1},"Agent2":{"1":1,"2":3,"3":1,"4":-2},"Agent3":{"1":0,"2":2,"3":0,"4":-1}}) ,
+    #                                    {"Agent1":2/3, "Agent2" : 1, "Agent3" : 1/3} , [0,4] , {"Agent1":[] , "Agent2":[] , "Agent3": []}))
+
+    # print(Generalized_Moving_knife_Algorithm(AgentList(
+    #     {"Agent1": {"1": 0, "2": 2, "3": 0, "4": -4}, "Agent2": {"1": 1, "2": -2, "3": 1, "4": -2},
+    #      "Agent3": {"1": 0, "2": -4, "3": 1, "4": 1}}),
+    #                                          {"Agent1": (-1 * 2 / 3), "Agent2": (-1 * 2 / 3), "Agent3": (-1 * 2 / 3)},
+    #                                          [0, 4], {"Agent1": [], "Agent2": [], "Agent3": []}))
