@@ -53,18 +53,6 @@ class BiddingForEnvyFreeness:
         logger.debug(self.options_list)
         self.table = self.bidding_to_envy(matrix, opt)
         self.res = self.calculate_discounts(2)
-        if self.res:
-            self.calculated_discounts = {
-                p: self.res[p] for p in self.res.keys()}
-        else:
-            self.calculated_discounts = {
-                p: 0 for p in self.bundle_allocation.keys()}
-        self.final_result = {f'Player {p}': {
-            'Allocated Bundle': self.bundle_allocation[p],
-            'Discount': self.calculated_discounts[p]
-        } for p in self.bundle_allocation}
-        logger.info(
-            f'Envy Free Allocation: \n{pprint.pformat(self.final_result)}')
 
     def __str__(self):
         return f'{self.dct}'
@@ -172,7 +160,7 @@ class BiddingForEnvyFreeness:
             - If an agent bidded a lower value for a bundle than the agent who gets it, 
             then the envy value is a negative number - the difference between both bids (the lower offer and the one that been accepted).
             - The last column of the table initilized with zeros, and represents accumulated discounts for each agent.
-        Input: None. works on the bidding matrix of the class.
+        Input: Bidding Matrix and Option list.
         For Example:
             b = [[50, 40, 35], 
                 [25, 25, 25], 
@@ -282,8 +270,8 @@ def run(matrix: ValuationMatrix):
 
 
 if __name__ == "__main__":
-    doctest.testmod()
-    # logger.addHandler(logging.StreamHandler(sys.stdout))
-    # logger.setLevel(logging.DEBUG)
-    # b1 = ValuationMatrix([[50, 25, 10], [40, 25, 20], [35, 25, 25]])
-    # run(b1)
+    # doctest.testmod()
+    logger.addHandler(logging.StreamHandler(sys.stdout))
+    logger.setLevel(logging.DEBUG)
+    b1 = ValuationMatrix([[50, 25, 10], [40, 25, 20], [35, 25, 25]])
+    run(b1)
