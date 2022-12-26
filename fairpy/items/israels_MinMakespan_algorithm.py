@@ -2,9 +2,9 @@
 import numpy as np
 from fairpy import ValuationMatrix
 # psedu random functions
-from numpy.random import randint, random
+from numpy.random import randint, uniform
 # convex optimization
-import cvxpy as cvx
+import cvxpy as cp
 # graph search algorithms
 import networkx as nx
 # oop
@@ -200,12 +200,15 @@ def apprx(output: scedual) -> None:
 
     # bounds on solution via a greedy solution
 
-    greedy(output)
+    greedy_sol = scedual_makespan()
+    greedy_sol.build(output.costs)
 
-    upper = output.extract_result()
+    greedy(greedy_sol)
+
+    upper = greedy_sol.extract_result()
     lower = upper / output.Mechines
 
-    output.clear()
+    del greedy_sol
 
     # homing on the best solution with binary search
 
@@ -213,96 +216,94 @@ def apprx(output: scedual) -> None:
 
         middle = (upper + lower) / 2
 
-        output.clear()
-        feasable = LinearProgram(output, np.array([middle] * output.Mechines), middle)
+        feasable = LinearProgram(output, upper)
 
-        if not feasable:    upper = middle - 0.0001
-        else:               lower = middle + 0.0001
-
+        if not feasable:    lower = middle + 0.0001
+        else:               upper = middle - 0.0001
 
 
-def LinearProgram(output: scedual, deadlines: np.ndarray, aprrx_bound: float) -> bool:
 
+def LinearProgram(output: scedual, apprx_bound: float) -> bool:
 
     ''' The linear program fassioned in the paper '''
 
-    variables = cvx.Variable(output.shape)
-
+    variables = cp.Variable(output.shape)
     # all variables are at least 0
-    constraints = [variables >= np.zeros(output.shape)]
+    constraints = [variables >= 0]
+    # add a constraint that requires that at most #jobs + #mechines entries will be non 0
+    actives = cp.Variable(output.shape, boolean = True)
+    constraints.append(actives >= variables)
+    constraints.append(cp.sum(actives) <= output.Jobs + output.Mechines)
+
 
     # out of all mechines that can do job j in time <= aprrx_bound
     # only 1 may be assigned to handle it, for j in all Jobs
     for job in range(output.Jobs):
 
-        var = variables[0, job]
-        for mechine in range(1, output.Mechines):
-            if output.costs[mechine, job] <= aprrx_bound:
-                var += variables[mechine, job]
-
-        constraints.append(var == 1)
-
+        mask = output.costs[:, job] <= apprx_bound
+        
+        if not (mask == False).all(): constraints.append(cp.sum(variables[:, job][mask]) == 1)
+        else:   return False
 
     # out of all jobs that mechine m can do in time <= aprrx_bound
     # m can handle at most deadline-m worth of processing time of'em, for m in all Mechines
     for mechine in range(output.Mechines):
 
-        var = variables[mechine, 0]
-        for job in range(1, output.Jobs):
-            if output.costs[mechine, job] <= aprrx_bound:
-                var += variables[mechine, job]
+        mask = output.costs[mechine, :] <= apprx_bound
 
-        constraints.append(var <= deadlines[mechine])
+        if not (mask == False).all(): constraints.append(cp.sum(variables[mechine, :][mask]) <= apprx_bound)
 
 
-    # minimise maximum workload aka makespan
-    workloads = []
+    # minimize: maximum workload aka makespan
+    makespan = cp.maximum( * [cp.sum(variables[mechine, :]) for mechine in range(output.Mechines)] )
+    constraints.append(makespan <= apprx_bound)
+    objective = cp.Minimize(makespan)
 
-    for mechine in range(output.Mechines):
-
-        load = variables[mechine, 0]
-        for job in range(1, output.Jobs):
-            load += variables[mechine, job]
-        
-        workloads.append(load)
-
-
-    objective = cvx.Minimize(cvx.maximum( * workloads))
-
-    prob = cvx.Problem(objective, constraints)
+    prob = cp.Problem(objective, constraints)
     prob.solve()
+    
     if prob.status != 'optimal': return False
-
-    # rounding to an integral solution
-    Round(output, prob)
+    output.clear()
+    Round(output, variables.value)
     return True
 
 
 
-def Round(output: scedual, fractional_sol: cvx.Problem):
+def Round(output: scedual, fractional_sol: np.ndarray):
 
     ''' The rounding theorem for the LP's solution fassioned in the paper '''
 
-    G : nx.Graph = nx.union(nx.Graph(range(output.Mechines)), nx.Graph(range(output.Jobs)), rename = ('M', 'J'))
-    G.add_weighted_edges_from({
-                                 (mechine, job, fractional_sol[mechine, job])
-                                 for mechine, job in zip(range(output.Mechines), range(output.Jobs))
-                                 if fractional_sol[mechine, job > 0]
-                              })
+    def node_to_int(name: str) -> int: return int(name[1])
+    def int_to_node(ind: int, job: bool) -> str: return 'J' + str(ind) if job else 'M' + str(ind)
+
+    mechine_nodes = ['M' + str(i) for i in range(output.Mechines)]
+    job_nodes = ['J' + str(i) for i in range(output.Jobs)]
+    G = nx.Graph()
+    G.add_nodes_from(mechine_nodes)
+    G.add_nodes_from(job_nodes)
+    G.add_edges_from({
+                        ('M' + str(mechine), 'J' + str(job)) : fractional_sol[mechine, job]
+                        for mechine, job in output
+                        if fractional_sol[mechine, job] > 0
+                     })
 
     # adopting integral assignments
-    for mechine, job in zip(range(output.Mechines), range(output.Jobs)):
+    for mechine, job in output:
         if fractional_sol[mechine, job] == 1:
 
             output.scedual(mechine, job)
-            G.remove_edge(mechine, job)
+            G.remove_edge(int_to_node(mechine, False), int_to_node(job, True))
 
 
     if not nx.bipartite.is_bipartite(G):    raise RuntimeError('G[fractional solution] should be bipartite')
 
     # assigning the rest acording to the algo, via max match
-    for mechine, job in nx.algorithms.bipartite.maximum_matching(G).items():   output.scedual(mechine, job)
+    for component in nx.connected_components(G):
 
+        if len(component) < 2: continue
+
+        for mechine, job in nx.algorithms.bipartite.maximum_matching(G.subgraph(component)):
+            output.scedual(node_to_int(mechine), node_to_int(job))
 
 
 def MinMakespan(algo: MinMakespanAlgo, input: ValuationMatrix, output: scedual, **kwargs):
@@ -325,11 +326,8 @@ def RandomTesting(algo: MinMakespanAlgo, output: scedual, iteration: int, **kwar
 
     ''' spesefied amount of random tests generator '''
 
-    mechines = randint(1, 500)
-    jobs = randint(1, 500)
-
     for i in range(iteration):
-        yield MinMakespan(algo, random(0, 3, (jobs, mechines)), output, **kwargs)
+        yield MinMakespan(algo, uniform(0, 3, (randint(1, 500), randint(1, 500))), output, **kwargs)
 
 
 
@@ -338,9 +336,12 @@ if __name__ == '__main__':
     import doctest
     #doctest.testmod(verbose = True)
 
+    for i in range(100):
 
-    scd = scedual_makespan()
-    scd.build(ValuationMatrix(np.ones((3, 3))))
-    apprx(scd)
-    print(scd.extract_result())
+        scd = scedual_makespan()
+        scd.build(ValuationMatrix(uniform(1, 3, (5, 5))))
+        apprx(scd)
+        print(scd.extract_result())
+
+    # TODO: time for logging, more TESTsssssssss !!!!
     

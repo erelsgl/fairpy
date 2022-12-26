@@ -17,13 +17,13 @@ class TestMinMakespanAlgos(unittest.TestCase):
         scd.build(arr)
 
         assert isinstance(scd, scedual)
-        assert isinstance(scd.extract_scedual(), np.ndarray.astype(bool))
+        assert isinstance(scd.extract_result(), np.ndarray.astype(bool))
 
         scd = scedual_makespan()
         scd.build(arr)
 
         assert isinstance(scd, scedual)
-        assert isinstance(scd.extract_scedual(), float)
+        assert isinstance(scd.extract_result(), float)
 
     def test_aprrx_lim(self):
 
@@ -68,23 +68,23 @@ class TestMinMakespanAlgos(unittest.TestCase):
 
 if __name__ == '__main__':
 
-    def apprx_lim_exm1(m: int) -> np.ndarray.astype(float):
+    def apprx_lim_exm1(m: int) -> ValuationMatrix:
 
         '''
         first example to show strictness of the
         approximiation factor of the algorithm, 2
         '''
 
-        return np.array([ [1] + [1 / m] * (m - 1) ] * (m * (m - 1)))
+        return ValuationMatrix([ [1] + [1 / m] * (m - 1) ] * (m * (m - 1)))
 
-    def apprx_lim_exm2(t: int) -> np.ndarray.astype(float):
+    def apprx_lim_exm2(t: int) -> ValuationMatrix:
 
         '''
         second example to show strictness of the
         approximiation factor of the algorithm, 2
         '''
 
-        return np.array([[1, t], [t, t + 1], [t + 1, 2*t + 2]])     
+        return ValuationMatrix([[1, t], [t, t + 1], [t + 1, 2*t + 2]])
 
 
     unittest.main()
