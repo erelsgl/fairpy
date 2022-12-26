@@ -83,7 +83,7 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
     pStar = [] 
     start_time = time.time()
     best_error = float("inf")
-    random.seed(3)
+    random.seed(seed)
     while(time.time() - start_time < time_to):
         price_vector = [((random.randint(1, 9)/10)*max_budget) for i in range(len(courses))]
         map_price_demand(price_vector, max_budget, students, courses)
@@ -139,8 +139,6 @@ def test1():
     max_budget = 15
     # #when we giving sufficient time for the algorithm it's getting the (best error == 3)
     assert(algorithm1(students, courses, max_budget, time_to= 1, seed = 3) == [4.5, 6.0, 4.5])
-    # #this is what happens when the algorithm get less time (best error == 14)
-    # assert(algorithm1(students, courses, max_budget, time_to= 0.003, seed = 3) == [6.0, 13.5, 4.5])
 
 def test2():
     a = Course(name='a', price=0, max_capacity=3)
