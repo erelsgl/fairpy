@@ -12,11 +12,3 @@ class Student:
         if(a.year - b.year == 0):
             return (a.budget - b.budget)
         return a.year - b.year
-
-    def __deepcopy__(self, memo):
-        cls = self.__class__
-        result = cls.__new__(cls)
-        memo[id(self)] = result
-        for k, v in self.__dict__.items():
-            setattr(result, k, deepcopy(v, memo))
-        return result

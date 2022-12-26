@@ -9,11 +9,11 @@ import doctest
 def csp_mapping(students:list[Student],courses:list[Course]):
     def get_course(s) -> bool:
         for i in range(0, len(s.preferences)):
-            if (s.budget >= s.preferences[i].price):
+            if (s.budget >= s.preferences[i].price and 
+                    s.preferences[i] not in s.courses):
                 s.courses.append(s.preferences[i])
                 s.budget = s.budget - s.preferences[i].price
                 s.preferences[i].capacity += 1
-                s.preferences.pop(i)
                 return True
         return False
     for course in courses:

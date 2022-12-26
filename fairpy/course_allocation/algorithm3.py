@@ -7,12 +7,12 @@ def mapping_csp(courses:list[Course], students:list[Student], helper:dict, stude
     def get_course(s: Student, stud_num:int) -> bool:
         for i in range(0, len(s.preferences)):
             if (s.budget >= s.preferences[i].price and
-                   students_matrix[stud_num][helper.get(s.preferences[i].name)] == False):
+                   students_matrix[stud_num][helper.get(s.preferences[i].name)] == False and
+                   s.preferences[i] not in s.courses):
                 s.courses.append(s.preferences[i])
                 s.budget = s.budget - s.preferences[i].price
                 s.preferences[i].capacity += 1
                 students_matrix[stud_num][helper.get(s.preferences[i].name)] = True
-                s.preferences.pop(i)
                 return True
         return False
     while True:

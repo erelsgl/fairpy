@@ -1,9 +1,0 @@
-[[False,False,False],[False,False,False],[False,False,False],[False,False,False],[False,False,False],[False,False,False]]
-
-[[False, True, True], [False, True, True], [True, True, False], [True, False, True], [True, True, False], [True, False, True]]
-
- [[True,False,False],[True,True,False],[False,False,True],[False,True,True],[False,True,True]]
-
-students_matrix = [[False,True,True],[True,False,True],[False,True,True],[True,False,True],[False,True,True]]
-algorithm3(students_matrix,mapping_csp,sort_function)
-[[False,True,True],[True,False,True],[True,True,True],[True,True,True],[True,True,True]]
