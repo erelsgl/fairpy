@@ -120,7 +120,7 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
     >>> students = [s1, s2, s3, s4, s5, s6]
     >>> max_budget = 18
     >>> algorithm1(students, courses, max_budget, time_to= 2.0, seed = 3)
-    [1.8, 1.8, 10.799999999999999]
+    [5.3999999999999995, 5.3999999999999995, 1.8]
     '''
     def alpha_error(price_vector):
         map_price_demand(price_vector, max_budget, students, courses)
@@ -142,8 +142,7 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
             queue = []
             for i in range(0, len(price_vector)):
                 temp = copy.deepcopy(price_vector)
-                wow = (random.randint(-9, 9))/10
-                temp[i] += (wow)*temp[i]
+                temp[i] = (random.randint(1, 9)/10)*max_budget
                 queue.append(temp)
             queue = sorted(queue, key=lambda x: alpha_error(x))
             found_step = False
@@ -185,7 +184,7 @@ def test1():
     students = [s1, s2, s3, s4, s5]
     max_budget = 15
     # #when we giving sufficient time for the algorithm it's getting the (best error == 3)
-    assert(algorithm1(students, courses, max_budget, time_to= 1, seed = 3) == [1.5, 1.5, 9.0])
+    assert(algorithm1(students, courses, max_budget, time_to= 1, seed = 3) == [4.5, 4.5, 1.5])
 
 def test2():
     a = Course(name='a', price=0, max_capacity=3)
@@ -200,7 +199,7 @@ def test2():
     students = [s1, s2, s3, s4, s5]
 
     max_budget = 10
-    assert(algorithm1(students, courses, max_budget, time_to= 1, seed = 3) == [1.0, 1.0, 6.0])
+    assert(algorithm1(students, courses, max_budget, time_to= 1, seed = 3) == [1.0, 2.0, 1.0])
 
 def test3():
     a = Course(name='a', price=0, capacity=0, max_capacity=5)
@@ -224,7 +223,7 @@ def test3():
     s12 = Student(name='s12', budget=18, year=1, courses=[], preferences=([d,f,e]))
     students = [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12]
     max_budget = 18
-    assert(algorithm1(students, courses, max_budget, time_to= 1, seed = 3) == [3.6, 16.2, 12.6, 12.6, 1.98, 7.2])#7
+    assert(algorithm1(students, courses, max_budget, time_to= 1, seed = 3) == [5.3999999999999995, 14.4, 7.2, 16.2, 1.8, 12.6])#7
 
 
 '''
