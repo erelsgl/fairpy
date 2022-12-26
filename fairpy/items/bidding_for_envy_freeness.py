@@ -6,7 +6,7 @@ Reference:
     Claus-Jochen Haake, Matthias G. Raith and Francis Edward Su (2002).
     ["An implementation of the bidding for envy freeness: A procedural approach to n-player fair-division problems"](https://scholarship.claremont.edu/cgi/viewcontent.cgi?article=1676&context=hmc_fac_pub).
     Social Choice and Welfare.
-    
+
 Programmers: Barak Amram, Adi Dahari
 Since: 2022-12
 '''
@@ -52,7 +52,11 @@ class BiddingForEnvyFreeness:
         self.options_list = self.player_package(opt)
         logger.debug(self.options_list)
         self.table = self.bidding_to_envy(matrix, opt)
-        self.res = self.calculate_discounts(2)
+        self.calculate_discounts(2)
+
+        logger.info(pprint.pformat({f'Player {p}': {
+            'Bundle': self.bundle_allocation[p] + 1, 'Discount': self.dct[p]} for p in self.dct})
+        )
 
     def __str__(self):
         return f'{self.dct}'
@@ -103,14 +107,15 @@ class BiddingForEnvyFreeness:
             A2  |30  35  20     # C2 = 85
             A3  |50  40  30     # C3 = 120
                 __  __  __
-                130 120 60      
+                130 120 60
 
         So the bidding matrix will be:
-        AB = [[50, 45, 10], 
-            [30, 35, 20], 
+        AB = [[50, 45, 10],
+            [30, 35, 20],
             [50, 40, 30]]
 
-        M = AB[0,0] + AB[1, 1] + AB[2, 2] = 50 + 35 + 30 = 115 # Mind that the diagonal of the matrix is the sum of the values of the bundles allocated to each agent.
+        # Mind that the diagonal of the matrix is the sum of the values of the bundles allocated to each agent.
+        M = AB[0,0] + AB[1, 1] + AB[2, 2] = 50 + 35 + 30 = 115
         C = Min(C1, C2, C3) = 85
 
         And the output will be the following tuple (M, C):
@@ -155,21 +160,21 @@ class BiddingForEnvyFreeness:
         '''
         The 1st stage of the algorithm, initialize a table of envy values based the bidding matrix,
         by the following rules:
-            - If an agent bidded a higher value for a bundle than the agent who gets it, 
+            - If an agent bidded a higher value for a bundle than the agent who gets it,
             then the envy value is a positive number - the difference between both bids (the higher offer and the one that been accepted).
-            - If an agent bidded a lower value for a bundle than the agent who gets it, 
+            - If an agent bidded a lower value for a bundle than the agent who gets it,
             then the envy value is a negative number - the difference between both bids (the lower offer and the one that been accepted).
             - The last column of the table initilized with zeros, and represents accumulated discounts for each agent.
         Input: Bidding Matrix and Option list.
         For Example:
-            b = [[50, 40, 35], 
-                [25, 25, 25], 
+            b = [[50, 40, 35],
+                [25, 25, 25],
                 [10, 20, 35]]
 
-        Output: Envy Matrix + initializes the envy matrix 
+        Output: Envy Matrix + initializes the envy matrix
         For Example:
-            e = [[  0, -10, -15, 0], 
-                [  0,   0,   0, 0], 
+            e = [[  0, -10, -15, 0],
+                [  0,   0,   0, 0],
                 [-15,  -5,   0, 0]]
 
         TESTS:
@@ -204,7 +209,7 @@ class BiddingForEnvyFreeness:
         logger.debug(f'Stage 1: Making a table\n{table}')
         return table
 
-    def calculate_discounts(self, stage: int) -> ValuationMatrix:
+    def calculate_discounts(self, stage: int):
         '''
         This recursive function calculates the discounts for each agent,
         based on the envy values in the envy matrix, which being manipulated along the way.
@@ -212,18 +217,18 @@ class BiddingForEnvyFreeness:
 
         This is a recursive function, which means that it calls itself until the last stage is reached.
 
-        Input: None. works on the envy matrix of the class.
+        Input: Stage, for debugging purposes.
         For Example, if m is the initial envy matrix (after the first stage):
-            m = [[ 0,  10, -50,   0, 0], 
-                [-20,   0,   0,  -5, 0], 
-                [-15, -10,   0, -15, 0], 
+            m = [[ 0,  10, -50,   0, 0],
+                [-20,   0,   0,  -5, 0],
+                [-15, -10,   0, -15, 0],
                 [-10, -20,   5,   0, 0]]
 
         Output: The envy matrix after the discounts are calculated.
         For Example:
-                [[  0,  10, -50,  0,  0], 
-                [-10,  10,  10,  5, 10], 
-                [ -5,   0,  10, -5, 10], 
+                [[  0,  10, -50,  0,  0],
+                [-10,  10,  10,  5, 10],
+                [ -5,   0,  10, -5, 10],
                 [ -5, -15,  10,  5,  5]]
 
         Where the last column represents the final discounts for each agent.
@@ -260,18 +265,35 @@ class BiddingForEnvyFreeness:
             logger.debug(
                 f'Final Stage:\n{result}\n--------------------------\n')
             # print(f'Final Stage:\n{self.dct}\n--------------------------\n')
-            return self.dct
+            return
         logger.debug(f'\nStage {stage}:\n{self.table}\n')
         self.calculate_discounts(stage+1)
 
 
 def run(matrix: ValuationMatrix):
-    BiddingForEnvyFreeness(matrix)
+    '''
+    This function runs the algorithm on the given matrix.
+
+    TESTS:
+    >>> m = ValuationMatrix([[50, 25, 10], [40, 25, 20], [35, 25, 25]])
+    >>> run(m)
+    Bidding for Envy Freeness
+    Initial Bidding Matrix: 
+    [[50 25 10]
+     [40 25 20]
+     [35 25 25]]
+    {'Player 1': {'Bundle': 1, 'Discount': 25.0},
+     'Player 2': {'Bundle': 2, 'Discount': 10.0},
+     'Player 3': {'Bundle': 3, 'Discount': 10.0}}
+    '''
+    logger.addHandler(logging.StreamHandler(sys.stdout))
+    logger.setLevel(logging.INFO)
+    b = BiddingForEnvyFreeness(matrix)
 
 
 if __name__ == "__main__":
     # doctest.testmod()
-    logger.addHandler(logging.StreamHandler(sys.stdout))
-    logger.setLevel(logging.DEBUG)
+    # logger.addHandler(logging.StreamHandler(sys.stdout))
+    # logger.setLevel(logging.INFO)
     b1 = ValuationMatrix([[50, 25, 10], [40, 25, 20], [35, 25, 25]])
     run(b1)
