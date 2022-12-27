@@ -293,7 +293,7 @@ def LinearProgram(output: scedual, apprx_bound: float) -> bool:
         return False
 
     output.clear()
-    Round(output, variables.value)
+    Round(output, np.round(variables.value, decimals = 7))
     return True
 
 
@@ -328,7 +328,9 @@ def Round(output: scedual, fractional_sol: np.ndarray):
             G.remove_edge(ind_to_node(mechine, False), ind_to_node(job, True))
 
 
-    if not nx.bipartite.is_bipartite(G):    raise RuntimeError('G[fractional solution] should be bipartite')
+    if not nx.bipartite.is_bipartite(G):    raise RuntimeError('G[x] should be bipartite')
+
+    logger.info('E(G[x]): %s', G.edges())
 
     # assigning the rest acording to the algo, via max match
     for component in nx.connected_components(G):
@@ -336,6 +338,7 @@ def Round(output: scedual, fractional_sol: np.ndarray):
         if len(component) < 2: continue
 
         matching = nx.algorithms.bipartite.maximum_matching(G.subgraph(component)).items()
+        logger.info('* part of the max matching in G[x]: %s', matching)
 
         for mechine, job in filter(lambda edge : edge[0][0] == 'M', matching):
 
@@ -364,7 +367,7 @@ def RandomTesting(algo: MinMakespanAlgo, output: scedual, iteration: int, **kwar
     ''' spesefied amount of random tests generator '''
 
     for i in range(iteration):
-        yield MinMakespan(algo, ValuationMatrix(uniform(1, 4, (randint(1, 25), randint(1, 25)))), output, **kwargs)
+        yield MinMakespan(algo, ValuationMatrix(uniform(1, 4, (randint(1, 20), randint(1, 20)))), output, **kwargs)
 
 
 
