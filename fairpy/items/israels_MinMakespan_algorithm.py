@@ -11,8 +11,12 @@ import networkx as nx
 from abc import ABC, abstractclassmethod
 # data types
 from typing import Callable, Tuple, Iterable, Iterator
-# other
+# iteration tool
 from itertools import product
+# debugging & monitoring
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level = logging.DEBUG, filename = 'debugging/pyproject.log', filemode = 'w', format = '%(levelname)s - %(message)s')
 
 
 ''' 
@@ -272,6 +276,8 @@ def LinearProgram(output: scedual, apprx_bound: float) -> bool:
 def Round(output: scedual, fractional_sol: np.ndarray):
 
     ''' The rounding theorem for the LP's solution fassioned in the paper '''
+
+    logger.info('fractional solution for the LP: %s', fractional_sol.__repr__())
 
     def node_to_int(name: str) -> int: return int(name[1])
     def int_to_node(ind: int, job: bool) -> str: return 'J' + str(ind) if job else 'M' + str(ind)
