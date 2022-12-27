@@ -3,7 +3,17 @@ import numpy as np
 from Calculation_Assistance import *
 from fairpy.agentlist import AgentList
 
-
+"""
+    "Fair Rent Division on a Budget"
+    
+    Based on:
+    "Fair Rent Division on a Budget" by Procaccia, A., Velez, R., & Yu, D. (2018), https://doi.org/10.1609/aaai.v32i1.11465
+    The algorithm calculates Maximum-rent envy-free allocation in a fully connected economy, or in simple words,
+    calculates a fair rent division under budget constraints.
+    
+    Programmers: Daniel Sela and Asif Rot
+    Date: 27-12-2022
+"""
 def maximum_rent_envy_free(agentsList: AgentList, rent: float, budget: dict):
     """
     This function implements Algorithm 1 from the article.
