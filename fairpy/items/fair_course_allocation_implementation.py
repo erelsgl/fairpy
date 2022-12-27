@@ -271,11 +271,8 @@ class Course_Bundle:
 
     def __lt__(self, other):
 
-
-
         score1 = self.score()
         score2 = other.score()
-
         return score1 < score2
 
         # if score1 == score2:
