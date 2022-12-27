@@ -122,16 +122,16 @@ def envy_freeness_and_equitability_with_payments(evaluation: dict, allocation: A
     >>> eval_1 = {"a": {"x": 40, "y": 20, "r": 30, "rx": 80, "rxy": 100}, "b": {"x": 10, "y":30, "r": 70, "rx": 79, "rxy": 90}}
     >>> allocation_1 = {"a": ["y"], "b": ["x", "r"]}
     >>> envy_freeness_and_equitability_with_payments(evaluation = eval_1, allocation= Allocation(agents = ["a", "b"],bundles = allocation_1))
-    "allocation: {'a': ['y', 'r', 'x'], 'b': []}, payments: {'a': 50.0, 'b': -50.0}"
+    {'allocation': {'a': ['y', 'r', 'x'], 'b': []}, 'payments': {'a': 50.0, 'b': -50.0}}
     >>> eval_2 = {"A":{"x":70},"B":{"x":60},"C":{"x":40},"D":{"x":80},"E":{"x":55}}
     >>> allocation_2 = {"A": ["x"], "B": [], "C": [], "D": [], "E": []}
     >>> envy_freeness_and_equitability_with_payments(evaluation = eval_2, allocation = Allocation(agents = ["A", "B", "C", "D", "E"],bundles = allocation_2))
-    "allocation: {'A': [], 'B': [], 'C': [], 'D': ['x'], 'E': []}, payments: {'A': -16.0, 'B': -16.0, 'C': -16.0, 'D': 64.0, 'E': -16.0}"
+    {'allocation': {'A': [], 'B': [], 'C': [], 'D': ['x'], 'E': []}, 'payments': {'A': -16.0, 'B': -16.0, 'C': -16.0, 'D': 64.0, 'E': -16.0}}
     >>> eq_value = {"x":10,"y":5,"z":15, "xy": 15, "yz": 20, "xz": 25}
     >>> eval_3 = {"A":eq_value,"B":eq_value,"C":eq_value,"D":eq_value}
     >>> allocation_3 = {"A":["x"], "B":["y"], "C":["z"], "D":[]}
     >>> envy_freeness_and_equitability_with_payments(evaluation = eval_3, allocation = Allocation(agents = ["A", "B", "C", "D"],bundles = allocation_3))
-    "allocation: {'A': ['x'], 'B': ['y'], 'C': ['z'], 'D': []}, payments: {'A': 2.5, 'B': -2.5, 'C': 7.5, 'D': -7.5}"
+    {'allocation': {'A': ['x'], 'B': ['y'], 'C': ['z'], 'D': []}, 'payments': {'A': 2.5, 'B': -2.5, 'C': 7.5, 'D': -7.5}}
     >>> a = {"x": 15, "y": 20, "z":10,"w":5, "xy": 45,"xz":25,"wx":20,"yz":30,"yw":30,"zw":20,"xyz":50,"xyw":50,"xzw":30,"yzw":40,"wxyz":50}
     >>> b = {"x": 30, "y": 35, "z":22,"w":7, "xy": 65,"xz":55,"wx":40,"yz":60,"yw":45,"zw":30,"xyz":90,"xyw":75,"xzw":65,"yzw":65,"wxyz":95}
     >>> c = {"x": 40, "y": 12, "z":13,"w":21, "xy": 55,"xz":55,"wx":65,"yz":25,"yw":35,"zw":35,"xyz":65,"xyw":75,"xzw":75,"yzw":50,"wxyz":90}
@@ -139,7 +139,7 @@ def envy_freeness_and_equitability_with_payments(evaluation: dict, allocation: A
     >>> eval_4 = {"A":a,"B":b,"C":c,"D":d}
     >>> allocation_4={"A":["x"], "B":["y"], "C":["z"], "D":["w"]}
     >>> envy_freeness_and_equitability_with_payments(evaluation = eval_4, allocation = Allocation(agents = ["A", "B", "C", "D"],bundles = allocation_4))
-    "allocation: {'A': [], 'B': ['y', 'x', 'z'], 'C': ['w'], 'D': []}, payments: {'A': -27.75, 'B': 62.25, 'C': -6.75, 'D': -27.75}"
+    {'allocation': {'A': [], 'B': ['y', 'x', 'z'], 'C': ['w'], 'D': []}, 'payments': {'A': -27.75, 'B': 62.25, 'C': -6.75, 'D': -27.75}}
     """
     if isinstance(allocation, Allocation):
         allocation = allocation.map_agent_to_bundle() #convert Allocation to dict
@@ -155,7 +155,7 @@ def envy_freeness_and_equitability_with_payments(evaluation: dict, allocation: A
     for agent in allocation:
         payments[agent] = get_value(agent, allocation[agent], evaluation) - sw_ave   #Calculation of the payment to each agent (the distance of the evaluation of the current bundle from the average of social welfare)
     logger.warning("check if %g", list_sw(allocation, evaluation, payments))
-    return f'allocation: {allocation}, payments: {payments}'
+    return {"allocation": allocation, "payments": payments}
 
 
 eval_1 = {"a": {"x": 40, "y": 20, "r": 30, "rx": 80, "rxy": 100}, "b": {"x": 10, "y":30, "r": 70, "rx": 79, "rxy": 90}}

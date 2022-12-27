@@ -89,19 +89,19 @@ def envy_free_approximation(allocation: Allocation, eps: float = 0) -> dict:
     ...      [15,25,22,20]]
     >>> a = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]
     >>> envy_free_approximation(Allocation(agents = ValuationMatrix(v), bundles=AllocationMatrix(a)))
-    {'bundles': [[3], [1], [0], [2]], 'payments': [11.0, 12.0, 5.0, 0.0]}
+    {'allocation': [[3], [1], [0], [2]], 'payments': [11.0, 12.0, 5.0, 0.0]}
     >>> v2 = [[0,50,0,0],
     ...       [0,40,0,0],
     ...       [0,30,0,0],
     ...       [0,45,0,0]]
     >>> envy_free_approximation(Allocation(agents = ValuationMatrix(v2), bundles=AllocationMatrix(a)))
-    {'bundles': [[1], [0], [2], [3]], 'payments': [50.0, 0.0, 0.0, 0.0]}
+    {'allocation': [[1], [0], [2], [3]], 'payments': [50.0, 0.0, 0.0, 0.0]}
     >>> v3 = [[-5,20,10,25],
     ...      [15,-15,-12,-15],
     ...      [-10,12,9,-5],
     ...      [12,20,30,-10]]
     >>> envy_free_approximation(Allocation(agents = ValuationMatrix(v3), bundles=AllocationMatrix(a)))
-    {'bundles': [[3], [0], [1], [2]], 'payments': [5.0, 27.0, 3.0, 0.0]}
+    {'allocation': [[3], [0], [1], [2]], 'payments': [5.0, 27.0, 3.0, 0.0]}
     """
     value_matrix = allocation.utility_profile_matrix()
     payments = np.zeros(allocation.num_of_agents)
@@ -128,7 +128,7 @@ def envy_free_approximation(allocation: Allocation, eps: float = 0) -> dict:
                 bundles[agent_j] = temp
                 logger.info("replace between agent_%g to agent_%g.", i, agent_j)
                 flag = True
-    return {"bundles": bundles, "payments": payments.tolist()}
+    return {"allocation": bundles, "payments": payments.tolist()}
 
 
 if __name__ == '__main__':
