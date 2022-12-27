@@ -7,12 +7,21 @@ from fairpy.agentlist import AgentList
 def spliddit(agentList: AgentList, rent: float):
     """
         This function for calculation of allocation by spliddit algorithm
-    :param N: agent
-    :param A: rooms
-    :param val: value of room by each agent
+        By Linear Programming of :
+            max M
+            M,pσ(1),...,pσ(n)
+                    s.t.
+                    ,
+                    ∑_i∈N pσ(i) = r ,
+                    ∀i ∈ N , v_iσ(i) − p_σ(i))
+                    ∀i,j∈N, v_iσ(i) - p_σ(i) ≥ v_iσ(j) - p_σ(j)
+    :param agentList:  agent whit rooms and valuation for each room by agent
     :param rent: total rent house
+    :param N: list of agent
+    :param A: list of room
     :return: sigma: N -> A , p : is vector of prices for each room
     """
+    # it take the typing agent List and moves to the component for comfortable
     N = []
     A = []
     for i in agentList.agent_names():
@@ -20,13 +29,14 @@ def spliddit(agentList: AgentList, rent: float):
     for i in agentList.all_items():
         A.append(i)
 
+    # Build bipartite graph
     g = nx.Graph()
     g.add_nodes_from(N, bipartite=0)
     g.add_nodes_from(A, bipartite=1)
     for i, k in zip(N, range(len(N))):
         for j in A:
             g.add_edge(i, j, weight=agentList[k].value(j))
-
+    # max weight matching in graph
     alloc = nx.max_weight_matching(g, maxcardinality=True)
     dict_match = {}
     for i in alloc:
@@ -35,7 +45,6 @@ def spliddit(agentList: AgentList, rent: float):
         else:
             dict_match[i[0]] = i[1]
 
-    # dict_match = dict(sorted(dict_match.items(), key=lambda x: x[0]))
     variable = {}  # list of all the 'price' variables that present the price of any room
     for i in dict_match.values():
         variable["price " + str(i)] = cp.Variable()
@@ -43,6 +52,7 @@ def spliddit(agentList: AgentList, rent: float):
     variable["M"] = cp.Variable()  # this variable care for the maximum
     objective = cp.Maximize(variable["M"])
     constraints = []
+
     # have 3 constrains
     # 1)  M <= v_iσ(i) - p_σ(i)
     for i in dict_match.keys():
@@ -60,30 +70,18 @@ def spliddit(agentList: AgentList, rent: float):
         total += variable["price " + dict_match[i]]
     constraints.append(total == rent)
 
+    # Solve
     prob = cp.Problem(objective, constraints)
     result = prob.solve()
 
+    # The result
     sigma = {}
     vector_p = {}
     for i in dict_match.keys():
         sigma[str(i)] = str(dict_match[i])
         vector_p[str(dict_match[i])] = round(float(variable["price " + dict_match[i]].value), 2)
+
     return sigma, vector_p
-
-
-def if_allocation_is_envy_free(sigma: dict, vector_p: dict, value: dict[dict]):
-    """
-        This for check if allocation is envy free
-    :return:
-    """
-    for i in sigma.keys():
-        for j in sigma.keys():
-            if i != j:
-                left = value[i][sigma[i]] - vector_p[sigma[i]]
-                right = value[i][sigma[j]] - vector_p[sigma[j]]
-                if left < right:
-                    return False
-    return True
 
 
 def build_budget_aware_graph(sigma: dict, vector_p: dict, budget: dict, agentList: AgentList) -> nx.DiGraph:
@@ -97,6 +95,7 @@ def build_budget_aware_graph(sigma: dict, vector_p: dict, budget: dict, agentLis
     :return:  graph
     """
     budget_aware_graph = nx.DiGraph()
+    budget_aware_graph.add_nodes_from(list(sigma.keys()))
     for i in sigma.keys():
         for j in sigma.keys():
             if not i == j:
@@ -120,6 +119,7 @@ def build_weak_envy_graph(sigma: dict, vector_p: dict, agentList: AgentList) -> 
     :return:
     """
     weak_envy_graph = nx.DiGraph()
+    weak_envy_graph.add_nodes_from(list(sigma.keys()))
     for i in sigma.keys():
         for j in sigma.keys():
             if not i == j:
@@ -132,24 +132,67 @@ def build_weak_envy_graph(sigma: dict, vector_p: dict, agentList: AgentList) -> 
     return weak_envy_graph
 
 
-def calculation_delta(sigma: dict, vector_p: dict, agentList: AgentList, rent: float, budget: dict):
-    count = 0
-    flag = True
-    while flag:
-        count += 1
-        s = random.randint(rent, rent + count * 100)
-        µ, q = spliddit(list(sigma.keys()), list(sigma.values()), agentList, s)
-        for i in µ.values():
-            if q[i] != vector_p[i] + (s - rent) / len(µ.keys()):
-                flag = False
-                break
-        if not flag:
-            flag = True
-        else:
-            for i in sigma.keys():
-                if budget[i] == vector_p[sigma[i]]:
-                    return (s - rent) / len(µ.keys())
-            flag = True
+def LP1(µ:dict,rent , val: dict[dict],budget:dict):
+    """
+        This function for calculation of LP(1) from article.
+        LP(1) is : Linear Programming of :
+            max M
+            M,pσ(1),...,pσ(n)
+                    s.t.
+                    ,
+                    ∑_i∈N pσ(i) = r ,
+                    ∀s ∈ [t] ,  x ≤ fs (v_1σ(1) − p_σ(1),...,v_nσ(n) − p_σ(n))
+                    ∀i,j∈N, v_iσ(i) - p_σ(i) ≥ v_iσ(j) - p_σ(j)
+                    ∀i∈N ,  p_σ(i) ≤b_i
+
+        :param µ:  µ: N -> A
+        :param rent: total rent house
+        :param val: the valuation of each room by agent
+        :param budget: total rent house
+        :return: if LP(1) for μ is feasible return µ: N -> A , p : is vector of prices for each room Else
+                "no solution"
+        """
+    variable = {}  # list of all the 'price' variables that present the price of any room
+    for i in µ.values():
+        variable["price " + str(i)] = cp.Variable()
+
+    variable["M"] = cp.Variable()  # this variable care for the maximum
+    objective = cp.Maximize(variable["M"])
+    constraints = []
+    # have 4 constrains
+    # 1)  M <= v_iσ(i) - p_σ(i)
+    for i in µ.keys():
+        constraints.append(variable["M"] <= val[i][µ[i]] - variable["price " + µ[i]])
+
+    # 2) Check that without envy -> v_iσ(i) - p_σ(i) ≥ v_iσ(j) - p_σ(j)
+    for i in µ.keys():
+        for j in µ.keys():
+            if i != j:
+                constraints.append(val[i][µ[i]] - variable["price " + µ[i]] >=
+                                   val[i][µ[j]] - variable["price " + µ[j]])
+
+    # 3) p_σ(i) ≤ b_i
+    for i in µ.keys():
+        constraints.append(variable["price " + µ[i]] <= budget[i])
+
+    # 4) ∑ P_i = rent
+    total = 0
+    for i in µ.keys():
+        total += variable["price " + µ[i]]
+    constraints.append(total == rent)
+
+    prob = cp.Problem(objective, constraints)
+    result = prob.solve()
+
+    if prob.status == 'optimal':
+        sigma = {}
+        vector_p = {}
+        for i in µ.keys():
+            sigma[str(i)] = str(µ[i])
+            vector_p[str(µ[i])] = round(float(variable["price " + µ[i]].value), 2)
+        return sigma, vector_p
+    else:
+        return "no solution"
 
 
 if __name__ == '__main__':
