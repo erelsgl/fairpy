@@ -14,113 +14,6 @@ from fairpy.agentlist import AgentList
     Programmers: Daniel Sela and Asif Rot
     Date: 27-12-2022
 """
-def maximum_rent_envy_free(agentsList: AgentList, rent: float, budget: dict):
-    """
-    This function implements Algorithm 1 from the article.
-    :param agentsList: agent whit rooms and valuation for each room by agent
-    :param rent: total rent house
-    :budget: the budget of each agent
-    :return: Maximum-rent envy-free allocation in a fully connected economy.
-             sigma: N -> A , p : is vector of prices for each room
-    """
-    sigma = {}
-    p = {}
-    sigma, p = spliddit(agentsList, rent)
-
-    # It is for calculate the ∆ let Δ ∈ R such that
-    # (σ,(pa −Δ)a∈A)∈Fb(N,C,v,r−nΔ) and there is i∈N such that pσ(i) =bi
-    temp = []
-    for i in sigma.keys():
-        temp.append(p[sigma[i]] - budget[i])
-    delta = max(temp)
-
-    # p ← (pσ(i) − Δ)i∈N
-    for i in sigma.keys():
-        p[sigma[i]] = round(p[sigma[i]] - delta, 3)
-    # # r ← r−nΔ
-    rent -= len(agentsList) * delta
-
-    # budget_graph ---> Γ_b(σ,p) ≡ (N,E), where E = {(i, j) : viσ(i) −pσ(i) = viσ(j) −pσ(i) and pσ(j) < bi}
-    budget_graph = build_budget_aware_graph(sigma, p, budget, agentsList)
-    while not check_while(budget_graph, budget, p, sigma):
-        # Case1
-        if not check_case_1(budget, p, sigma):
-            # Δ ← min i∈N (bi − pσ(i))
-            temp = []
-            for i in sigma.keys():
-                temp.append(budget[i] - p[sigma[i]])
-            delta = min(temp)
-            # p ← (pa + Δ) a∈A
-            for i in p.keys():
-                p[i] += delta
-            # r ← r + nΔ
-            rent = rent + len(N) * delta
-        # Case2
-        else:
-            sigma = case_2(sigma, p, budget, agentsList)
-        # Update the new budget-aware graph
-        budget_graph = build_budget_aware_graph(sigma, p, budget, val)
-    # print(f"the max total rent is {rent} \nthe sigma is {sigma} \nthe vector p is {p}")
-    return rent, (sigma, p)
-
-
-def check_while(budget_graph, budget: dict, p: dict, sigma: dict):
-    """
-        Exist i∈N s.t. p_σ(i) =bi and i is not avertex of a cycle of Γb(σ, p)
-        :return: if exist i return true
-    """
-    for i in sigma.keys():
-        if budget[i] == p[sigma[i]]:
-            cycle = nx.simple_cycles(budget_graph)
-            x = list(cycle)
-            if x == []:
-                return True
-            else:
-                for c in cycle:
-                    if i in c:
-                        return True
-    return False
-
-
-def check_case_1(budget: dict, p: dict, sigma: dict):
-    """
-     exist i∈N s.t. pσ(i) =bi
-     :return: if exist i return true
-    """
-    for i in sigma.keys():
-        if budget[i] == p[sigma[i]]:
-            return True
-    return False
-
-
-def case_2(sigma: dict, p: dict, budget: dict, agentsList: AgentList):
-    """
-        For reshuffle of sigma along cycle C of budget aware graph.
-        find i∈N s.t.pσ(i) = bi and i is a vertex of a cycle C of Γb(σ, p)
-        σ ← reshuffle of σ along C
-    :return: new sigma
-    """
-    budget_graph = build_budget_aware_graph(sigma, p, budget, agentsList)
-    for i in sigma.keys():
-        if p[sigma[i]] == budget[i]:
-            # find cycle in graph
-            cycle = nx.simple_cycles(budget_graph)
-            for c in cycle:
-                if i in c:
-                    temp = {}
-                    # For reshuffle the rooms
-                    for j in c:
-                        temp[j] = sigma[j]
-                    values = list(temp.values())
-                    # Use the shuffle function to shuffle the values
-                    random.shuffle(values)
-                    # Create a new shuffled dictionary using the original keys and the shuffled values
-                    shuffled_temp = {key: value for key, value in zip(temp.keys(), values)}
-                    # for update new room for agent
-                    for j in shuffled_temp.keys():
-                        sigma[j] = shuffled_temp[j]
-                    return sigma
-    return sigma
 
 
 def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict):
@@ -198,6 +91,115 @@ def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict):
     else:
         print(f"--------THE RESULT-------- \n 'no solution'")
         return "no solution"
+
+
+def maximum_rent_envy_free(agentsList: AgentList, rent: float, budget: dict):
+    """
+    This function implements Algorithm 1 from the article.
+    :param agentsList: agent whit rooms and valuation for each room by agent
+    :param rent: total rent house
+    :budget: the budget of each agent
+    :return: Maximum-rent envy-free allocation in a fully connected economy.
+             sigma: N -> A , p : is vector of prices for each room
+    """
+    sigma = {}
+    p = {}
+    sigma, p = spliddit(agentsList, rent)
+
+    # It is for calculate the ∆ let Δ ∈ R such that
+    # (σ,(pa −Δ)a∈A)∈Fb(N,C,v,r−nΔ) and there is i∈N such that pσ(i) =bi
+    temp = []
+    for i in sigma.keys():
+        temp.append(p[sigma[i]] - budget[i])
+    delta = max(temp)
+
+    # p ← (pσ(i) − Δ)i∈N
+    for i in sigma.keys():
+        p[sigma[i]] = round(p[sigma[i]] - delta, 3)
+    # # r ← r−nΔ
+    rent -= len(agentsList) * delta
+
+    # budget_graph ---> Γ_b(σ,p) ≡ (N,E), where E = {(i, j) : viσ(i) −pσ(i) = viσ(j) −pσ(i) and pσ(j) < bi}
+    budget_graph = build_budget_aware_graph(sigma, p, budget, agentsList)
+    while not check_while(budget_graph, budget, p, sigma):
+        # Case1
+        if not case_1(budget, p, sigma):
+            # Δ ← min i∈N (bi − pσ(i))
+            temp = []
+            for i in sigma.keys():
+                temp.append(budget[i] - p[sigma[i]])
+            delta = min(temp)
+            # p ← (pa + Δ) a∈A
+            for i in p.keys():
+                p[i] += delta
+            # r ← r + nΔ
+            rent = rent + len(N) * delta
+        # Case2
+        else:
+            sigma = case_2(sigma, p, budget, agentsList)
+        # Update the new budget-aware graph
+        budget_graph = build_budget_aware_graph(sigma, p, budget, val)
+    # print(f"the max total rent is {rent} \nthe sigma is {sigma} \nthe vector p is {p}")
+    return rent, (sigma, p)
+
+
+def check_while(budget_graph, budget: dict, p: dict, sigma: dict):
+    """
+        Exist i∈N s.t. p_σ(i) =bi and i is not avertex of a cycle of Γb(σ, p)
+        :return: if exist i return true
+    """
+    for i in sigma.keys():
+        if budget[i] == p[sigma[i]]:
+            cycle = nx.simple_cycles(budget_graph)
+            x = list(cycle)
+            if x == []:
+                return True
+            else:
+                for c in cycle:
+                    if i in c:
+                        return True
+    return False
+
+
+def case_1(budget: dict, p: dict, sigma: dict):
+    """
+     exist i∈N s.t. pσ(i) =bi
+     :return: if exist i return true
+    """
+    for i in sigma.keys():
+        if budget[i] == p[sigma[i]]:
+            return True
+    return False
+
+
+def case_2(sigma: dict, p: dict, budget: dict, agentsList: AgentList):
+    """
+        For reshuffle of sigma along cycle C of budget aware graph.
+        find i∈N s.t.pσ(i) = bi and i is a vertex of a cycle C of Γb(σ, p)
+        σ ← reshuffle of σ along C
+    :return: new sigma
+    """
+    budget_graph = build_budget_aware_graph(sigma, p, budget, agentsList)
+    for i in sigma.keys():
+        if p[sigma[i]] == budget[i]:
+            # find cycle in graph
+            cycle = nx.simple_cycles(budget_graph)
+            for c in cycle:
+                if i in c:
+                    temp = {}
+                    # For reshuffle the rooms
+                    for j in c:
+                        temp[j] = sigma[j]
+                    values = list(temp.values())
+                    # Use the shuffle function to shuffle the values
+                    random.shuffle(values)
+                    # Create a new shuffled dictionary using the original keys and the shuffled values
+                    shuffled_temp = {key: value for key, value in zip(temp.keys(), values)}
+                    # for update new room for agent
+                    for j in shuffled_temp.keys():
+                        sigma[j] = shuffled_temp[j]
+                    return sigma
+    return sigma
 
 
 if __name__ == '__main__':
