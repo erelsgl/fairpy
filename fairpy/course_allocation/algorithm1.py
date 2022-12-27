@@ -131,7 +131,7 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
     pStar = [] 
     start_time = time.time()
     best_error = float("inf")
-    random.seed(seed)
+    random.seed(seed) #to hold the random number generator
     while(time.time() - start_time < time_to):
         price_vector = [((random.randint(1, 9)/10)*max_budget) for i in range(len(courses))]
         map_price_demand(price_vector, max_budget, students, courses)

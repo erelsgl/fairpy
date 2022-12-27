@@ -71,6 +71,7 @@ def algorithm2(price_vector:list[float], maximum:int, eps:float, csp_mapping:cal
     >>> algorithm2(price_vector, maximum, eps, csp_mapping, students, courses)
     [6, 4, 6]
     '''
+    ## this section is for finding j_hat in line 1
     wow = []
     for s in students:
         a = copy.deepcopy(s)
@@ -80,12 +81,14 @@ def algorithm2(price_vector:list[float], maximum:int, eps:float, csp_mapping:cal
         wow.append(a)
     csp_mapping(wow, courses)
     J_hat = sorted(courses, key=cmp_to_key(Course.comperator))[-1]
-    while(J_hat.capacity-J_hat.max_capacity > 0 and not J_hat.mark):
-        d_star = math.floor((J_hat.capacity-J_hat.max_capacity)/2)
-        p_l = J_hat.price
-        p_h = maximum
-        while(True):
-            J_hat.price = (p_l + p_h)/2
+    ##till here line 1 in algorithm 2
+    while((J_hat.capacity-J_hat.max_capacity > 0 and not J_hat.mark) or (maximum-J_hat.price <= eps)): #2
+        d_star = math.floor((J_hat.capacity-J_hat.max_capacity)/2) #3
+        p_l = J_hat.price #4
+        p_h = maximum #5
+        while(True): #6
+            J_hat.price = (p_l + p_h)/2 #7
+            ##same here as above, for line 8 if section
             wow = []
             for s in students:
                 a = copy.deepcopy(s)
@@ -94,18 +97,18 @@ def algorithm2(price_vector:list[float], maximum:int, eps:float, csp_mapping:cal
                     a.preferences.append(pre)
                 wow.append(a)
             csp_mapping(wow,courses) # mapping here after price changes
-            if((J_hat.capacity-J_hat.max_capacity) >= d_star):
-                p_l = J_hat.price
-            else:
-                p_h = J_hat.price
-            if(p_h - p_l <= eps):
-                J_hat.price = p_h
-                J_hat.mark = True
-                break
-        J_hat = sorted(courses, key=cmp_to_key(Course.comperator))[-1]
-        if(J_hat.capacity <= J_hat.max_capacity or maximum-J_hat.price <= eps):
-            return [c.price for c in courses]
-    return [c.price for c in courses]
+            if((J_hat.capacity-J_hat.max_capacity) >= d_star): #line 8
+                p_l = J_hat.price #9
+            else: #10
+                p_h = J_hat.price #11
+            if(p_h - p_l <= eps): #13
+                J_hat.price = p_h #14
+                J_hat.mark = True #14
+                break #part of 13
+        J_hat = sorted(courses, key=cmp_to_key(Course.comperator))[-1] #15
+        # if(J_hat.capacity <= J_hat.max_capacity or maximum-J_hat.price <= eps):
+        #     return [c.price for c in courses]
+    return [c.price for c in courses] #return at the end
 
 
 def test1(): 

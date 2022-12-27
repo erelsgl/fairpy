@@ -67,26 +67,30 @@ def algorithm3(courses, students, students_matrix:list[list[bool]],csp_students:
     >>> algorithm3(courses, students ,students_matrix,mapping_csp)
     [[False, True, True], [False, True, True], [True, True, False], [True, True, False], [True, False, True]]
     '''
+    #create dict for easy traversal
     helper = {}
     count = 0
     for course in courses:
         helper[course.name] = count
         count += 1
+    ## not part of algorithm
     csp_students(courses, students, helper, students_matrix)
-    while(True):
-        flag = True
+    done = False
+    while(not done): #1
+        done = True
         for student in sorted(students, key=cmp_to_key(Student.comperator),reverse=True):
             before_budget = student.budget
             before_inc = student.courses
             student.budget *= 1.1
             csp_students(courses, students, helper, students_matrix)
             if(not(before_inc == student.courses)):
-                flag = False
-                break
-            else:
-                student.budget  = before_budget
-        if(flag):
-            break
+                done = False
+                break #break of for loop and not while loop
+            ## 2 lines to get before_budget, not in algorithm 
+            # else: 
+            #     student.budget  = before_budget
+        # if(done):
+        #     break
     return students_matrix
 
 
