@@ -105,6 +105,20 @@ def  Generalized_Adjusted_Winner_Algorithm(agent_list :AgentList)->dict:
 
 
 def Generalized_Moving_knife_Algorithm(agent_list :AgentList , items:list):
+    """
+        "Fair allocation of indivisible goods and chores" by  Ioannis Caragiannis ,
+        Ayumi Igarashi, Toby Walsh and Haris Aziz.(2021) , link
+        Algorithm 3:  Finding a Connected PROP1 Allocation
+        Programmer: Yair Raviv , Rivka Strilitz
+        Example 1: Non-Negative Proportional Utilities
+        >>> Generalized_Moving_knife_Algorithm(AgentList({"Agent1":{"1":0,"2":-1,"3":2,"4":1},"Agent2":{"1":1,"2":3,"3":1,"4":-2},"Agent3":{"1":0,"2":2,"3":0,"4":-1}}) , ['1' , '2' , '3' , '4'])
+        {'Agent1': ['3', '4'], 'Agent2': ['1'], 'Agent3': ['2']}
+
+        Example 2: Positive and Negative Proportional Utilities
+        >>> Generalized_Moving_knife_Algorithm(AgentList({"Agent1":{"1":0,"2":2,"3":0,"4":-4},"Agent2":{"1":1,"2":-2,"3":1,"4":-2},"Agent3":{"1":0,"2":-4,"3":1,"4":1}}),['1' , '2' , '3' , '4'])
+        {'Agent1': ['1', '2', '3'], 'Agent2': [], 'Agent3': ['4']}
+
+    """
     agents_num = len(agent_list)
     if agents_num <= 0:
         logging.warning("Empty Agent list")
