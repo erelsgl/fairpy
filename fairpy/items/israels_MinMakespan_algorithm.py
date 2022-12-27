@@ -218,6 +218,9 @@ def apprx(output: scedual) -> None:
     True
     '''
 
+    # extreme case
+    if output.Mechines == 1: greedy(output); return
+
     # bounds on solution via a greedy solution
 
     greedy_sol = scedual_makespan()
@@ -238,8 +241,8 @@ def apprx(output: scedual) -> None:
 
         feasable = LinearProgram(output, upper)
 
-        if not feasable:    lower = middle + 0.0001
-        else:               upper = middle - 0.0001
+        if not feasable:    lower = middle + 0.001
+        else:               upper = middle - 0.001
 
 
 
@@ -275,8 +278,11 @@ def LinearProgram(output: scedual, apprx_bound: float) -> bool:
 
 
     # minimize: maximum workload aka makespan
-    makespan = cp.maximum( * [cp.sum(variables[mechine, :]) for mechine in range(output.Mechines)] )
+    workloads = [cp.sum(variables[mechine, :]) for mechine in range(output.Mechines)]
+    try: makespan = cp.maximum( * workloads )
+    except Exception: logger.exception('workloads len: %s, shape of input: %s', len(workloads), output.shape, exc_info = True)
     constraints.append(makespan <= apprx_bound)
+
     objective = cp.Minimize(makespan)
 
     prob = cp.Problem(objective, constraints)
@@ -358,7 +364,7 @@ def RandomTesting(algo: MinMakespanAlgo, output: scedual, iteration: int, **kwar
     ''' spesefied amount of random tests generator '''
 
     for i in range(iteration):
-        yield MinMakespan(algo, ValuationMatrix(uniform(1, 4, (randint(1, 50), randint(1, 50)))), output, **kwargs)
+        yield MinMakespan(algo, ValuationMatrix(uniform(1, 4, (randint(1, 25), randint(1, 25)))), output, **kwargs)
 
 
 
@@ -368,7 +374,9 @@ if __name__ == '__main__':
     #doctest.testmod(verbose = True)
 
 
-    for res in RandomTesting(apprx, scedual_makespan(), 3):    print(res)
+    print('avg makespan greedy: ', sum(res for res in RandomTesting(greedy, scedual_makespan(), 30)) / 30)
+    print('---------')
+    print('avg makespan apprx: ', sum(res for res in RandomTesting(apprx, scedual_makespan(), 30)) / 30)
 
 
     # TODO: more TESTsssssssss !!!!
