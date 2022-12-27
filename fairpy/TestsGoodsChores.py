@@ -7,11 +7,24 @@ from fairpy.agentlist import AgentList
 from fairpy.goods_chores import *
 
 
-def is_continuous(allocation:list):
+def is_continuous(allocation:list , items : list):
     # print(allocation)
-    for i in range(0,len(allocation) -1):
-        if not (int(allocation[i])+1) == int(allocation[i+1]):
+    if len(allocation) == 0:
+        return True
+    index = -1
+    item1 = allocation[0]
+    # find the first item of the agent in the items list
+    for i in range(len(items)):
+        if item1 == items[i]:
+            index = i
+            break
+    if index == -1:
+        return False
+    # check if the agent's bundle is continuous
+    for item in allocation:
+        if not item == items[index]:
             return False
+        index += 1
     return True
 
 
@@ -101,9 +114,9 @@ class Mytes(unittest.TestCase):
                 sum += agents[agentI][str(j)]
             prop[agentI] = sum/100
             result[agentI] = []
-        res = Generalized_Moving_knife_Algorithm(AgentList(agents) , prop_values=prop, remain_interval=[0,1000] , result=result)
+        res = Generalized_Moving_knife_Algorithm(agent_list=AgentList(agents) ,items =  [str(i) for i in range(1,1001)])
         for allocation in res:
-            self.assertTrue(is_continuous(res[allocation]))
+            self.assertTrue(is_continuous(res[allocation]) , items =  [str(i) for i in range(1,1001)])
 
     # large random input and prop1 validation
     def test9(self):
@@ -121,7 +134,7 @@ class Mytes(unittest.TestCase):
             prop[agentI] = s / 1000
             result[agentI] = []
             prop_shares.append(sum(list(agents[agentI].values()))/1000)
-        res = Generalized_Moving_knife_Algorithm(AgentList(agents) , prop_values=prop, remain_interval=[0,1000] , result=result)
+        res = Generalized_Moving_knife_Algorithm(agent_list=AgentList(agents) ,items =  [str(i) for i in range(1,1001)])
         for i in range(100):
             maxim = -10
             minim = 10
@@ -131,8 +144,8 @@ class Mytes(unittest.TestCase):
                     maxim = int(agents[agentI][str(j)])
                 if str(j) in res[agentI] and agents[agentI][str(j)] <= minim:
                     minim = int(agents[agentI][str(j)])
-            plus1 = prop[agentI] + (maxim/10)
-            minus1 = prop[agentI] - (minim/10)
+            plus1 = prop[agentI] + (maxim/100)
+            minus1 = prop[agentI] - (minim/100)
             sum_res_i = sum([int(x) for x in res[agentI]])
             self.assertTrue(sum_res_i >= prop[agentI] or sum_res_i >= plus1 or sum_res_i >= minus1)
 
