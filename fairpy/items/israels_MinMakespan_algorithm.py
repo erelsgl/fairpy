@@ -15,8 +15,24 @@ from typing import Callable, Tuple, Iterable, Iterator
 from itertools import product
 # debugging & monitoring
 import logging
+
 logger = logging.getLogger(__name__)
-logging.basicConfig(level = logging.DEBUG, filename = 'debugging/pyproject.log', filemode = 'w', format = '%(levelname)s - %(message)s')
+
+logging_format = '%(levelname)s - %(message)s'
+
+logging.basicConfig(level = logging.DEBUG, filename = 'pyproject.log', filemode = 'w', format = logging_format)
+
+file_handler = logging.FileHandler("pyproject.log")
+file_handler.setLevel(logging.INFO)
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.ERROR)
+
+formatter = logging.Formatter(logging_format)
+file_handler.setFormatter(formatter)
+stream_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
 
 
 ''' 
@@ -244,18 +260,18 @@ def LinearProgram(output: scedual, apprx_bound: float) -> bool:
     # only 1 may be assigned to handle it, for j in all Jobs
     for job in range(output.Jobs):
 
-        mask = output.costs[:, job] <= apprx_bound
+        mask = output.costs.submatrix(list(output.costs.agents()), [job])[:] <= apprx_bound
         
-        if not (mask == False).all(): constraints.append(cp.sum(variables[:, job][mask]) == 1)
+        if not (mask == False).all(): constraints.append(cp.sum(variables[:, job][mask[:, 0]]) == 1)
         else:   return False
 
     # out of all jobs that mechine m can do in time <= aprrx_bound
     # m can handle at most deadline-m worth of processing time of'em, for m in all Mechines
     for mechine in range(output.Mechines):
 
-        mask = output.costs[mechine, :] <= apprx_bound
+        mask = output.costs.submatrix([mechine], list(output.costs.objects()))[:] <= apprx_bound
 
-        if not (mask == False).all(): constraints.append(cp.sum(variables[mechine, :][mask]) <= apprx_bound)
+        if not (mask == False).all(): constraints.append(cp.sum(variables[mechine, :][mask[0, :]]) <= apprx_bound)
 
 
     # minimize: maximum workload aka makespan
@@ -266,7 +282,10 @@ def LinearProgram(output: scedual, apprx_bound: float) -> bool:
     prob = cp.Problem(objective, constraints)
     prob.solve()
     
-    if prob.status != 'optimal': return False
+    if prob.status != 'optimal':
+        logger.info('LP status: %s', prob.status)
+        return False
+
     output.clear()
     Round(output, variables.value)
     return True
@@ -277,16 +296,16 @@ def Round(output: scedual, fractional_sol: np.ndarray):
 
     ''' The rounding theorem for the LP's solution fassioned in the paper '''
 
-    logger.info('fractional solution for the LP: %s', fractional_sol.__repr__())
+    logger.info('fractional solution for the LP: \n%s', fractional_sol)
 
-    def node_to_int(name: str) -> int: return int(name[1])
-    def int_to_node(ind: int, job: bool) -> str: return 'J' + str(ind) if job else 'M' + str(ind)
+    def node_to_ind(name: str) -> int: return int(name[1:])
+    def ind_to_node(num: int, job: bool) -> str: return 'J' + str(num) if job else 'M' + str(num)
 
     mechine_nodes = ['M' + str(i) for i in range(output.Mechines)]
-    job_nodes = ['J' + str(i) for i in range(output.Jobs)]
+    job_nodes =     ['J' + str(i) for i in range(output.Jobs)]
     G = nx.Graph()
-    G.add_nodes_from(mechine_nodes)
-    G.add_nodes_from(job_nodes)
+    G.add_nodes_from(mechine_nodes, bipartite = 0)
+    G.add_nodes_from(job_nodes, bipartite = 1)
     G.add_edges_from({
                         ('M' + str(mechine), 'J' + str(job)) : fractional_sol[mechine, job]
                         for mechine, job in output
@@ -297,8 +316,10 @@ def Round(output: scedual, fractional_sol: np.ndarray):
     for mechine, job in output:
         if fractional_sol[mechine, job] == 1:
 
-            output.scedual(mechine, job)
-            G.remove_edge(int_to_node(mechine, False), int_to_node(job, True))
+            try: output.scedual(mechine, job)
+            except Exception: logger.exception('Excaption while scedualing\n', exc_info = True)
+            
+            G.remove_edge(ind_to_node(mechine, False), ind_to_node(job, True))
 
 
     if not nx.bipartite.is_bipartite(G):    raise RuntimeError('G[fractional solution] should be bipartite')
@@ -308,8 +329,12 @@ def Round(output: scedual, fractional_sol: np.ndarray):
 
         if len(component) < 2: continue
 
-        for mechine, job in nx.algorithms.bipartite.maximum_matching(G.subgraph(component)):
-            output.scedual(node_to_int(mechine), node_to_int(job))
+        matching = nx.algorithms.bipartite.maximum_matching(G.subgraph(component)).items()
+
+        for mechine, job in filter(lambda edge : edge[0][0] == 'M', matching):
+
+            try: output.scedual(node_to_ind(mechine), node_to_ind(job))
+            except Exception: logger.exception('Excaption while scedualing\n', exc_info = True)
 
 
 def MinMakespan(algo: MinMakespanAlgo, input: ValuationMatrix, output: scedual, **kwargs):
@@ -333,7 +358,7 @@ def RandomTesting(algo: MinMakespanAlgo, output: scedual, iteration: int, **kwar
     ''' spesefied amount of random tests generator '''
 
     for i in range(iteration):
-        yield MinMakespan(algo, uniform(0, 3, (randint(1, 500), randint(1, 500))), output, **kwargs)
+        yield MinMakespan(algo, ValuationMatrix(uniform(1, 4, (randint(1, 50), randint(1, 50)))), output, **kwargs)
 
 
 
@@ -342,12 +367,9 @@ if __name__ == '__main__':
     import doctest
     #doctest.testmod(verbose = True)
 
-    for i in range(100):
 
-        scd = scedual_makespan()
-        scd.build(ValuationMatrix(uniform(1, 3, (5, 5))))
-        apprx(scd)
-        print(scd.extract_result())
+    for res in RandomTesting(apprx, scedual_makespan(), 3):    print(res)
 
-    # TODO: time for logging, more TESTsssssssss !!!!
+
+    # TODO: more TESTsssssssss !!!!
     
