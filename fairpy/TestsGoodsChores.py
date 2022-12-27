@@ -15,7 +15,23 @@ def is_continuous(allocation:list):
     return True
 
 
-def is_PO(param):
+def is_PO(agents:AgentList , result:dict):
+    try:
+        winner = agents[0]
+        looser = agents[1]
+        winner_utility = sum([winner.value(item) for item in result['Agent1']])
+        looser_utility = sum([looser.value(item) for item in result['Agent2']])
+    except:
+        raise 'Invalid arguments'
+    all_items = set(result['Agent1'] + result['Agent2'])
+    for i in range(len(all_items) +1):
+        for bundle in itertools.combinations(all_items, i):
+            W_utility = sum([winner.value(item) for item in bundle])
+            L_utility = sum([winner.value(item) for item in all_items if item not in bundle])
+            notPoWinner = W_utility > winner_utility and L_utility >= looser_utility
+            notPoLooser = W_utility >= winner_utility and L_utility > looser_utility
+            if notPoWinner or notPoLooser:
+                return False
     return True
 
 
