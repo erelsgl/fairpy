@@ -30,7 +30,7 @@ def spliddit(agentList: AgentList, rent: float):
     >>> spliddit(agentList2, 1000)
     ({'P3': 'Ra', 'P2': 'Rb', 'P1': 'Rc'}, {'Rc': 150.0, 'Rb': 250.0, 'Ra': 600.0})
     """
-    # it take the typing agent List and moves to the component for comfortable
+    # Taking the AgentList type and splitting it to lists and dictionary
     N = []
     A = []
     for i in agentList.agent_names():
@@ -63,11 +63,11 @@ def spliddit(agentList: AgentList, rent: float):
     constraints = []
 
     # have 3 constrains
-    # 1)  M <= v_iσ(i) - p_σ(i)
+    # 1)  M <= v_(iσ(i)) - p_(σ(i))
     for i in dict_match.keys():
         constraints.append(variable["M"] <= agentList[N.index(i)].value(dict_match[i]) - variable["price " + dict_match[i]])
 
-    # 2) Check that without envy -> v_iσ(i) - p_σ(i) ≥ v_iσ(j) - p_σ(j)
+    # 2) Check that without envy -> v_(iσ(i)) - p_(σ(i)) ≥ v_(iσ(j)) - p_(σ(j))
     for i in dict_match.keys():
         for j in dict_match.keys():
             if i != j:
@@ -98,12 +98,12 @@ def spliddit(agentList: AgentList, rent: float):
 def build_budget_aware_graph(sigma: dict, vector_p: dict, budget: dict, agentList: AgentList) -> nx.DiGraph:
     """
         This function build budget aware envy graph ,Γ_b(σ, p) ≡ (N,E) , where
-        E = {(i, j) : v_iσ(i) - p_σ(i) = v_iσ(j) - p_σ(i) and p_σ(j) < b_i}
-    :param sigma: this function from agent to room
-    :param vector_p: vector of prices for each room
-    :param budget: agents budget
-    :param val: the value of room by agent
-    :return:  graph
+        E = {(i, j) : v_(iσ(i)) - p_(σ(i)) = v_(iσ(j)) - p_(σ(i)) and p_(σ(j)) < b_i}
+    :param sigma: Dictionary for room per agent
+    :param vector_p: Vector of prices for each room
+    :param budget: Agents' budget
+    :param val: The values of room per agent
+    :return: Directed Graph
     """
     budget_aware_graph = nx.DiGraph()
     budget_aware_graph.add_nodes_from(list(sigma.keys()))
@@ -111,7 +111,7 @@ def build_budget_aware_graph(sigma: dict, vector_p: dict, budget: dict, agentLis
         for j in sigma.keys():
             if not i == j:
                 left = agentList[agentList.agent_names().index(i)].value(sigma[i]) - vector_p[sigma[i]]
-                # to build budget aware weak envy graph --> v_iσ(i) - p_σ(i) = v_iσ(j) - p_σ(i) and p_σ(j) < b_i
+                # building budget aware weak envy graph --> v_(iσ(i)) - p_(σ(i)) = v_(iσ(j)) - p_(σ(i)) and p_(σ(j)) < b_i
                 if left == (agentList[agentList.agent_names().index(i)].value(sigma[j]) - vector_p[sigma[i]]) and budget[i] > vector_p[sigma[j]]:
                     budget_aware_graph.add_node(i)
                     budget_aware_graph.add_node(j)
@@ -124,10 +124,10 @@ def build_weak_envy_graph(sigma: dict, vector_p: dict, agentList: AgentList) -> 
     """
         This function for build weak envy graph , Γ(σ, p) ≡ (N,E) ,where
         (i, j) ∈ E if and only if v_iσ(i) - p_σ(i) = v_iσ(j) - p_σ(j)
-    :param sigma: this function from agent to room
-    :param vector_p: vector of prices for each room
-    :param val: the value of room by agent
-    :return:
+    :param sigma: Dictionary for room per agent
+    :param vector_p: Vector of prices for each room
+    :param val: The values of room per agent
+    :return: Directed Graph
     """
     weak_envy_graph = nx.DiGraph()
     weak_envy_graph.add_nodes_from(list(sigma.keys()))
@@ -143,23 +143,22 @@ def build_weak_envy_graph(sigma: dict, vector_p: dict, agentList: AgentList) -> 
     return weak_envy_graph
 
 
-def LP1(µ:dict,rent , val: dict[dict],budget:dict):
+def LP1(µ: dict, rent, val: dict[dict], budget: dict):
     """
-        This function for calculation of LP(1) from article.
+        This function is for calculation of LP(1) from the article.
         LP(1) is : Linear Programming of :
             max M
-            M,pσ(1),...,pσ(n)
+    {M,pσ(1),...,pσ(n)}
                     s.t.
-                    ,
-                    ∑_i∈N pσ(i) = r ,
-                    ∀s ∈ [t] ,  x ≤ fs (v_1σ(1) − p_σ(1),...,v_nσ(n) − p_σ(n))
-                    ∀i,j∈N, v_iσ(i) - p_σ(i) ≥ v_iσ(j) - p_σ(j)
-                    ∀i∈N ,  p_σ(i) ≤b_i
+                    ∑_i∈N p(σ(i)) = r,
+                    ∀s ∈ [t],  M ≤ fs (v_(1σ(1)) − p_(σ(1)), ..., v_(nσ(n)) − p_(σ(n)))
+                    ∀i,j∈N, v_(iσ(i)) - p_(σ(i)) ≥ v_(iσ(j)) - p_(σ(j))
+                    ∀i∈N,  p_(σ(i)) ≤ b_i
 
         :param µ:  µ: N -> A
-        :param rent: total rent house
-        :param val: the valuation of each room by agent
-        :param budget: total rent house
+        :param rent: Total rent
+        :param val: Evaluation for each room by agent
+        :param budget: Each agent's budget
         :return: if LP(1) for μ is feasible return µ: N -> A , p : is vector of prices for each room Else
                 "no solution"
         >>> agentList1 = AgentList({'P1': {'Ra': 600, 'Rb': 100, 'Rc': 150},'P2': {'Ra': 250, 'Rb': 250, 'Rc': 250},'P3': {'Ra': 100, 'Rb': 400, 'Rc': 250}})
@@ -182,18 +181,18 @@ def LP1(µ:dict,rent , val: dict[dict],budget:dict):
     objective = cp.Maximize(variable["M"])
     constraints = []
     # have 4 constrains
-    # 1)  M <= v_iσ(i) - p_σ(i)
+    # 1)  M <= v_(iσ(i)) - p_(σ(i))
     for i in µ.keys():
         constraints.append(variable["M"] <= val[i][µ[i]] - variable["price " + µ[i]])
 
-    # 2) Check that without envy -> v_iσ(i) - p_σ(i) ≥ v_iσ(j) - p_σ(j)
+    # 2) Check that without envy -> v_(iσ(i)) - p_(σ(i)) ≥ v_(iσ(j)) - p_(σ(j))
     for i in µ.keys():
         for j in µ.keys():
             if i != j:
                 constraints.append(val[i][µ[i]] - variable["price " + µ[i]] >=
                                    val[i][µ[j]] - variable["price " + µ[j]])
 
-    # 3) p_σ(i) ≤ b_i
+    # 3) p_(σ(i)) ≤ b_i
     for i in µ.keys():
         constraints.append(variable["price " + µ[i]] <= budget[i])
 

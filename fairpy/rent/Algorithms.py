@@ -1,9 +1,9 @@
 import doctest
-
 import networkx as nx
 import numpy as np
-from Calculation_Assistance import *
+from fairpy.rent.Calculation_Assistance import *
 from fairpy.agentlist import AgentList
+import logging
 
 """
     "Fair Rent Division on a Budget"
@@ -17,13 +17,17 @@ from fairpy.agentlist import AgentList
     Date: 27-12-2022
 """
 
+LOG_FORMAT = "%(levelname)s, time: %(asctime)s, line: %(lineno)d - %(message)s"
+logging.basicConfig(filename='algorithms_logging.log', level=logging.DEBUG, format=LOG_FORMAT)
+logger = logging.getLogger()
 
-def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict):
+
+def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict) -> (dict, dict):
     """
         This function implements Algorithm 2 from the article.
-        :param agentsList: agent whit rooms and valuation for each room by agent
-        :param rent: total rent house
-        :budget: the budget of each agent
+        :param agentsList: Evaluation for each room by agent
+        :param rent: Total rent
+        :budget: Each agent's budget
         :return:  Optimal envy-free allocation subject to budget constraints.
                  µ: N -> A , p : is vector of prices for each room
         >>> agentList1 = AgentList({'Alice': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},'Bob': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},'Clair': {'2ndFloor': 250, 'Basement': 500, 'MasterBedroom': 250}})
@@ -39,7 +43,8 @@ def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict):
         --------THE RESULT--------
         'no solution'
         """
-    # line 124-132 : it take the typing agent List and moves to the component for comfortable
+    logger.info(f'optimal_envy_free({agentsList}, {rent}, {budget})')
+    # line 48-55 : Taking the AgentList type and splitting it to lists and dictionary
     N = list([i for i in agentsList.agent_names()])
     A = list([i for i in agentsList.all_items()])
     val = {}
@@ -48,16 +53,19 @@ def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict):
         for j in A:
             tempA[j] = agentsList[N.index(i)].value(j)
         val[i] = tempA
+    logger.debug("done initializing the first variables")
     # compute (σ,p) ∈ F(N,A,v,r)
     sigma = {}
     p = {}
     sigma, p = spliddit(agentsList, rent)  # compute (σ,p) ∈ F(N,A,v,r)
-
+    logger.debug("done spliddit")
     # Γ(σ, p) : weak envy graph by Γ(σ,p) ≡ (N,E), where (i, j) ∈ E if and only if viσ(i) − pσ(i) = viσ(j) − pσ(j)
     # graph = Γ(σ, p)
     graph = build_weak_envy_graph(sigma, p, agentsList)
+    logger.debug("done build_weak_envy_graph")
     # SCC = C , C ← strongly connected components of Γ(σ, p)
     SCC = nx.strongly_connected_components(graph)
+    logger.debug("done strongly_connected_components")
 
     ans_µc_pc = []
     """
@@ -67,7 +75,7 @@ def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict):
     lst_SCC = list(SCC)
     for c in lst_SCC:
         tempAgentC = {}
-        # N_c = let N_c bet the set of agent from strongly connected components
+        # N_c = let N_c be the set of agent from strongly connected components
         N_c = list([i for i in N if i in c])
         # A_c = let A(C) be the set of rooms received by agents in C
         A_c = list([sigma[i] for i in sigma.keys() if i in c])
@@ -79,12 +87,13 @@ def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict):
                 tempA[j] = agentsList[N_c.index(i)].value(j)
             V_c[i] = tempA
         B_c = {i: budget[i] for i in sigma.keys() if i in c}
-        # New rent for calculated on c
+        # New rent for calculation on c
         new_rent = sum(p[sigma[i]] for i in c)
         for i in c:
             tempAgentC[i] = V_c[i]
         # (μC,pC) ← output of Algorithm 1 on C, A(C), V_c, and B_c
         ans_µc_pc.append(maximum_rent_envy_free(AgentList(tempAgentC), new_rent, B_c))
+        logger.debug("done appending ans_µc_pc with maximum_rent_envy_free")
 
     µ = {}
     # let μ:N →A s.t. for all i ∈ N , μ(i) = μ_C(i) for c ∈ C s.t. i ∈ C
@@ -95,26 +104,30 @@ def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict):
                     µc = dict(j[1][0])
                     if i in µc:
                         µ[i] = µc[i]
+    logger.debug("done comparing µ[i] = µc[i]")
 
     # if LP(1) for μ is feasible , ans_LP1 = (µ,p)
     ans_LP1 = LP1(µ, rent, val, budget)
+    logger.debug("done LP1")
     if ans_LP1 != "no solution":
         # p ← solution of LP (1) for μ return (μ, p)
-        #print(f"--------THE RESULT-------- \n µ : {ans_LP1[0]} , p : {ans_LP1[1]}")
+        # print(f"--------THE RESULT-------- \n µ : {ans_LP1[0]} , p : {ans_LP1[1]}")
         sigma = sorted(ans_LP1[0].items(), key=lambda x: x[0])
         p = sorted(ans_LP1[1].items(), key=lambda x: x[1])
-        return sigma , p
+        logger.debug("done function (ans_LP1 != 'no solution')")
+        return sigma, p
     else:
+        logger.debug("done function ('no solution')")
         print(f"--------THE RESULT--------")
         return "no solution"
 
 
-def maximum_rent_envy_free(agentsList: AgentList, rent: float, budget: dict):
+def maximum_rent_envy_free(agentsList: AgentList, rent: float, budget: dict) -> (int, dict):
     """
     This function implements Algorithm 1 from the article.
-    :param agentsList: agent whit rooms and valuation for each room by agent
-    :param rent: total rent house
-    :budget: the budget of each agent
+    :param agentsList: Evaluation for each room by agent
+    :param rent: Total rent
+    :budget: Each agent's budget
     :return: Maximum-rent envy-free allocation in a fully connected economy.
              sigma: N -> A , p : is vector of prices for each room
     >>> ex1 = AgentList({"Alice":{'1' : 250, '2' : 250, '3' : 500}, "Bob": {'1': 250, '2' : 250, '3' :500}, "Clair": {'1' :250, '2' : 500, '3' : 250}})
@@ -127,6 +140,7 @@ def maximum_rent_envy_free(agentsList: AgentList, rent: float, budget: dict):
     >>> maximum_rent_envy_free(ex3, 1000, {'Alice': 450, 'Bob': 550})
     (800.0, ([('Alice', '1'), ('Bob', '2')], [('1', 250.0), ('2', 550.0)]))
     """
+    logger.info(f'maximum_rent_envy_free({agentsList}, {rent}, {budget})')
     N = list([i for i in agentsList.agent_names()])
     A = list([i for i in agentsList.all_items()])
     val = {}
@@ -135,53 +149,69 @@ def maximum_rent_envy_free(agentsList: AgentList, rent: float, budget: dict):
         for j in A:
             tempA[j] = agentsList[N.index(i)].value(j)
         val[i] = tempA
+    logger.debug("done initializing the first variables")
     sigma = {}
     p = {}
     sigma, p = spliddit(agentsList, rent)
+    logger.debug("done spliddit")
 
-    # It is for calculate the ∆ let Δ ∈ R such that
-    # (σ,(pa −Δ)a∈A)∈Fb(N,C,v,r−nΔ) and there is i∈N such that pσ(i) =bi
+    # It is for calculating the ∆, let Δ ∈ R such that
+    # (σ,(p_a −Δ)_(a∈A)) ∈ F_b(N,C,v,r−nΔ) and there is i∈N such that p_(σ(i)) = b_i
     temp = []
     for i in sigma.keys():
         temp.append(p[sigma[i]] - budget[i])
     delta = max(temp)
+    logger.debug("done calculating delta")
 
-    # p ← (pσ(i) − Δ)i∈N
+    # p ← (p_(σ(i)) − Δ)_(i∈N)
     for i in sigma.keys():
         p[sigma[i]] = round(p[sigma[i]] - delta, 3)
-    # # r ← r−nΔ
+    logger.debug("done calculating p")
+    # # r ← r − nΔ
     rent -= len(agentsList) * delta
+    logger.debug("done calculating rent")
 
-    # budget_graph ---> Γ_b(σ,p) ≡ (N,E), where E = {(i, j) : viσ(i) −pσ(i) = viσ(j) −pσ(i) and pσ(j) < bi}
+    # budget_graph
+    # ---> Γ_b(σ,p) ≡ (N,E), where E = {(i, j) : v_(iσ(i)) − p_(σ(i)) = v_(iσ(j)) −p_(σ(i)) and p_(σ(j)) < b_i}
     budget_graph = build_budget_aware_graph(sigma, p, budget, agentsList)
+    logger.debug("done build_budget_aware_graph")
     while not check_while(budget_graph, budget, p, sigma):
         # Case1
         if not case_1(budget, p, sigma):
-            # Δ ← min i∈N (bi − pσ(i))
+            logger.debug("entering case_1")
+            # Δ ← min i∈N (b_i − p_(σ(i)))
             temp = []
             for i in sigma.keys():
                 temp.append(budget[i] - p[sigma[i]])
             delta = min(temp)
-            # p ← (pa + Δ) a∈A
+            logger.debug("done min delta")
+            # p ← (p_a + Δ)_(a∈A)
             for i in p.keys():
                 p[i] += delta
+            logger.debug("done calculating new p")
             # r ← r + nΔ
             rent = rent + len(N) * delta
+            logger.debug("done calculating new rent")
         # Case2
         else:
+            logger.debug("entering case_2")
             sigma = case_2(sigma, p, budget, agentsList)
+            logger.debug("done case_2 function")
         # Update the new budget-aware graph
         budget_graph = build_budget_aware_graph(sigma, p, budget, agentsList)
-    # print(f"the max total rent is {rent} \nthe sigma is {sigma} \nthe vector p is {p}")
-    sigma = sorted(sigma.items(), key=lambda x:x[1])
-    p = sorted(p.items(), key=lambda x:x[0])
+        logger.debug("done build_budget_aware_graph function")
+
+    logger.debug("done conditions before sorting")
+    sigma = sorted(sigma.items(), key=lambda x: x[1])
+    p = sorted(p.items(), key=lambda x: x[0])
+    logger.debug("done function after sorting")
     return rent, (sigma, p)
 
 
 def check_while(budget_graph, budget: dict, p: dict, sigma: dict):
     """
-        Exist i∈N s.t. p_σ(i) =bi and i is not avertex of a cycle of Γb(σ, p)
-        :return: if exist i return true
+        Exist i∈N s.t. p_(σ(i)) = b_i and i is not a vertex of a cycle of Γ_b(σ, p)
+        :return: if exist i, return true
     """
     for i in sigma.keys():
         if budget[i] == p[sigma[i]]:
@@ -198,7 +228,7 @@ def check_while(budget_graph, budget: dict, p: dict, sigma: dict):
 
 def case_1(budget: dict, p: dict, sigma: dict):
     """
-     exist i∈N s.t. pσ(i) =bi
+     exist i∈N s.t. p_(σ(i)) = b_i
      :return: if exist i return true
     """
     for i in sigma.keys():
@@ -210,7 +240,7 @@ def case_1(budget: dict, p: dict, sigma: dict):
 def case_2(sigma: dict, p: dict, budget: dict, agentsList: AgentList):
     """
         For reshuffle of sigma along cycle C of budget aware graph.
-        find i∈N s.t.pσ(i) = bi and i is a vertex of a cycle C of Γb(σ, p)
+        find i∈N s.t.p_(σ(i)) = b_i and i is a vertex of a cycle C of Γ_b(σ, p)
         σ ← reshuffle of σ along C
     :return: new sigma
     """
@@ -230,7 +260,7 @@ def case_2(sigma: dict, p: dict, budget: dict, agentsList: AgentList):
                     random.shuffle(values)
                     # Create a new shuffled dictionary using the original keys and the shuffled values
                     shuffled_temp = {key: value for key, value in zip(temp.keys(), values)}
-                    # for update new room for agent
+                    # updating new room for agent
                     for j in shuffled_temp.keys():
                         sigma[j] = shuffled_temp[j]
                     return sigma
@@ -265,8 +295,7 @@ if __name__ == '__main__':
     rent2 = 1000
 
     print("solution agentList1")
-    print(optimal_envy_free(agentList1,rent1,budget1))
+    print(optimal_envy_free(agentList1, rent1, budget1))
     print()
     print("solution agentList2")
     print(optimal_envy_free(agentList2, rent2, budget2))
-
