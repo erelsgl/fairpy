@@ -4,7 +4,7 @@ import logging
 logging.basicConfig(filename="my_logger_file.log", level=logging.DEBUG)
 logger = logging.getLogger()
 
-def get_value(agent, boundle: list, eval_func: dict):
+def get_value(agent: str, boundle: list, eval_func: dict):
     """"
     A function that returns an agent's evaluation of a particular bundle
     :param agent: the name of the agent
@@ -26,7 +26,7 @@ def get_value(agent, boundle: list, eval_func: dict):
     return 0
 
 
-def compare_2_bundles_and_transfer(agent_a, allo: dict, eval_func: dict):
+def compare_2_bundles_and_transfer(agent_a: str, allo: dict, eval_func: dict):
     """
     A function that checks if transferring a bundle to a certain agent will increase the SW, and if so transfers
     :param agent_a: the name of the cuurent agent
@@ -83,12 +83,12 @@ def calcuSWave(allocation: dict, eval_func: dict):
     return sum_values / len(allocation)  #return the average (the received sum divided by the number of agents)
 
 
-def list_sw(allo, eval_func, pay_list):
+def list_sw(allo: dict, eval_func: dict, pay_list: dict):
     """
     A function to check if we have achieved equality
     :param allo: The current allocation
     :param eval_func: A dictionary of the evaluations of each agent for each bundle
-    :pay_list: A dictionary of each agent's payment
+    :param pay_list: A dictionary of each agent's payment
 
     >>> list_sw(allocation_2, eval_2, {'A': -16.0, 'B': -16.0, 'C': -16.0, 'D': 64.0, 'E': -16.0})
     True
