@@ -1,3 +1,5 @@
+import doctest
+
 import networkx as nx
 import numpy as np
 from Calculation_Assistance import *
@@ -24,6 +26,18 @@ def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict):
         :budget: the budget of each agent
         :return:  Optimal envy-free allocation subject to budget constraints.
                  µ: N -> A , p : is vector of prices for each room
+        >>> agentList1 = AgentList({'Alice': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},'Bob': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},'Clair': {'2ndFloor': 250, 'Basement': 500, 'MasterBedroom': 250}})
+        >>> optimal_envy_free(agentList1, 1000, {'Alice': 200,'Bob': 100,'Clair': 200,})
+        --------THE RESULT--------
+        'no solution'
+        >>> agentList2 = AgentList({'P1': {'Ra': 600, 'Rb': 100, 'Rc': 150},'P2': {'Ra': 250, 'Rb': 250, 'Rc': 250},'P3': {'Ra': 100, 'Rb': 400, 'Rc': 250}})
+        >>> optimal_envy_free(agentList2, 1000, {'P1': 600,'P2': 400,'P3': 400})
+        ([('P1', 'Ra'), ('P2', 'Rc'), ('P3', 'Rb')], [('Rc', 166.67), ('Rb', 316.67), ('Ra', 516.67)])
+
+        >>> ex3 = AgentList({"Alice":{'1' : 250, '2' : 750}, "Bob": {'1': 250, '2' : 750}})
+        >>> optimal_envy_free(ex3, 1000, {'Alice': 600, 'Bob': 500})
+        --------THE RESULT--------
+        'no solution'
         """
     # line 124-132 : it take the typing agent List and moves to the component for comfortable
     N = list([i for i in agentsList.agent_names()])
@@ -86,10 +100,12 @@ def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict):
     ans_LP1 = LP1(µ, rent, val, budget)
     if ans_LP1 != "no solution":
         # p ← solution of LP (1) for μ return (μ, p)
-        print(f"--------THE RESULT-------- \n µ : {ans_LP1[0]} , p : {ans_LP1[1]}")
-        return ans_LP1
+        #print(f"--------THE RESULT-------- \n µ : {ans_LP1[0]} , p : {ans_LP1[1]}")
+        sigma = sorted(ans_LP1[0].items(), key=lambda x: x[0])
+        p = sorted(ans_LP1[1].items(), key=lambda x: x[1])
+        return sigma , p
     else:
-        print(f"--------THE RESULT-------- \n 'no solution'")
+        print(f"--------THE RESULT--------")
         return "no solution"
 
 
@@ -101,7 +117,24 @@ def maximum_rent_envy_free(agentsList: AgentList, rent: float, budget: dict):
     :budget: the budget of each agent
     :return: Maximum-rent envy-free allocation in a fully connected economy.
              sigma: N -> A , p : is vector of prices for each room
+    >>> ex1 = AgentList({"Alice":{'1' : 250, '2' : 250, '3' : 500}, "Bob": {'1': 250, '2' : 250, '3' :500}, "Clair": {'1' :250, '2' : 500, '3' : 250}})
+    >>> maximum_rent_envy_free(ex1, 1000, {'Alice': 250, 'Bob': 320, 'Clair': 430})
+    (709.99, ([('Alice', '1'), ('Clair', '2'), ('Bob', '3')], [('1', 70.0), ('2', 320.0), ('3', 320.0)]))
+    >>> ex2 = AgentList({"Alice":{'1' : 250, '2' : 750}, "Bob": {'1': 250, '2' : 750}})
+    >>> maximum_rent_envy_free(ex2, 1000, {'Alice': 600, 'Bob': 500})
+    (500.0, ([('Alice', '1'), ('Bob', '2')], [('1', 0.0), ('2', 500.0)]))
+    >>> ex3 = AgentList({"Alice":{'1' : 400, '2' : 600}, "Bob": {'1': 300, '2' : 700}})
+    >>> maximum_rent_envy_free(ex3, 1000, {'Alice': 450, 'Bob': 550})
+    (800.0, ([('Alice', '1'), ('Bob', '2')], [('1', 250.0), ('2', 550.0)]))
     """
+    N = list([i for i in agentsList.agent_names()])
+    A = list([i for i in agentsList.all_items()])
+    val = {}
+    for i in N:
+        tempA = {}
+        for j in A:
+            tempA[j] = agentsList[N.index(i)].value(j)
+        val[i] = tempA
     sigma = {}
     p = {}
     sigma, p = spliddit(agentsList, rent)
@@ -138,8 +171,10 @@ def maximum_rent_envy_free(agentsList: AgentList, rent: float, budget: dict):
         else:
             sigma = case_2(sigma, p, budget, agentsList)
         # Update the new budget-aware graph
-        budget_graph = build_budget_aware_graph(sigma, p, budget, val)
+        budget_graph = build_budget_aware_graph(sigma, p, budget, agentsList)
     # print(f"the max total rent is {rent} \nthe sigma is {sigma} \nthe vector p is {p}")
+    sigma = sorted(sigma.items(), key=lambda x:x[1])
+    p = sorted(p.items(), key=lambda x:x[0])
     return rent, (sigma, p)
 
 
@@ -203,9 +238,17 @@ def case_2(sigma: dict, p: dict, budget: dict, agentsList: AgentList):
 
 
 if __name__ == '__main__':
+    doctest.testmod()
     agentList1 = AgentList({'Alice': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},
                             'Bob': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},
                             'Clair': {'2ndFloor': 250, 'Basement': 500, 'MasterBedroom': 250}})
+
+    budget1 = {
+        'Alice': 200,
+        'Bob': 100,
+        'Clair': 200,
+    }
+    rent1 = 1000
 
     agentList2 = AgentList({
         'P1': {'Ra': 600, 'Rb': 100, 'Rc': 150, 'Rd': 150},
@@ -213,42 +256,17 @@ if __name__ == '__main__':
         'P3': {'Ra': 100, 'Rb': 400, 'Rc': 250, 'Rd': 250},
         'P4': {'Ra': 100, 'Rb': 200, 'Rc': 350, 'Rd': 350}
     })
-    budget = {
+    budget2 = {
         'P1': 600,
         'P2': 400,
         'P3': 400,
         'P4': 300
     }
-    rent = 1000
-    ans = optimal_envy_free(agentList2, rent, budget)
-    # N = ['Alice', 'Bob', 'Clair']
-    # A = ['2ndFloor', 'Basement', 'MasterBedroom']
-    # val = {
-    #     'Alice': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},
-    #     'Bob': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},
-    #     'Clair': {'2ndFloor': 250, 'Basement': 500, 'MasterBedroom': 250},
-    # }
-    # budget = {
-    #     'Alice': 200,
-    #     'Bob': 100,
-    #     'Clair': 200,
-    # }
-    # rent = 1000
+    rent2 = 1000
 
-    # N = ['P1', 'P2', 'P3', 'P4']
-    # A = ['Ra', 'Rb', 'Rc', 'Rd']
-    # val = {
-    #     'P1': {'Ra': 600, 'Rb': 100, 'Rc': 150, 'Rd': 150},
-    #     'P2': {'Ra': 250, 'Rb': 250, 'Rc': 250, 'Rd': 250},
-    #     'P3': {'Ra': 100, 'Rb': 400, 'Rc': 250, 'Rd': 250},
-    #     'P4': {'Ra': 100, 'Rb': 200, 'Rc': 350, 'Rd': 350}
-    # }
-    # budget = {
-    #     'P1': 1000,
-    #     'P2': 1000,
-    #     'P3': 1000,
-    #     'P4': 1000
-    # }
-    # rent = 1000
-    #
-    # ans = algorithm_1(N, A, agentList1, rent, budget)
+    print("solution agentList1")
+    print(optimal_envy_free(agentList1,rent1,budget1))
+    print()
+    print("solution agentList2")
+    print(optimal_envy_free(agentList2, rent2, budget2))
+

@@ -1,3 +1,5 @@
+import doctest
+
 import networkx as nx
 import random
 import cvxpy as cp
@@ -20,6 +22,13 @@ def spliddit(agentList: AgentList, rent: float):
     :param N: list of agent
     :param A: list of room
     :return: sigma: N -> A , p : is vector of prices for each room
+    >>> agentList1 = AgentList({'P1': {'Ra': 600, 'Rb': 100, 'Rc': 150},'P2': {'Ra': 250, 'Rb': 250, 'Rc': 250},'P3': {'Ra': 100, 'Rb': 400, 'Rc': 250}})
+    >>> spliddit(agentList1, 1000)
+    ({'P1': 'Ra', 'P3': 'Rb', 'P2': 'Rc'}, {'Rc': 166.67, 'Rb': 316.67, 'Ra': 516.67})
+
+    >>> agentList2 = AgentList({'P1': {'Ra': 500, 'Rb': 250, 'Rc': 250},'P2': {'Ra': 300, 'Rb': 400, 'Rc': 300},'P3': {'Ra': 700, 'Rb': 100, 'Rc': 200}})
+    >>> spliddit(agentList2, 1000)
+    ({'P3': 'Ra', 'P2': 'Rb', 'P1': 'Rc'}, {'Rc': 150.0, 'Rb': 250.0, 'Ra': 600.0})
     """
     # it take the typing agent List and moves to the component for comfortable
     N = []
@@ -81,6 +90,8 @@ def spliddit(agentList: AgentList, rent: float):
         sigma[str(i)] = str(dict_match[i])
         vector_p[str(dict_match[i])] = round(float(variable["price " + dict_match[i]].value), 2)
 
+    sigma = dict(sorted(sigma.items(), key=lambda x: x[1]))
+    vector_p = dict(sorted(vector_p.items(), key=lambda x: x[1]))
     return sigma, vector_p
 
 
@@ -151,6 +162,17 @@ def LP1(µ:dict,rent , val: dict[dict],budget:dict):
         :param budget: total rent house
         :return: if LP(1) for μ is feasible return µ: N -> A , p : is vector of prices for each room Else
                 "no solution"
+        >>> agentList1 = AgentList({'P1': {'Ra': 600, 'Rb': 100, 'Rc': 150},'P2': {'Ra': 250, 'Rb': 250, 'Rc': 250},'P3': {'Ra': 100, 'Rb': 400, 'Rc': 250}})
+        >>> µ , p = spliddit(agentList1, 1000)
+        >>> val = {'P1': {'Ra': 600, 'Rb': 100, 'Rc': 150},'P2': {'Ra': 250, 'Rb': 250, 'Rc': 250},'P3': {'Ra': 100, 'Rb': 400, 'Rc': 250}}
+        >>> LP1(µ,1000,val,{'P1':500,'P2':500,'P3':400})
+        ({'P1': 'Ra', 'P3': 'Rb', 'P2': 'Rc'}, {'Ra': 500.0, 'Rb': 325.0, 'Rc': 175.0})
+
+         >>> agentList2 = AgentList({'P1': {'Ra': 500, 'Rb': 250, 'Rc': 250},'P2': {'Ra': 300, 'Rb': 400, 'Rc': 300},'P3': {'Ra': 700, 'Rb': 100, 'Rc': 200}})
+         >>> µ , p = spliddit(agentList2, 1000)
+         >>> val = {'P1': {'Ra': 500, 'Rb': 250, 'Rc': 250},'P2': {'Ra': 300, 'Rb': 400, 'Rc': 300},'P3': {'Ra': 700, 'Rb': 100, 'Rc': 200}}
+         >>> LP1(µ,1000,val,{'P1':200,'P2':400,'P3':700})
+         ({'P3': 'Ra', 'P2': 'Rb', 'P1': 'Rc'}, {'Ra': 600.0, 'Rb': 250.0, 'Rc': 150.0})
         """
     variable = {}  # list of all the 'price' variables that present the price of any room
     for i in µ.values():
@@ -196,26 +218,7 @@ def LP1(µ:dict,rent , val: dict[dict],budget:dict):
 
 
 if __name__ == '__main__':
-    # N = ['a', 'b', 'c']
-    # A = ['small', 'mid', 'big']
-    # val = {
-    #     'a': {'small': 250, 'mid': 250, 'big': 500},
-    #     'b': {'small': 250, 'mid': 500, 'big': 250},
-    #     'c': {'small': 200, 'mid': 200, 'big': 600},
-    # }
-    # rent = 1000
-    # budget = {
-    #     'a': 600,
-    #     'b': 350,
-    #     'c': 500
-    # }
-    # ans = spliddit(N, A, val, rent)
-    # print(*ans, sep="\n")
-    # if_allocation_is_envy_free(ans[0], ans[1], val)
-    # # graph = build_graph(ans[0], ans[1], val)
-    # # SCC_weak_envy_graph(graph[1])
-    # N = ['P1', 'P2', 'P3', 'P4']
-    # A = ['Ra', 'Rb', 'Rc', 'Rd']
+    doctest.testmod()
     agentList1 = AgentList({'bob': {'Ra': 600, 'Rb': 100, 'Rc': 150, 'Rd': 150},
                             'alice': {'Ra': 250, 'Rb': 250, 'Rc': 250, 'Rd': 250},
                             'dor': {'Ra': 100, 'Rb': 400, 'Rc': 250, 'Rd': 250},
