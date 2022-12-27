@@ -197,6 +197,8 @@ def greedy(output: scedual) -> None:
     {(3, 1), (0, 2), (1, 3), (0, 0)}
     '''
 
+    output.clear()
+
     for job in range(output.Jobs):
         output.scedual(min(range(output.Mechines), key = lambda mechine : output.costs[mechine, job] + output.loadOf(mechine)), job)
 
@@ -230,6 +232,8 @@ def apprx(output: scedual) -> None:
     >>> print(output.extract_result())
     {(1, 1), (0, 0)}
     '''
+
+    output.clear()
 
     # extreme case
     if output.Mechines == 1: greedy(output); return
@@ -384,7 +388,7 @@ def RandomTesting(algo: MinMakespanAlgo, output: scedual, iteration: int, **kwar
     ''' spesefied amount of random tests generator '''
 
     for i in range(iteration):
-        yield MinMakespan(algo, ValuationMatrix(uniform(1, 100, (randint(1, 20), randint(1, 20)))), output, **kwargs)
+        yield MinMakespan(algo, ValuationMatrix(uniform(1, 3, (randint(1, 20), randint(1, 20)))), output, **kwargs)
 
 
 
@@ -392,4 +396,3 @@ if __name__ == '__main__':
 
     import doctest
     doctest.testmod(verbose = True)
-    

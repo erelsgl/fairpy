@@ -5,65 +5,96 @@ from time import perf_counter
 '''see test examples.pdf for farther info'''
 
 
-class TestMinMakespanAlgos(unittest.TestCase):
+class TestScedualing(unittest.TestCase):
 
-    def test_basics(self):
+    def setUp(self):
         
-        '''quick sanity check'''
+        self.scd1 : scedual = scedual_assignment()
+        self.scd2 : scedual = scedual_makespan()
+        self.mat = ValuationMatrix([[1, 1], [-1, -1]])
+        self.scd1.build(self.mat)
+        self.scd2.build(self.mat)
 
-        arr = np.array([[1, 1], [1, 1]])
+        self.scd1.scedual(0, 0)
+        self.scd2.scedual(1, 1)
 
-        scd = scedual_assignment()
-        scd.build(arr)
+        assert isinstance(self.scd1, scedual)
+        assert isinstance(self.scd2, scedual)
+        assert isinstance(self.scd1.costs, ValuationMatrix)
+        assert isinstance(self.scd2.costs, ValuationMatrix)
 
-        assert isinstance(scd, scedual)
-        assert isinstance(scd.extract_result(), np.ndarray.astype(bool))
+        self.assertEqual(id(self.scd1.costs), id(self.scd2.costs))
 
-        scd = scedual_makespan()
-        scd.build(arr)
 
-        assert isinstance(scd, scedual)
-        assert isinstance(scd.extract_result(), float)
+    def testBase(self):
+
+        # properties
+
+        self.assertEqual(2, self.scd1.Jobs)
+        self.assertEqual(2, self.scd1.Mechines)
+        self.assertEqual((2, 2), self.scd1.shape)
+
+        # iterator
+
+        self.assertEqual(4, len([(mechine, job) for mechine, job in self.scd1]))
+
+        for mechine, job in self.scd1:
+            self.assertEqual(self.scd1.costs[mechine, job], self.mat[mechine, job])
+
+        # scedualing
+
+        self.assertTrue(self.scd1.assignments[0, 0])
+        self.assertFalse(self.scd2.assignments[0, 0])
+        with self.assertRaises(KeyError): self.scd1.scedual(0, 0)
+        self.scd2.scedual(0, 0)
+
+    def testDerived1(self):
+
+        self.assertEqual({(0, 0)}, self.scd1.extract_result())
+
+    def testDerived2(self):
+
+        self.assertEqual(0, self.scd2.extract_result())
+        self.scd2.scedual(0, 0)
+        self.assertEqual(1, self.scd2.extract_result())
+
+
+
+
+class TestMinMakespanAlgos(unittest.TestCase):
 
     def test_aprrx_lim(self):
 
-        self.assertTrue(MinMakespan(apprx, apprx_lim_exm1(100), scedual_makespan) < 201)
-        self.assertTrue(MinMakespan(apprx, apprx_lim_exm1(200), scedual_makespan) < 401)
+        for m in range(1, 10):
+            self.assertTrue(MinMakespan(apprx, apprx_lim_exm1(m), scedual_makespan()) < 2*m)
 
-        self.assertTrue(MinMakespan(apprx, apprx_lim_exm2(1000), scedual_makespan) < 1000.1)
-        self.assertTrue(MinMakespan(apprx, apprx_lim_exm2(2000), scedual_makespan) < 2000.1)
+        for t in range(1, 13):
+            self.assertTrue(MinMakespan(apprx, apprx_lim_exm2(1000 * t), scedual_makespan()) <= 2000 * t + 2)
 
-        ans = MinMakespan(apprx, apprx_lim_exm2(100), scedual_assignment)
+    def origionalTests(self):
 
-        self.assertTrue(ans[1, 0])
-        self.assertTrue((ans[0, 1] and ans[2, 2]) or (ans[0, 2] and ans[2, 1]))
-
-    def origional(self):
 
         # uniformally different mechines
-        uniformally_diff = np.array([[2, 2, 3],
-                                     [4, 6, 7],
-                                     [1, 10, 11]])
+        uniformally_diff = ValuationMatrix([[2, 4, 1],
+                                            [2, 6, 10],
+                                            [3, 7, 11]])
 
         # example that elustrates the trickyness of the problome
-        tradeof = np.array([[10, 10, 1], [5, 2, 6], [7, 5, 6]])
+        tradeof = ValuationMatrix([[10, 5, 7],
+                                   [10, 2, 5],
+                                   [1, 6, 6]])
 
-        self.assertTrue(MinMakespan(apprx, uniformally_diff, scedual_makespan) <= 10)
-        self.assertTrue(MinMakespan(apprx, tradeof, scedual_makespan) <= 10)
+        self.assertEqual(5, MinMakespan(apprx, uniformally_diff, scedual_makespan))
+        self.assertEqual(7, MinMakespan(greedy, uniformally_diff, scedual_makespan))
+        self.assertEqual(5, MinMakespan(apprx, tradeof, scedual_makespan))
+        self.assertEqual(7, MinMakespan(greedy, tradeof, scedual_makespan))
 
     def test_supiriorty(self):
 
-        start = perf_counter()
-        apprx_preformance = sum([makespan for makespan in RandomTesting(apprx, scedual_makespan, 1000)])
-        print('the approximation algorithm took ' + (perf_counter() - start) + 'seconds to complete a 1000 random examples')
-        start = perf_counter()
-        greedy_preformance = sum([makespan for makespan in RandomTesting(greedy, scedual_makespan, 1000)])
-        print('the greedy algorithm took ' + (perf_counter() - start) + 'seconds to complete a 1000 random examples')
 
-        assert apprx_preformance < greedy_preformance
-
-        print('approximations algorithm \'s avarage result: ' + apprx_preformance / 1000)
-        print('greedy algorithm \'s avarage result: ' + greedy_preformance / 1000)
+        print('avg makespan for the approximation algorithm: ', sum(res for res in RandomTesting(apprx, scedual_makespan(), 30)) / 30)
+        print('----------')
+        print('avg makespan for the greedy algorithm: ', sum(res for res in RandomTesting(apprx, scedual_makespan(), 30)) / 30)
 
 
 if __name__ == '__main__':
@@ -75,7 +106,7 @@ if __name__ == '__main__':
         approximiation factor of the algorithm, 2
         '''
 
-        return ValuationMatrix([ [1] + [1 / m] * (m - 1) ] * (m * (m - 1)))
+        return ValuationMatrix([[m] + [1] * (m*m - m)] * m)
 
     def apprx_lim_exm2(t: int) -> ValuationMatrix:
 
@@ -84,7 +115,7 @@ if __name__ == '__main__':
         approximiation factor of the algorithm, 2
         '''
 
-        return ValuationMatrix([[1, t], [t, t + 1], [t + 1, 2*t + 2]])
+        return ValuationMatrix([[1, t, t + 1], [t, t + 1, (2*t + 2) / (2*t + 1)]])
 
 
     unittest.main()
