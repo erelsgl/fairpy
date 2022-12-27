@@ -1,6 +1,6 @@
 import unittest
 from fairpy.agentlist import AgentList
-from main import algorithm1, algorithm2
+from fair_rent_division_by_budget import algorithm1, algorithm2
 
 
 class TestMain(unittest.TestCase):
