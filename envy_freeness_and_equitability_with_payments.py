@@ -1,20 +1,16 @@
-from fairpy import Allocation, MonotoneValuation
+from fairpy import Allocation
 import logging
-# agents = ["A", "B", "C"]
-# agents1 = {"A": {"x": 70, "y": 70}, "B": {"x": 60, "y": 70}, "C": {"x": 40, "y": 70}}
-# bun = {"A": ["y"], "B": ["x"], "C": []}
-# bun1 = [["A" ,["y"]], ["B", ["x"]], ["C", []]]
-# x = Allocation(agents1, bun)
-# c = x.map_agent_to_bundle()
-# # print(x)
-# print(c)
 
 logging.basicConfig(filename="my_logger_file.log", level=logging.DEBUG)
 logger = logging.getLogger()
 
-def get_value(agent, boundle_of_agent: list, eval_func: dict):
+def get_value(agent, boundle: list, eval_func: dict):
     """"
     A function that returns an agent's evaluation of a particular bundle
+    :param agent: the name of the agent
+    :param boundle: List the elements in the given bundle
+    :param eval_func: A dictionary of the evaluations of each agent for each bundle
+
     >>> get_value("a",["y"], eval_1)
     20
     >>> get_value("b",["x", "r"], eval_1)
@@ -24,7 +20,7 @@ def get_value(agent, boundle_of_agent: list, eval_func: dict):
     >>> get_value("A",[], eval_2)
     0
     """
-    curr_bundles = "".join(map(str, sorted(boundle_of_agent))) #Convert the list to a sorted string
+    curr_bundles = "".join(map(str, sorted(boundle))) #Convert the list to a sorted string
     if curr_bundles:  #if the bundle not empty
         return eval_func[agent][curr_bundles]
     return 0
@@ -33,6 +29,10 @@ def get_value(agent, boundle_of_agent: list, eval_func: dict):
 def compare_2_bundles_and_transfer(agent_a, allo: dict, eval_func: dict):
     """
     A function that checks if transferring a bundle to a certain agent will increase the SW, and if so transfers
+    :param agent_a: the name of the cuurent agent
+    :param allo: The current allocation
+    :param eval_func: A dictionary of the evaluations of each agent for each bundle
+
     >>> compare_2_bundles_and_transfer("a",allocation_1, eval_1)
     True
     >>> print(allocation_1["a"])
@@ -55,13 +55,16 @@ def compare_2_bundles_and_transfer(agent_a, allo: dict, eval_func: dict):
                 allo[agent_a] = allo[agent_a] + allo[agent_b]  #Making the transfer
                 allo[agent_b] = []  #agent_b lost his bundle
                 is_envy = True  # set is_envy to True because there is jealousy here
-                logger.debug(f"agent {agent_a} took agent {agent_b}'s bundle")
+                logger.debug("agent %s took agent %s's bundle", agent_a, agent_b)
     return is_envy
 
 
-def calcuSWave(allocation: dict, evaluation: dict):
+def calcuSWave(allocation: dict, eval_func: dict):
     """
     A function to calculate the average social welfare of the current allocation
+    :param allocation: The current allocation
+    :param eval_func: A dictionary of the evaluations of each agent for each bundle
+
     >>> calcuSWave(allocation_1, eval_1)
     49.5
     >>> calcuSWave(allocation_2, eval_2)
@@ -74,15 +77,19 @@ def calcuSWave(allocation: dict, evaluation: dict):
     sum_values = 0
     for agent in allocation:
         if allocation[agent]:  #Go through all the agents and sum up their social welfare in the given allocation
-            sum_values = sum_values + evaluation[agent]["".join(sorted(allocation[agent]))]
-            logger.debug(f"current sum_value after agent {agent}: {sum_values}")
-    logger.info(f"average of SW: {sum_values / len(allocation)}")
+            sum_values = sum_values + eval_func[agent]["".join(sorted(allocation[agent]))]
+            logger.debug("current sum_value after agent %s: %d", agent, sum_values)
+    logger.info("average of SW: %f",sum_values / len(allocation))
     return sum_values / len(allocation)  #return the average (the received sum divided by the number of agents)
 
 
-def list_sw(allo, eval, pay_list):
+def list_sw(allo, eval_func, pay_list):
     """
     A function to check if we have achieved equality
+    :param allo: The current allocation
+    :param eval_func: A dictionary of the evaluations of each agent for each bundle
+    :pay_list: A dictionary of each agent's payment
+
     >>> list_sw(allocation_2, eval_2, {'A': -16.0, 'B': -16.0, 'C': -16.0, 'D': 64.0, 'E': -16.0})
     True
     >>> list_sw(allocation_2, eval_2, {'A': -16.0, 'B': -16.0, 'C': -15.0, 'D': 64.0, 'E': -16.0})
@@ -94,7 +101,7 @@ def list_sw(allo, eval, pay_list):
     """
     sw_list = []
     for agent in allo:
-        val = get_value(agent, allo[agent], eval) - pay_list[agent]
+        val = get_value(agent, allo[agent], eval_func) - pay_list[agent]
         sw_list.append(val)
     is_equality = all(x == sw_list[0] for x in sw_list)
     return is_equality
@@ -108,6 +115,10 @@ def envy_freeness_and_equitability_with_payments(evaluation: dict, allocation: A
     Algorithm 1: Creating envy-freeness and equitability division with the help of a payment function.
 
     Programmers: Noamya Shani, Eitan Shenkolevski.
+
+    :param evaluation: A dictionary of the evaluations of each agent for each bundle
+    :param allocation: The initial allocation
+
     >>> eval_1 = {"a": {"x": 40, "y": 20, "r": 30, "rx": 80, "rxy": 100}, "b": {"x": 10, "y":30, "r": 70, "rx": 79, "rxy": 90}}
     >>> allocation_1 = {"a": ["y"], "b": ["x", "r"]}
     >>> envy_freeness_and_equitability_with_payments(evaluation = eval_1, allocation= Allocation(agents = ["a", "b"],bundles = allocation_1))
@@ -143,8 +154,7 @@ def envy_freeness_and_equitability_with_payments(evaluation: dict, allocation: A
     payments = {}
     for agent in allocation:
         payments[agent] = get_value(agent, allocation[agent], evaluation) - sw_ave   #Calculation of the payment to each agent (the distance of the evaluation of the current bundle from the average of social welfare)
-    logger.warning(f"check if {list_sw(allocation, evaluation, payments)}")
-    # print("allocation:", allocation, " payments:", payments)
+    logger.warning("check if %g", list_sw(allocation, evaluation, payments))
     return f'allocation: {allocation}, payments: {payments}'
 
 
