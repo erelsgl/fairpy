@@ -207,15 +207,28 @@ def apprx(output: scedual) -> None:
     closing in on the optimal solution with binry search
     using a LP and a spacial rounding algo
 
-
-    #>>> print(apprx(np.array([[1, 2], [2, 1]])).extract_result())
+    >>> output = scedual_makespan()
+    >>> output.build(ValuationMatrix([[1, 2], [2, 1]]))
+    >>> apprx(output)
+    >>> print(output.extract_result())
     1
-    #>>> print(apprx(np.array([[1, 2, 3], [2, 1, 3], [3, 2, 1]])).extract_result())
+    >>> output.build(ValuationMatrix([[1, 2, 3], [2, 1, 2], [3, 3, 1]]))
+    >>> apprx(output)
+    >>> print(output.extract_result())
     1
-    #>>> print(apprx(np.array([[0.5, 1, 0.25], [2, 0.5, 0.8], [0.6, 2, 1]])).extract_result() <= 1.2)
+    >>> output.build(ValuationMatrix([[0.5, 2, 0.6], [1, 0.5, 2], [0.25, 0.8, 1]]))
+    >>> apprx(output)
+    >>> print(output.extract_result() <= 1.21)
     True
-    #>>> print(apprx(np.array([[[1, 2, 3], [2, 5, 3],[1, 3, 7], [10, 3, 10]]])).extract_result() <= 6)
+    >>> output.build(ValuationMatrix([[1, 2, 1, 10], [2, 5, 3, 3], [3, 3, 7, 10]]))
+    >>> apprx(output)
+    >>> print(output.extract_result() <= 6.1)
     True
+    >>> output = scedual_assignment()
+    >>> output.build(ValuationMatrix([[1, 2], [2, 1]]))
+    >>> apprx(output)
+    >>> print(output.extract_result())
+    {(1, 1), (0, 0)}
     '''
 
     # extreme case
@@ -351,10 +364,14 @@ def MinMakespan(algo: MinMakespanAlgo, input: ValuationMatrix, output: scedual, 
     '''
     generic function for the min-makespan problome
 
-    #>>> print(MinMakespan(greedy, np.array([[1, 2, 2], [2, 2, 3],[5, 1, 5]], scedual_makespan()))
-    3
-    #>>> print(MinMakespan(aprrx, np.array([[1, 2, 3], [2, 1, 3], [3, 2, 1]], scedual_makespan()))
-    1
+    >>> print(MinMakespan(greedy, ValuationMatrix([[10, 5, 7], [10, 2, 5],[1, 6, 6]]), scedual_makespan()))
+    7
+    >>> print(MinMakespan(apprx, ValuationMatrix([[10, 5, 7], [10, 2, 5],[1, 6, 6]]), scedual_makespan()))
+    5
+    >>> print(MinMakespan(greedy, ValuationMatrix([[10, 5, 7], [10, 2, 5],[1, 6, 6]]), scedual_assignment()))
+    {(1, 1), (0, 2), (2, 0)}
+    >>> print(MinMakespan(apprx, ValuationMatrix([[10, 5, 7], [10, 2, 5],[1, 6, 6]]), scedual_assignment()))
+    {(0, 1), (1, 2), (2, 0)}
     '''
 
     output.build(input)
@@ -367,20 +384,12 @@ def RandomTesting(algo: MinMakespanAlgo, output: scedual, iteration: int, **kwar
     ''' spesefied amount of random tests generator '''
 
     for i in range(iteration):
-        yield MinMakespan(algo, ValuationMatrix(uniform(1, 4, (randint(1, 20), randint(1, 20)))), output, **kwargs)
+        yield MinMakespan(algo, ValuationMatrix(uniform(1, 100, (randint(1, 20), randint(1, 20)))), output, **kwargs)
 
 
 
 if __name__ == '__main__':
 
     import doctest
-    #doctest.testmod(verbose = True)
-
-
-    print('avg makespan greedy: ', sum(res for res in RandomTesting(greedy, scedual_makespan(), 30)) / 30)
-    print('---------')
-    print('avg makespan apprx: ', sum(res for res in RandomTesting(apprx, scedual_makespan(), 30)) / 30)
-
-
-    # TODO: more TESTsssssssss !!!!
+    doctest.testmod(verbose = True)
     
