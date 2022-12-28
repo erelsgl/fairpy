@@ -9,40 +9,69 @@ from fairpy.allocations import Allocation
 import pytest
 
 def create_bid_sets(num_players, bid_set_size):
-  # Define the global bid set B as a list of integers from 1 to num_players*bid_set_size
-  B = [i for i in range(1, num_players*bid_set_size+1)]
+    """
+    This function create the bid set for each Agent with this bids he can buy courses
+    >>> create_bid_sets(3,2)
+    [[6, 1], [5, 3], [4, 2]]
+    """
+    # Define the global bid set B as a list of integers from 1 to num_players*bid_set_size
+    B = [i for i in range(1, num_players*bid_set_size+1)]
   
-  # Initialize a list to hold the bid sets
-  bid_sets = [[] for _ in range(num_players)]
+    # Initialize a list to hold the bid sets
+    bid_sets = [[] for _ in range(num_players)]
   
-  # Sort the bids in decreasing order
-  B = sorted(B, reverse=True)
+    # Sort the bids in decreasing order
+    B = sorted(B, reverse=True)
   
-  turn_list = create_turns(num_players=num_players,num_picks=num_players*bid_set_size)
-  for i in range(len(turn_list)):
-    bid_sets[turn_list[i]].append(B[i])
+    turn_list = create_turns(num_players=num_players,num_picks=num_players*bid_set_size)
+    for i in range(len(turn_list)):
+        bid_sets[turn_list[i]].append(B[i])
   
-  # Return the list of bid sets
-  return bid_sets
+    # Return the list of bid sets
+    return bid_sets
 
 def create_turns(num_players, num_picks):
-  turns = []
+    """
+    This function create a an array that represt turn of each player by index to create a fair bids.
+    >>> create_turns(3,6)
+    [0, 1, 2, 1, 2, 0]
+    """
+    turns = []
   
-  for i in range(num_picks):
-    # Add the player to the turns list, rotating the order of the picks between rounds
-    turns.append((i + (i // num_players)) % num_players)
-    # The expression (i + (i // num_players)) % num_players rotates the order of the picks between rounds
-  return turns
+    for i in range(num_picks):
+        # Add the player to the turns list, rotating the order of the picks between rounds
+        turns.append((i + (i // num_players)) % num_players)
+        # The expression (i + (i // num_players)) % num_players rotates the order of the picks between rounds
+    return turns
 
 def has_common_object(list1, list2):
+    """
+    This function is checking if 2 lists have at list 1 common element.
+    >>> has_common_object([0,1],[5,6])
+    False
+    >>> has_common_object([0,5],[5,6])
+    True
+    """
     commons_objects = [element for element in list1 if element in list2]
     return True if commons_objects else False
 def calculate_b_star(Bi,B_tag_i,p_Ac):
-        Bi_without_B_tag_i_ = [bid for bid in Bi if bid not in B_tag_i and bid > p_Ac]
-        return min(Bi_without_B_tag_i_) if Bi_without_B_tag_i_ else None
+    """
+    This function used to calculate b* from the articale b* is bid that is inside Bi and not inside B_tag and also is bigger than
+    p_Ac.
+    >>> calculate_b_star([1,6],[1],3)
+    6
+    """
+    Bi_without_B_tag_i_ = [bid for bid in Bi if bid not in B_tag_i and bid > p_Ac]
+    return min(Bi_without_B_tag_i_) if Bi_without_B_tag_i_ else None
 def calculate_b_double_star(Bi,B_tag_i,b_star):
-        Bi_without_B_tag_i_ = [bid for bid in Bi if bid not in B_tag_i and bid >= b_star]
-        return min(Bi_without_B_tag_i_) if Bi_without_B_tag_i_ else None
+    """
+    This function used to calculate b** from the articale b** is bid that is inside Bi and not inside B_tag and also is bigger or equal to
+    b_star.
+    >>> calculate_b_double_star([2,5],[2],3)
+    5
+    """
+    Bi_without_B_tag_i_ = [bid for bid in Bi if bid not in B_tag_i and bid >= b_star]
+    return min(Bi_without_B_tag_i_) if Bi_without_B_tag_i_ else None
            
 def course_allocation(agents: list[AdditiveAgent],course_capacity:int,course_list:str,course_amount_per_agent:int) -> Allocation:
     """
