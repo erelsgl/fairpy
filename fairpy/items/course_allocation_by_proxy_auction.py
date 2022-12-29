@@ -154,7 +154,7 @@ def course_allocation(agents: list[AdditiveAgent],course_capacity:int,course_lis
     for i,agent in enumerate(agents):
         for course in course_list:
             if [bid for bid in bids_coins[i] if bid in Ac[course]]: bundle[agent.name()].append(course)
-    LOGGER.info(f"Algorithem ends successfully")
+    LOGGER.info(f"Algorithm ends successfully")
     return Allocation(agents=[agent.name() for agent in agents], bundles=bundle)
 if __name__ == "__main__":
     import doctest
