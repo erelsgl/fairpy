@@ -7,6 +7,9 @@ from collections import defaultdict
 from fairpy.agents import AdditiveAgent
 from fairpy.allocations import Allocation
 import pytest
+import logging
+logging.basicConfig(level = logging.INFO)
+LOGGER = logging.getLogger(__name__)
 
 def create_bid_sets(num_players, bid_set_size):
     """
@@ -113,6 +116,7 @@ def course_allocation(agents: list[AdditiveAgent],course_capacity:int,course_lis
     for i,agent in enumerate(agents):
         list_of_course_preference [i] = sorted([course for course in course_list],key= lambda x: agent.value({x})) 
     bids_coins =create_bid_sets(len(agents),course_amount_per_agent)
+    LOGGER.info(f"Created the bids for each player: {bids_coins}")
     Ac = {}
     for course in course_list:
         Ac[course] = [] 
@@ -121,28 +125,39 @@ def course_allocation(agents: list[AdditiveAgent],course_capacity:int,course_lis
         active = False
         for i in range(len(agents)):
             B_TAG = []
+            LOGGER.info(f"{agents[i].name()} start its turn")
             for course in list_of_course_preference[i]:
                 if has_common_object(bids_coins[i],Ac[course]) is False:
                     p_Ac  = 0 if len(Ac[course])< course_capacity else min(Ac[course])
                     b_star = calculate_b_star(bids_coins[i],B_TAG,p_Ac)
                     if b_star:
                         B_TAG.append(b_star)
-                        Ac[course].append(min([bid for bid in bids_coins[i] if bid > p_Ac ]))
-                        if len(Ac[course]) > course_capacity: Ac[course].remove(min(Ac[course]))
+                        min_bid_to_add = min([bid for bid in bids_coins[i] if bid > p_Ac ])
+                        Ac[course].append(min_bid_to_add)
+                        LOGGER.info(f"Agent {agents[i].name()} added bid coin {min_bid_to_add} for course {course}")
+                        if len(Ac[course]) > course_capacity: 
+                            Ac[course].remove(min(Ac[course]))
+                            LOGGER.info(f"Bid coin {p_Ac} removed from {course} bids group current bids are:{Ac[course]}")
                         active = True
                 else:
                     b_star = [bid for bid in bids_coins[i] if bid in Ac[course]][0]
                     b_double_star = calculate_b_double_star(bids_coins[i],B_TAG,b_star)
-                    B_TAG.append(b_double_star) if b_double_star else Ac[course].remove(b_star)
+                    if b_double_star:
+                        B_TAG.append(b_double_star)
+                    else:
+                        Ac[course].remove(b_star)
+                        LOGGER.info(f"Bid coin {b_star} removed from {course} current bids are:{Ac[course]}")
+
+            LOGGER.info(f"{agents[i].name()} end its turn")
+
     bundle = defaultdict(list)
     for i,agent in enumerate(agents):
         for course in course_list:
             if [bid for bid in bids_coins[i] if bid in Ac[course]]: bundle[agent.name()].append(course)
+    LOGGER.info(f"Algorithem ends successfully")
     return Allocation(agents=[agent.name() for agent in agents], bundles=bundle)
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-
-   
 
 
