@@ -106,9 +106,9 @@ def envy_free_approximation(allocation: Allocation, eps: float = 0) -> dict:
     value_matrix = allocation.utility_profile_matrix()
     payments = np.zeros(allocation.num_of_agents)
     bundles = [[i] for i in range(allocation.num_of_agents)]
-    flag = True
-    while flag:
-        flag = False
+    still_envy = True
+    while still_envy:
+        still_envy = False
         # run on all agents and check if exist ε-envy
         for i in range(len(value_matrix)):
             if value_matrix[i][i] - payments[i] < get_max(value_matrix[i], payments) - eps:
@@ -117,17 +117,17 @@ def envy_free_approximation(allocation: Allocation, eps: float = 0) -> dict:
                 u1 = get_max(value_matrix[i], payments)
                 u2 = get_second_max(agent_j, value_matrix[i], payments)
                 logger.debug("u1,u2: %g, %g", u1, u2)
-                # replace payment value
-                temp_p = payments[i]
-                payments[i] = payments[agent_j] + (u1 - u2) + eps
-                payments[agent_j] = temp_p
                 # replace bundles
                 swap_columns(value_matrix, i, agent_j)
                 temp = bundles[i]
                 bundles[i] = bundles[agent_j]
                 bundles[agent_j] = temp
+                # replace payment value
+                temp_p = payments[i]
+                payments[i] = payments[agent_j] + (u1 - u2) + eps
+                payments[agent_j] = temp_p
                 logger.info("replace between agent_%g to agent_%g.", i, agent_j)
-                flag = True
+                still_envy = True
     return {"allocation": bundles, "payments": payments.tolist()}
 
 
