@@ -10,7 +10,7 @@ import networkx as nx
 # oop
 from abc import ABC, abstractclassmethod
 # data types
-from typing import Callable, Tuple, Iterable, Iterator
+from typing import Callable, Iterable, Iterator, Tuple, Dict, Any
 # iteration tool
 from itertools import product
 # debugging & monitoring
@@ -244,6 +244,7 @@ def apprx(output: scedual) -> None:
     greedy_sol.build(output.costs)
 
     greedy(greedy_sol)
+    greedy(output)
 
     upper = greedy_sol.extract_result()
     lower = upper / output.Mechines
@@ -256,7 +257,7 @@ def apprx(output: scedual) -> None:
 
         middle = (upper + lower) / 2
 
-        feasable = LinearProgram(output, upper)
+        feasable = LinearProgram(output, middle)
 
         if not feasable:    lower = middle + 0.001
         else:               upper = middle - 0.001
@@ -391,6 +392,33 @@ def RandomTesting(algo: MinMakespanAlgo, output: scedual, iteration: int, **kwar
         yield MinMakespan(algo, ValuationMatrix(uniform(1, 3, (randint(1, 20), randint(1, 20)))), output, **kwargs)
 
 
+def compare(algo1: Tuple[MinMakespanAlgo, Dict[str, Any]], algo2: Tuple[MinMakespanAlgo, Dict[str, Any]], iteration: int) -> Tuple[int, int]:
+
+    '''
+        Comparing 2 algorithms, some times to get enough iterations so the
+        avarge result would stabelize takes to much time.
+    
+        This method allows comparesion on the same inputs to get a sense of wich
+        algo is better without wasting to much time
+
+
+        >>> scr1, scr2 = compare((apprx, {}), (greedy, {}), 5)
+        >>> print(type(scr1), type(scr2))
+        <class 'int'> <class 'int'>
+    '''
+
+
+    score1 = score2 = 0
+    for i in range(iteration):
+
+        inpt = ValuationMatrix(uniform(1, 3, (randint(1, 20), randint(1, 20))))
+
+        res1, res2 = MinMakespan(algo1[0], inpt, scedual_makespan(), **algo1[1]), MinMakespan(algo2[0], inpt, scedual_makespan(), **algo2[1])
+
+        if res1 < res2: score1 += 1
+        if res2 < res1: score2 += 1
+
+    return score1, score2
 
 if __name__ == '__main__':
 

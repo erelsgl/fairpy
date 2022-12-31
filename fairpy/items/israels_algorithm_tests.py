@@ -1,8 +1,5 @@
 from israels_MinMakespan_algorithm import *
 import unittest
-from time import perf_counter
-
-'''see test examples.pdf for farther info'''
 
 
 class TestScedualing(unittest.TestCase):
@@ -94,7 +91,7 @@ class TestMinMakespanAlgos(unittest.TestCase):
 
         print('avg makespan for the approximation algorithm: ', sum(res for res in RandomTesting(apprx, scedual_makespan(), 30)) / 30)
         print('----------')
-        print('avg makespan for the greedy algorithm: ', sum(res for res in RandomTesting(apprx, scedual_makespan(), 30)) / 30)
+        print('avg makespan for the greedy algorithm: ', sum(res for res in RandomTesting(greedy, scedual_makespan(), 30)) / 30)
 
 
 if __name__ == '__main__':
