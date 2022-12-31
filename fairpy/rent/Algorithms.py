@@ -98,6 +98,7 @@ def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict) -> (dict
         logger.debug("done appending ans_µc_pc with maximum_rent_envy_free")
 
     µ = {}
+
     # let μ:N →A s.t. for all i ∈ N , μ(i) = μ_C(i) for c ∈ C s.t. i ∈ C
     # for i in agentsList.agent_names():
     #     for c in lst_SCC:
@@ -120,10 +121,10 @@ def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict) -> (dict
     if ans_LP1 != "no solution":
         # p ← solution of LP (1) for μ return (μ, p)
         # print(f"--------THE RESULT-------- \n µ : {ans_LP1[0]} , p : {ans_LP1[1]}")
-        sigma = sorted(ans_LP1[0].items(), key=lambda x: x[0])
+        µ = sorted(ans_LP1[0].items(), key=lambda x: x[0])
         p = sorted(ans_LP1[1].items(), key=lambda x: x[1])
         logger.debug("done function (ans_LP1 != 'no solution')")
-        return sigma, p
+        return µ, p
     else:
         logger.debug("done function ('no solution')")
         print(f"--------THE RESULT--------")
