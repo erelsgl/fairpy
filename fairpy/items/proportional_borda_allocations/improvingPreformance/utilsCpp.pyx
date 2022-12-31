@@ -2,7 +2,7 @@
 from fairpy import AgentList
 from typing import List, Tuple
 import networkx as nx
-
+from itertools import permutations
 
 def bundles_from_edges(match:set, G:nx.Graph) -> dict:
     bundles = {}
