@@ -4,7 +4,7 @@ import numpy as np
 from fairpy import AllocationMatrix, Allocation, ValuationMatrix
 
 logger = logging.getLogger()
-logging.basicConfig(filename="ev.log", level=logging.INFO)
+# logging.basicConfig(filename="ev.log", level=logging.INFO)
 
 """
 "Achieving Envy-freeness and Equitability with Monetary Transfers" by Haris Aziz (2021),
@@ -133,11 +133,13 @@ def envy_free_approximation(allocation: Allocation, eps: float = 0) -> dict:
                 payments[agent_j] = temp_p
                 logger.debug("replace between agent_%g to agent_%g.", agent_i, agent_j)
                 still_envy = True
+
     logger.info("envy value for each agent (after): %s", [x[0] - x[1] for x in
                                                           zip([get_max(value_matrix[i], payments) for i in
                                                                range(allocation.num_of_agents)],
                                                               [value_matrix[i][i] - payments[i] for i in
                                                                range(allocation.num_of_agents)])])
+
     return {"allocation": bundles, "payments": payments.tolist()}
 
 
