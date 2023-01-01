@@ -31,20 +31,23 @@ def spliddit(agentList: AgentList, rent: float):
     ({'P3': 'Ra', 'P2': 'Rb', 'P1': 'Rc'}, {'Rc': 150.0, 'Rb': 250.0, 'Ra': 600.0})
     """
     # Taking the AgentList type and splitting it to lists and dictionary
-    N = []
-    A = []
-    for i in agentList.agent_names():
-        N.append(i)
-    for i in agentList.all_items():
-        A.append(i)
+    # N = []
+    # A = []
+    # for i in agentList.agent_names():
+    #     N.append(i)
+    # for i in agentList.all_items():
+    #     A.append(i)
+    N = [i for i in agentList.agent_names()]
+    A = [i for i in agentList.all_items()]
 
     # Build bipartite graph
     g = nx.Graph()
     g.add_nodes_from(N, bipartite=0)
     g.add_nodes_from(A, bipartite=1)
-    for i, k in zip(N, range(len(N))):
-        for j in A:
-            g.add_edge(i, j, weight=agentList[k].value(j))
+    # for i, k in zip(N, range(len(N))):
+    #     for j in A:
+    #         g.add_edge(i, j, weight=agentList[k].value(j))
+    [g.add_edge(i, j, weight=agentList[k].value(j)) for i, k in zip(N, range(len(N))) for j in A]
     # max weight matching in graph
     alloc = nx.max_weight_matching(g, maxcardinality=True)
     dict_match = {}
@@ -54,9 +57,11 @@ def spliddit(agentList: AgentList, rent: float):
         else:
             dict_match[i[0]] = i[1]
 
-    variable = {}  # list of all the 'price' variables that present the price of any room
-    for i in dict_match.values():
-        variable["price " + str(i)] = cp.Variable()
+    # variable is a list of all the 'price' variables that present the price of any room
+    # variable = {}
+    # for i in dict_match.values():
+    #     variable["price " + str(i)] = cp.Variable()
+    variable = {f"price {i}": cp.Variable() for i in dict_match.values()}
 
     variable["M"] = cp.Variable()  # this variable care for the maximum
     objective = cp.Maximize(variable["M"])
@@ -66,6 +71,8 @@ def spliddit(agentList: AgentList, rent: float):
     # 1)  M <= v_(iσ(i)) - p_(σ(i))
     for i in dict_match.keys():
         constraints.append(variable["M"] <= agentList[N.index(i)].value(dict_match[i]) - variable["price " + dict_match[i]])
+    constraints = [variable["M"] <= agentList[N.index(i)].value(dict_match[i]) - variable[f"price {dict_match[i]}"] for
+                   i in dict_match.keys()]
 
     # 2) Check that without envy -> v_(iσ(i)) - p_(σ(i)) ≥ v_(iσ(j)) - p_(σ(j))
     for i in dict_match.keys():
@@ -84,11 +91,14 @@ def spliddit(agentList: AgentList, rent: float):
     result = prob.solve()
 
     # The result
-    sigma = {}
-    vector_p = {}
-    for i in dict_match.keys():
-        sigma[str(i)] = str(dict_match[i])
-        vector_p[str(dict_match[i])] = round(float(variable["price " + dict_match[i]].value), 2)
+    # sigma = {}
+    # vector_p = {}
+    # for i in dict_match.keys():
+    #     sigma[str(i)] = str(dict_match[i])
+    #     vector_p[str(dict_match[i])] = round(float(variable["price " + dict_match[i]].value), 2)
+
+    sigma = {str(i): str(dict_match[i]) for i in dict_match.keys()}
+    vector_p = {str(dict_match[i]): round(float(variable["price " + dict_match[i]].value), 2) for i in dict_match.keys()}
 
     sigma = dict(sorted(sigma.items(), key=lambda x: x[1]))
     vector_p = dict(sorted(vector_p.items(), key=lambda x: x[1]))
@@ -113,8 +123,8 @@ def build_budget_aware_graph(sigma: dict, vector_p: dict, budget: dict, agentLis
                 left = agentList[agentList.agent_names().index(i)].value(sigma[i]) - vector_p[sigma[i]]
                 # building budget aware weak envy graph --> v_(iσ(i)) - p_(σ(i)) = v_(iσ(j)) - p_(σ(i)) and p_(σ(j)) < b_i
                 if left == (agentList[agentList.agent_names().index(i)].value(sigma[j]) - vector_p[sigma[i]]) and budget[i] > vector_p[sigma[j]]:
-                    budget_aware_graph.add_node(i)
-                    budget_aware_graph.add_node(j)
+                    # budget_aware_graph.add_node(i)
+                    # budget_aware_graph.add_node(j)
                     budget_aware_graph.add_edge(i, j)
 
     return budget_aware_graph
@@ -137,8 +147,8 @@ def build_weak_envy_graph(sigma: dict, vector_p: dict, agentList: AgentList) -> 
                 left = (agentList[agentList.agent_names().index(i)].value(sigma[i]) - vector_p[sigma[i]])
                 # to build weak envy graph --> v_iσ(i) - p_σ(i) = v_iσ(j) - p_σ(j)
                 if left == (agentList[agentList.agent_names().index(i)].value(sigma[j]) - vector_p[sigma[j]]):
-                    weak_envy_graph.add_node(i)
-                    weak_envy_graph.add_node(j)
+                    # weak_envy_graph.add_node(i)
+                    # weak_envy_graph.add_node(j)
                     weak_envy_graph.add_edge(i, j)
     return weak_envy_graph
 
@@ -173,9 +183,10 @@ def LP1(µ: dict, rent, val: dict[dict], budget: dict):
          >>> LP1(µ,1000,val,{'P1':200,'P2':400,'P3':700})
          ({'P3': 'Ra', 'P2': 'Rb', 'P1': 'Rc'}, {'Ra': 600.0, 'Rb': 250.0, 'Rc': 150.0})
         """
-    variable = {}  # list of all the 'price' variables that present the price of any room
-    for i in µ.values():
-        variable["price " + str(i)] = cp.Variable()
+    # variable = {}  # list of all the 'price' variables that present the price of any room
+    # for i in µ.values():
+    #     variable["price " + str(i)] = cp.Variable()
+    variable = {f"price {i}": cp.Variable() for i in µ.values()}
 
     variable["M"] = cp.Variable()  # this variable care for the maximum
     objective = cp.Maximize(variable["M"])
@@ -206,11 +217,13 @@ def LP1(µ: dict, rent, val: dict[dict], budget: dict):
     result = prob.solve()
 
     if prob.status == 'optimal':
-        sigma = {}
-        vector_p = {}
-        for i in µ.keys():
-            sigma[str(i)] = str(µ[i])
-            vector_p[str(µ[i])] = round(float(variable["price " + µ[i]].value), 2)
+        # sigma = {}
+        # vector_p = {}
+        # for i in µ.keys():
+        #     sigma[str(i)] = str(µ[i])
+        #     vector_p[str(µ[i])] = round(float(variable["price " + µ[i]].value), 2)
+        sigma = {str(i): str(µ[i]) for i in µ.keys()}
+        vector_p = {str(µ[i]): round(float(variable["price " + µ[i]].value), 2) for i in µ.keys()}
         return sigma, vector_p
     else:
         return "no solution"

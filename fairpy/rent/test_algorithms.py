@@ -5,6 +5,7 @@ from fairpy.rent.Algorithms import maximum_rent_envy_free, optimal_envy_free
 
 class TestMain(unittest.TestCase):
     def test_algo1(self):
+        self.maxDiff = None
         ex1 = AgentList({"Alice": {'1': 250, '2': 250, '3': 500}, "Bob": {'1': 250, '2': 250, '3': 500},
                          "Clair": {'1': 250, '2': 500, '3': 250}})
         self.assertEqual(maximum_rent_envy_free(ex1, 1000, {'Alice': 250, 'Bob': 320, 'Clair': 430}),
@@ -44,6 +45,32 @@ class TestMain(unittest.TestCase):
         ex8 = AgentList({"Alice": {'1': 400, '2': 250}, "Bob": {'1': 400, '2': 320}})
         self.assertEqual(maximum_rent_envy_free(ex8, 700, {'Alice': 420, 'Bob': 410}),
                          (760.0, ([('Alice', '1'), ('Bob', '2')], [('1', 420.0), ('2', 340.0)])))
+
+        # Overload test
+        # agents = {"Alice": {str(i): i for i in range(1000)}, "Bob": {str(i): i for i in range(1000)}}
+        # ex9 = AgentList(agents)
+        # self.assertEqual(maximum_rent_envy_free(ex9, 10000, {'Alice': 500, 'Bob': 500}),
+        #                  (999.0, ([('Alice', '998'), ('Bob', '999')], [('998', 499.0), ('999', 500.0)])))
+        #
+        # # Create a large number of agents and items with high values
+        # num_agents = 1000
+        # num_items = 1000
+        # agents = {f"Agent{i}": {f"Item{j}": (i + j) * 100 for j in range(num_items)} for i in range(num_agents)}
+        # ex10 = AgentList(agents)
+        #
+        # # Set the rent to a large value
+        # rent = num_agents * num_items * 100
+        #
+        # # Set the budgets to a high value
+        # budgets = {f"Agent{i}": (i + 1) * 100 for i in range(num_agents)}
+        #
+        # # Test the function
+        # result = maximum_rent_envy_free(ex10, rent, budgets)
+        # self.assertIsInstance(result, tuple)
+        # self.assertIsInstance(result[0], float)
+        # self.assertIsInstance(result[1], tuple)
+        # self.assertIsInstance(result[1][0], list)
+        # self.assertIsInstance(result[1][1], list)
 
     def test_algo2(self):
         ex1 = AgentList({"Alice": {'1': 250, '2': 250, '3': 500}, "Bob": {'1': 250, '2': 250, '3': 500},
