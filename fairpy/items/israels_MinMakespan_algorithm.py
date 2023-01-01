@@ -7,12 +7,12 @@ from numpy.random import randint, uniform
 import cvxpy as cp
 # graph search algorithms
 import networkx as nx
-# oop
-from abc import ABC, abstractclassmethod
 # data types
 from typing import Callable, Iterable, Iterator, Tuple, Dict, Any
 # iteration tool
 from itertools import product
+# deep copy
+from copy import copy
 # debugging & monitoring
 import logging
 
@@ -50,25 +50,63 @@ Cornell University, Ithaca, NY, USA
 '''
 
 
-class scedual(ABC, Iterable):
+class scedual:
 
-    ''' custom output class to wrap the libraries ValuationMatrix for this programs needs '''
+    ''' 
+        custom output class to wrap the libraries ValuationMatrix for this programs needs
+
+        >>> scd = scedual()
+        >>> scd.build(ValuationMatrix(np.eye(2)))
+        >>> for mechine, job in scd:    print(mechine, job, end = ' ')
+        0 0 0 1 1 0 1 1 
+        >>> print(scd.jobs)
+        2
+        >>> print(scd.mechines)
+        2
+        >>> print(scd.shape)
+        (2, 2)
+        >>> scd.scedual(0, 0)
+        >>> scd.scedual(1, 1)
+        >>> print(scd.makespan)
+        1.0
+        >>> print(scd.assignments)
+        {0: 0, 1: 1}
+
+        
+     '''
 
     def __init__(self) -> None:
         super().__init__()
 
         self.costs : ValuationMatrix
-        self.assignments : np.ndarray.astype(bool)
+        self._assignments : dict
 
 
     @property
-    def Jobs(self) -> int: return len(self.costs.objects())
+    def jobs(self) -> int: return len(self.costs.objects())
 
     @property
-    def Mechines(self) -> int: return len(self.costs.agents())
+    def mechines(self) -> int: return len(self.costs.agents())
 
     @property
-    def shape(self) -> Tuple[int]: return self.Mechines, self.Jobs
+    def shape(self) -> Tuple[int]: return self.mechines, self.jobs
+
+    @property
+    def assignments(self) -> dict: return copy(self._assignments)
+
+    @assignments.setter
+    def assignments(self, new_assignments: dict): self._assignments = copy(new_assignments)
+
+    @property
+    def makespan(self) -> float:
+
+        return max(sum(
+                            self.costs[mechine, job]
+                            for job in self.costs.objects()
+                            if job in self._assignments.keys() and self._assignments[job] == mechine
+                       )
+                        for mechine in self.costs.agents()
+                   )
 
 
     # iterator for indexes covering exactly the data structure
@@ -80,74 +118,23 @@ class scedual(ABC, Iterable):
 
         # different algorithms can use an instance with the same cost matrix, Flyweight design
         self.costs = cost_matrix
-        self.assignments = np.zeros(self.shape).astype(bool)
+        self._assignments = {}
 
     # assigning a job to a mechine to process
     def scedual(self, mechine: int, job: int):
 
-        if self.assignments[mechine, job]: raise KeyError('assignment already scedualed')
-        self.assignments[mechine, job] = True
+        if job in self._assignments.keys() : raise KeyError('assignment already scedualed')
+        self._assignments[job] = mechine
 
     # delet all assignments, start over
-    def clear(self): self.assignments = np.zeros(self.shape).astype(bool)
+    def clear(self): self._assignments.clear()
 
     # are all jobs scedual
-    def complete(self) -> bool: return np.add.reduce(self.assignments, axis = 0).all()
+    def complete(self) -> bool: return len(self._assignments) == self.jobs
 
     # current workload of spesific mechine
     def loadOf(self, mechine: int) -> float:
-        return sum(self.costs[mechine, job]  for job in self.costs.objects() if self.assignments[mechine, job])
-
-
-    @abstractclassmethod
-    def extract_result(self): pass
-
-
-class scedual_assignment(scedual):
-
-    '''
-    implementation that keeps track of the actuall makespan
-
-    >>> scd = scedual_assignment()
-    >>> scd.build(ValuationMatrix([[1, 1], [1, 1]]))
-    >>> scd.scedual(0, 0)
-    >>> scd.scedual(1, 1)
-    >>> print(scd.extract_result())
-    {(1, 1), (0, 0)}
-    '''
-
-    def extract_result(self):
-        return { 
-                    (mechine, job)
-                    for mechine, job in self
-                    if self.assignments[mechine, job]
-                }
-
-class scedual_makespan(scedual):
-
-    '''
-    implementation that keeps track of the assignment
-
-    >>> scd = scedual_makespan()
-    >>> scd.build(ValuationMatrix([[1, 1], [1, 1]]))
-    >>> scd.scedual(0, 0)
-    >>> scd.scedual(1, 1)
-    >>> print(scd.extract_result())
-    1
-    >>> scd.scedual(0, 1)
-    >>> print(scd.extract_result())
-    2
-    '''
-
-    def extract_result(self):
-
-        return max(sum(
-                            self.costs[mechine, job]
-                            for job in range(self.Jobs)
-                            if self.assignments[mechine, job]
-                        )
-                        for mechine in range(self.Mechines)
-                    )
+        return sum(self.costs[mechine, job]  for job in self.costs.objects() if job in self._assignments.keys() and self._assignments[job] == mechine)
 
 
 
@@ -162,36 +149,32 @@ def optimal(output: scedual) -> None:
     ''' 
         naive algo, goes through all options, mostly for testing
 
-        >>> output = scedual_makespan()
+        >>> output = scedual()
         >>> output.build(ValuationMatrix([[1, 2, 5], [2, 2, 1],[2, 3, 5]]))
         >>> optimal(output)
-        >>> print(output.extract_result())
+        >>> print(output.makespan)
         2
-        >>> output = scedual_assignment()
-        >>> output.build(ValuationMatrix([[1, 2, 5], [2, 2, 1],[2, 3, 5]]))
-        >>> optimal(output)
-        >>> print(output.extract_result())
-        {(0, 1), (1, 2), (2, 0)}
+        >>> print(output.assignments)
+        {0: 2, 1: 0, 2: 1}
     '''
 
     output.clear()
 
-    checker = scedual_makespan()
-    checker.build(output.costs)
-    best = float('inf')
+    best_makespan = float('inf')
+    best_assignment = output.assignments
 
-    for assign in product(range(output.Mechines), repeat = output.Jobs):
+    for assign in product(range(output.mechines), repeat = output.jobs):
 
-        checker.clear()
+        output.clear()
 
-        for job in range(output.Jobs):  checker.scedual(assign[job], job)
+        for job in range(output.jobs):  output.scedual(assign[job], job)
 
-        if checker.extract_result() < best:
+        if output.makespan < best_makespan:
 
-            output.clear()
-            for job in range(output.Jobs):  output.scedual(assign[job], job)
+            best_makespan = output.makespan
+            best_assignment = output.assignments
 
-            best = checker.extract_result()
+    output.assignments = best_assignment
 
 
 def greedy(output: scedual) -> None:
@@ -201,46 +184,37 @@ def greedy(output: scedual) -> None:
     Iterate through all jobs, at each iteration:
     assign to the mechine that minimises the current makspan.
 
-    >>> output = scedual_makespan()
+    >>> output = scedual()
     >>> output.build(ValuationMatrix([[1, 2, 5], [2, 2, 1],[2, 3, 5]]))
     >>> greedy(output)
-    >>> print(output.extract_result())
+    >>> print(output.makespan)
     3
+    >>> print(output.assignments)
+    {0: 0, 1: 1, 2: 1}
     >>> output.build(ValuationMatrix([[1, 2, 1], [4, 2, 4],[2, 3, 2]]))
     >>> greedy(output)
-    >>> print(output.extract_result())
+    >>> print(output.makespan)
     2
+    >>> print(output.assignments)
+    {0: 0, 1: 1, 2: 0}
     >>> output.build(ValuationMatrix([[1, 2, 1], [4, 2, 4],[2, 3, 2], [3, 1, 2]]))
     >>> greedy(output)
-    >>> print(output.extract_result())
+    >>> print(output.makespan)
     2
+    >>> print(output.assignments)
+    {0: 0, 1: 3, 2: 0}
     >>> output.build(ValuationMatrix([[1, 5, 1, 10], [2, 4, 4, 3], [2, 5, 3, 3], [3, 3, 7, 10]]))
     >>> greedy(output)
-    >>> print(output.extract_result())
+    >>> print(output.makespan)
     3
-    >>> output = scedual_assignment()
-    >>> output.build(ValuationMatrix([[1, 2, 5], [2, 2, 1],[2, 3, 5]]))
-    >>> greedy(output)
-    >>> print(output.extract_result())
-    {(1, 1), (1, 2), (0, 0)}
-    >>> output.build(ValuationMatrix([[1, 2, 1], [4, 2, 4],[2, 3, 2]]))
-    >>> greedy(output)
-    >>> print(output.extract_result())
-    {(1, 1), (0, 2), (0, 0)}
-    >>> output.build(ValuationMatrix([[1, 2, 1], [4, 2, 4],[2, 3, 2], [3, 1, 2]]))
-    >>> greedy(output)
-    >>> print(output.extract_result())
-    {(3, 1), (0, 2), (0, 0)}
-    >>> output.build(ValuationMatrix([[1, 5, 1, 10], [2, 4, 4, 3], [2, 5, 3, 3], [3, 3, 7, 10]]))
-    >>> greedy(output)
-    >>> print(output.extract_result())
-    {(3, 1), (0, 2), (1, 3), (0, 0)}
+    >>> print(output.assignments)
+    {0: 0, 1: 3, 2: 0, 3: 1}
     '''
 
     output.clear()
 
-    for job in range(output.Jobs):
-        output.scedual(min(range(output.Mechines), key = lambda mechine : output.costs[mechine, job] + output.loadOf(mechine)), job)
+    for job in range(output.jobs):
+        output.scedual(min(range(output.mechines), key = lambda mechine : output.costs[mechine, job] + output.loadOf(mechine)), job)
 
 
 def apprx(output: scedual) -> None:
@@ -249,47 +223,37 @@ def apprx(output: scedual) -> None:
     closing in on the optimal solution with binry search
     using a LP and a spacial rounding algo
 
-    >>> output = scedual_makespan()
+    >>> output = scedual()
     >>> output.build(ValuationMatrix([[1, 2], [2, 1]]))
     >>> apprx(output)
-    >>> print(output.extract_result())
+    >>> print(output.makespan)
     1
+    >>> print(output.assignments)
+    {0: 0, 1: 1}
     >>> output.build(ValuationMatrix([[1, 2, 3], [2, 1, 2], [3, 3, 1]]))
     >>> apprx(output)
-    >>> print(output.extract_result())
+    >>> print(output.makespan)
     1
     >>> output.build(ValuationMatrix([[0.5, 2, 0.6], [1, 0.5, 2], [0.25, 0.8, 1]]))
     >>> apprx(output)
-    >>> print(output.extract_result() <= 1.21)
+    >>> print(output.makespan <= 1.21)
     True
     >>> output.build(ValuationMatrix([[1, 2, 1, 10], [2, 5, 3, 3], [3, 3, 7, 10]]))
     >>> apprx(output)
-    >>> print(output.extract_result() <= 6.1)
+    >>> print(output.makespan <= 6.1)
     True
-    >>> output = scedual_assignment()
-    >>> output.build(ValuationMatrix([[1, 2], [2, 1]]))
-    >>> apprx(output)
-    >>> print(output.extract_result())
-    {(1, 1), (0, 0)}
     '''
 
     output.clear()
 
-    # extreme case
-    if output.Mechines == 1: greedy(output); return
-
     # bounds on solution via a greedy solution
-
-    greedy_sol = scedual_makespan()
-    greedy_sol.build(output.costs)
-
-    greedy(greedy_sol)
     greedy(output)
 
-    upper = greedy_sol.extract_result()
-    lower = upper / output.Mechines
+    upper = output.makespan
+    lower = upper / output.mechines
 
-    del greedy_sol
+    # extreme case
+    if output.mechines == 1: return
 
     # homing on the best solution with binary search
 
@@ -314,12 +278,12 @@ def LinearProgram(output: scedual, apprx_bound: float) -> bool:
     # add a constraint that requires that at most #jobs + #mechines entries will be non 0
     actives = cp.Variable(output.shape, boolean = True)
     constraints.append(actives >= variables)
-    constraints.append(cp.sum(actives) <= output.Jobs + output.Mechines)
+    constraints.append(cp.sum(actives) <= output.jobs + output.mechines)
 
 
     # out of all mechines that can do job j in time <= aprrx_bound
     # only 1 may be assigned to handle it, for j in all Jobs
-    for job in range(output.Jobs):
+    for job in range(output.jobs):
 
         mask = output.costs.submatrix(list(output.costs.agents()), [job])[:] <= apprx_bound
         
@@ -328,7 +292,7 @@ def LinearProgram(output: scedual, apprx_bound: float) -> bool:
 
     # out of all jobs that mechine m can do in time <= aprrx_bound
     # m can handle at most deadline-m worth of processing time of'em, for m in all Mechines
-    for mechine in range(output.Mechines):
+    for mechine in range(output.mechines):
 
         mask = output.costs.submatrix([mechine], list(output.costs.objects()))[:] <= apprx_bound
 
@@ -336,7 +300,7 @@ def LinearProgram(output: scedual, apprx_bound: float) -> bool:
 
 
     # minimize: maximum workload aka makespan
-    workloads = [cp.sum(variables[mechine, :]) for mechine in range(output.Mechines)]
+    workloads = [cp.sum(variables[mechine, :]) for mechine in range(output.mechines)]
     try: makespan = cp.maximum( * workloads )
     except Exception: logger.exception('workloads len: %s, shape of input: %s', len(workloads), output.shape, exc_info = True)
     constraints.append(makespan <= apprx_bound)
@@ -365,8 +329,8 @@ def Round(output: scedual, fractional_sol: np.ndarray):
     def node_to_ind(name: str) -> int: return int(name[1:])
     def ind_to_node(num: int, job: bool) -> str: return 'J' + str(num) if job else 'M' + str(num)
 
-    mechine_nodes = ['M' + str(i) for i in range(output.Mechines)]
-    job_nodes =     ['J' + str(i) for i in range(output.Jobs)]
+    mechine_nodes = ['M' + str(i) for i in range(output.mechines)]
+    job_nodes =     ['J' + str(i) for i in range(output.jobs)]
     G = nx.Graph()
     G.add_nodes_from(mechine_nodes, bipartite = 0)
     G.add_nodes_from(job_nodes, bipartite = 1)
@@ -409,27 +373,32 @@ def MinMakespan(algo: MinMakespanAlgo, input: ValuationMatrix, output: scedual, 
     '''
     generic function for the min-makespan problome
 
-    >>> print(MinMakespan(greedy, ValuationMatrix([[10, 5, 7], [10, 2, 5],[1, 6, 6]]), scedual_makespan()))
+    >>> scd = scedual()
+    >>> MinMakespan(greedy, ValuationMatrix([[10, 5, 7], [10, 2, 5],[1, 6, 6]]), scd)
+    >>> print(scd.makespan)
     7
-    >>> print(MinMakespan(apprx, ValuationMatrix([[10, 5, 7], [10, 2, 5],[1, 6, 6]]), scedual_makespan()))
+    >>> print(scd.assignments)
+    {0: 2, 1: 1, 2: 0}
+    >>> MinMakespan(apprx, ValuationMatrix([[10, 5, 7], [10, 2, 5],[1, 6, 6]]), scd)
+    >>> print(scd.makespan)
     5
-    >>> print(MinMakespan(greedy, ValuationMatrix([[10, 5, 7], [10, 2, 5],[1, 6, 6]]), scedual_assignment()))
-    {(1, 1), (0, 2), (2, 0)}
-    >>> print(MinMakespan(apprx, ValuationMatrix([[10, 5, 7], [10, 2, 5],[1, 6, 6]]), scedual_assignment()))
-    {(0, 1), (1, 2), (2, 0)}
+    >>> print(scd.assignments)
+    {1: 0, 2: 1, 0: 2}
     '''
 
     output.build(input)
     algo(output, **kwargs)
-    return output.extract_result()
 
 
-def RandomTesting(algo: MinMakespanAlgo, output: scedual, iterations: int, **kwargs):
+def RandomTesting(algo: MinMakespanAlgo, iterations: int, **kwargs):
 
     ''' spesefied amount of random tests generator '''
 
+    scd = scedual()
+
     for i in range(iterations):
-        yield MinMakespan(algo, ValuationMatrix(uniform(1, 3, (randint(1, 20), randint(1, 20)))), output, **kwargs)
+        MinMakespan(algo, ValuationMatrix(uniform(1, 3, (randint(1, 20), randint(1, 20)))), scd, **kwargs)
+        yield scd.makespan
 
 
 def compare(algo1: Tuple[MinMakespanAlgo, Dict[str, Any]], algo2: Tuple[MinMakespanAlgo, Dict[str, Any]], iterations: int) -> Tuple[int, int]:
@@ -449,11 +418,16 @@ def compare(algo1: Tuple[MinMakespanAlgo, Dict[str, Any]], algo2: Tuple[MinMakes
 
 
     score1 = score2 = 0
+    scd1, scd2 = scedual(), scedual()
+
     for i in range(iterations):
 
         inpt = ValuationMatrix(uniform(1, 3, (randint(1, 20), randint(1, 20))))
 
-        res1, res2 = MinMakespan(algo1[0], inpt, scedual_makespan(), **algo1[1]), MinMakespan(algo2[0], inpt, scedual_makespan(), **algo2[1])
+        MinMakespan(algo1[0], inpt, scd1, **algo1[1])
+        MinMakespan(algo2[0], inpt, scd2, **algo2[1])
+
+        res1, res2 = scd1.makespan, scd2.makespan
 
         if res1 < res2: score1 += 1
         if res2 < res1: score2 += 1
