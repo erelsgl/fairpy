@@ -89,7 +89,10 @@ class scedual(ABC, Iterable):
         self.assignments[mechine, job] = True
 
     # delet all assignments, start over
-    def clear(self): self.assignments = np.zeros(self.shape).astype(bool) 
+    def clear(self): self.assignments = np.zeros(self.shape).astype(bool)
+
+    # are all jobs scedual
+    def complete(self) -> bool: return np.add.reduce(self.assignments, axis = 0).all()
 
     # current workload of spesific mechine
     def loadOf(self, mechine: int) -> float:
@@ -152,6 +155,43 @@ class scedual_makespan(scedual):
 
 
 MinMakespanAlgo = Callable[[scedual], None]
+
+
+def optimal(output: scedual) -> None:
+
+    ''' 
+        naive algo, goes through all options, mostly for testing
+
+        >>> output = scedual_makespan()
+        >>> output.build(ValuationMatrix([[1, 2, 5], [2, 2, 1],[2, 3, 5]]))
+        >>> optimal(output)
+        >>> print(output.extract_result())
+        2
+        >>> output = scedual_assignment()
+        >>> output.build(ValuationMatrix([[1, 2, 5], [2, 2, 1],[2, 3, 5]]))
+        >>> optimal(output)
+        >>> print(output.extract_result())
+        {(0, 1), (1, 2), (2, 0)}
+    '''
+
+    output.clear()
+
+    checker = scedual_makespan()
+    checker.build(output.costs)
+    best = float('inf')
+
+    for assign in product(range(output.Mechines), repeat = output.Jobs):
+
+        checker.clear()
+
+        for job in range(output.Jobs):  checker.scedual(assign[job], job)
+
+        if checker.extract_result() < best:
+
+            output.clear()
+            for job in range(output.Jobs):  output.scedual(assign[job], job)
+
+            best = checker.extract_result()
 
 
 def greedy(output: scedual) -> None:
@@ -384,15 +424,15 @@ def MinMakespan(algo: MinMakespanAlgo, input: ValuationMatrix, output: scedual, 
     return output.extract_result()
 
 
-def RandomTesting(algo: MinMakespanAlgo, output: scedual, iteration: int, **kwargs):
+def RandomTesting(algo: MinMakespanAlgo, output: scedual, iterations: int, **kwargs):
 
     ''' spesefied amount of random tests generator '''
 
-    for i in range(iteration):
+    for i in range(iterations):
         yield MinMakespan(algo, ValuationMatrix(uniform(1, 3, (randint(1, 20), randint(1, 20)))), output, **kwargs)
 
 
-def compare(algo1: Tuple[MinMakespanAlgo, Dict[str, Any]], algo2: Tuple[MinMakespanAlgo, Dict[str, Any]], iteration: int) -> Tuple[int, int]:
+def compare(algo1: Tuple[MinMakespanAlgo, Dict[str, Any]], algo2: Tuple[MinMakespanAlgo, Dict[str, Any]], iterations: int) -> Tuple[int, int]:
 
     '''
         Comparing 2 algorithms, some times to get enough iterations so the
@@ -409,7 +449,7 @@ def compare(algo1: Tuple[MinMakespanAlgo, Dict[str, Any]], algo2: Tuple[MinMakes
 
 
     score1 = score2 = 0
-    for i in range(iteration):
+    for i in range(iterations):
 
         inpt = ValuationMatrix(uniform(1, 3, (randint(1, 20), randint(1, 20))))
 
@@ -423,4 +463,4 @@ def compare(algo1: Tuple[MinMakespanAlgo, Dict[str, Any]], algo2: Tuple[MinMakes
 if __name__ == '__main__':
 
     import doctest
-    doctest.testmod(verbose = True)
+    doctest.testmod(verbose = True) 

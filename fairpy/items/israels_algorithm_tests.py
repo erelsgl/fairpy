@@ -45,6 +45,9 @@ class TestScedualing(unittest.TestCase):
         with self.assertRaises(KeyError): self.scd1.scedual(0, 0)
         self.scd2.scedual(0, 0)
 
+        self.assertFalse(self.scd1.complete())
+        self.assertTrue(self.scd2.complete())
+
     def testDerived1(self):
 
         self.assertEqual({(0, 0)}, self.scd1.extract_result())
@@ -59,6 +62,49 @@ class TestScedualing(unittest.TestCase):
 
 
 class TestMinMakespanAlgos(unittest.TestCase):
+
+    def test_validaty(self):
+
+        self.scd = scedual_makespan()
+
+        self.scd.build(ValuationMatrix(np.ones((10, 10))))
+
+        greedy(self.scd)
+        self.assertTrue(self.scd.complete())
+        self.assertEqual(1, self.scd.extract_result())
+
+        self.scd.clear()
+
+        apprx(self.scd)
+        self.assertTrue(self.scd.complete())
+        self.assertEqual(1, self.scd.extract_result())
+
+        self.scd.clear()
+
+        self.scd.build(ValuationMatrix([[1, 3, 3, 3],
+                                        [4, 4, 1, 4],
+                                        [1, 2, 3, 4],
+                                        [4, 1, 1, 2]]))
+
+        greedy(self.scd)
+        self.assertTrue(self.scd.complete())
+        self.assertEqual(3, self.scd.extract_result())
+
+        self.scd.clear()
+
+        apprx(self.scd)
+        self.assertTrue(self.scd.complete())
+        self.assertEqual(2, self.scd.extract_result())
+
+    def test_apprx_factor(self):
+
+        for i in range(10):
+
+            mat = ValuationMatrix(uniform(1, 3, (4, 4)))
+
+            optimum = MinMakespan(optimal, mat, scedual_makespan())
+
+            self.assertTrue(MinMakespan(apprx, mat, scedual_makespan()) <= 2 * optimum)
 
     def test_aprrx_lim(self):
 
@@ -88,10 +134,9 @@ class TestMinMakespanAlgos(unittest.TestCase):
 
     def test_supiriorty(self):
 
-
-        print('avg makespan for the approximation algorithm: ', sum(res for res in RandomTesting(apprx, scedual_makespan(), 30)) / 30)
-        print('----------')
-        print('avg makespan for the greedy algorithm: ', sum(res for res in RandomTesting(greedy, scedual_makespan(), 30)) / 30)
+       print('avg makespan for the approximation algorithm: ', sum(res for res in RandomTesting(apprx, scedual_makespan(), 80)) / 80)
+       print('----------')
+       print('avg makespan for the greedy algorithm: ', sum(res for res in RandomTesting(greedy, scedual_makespan(), 80)) / 80)
 
 
 if __name__ == '__main__':
