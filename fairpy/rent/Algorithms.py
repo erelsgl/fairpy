@@ -47,12 +47,7 @@ def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict) -> (dict
     # line 48-55 : Taking the AgentList type and splitting it to lists and dictionary
     N = list([i for i in agentsList.agent_names()])
     A = list([i for i in agentsList.all_items()])
-    # val = {}
-    # for i in N:
-    #     tempA = {}
-    #     for j in A:
-    #         tempA[j] = agentsList[N.index(i)].value(j)
-    #     val[i] = tempA
+
     val = {i: {j: agentsList[N.index(i)].value(j) for j in A} for i in N}
     logger.debug("done initializing the first variables")
     # compute (σ,p) ∈ F(N,A,v,r)
@@ -80,18 +75,10 @@ def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict) -> (dict
         # A_c = let A(C) be the set of rooms received by agents in C
         A_c = list([sigma[i] for i in sigma.keys() if i in c])
         # let vC and B_c be the restrictions of the two vectors to C
-        # V_c = {}
-        # for i in c:
-        #     tempA = {}
-        #     for j in A_c:
-        #         tempA[j] = agentsList[N_c.index(i)].value(j)
-        #     V_c[i] = tempA
         V_c = {i: {j: agentsList[N_c.index(i)].value(j) for j in A_c} for i in c}
         B_c = {i: budget[i] for i in sigma.keys() if i in c}
         # New rent for calculation on c
         new_rent = sum(p[sigma[i]] for i in c)
-        # for i in c:
-        #     tempAgentC[i] = V_c[i]
         tempAgentC = {i: V_c[i] for i in c}
         # (μC,pC) ← output of Algorithm 1 on C, A(C), V_c, and B_c
         ans_µc_pc.append(maximum_rent_envy_free(AgentList(tempAgentC), new_rent, B_c))
@@ -100,13 +87,6 @@ def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict) -> (dict
     µ = {}
 
     # let μ:N →A s.t. for all i ∈ N , μ(i) = μ_C(i) for c ∈ C s.t. i ∈ C
-    # for i in agentsList.agent_names():
-    #     for c in lst_SCC:
-    #         if i in c:
-    #             for j in ans_µc_pc:
-    #                 µc = dict(j[1][0])
-    #                 if i in µc:
-    #                     µ[i] = µc[i]
     for i in agentsList.agent_names():
         for j in ans_µc_pc:
             µc = dict(j[1][0])
@@ -151,14 +131,6 @@ def maximum_rent_envy_free(agentsList: AgentList, rent: float, budget: dict) -> 
     """
     logger.info(f'maximum_rent_envy_free({agentsList}, {rent}, {budget})')
     N = list([i for i in agentsList.agent_names()])
-    # A = list([i for i in agentsList.all_items()])
-    # val = {}
-    # for i in N:
-    #     tempA = {}
-    #     for j in A:
-    #         tempA[j] = agentsList[N.index(i)].value(j)
-    #     val[i] = tempA
-    # val = {i: {j: agentsList[N.index(i)].value(j) for j in A} for i in N}
     logger.debug("done initializing the first variables")
     sigma = {}
     p = {}
@@ -167,16 +139,12 @@ def maximum_rent_envy_free(agentsList: AgentList, rent: float, budget: dict) -> 
 
     # It is for calculating the ∆, let Δ ∈ R such that
     # (σ,(p_a −Δ)_(a∈A)) ∈ F_b(N,C,v,r−nΔ) and there is i∈N such that p_(σ(i)) = b_i
-    # temp = [p[sigma[i]] - budget[i] for i in sigma.keys()]
-    # for i in sigma.keys():
-    #     temp.append(p[sigma[i]] - budget[i])
+
     delta = min([p[sigma[i]] - budget[i] for i in sigma.keys()])
     logger.debug("done calculating delta")
 
     # p ← (p_(σ(i)) − Δ)_(i∈N)
     p = {i: round(v - delta, 3) for i, v in p.items()}
-    # for i in sigma.keys():
-    #     p[sigma[i]] = round(p[sigma[i]] - delta, 3)
     logger.debug("done calculating p")
     # # r ← r − nΔ
     rent -= len(agentsList) * delta
