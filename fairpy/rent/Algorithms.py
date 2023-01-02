@@ -141,13 +141,13 @@ def maximum_rent_envy_free(agentsList: AgentList, rent: float, budget: dict) -> 
              sigma: N -> A , p : is vector of prices for each room
     >>> ex1 = AgentList({"Alice":{'1' : 250, '2' : 250, '3' : 500}, "Bob": {'1': 250, '2' : 250, '3' :500}, "Clair": {'1' :250, '2' : 500, '3' : 250}})
     >>> maximum_rent_envy_free(ex1, 1000, {'Alice': 250, 'Bob': 320, 'Clair': 430})
-    (709.99, ([('Alice', '1'), ('Clair', '2'), ('Bob', '3')], [('1', 70.0), ('2', 320.0), ('3', 320.0)]))
+    (1249.99, ([('Alice', '1'), ('Clair', '2'), ('Bob', '3')], [('1', 250.0), ('2', 500.0), ('3', 500.0)]))
     >>> ex2 = AgentList({"Alice":{'1' : 250, '2' : 750}, "Bob": {'1': 250, '2' : 750}})
     >>> maximum_rent_envy_free(ex2, 1000, {'Alice': 600, 'Bob': 500})
-    (500.0, ([('Alice', '1'), ('Bob', '2')], [('1', 0.0), ('2', 500.0)]))
+    (1700.0, ([('Alice', '1'), ('Bob', '2')], [('1', 600.0), ('2', 1100.0)]))
     >>> ex3 = AgentList({"Alice":{'1' : 400, '2' : 600}, "Bob": {'1': 300, '2' : 700}})
     >>> maximum_rent_envy_free(ex3, 1000, {'Alice': 450, 'Bob': 550})
-    (800.0, ([('Alice', '1'), ('Bob', '2')], [('1', 250.0), ('2', 550.0)]))
+    (1200.0, ([('Alice', '1'), ('Bob', '2')], [('1', 450.0), ('2', 750.0)]))
     """
     logger.info(f'maximum_rent_envy_free({agentsList}, {rent}, {budget})')
     N = list([i for i in agentsList.agent_names()])
@@ -170,7 +170,7 @@ def maximum_rent_envy_free(agentsList: AgentList, rent: float, budget: dict) -> 
     # temp = [p[sigma[i]] - budget[i] for i in sigma.keys()]
     # for i in sigma.keys():
     #     temp.append(p[sigma[i]] - budget[i])
-    delta = max([p[sigma[i]] - budget[i] for i in sigma.keys()])
+    delta = min([p[sigma[i]] - budget[i] for i in sigma.keys()])
     logger.debug("done calculating delta")
 
     # p ← (p_(σ(i)) − Δ)_(i∈N)
@@ -255,19 +255,23 @@ def case_2(sigma: dict, p: dict, budget: dict, agentsList: AgentList):
     for i in sigma.keys():
         if p[sigma[i]] == budget[i]:
             # find cycle in graph
-            cycle = nx.find_cycle(budget_graph, i)
-            if cycle is not None:
-                temp = {j: sigma[j] for j in cycle}
-                # For reshuffle the rooms
-                values = list(temp.values())
-                # Find the position of the first element in temp
-                pos = values.index(temp[0])
-                # Shift the elements to the right
-                values = values[pos:] + values[:pos]
-                # Create a new shuffled dictionary using the original keys and the shuffled values
-                shuffled_temp = {key: value for key, value in zip(temp.keys(), values)}
-                # updating new room for agent
-                sigma = {j: shuffled_temp[j] for j in shuffled_temp.keys()}
+            try:
+                cycle = nx.find_cycle(budget_graph, i)
+                if cycle is not None:
+                    temp = {j: sigma[j] for j in cycle}
+                    # For reshuffle the rooms
+                    values = list(temp.values())
+                    # Find the position of the first element in temp
+                    pos = values.index(temp[0])
+                    # Shift the elements to the right
+                    values = values[pos:] + values[:pos]
+                    # Create a new shuffled dictionary using the original keys and the shuffled values
+                    shuffled_temp = {key: value for key, value in zip(temp.keys(), values)}
+                    # updating new room for agent
+                    sigma = {j: shuffled_temp[j] for j in shuffled_temp.keys()}
+                    return sigma
+            except:
+                print("yess")
                 return sigma
     return sigma
 
@@ -304,3 +308,7 @@ if __name__ == '__main__':
     print()
     print("solution agentList2")
     print(optimal_envy_free(agentList2, rent2, budget2))
+    print("solution ex2")
+    ex2 = AgentList({"Alice": {'1': 250, '2': 250, '3': 500}, "Bob": {'1': 250, '2': 250, '3': 500},
+                     "Clair": {'1': 250, '2': 250, '3': 500}})
+    print(optimal_envy_free(ex2, 1000, {'Alice': 300, 'Bob': 300, 'Clair': 300}))
