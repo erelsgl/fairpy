@@ -11,289 +11,321 @@ Programmers: Barak Amram, Adi Dahari
 Since: 2022-12
 '''
 
-import doctest
-import sys
-from itertools import permutations
-import pandas as pd
-from fairpy.items.valuations import ValuationMatrix
-import logging
+from fairpy import ValuationMatrix
+
+import networkx as nx
+import numpy as np
 import pprint
-
-INF = float('inf')
-
+import logging
 logger = logging.getLogger(__name__)
 
-
 class BiddingForEnvyFreeness:
-
-    def __init__(self, matrix: ValuationMatrix):
+    def __init__(self, matrix: ValuationMatrix | list = None):
         '''
-        This init function initializes the algorithm, by the following steps:
-            1. Find the best option (M, C) and the best option index.
-            2. Find the M - C value.
-            3. Find the best option list.
-            4. Evaluate the bidding matrix.
-            5. Calculate the discounts step by step.
+        Bidding for Envy Freeness algorithm.
+        :param matrix: a matrix of players bids for bundles.
+        
+        >>> matrix = [[3, 2, 1], [2, 3, 1], [2, 1, 3]]
+        >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
+        >>> print(bidding_for_envy_freeness.M)
+        9
+        
+        >>> print(bidding_for_envy_freeness.C)
+        6
+        
+        >>> print(bidding_for_envy_freeness.MC)
+        3
+        
+        >>> bidding_for_envy_freeness.initialize_assessment_matrix()
+        array([[ 0, -1, -2],
+               [-1,  0, -2],
+               [-1, -2,  0],
+               [ 0,  0,  0]])
+        
+        
         '''
-        logger.info('Bidding for Envy Freeness')
-        logger.info(f'Initial Bidding Matrix: \n{pprint.pformat(matrix)}')
-        self.bidding_matrix = matrix
-        self.dct = dict()
-        self.m, self.c, self.best = self.find_m_c_best(matrix)
-        logger.debug(
-            f'best: option {self.best} --- {self.players_options[self.best]}')
-        logger.debug(f'C: {self.c}')
-        logger.debug(f'M: {self.m}')
-        self.MC = self.m - self.c
-        logger.debug(f'M - C: {self.MC}')
-        opt = list(self.players_options[self.best])
-        self.bundle_allocation = {i + 1: opt[i] for i in range(len(opt))}
-        logger.debug(f'best opt: {opt}')
-        self.options_list = self.player_package(opt)
-        logger.debug(self.options_list)
-        self.table = self.bidding_to_envy(matrix, opt)
-        self.calculate_discounts(2)
+        
+        logger.info(f'\n----------[ INFO ]----------\nInitializing BiddingForEnvyFreeness with bidding matrix:\n{matrix}\n----------[\ INFO ]----------')
+        
+        # initializing the players bids for bundles matrix
+        self.players_bids_for_bundles = matrix
+        
+        if not isinstance(matrix, ValuationMatrix):
+            self.players_bids_for_bundles = ValuationMatrix(matrix)
 
-        logger.info(pprint.pformat({f'Player {p}': {
-            'Bundle': self.bundle_allocation[p] + 1, 'Discount': self.dct[p]} for p in self.dct})
-        )
+        
 
-    def __str__(self):
-        return f'{self.dct}'
-
-    def make_list(self, values: ValuationMatrix, players_options: list):
+        self.players_order = self.find_best_matching()
+        logger.debug(f'\n----------[ INFO ]----------\nFound best players order:\n{pprint.pformat(self.players_order)}\n----------[\ INFO ]----------')
+        
+        self.players_bids_for_bundles = ValuationMatrix([self.players_bids_for_bundles[i] for i in self.players_order])
+        logger.debug(f'\n----------[ INFO ]----------\nReordered players bids for bundles matrix:\n{pprint.pformat(self.players_bids_for_bundles)}\n----------[\ INFO ]----------')
+        
+                
+        # finding M and C
+        self.M, self.C, self.MC = self.find_m_c()
+        logger.debug(f'\n----------[ INFO ]----------\nFound M = {self.M}, C = {self.C}, M-C = {self.MC}\n----------[\ INFO ]----------')
+        
+        # initializing the assessment matrix
+        self.assessment_matrix = self.initialize_assessment_matrix()
+        logger.debug(f'\n----------[ INFO ]----------\nInitialized assessment matrix:\n{pprint.pformat(self.assessment_matrix)}\n----------[\ INFO ]----------')
+        
+        # running the compensation procedure
+        self.compensation_procedure()
+        
+        
+        logger.info(f'\n----------[ INFO ]----------\nFinished BiddingForEnvyFreeness with assessment matrix:\n{pprint.pformat(self.assessment_matrix)}\n----------[\ INFO ]----------')
+        
+        
+    def find_best_matching(self, matrix: ValuationMatrix = None) -> list:
         '''
-        This function makes a list of the total values of the bundles allocated to each agent.
+        Find the best matching for the given bidding matrix.
+        Using NetworkX maximum_weight_matching algorithm, which finds the maximum weight matching in a bipartite graph.
+        For applying the algorithm on our data, the following conversion is done:
+            consider 2 sides of the bipartite graph: A, B, such that:
+            A is the set of players, B is the set of bundles.
+            each edge A_i -> B_j has weight equal to the bid of player i for bundle j.
+            
+            The algorithm returns a list of allocated bundles for each player, in the form of a list of integers,
+            which each index of the list is a player and the value of the index is the allocated bundle for the player.
+                    
+        reference: 
+        https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.matching.max_weight_matching.html
+        
+        :param matrix: a matrix of players bids for bundles.
+        :return: a list of allocated bundles for each player.
+        >>> matrix = [[3, 2, 1], [2, 3, 1], [2, 1, 3]]
+        >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
+        >>> print(bidding_for_envy_freeness.find_best_matching())
+        [0, 1, 2]
+        >>> matrix = [[2, 3, 1], [3, 2, 1], [2, 1, 3]]
+        >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
+        >>> print(bidding_for_envy_freeness.find_best_matching())
+        [1, 0, 2]
+        >>> matrix = [[2, 3, 1], [2, 1, 3], [3, 2, 1]]
+        >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
+        >>> print(bidding_for_envy_freeness.find_best_matching())
+        [2, 0, 1]
+        
+        >>> matrix = [[50, 20, 10, 20], [60, 40, 15, 10], [0, 40, 25, 35], [50, 35, 10, 30]]
+        >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
+        >>> print(bidding_for_envy_freeness.find_best_matching())
+        [0, 1, 2, 3]
+        >>> matrix = [[60, 40, 15, 10], [50, 20, 10, 20], [0, 40, 25, 35], [50, 35, 10, 30]]
+        >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
+        >>> print(bidding_for_envy_freeness.find_best_matching())
+        [1, 0, 2, 3]
+        >>> matrix = [[60, 40, 15, 10], [0, 40, 25, 35], [50, 20, 10, 20], [50, 35, 10, 30]]
+        >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
+        >>> print(bidding_for_envy_freeness.find_best_matching())
+        [2, 0, 1, 3]
+        >>> matrix = [[60, 40, 15, 10], [0, 40, 25, 35], [50, 35, 10, 30], [50, 20, 10, 20]]
+        >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
+        >>> print(bidding_for_envy_freeness.find_best_matching())
+        [3, 0, 1, 2]
+        
         '''
-        res = []
-        for i in range(0, len(players_options)):
-            sum = 0
-            for j in range(0, values.num_of_agents):
-                sum += values[players_options[i][j]][j]
-            res.append(sum)
-        return res
-
-    def best_option(self, options: list):
+        if matrix is None:
+            matrix = self.players_bids_for_bundles
+        
+        # Initializing the graph
+        g = nx.Graph()
+        
+        # Creating the edges by bids
+        edges = [(f'p{player}', f'b{bundle}', matrix[bundle][player]) for player in range(matrix.num_of_agents) for bundle in range(matrix.num_of_objects)]
+        
+        # Adding the edges to the graph
+        g.add_weighted_edges_from(edges)
+        
+        # Finding the maximum weight matching
+        matching = nx.max_weight_matching(g)
+        
+        # Sorting the tuples to a form of (player, bundle)
+        matching = [sorted(m, reverse=True) for m in matching]
+        
+        # Sorting the tuples by player number
+        matching = sorted(matching, key=lambda x: int(x[0][1:]))
+        
+        # Returning the allocated bundles for each player as a list of integers
+        # each index of the list is a player and the value of the index is the allocated bundle for the player.
+        return [int(m[1][1:]) for m in matching]
+    
+        
+    def find_m_c(self, matrix: ValuationMatrix | list = None) -> tuple:
         '''
-        This function finds the best option and its index.
-
+        Find M and C for the given bidding matrix.
+        :param matrix: a matrix of players bids for bundles.
+        :return: M, C, M-C
+        >>> matrix = [[3, 2, 1], [2, 3, 1], [2, 1, 3]]
+        >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
+        >>> print(bidding_for_envy_freeness.M)
+        9
+        >>> print(bidding_for_envy_freeness.C)
+        6
+        >>> print(bidding_for_envy_freeness.MC)
+        3
+        
+        
+        >>> matrix = [[50, 20, 10, 20],[60, 40, 15, 10],[0, 40, 25, 35], [50, 35, 10, 30]]
+        >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
+        >>> print(bidding_for_envy_freeness.M)
+        145
+        >>> print(bidding_for_envy_freeness.C)
+        100
+        >>> print(bidding_for_envy_freeness.MC)
+        45
+        
+        
+        >>> matrix = [[50, 40, 35], [25, 25, 25], [10, 20, 25]]
+        >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
+        >>> print(bidding_for_envy_freeness.M)
+        100
+        >>> print(bidding_for_envy_freeness.C)
+        55
+        >>> print(bidding_for_envy_freeness.MC)
+        45
+        
         '''
-        best = -1
-        m = -INF
-        for i in range(0, len(options)):
-            if m < options[i]:
-                m, best = options[i], i
-        return best, m
+        
+        # for tests, debugging and standalone use
+        if matrix is None:
+            matrix = self.players_bids_for_bundles
+            
+        elif not isinstance(matrix, ValuationMatrix):
+            matrix = ValuationMatrix(matrix)
+        
+        # M is the diagonal sum of the matrix, which represents the sum of the players' bids for their allocated bundles
+        m = sum([matrix[Bi][Bi] for Bi in range(matrix.num_of_agents)])
+        
+        # C is the minimum sum of a row, which represents the minimum sum of single player's bids for all bundles
+        c = min([sum(matrix[ci]) for ci in range(matrix.num_of_agents)])
+        
+        return m, c, m-c
+    
+    def initialize_assessment_matrix(self, matrix: ValuationMatrix = None) -> np.ndarray:
+        """
+        Create the inititial assessment matrix for the given bidding matrix( by default the class' 'self.players_bids_for_bundles' ).
+        :param matrix: a matrix of players bids for bundles.
+        :return: the initial assessment matrix.
+        >>> matrix = [[3, 2, 1], [2, 3, 1], [2, 1, 3]]
+        >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
+        >>> print(bidding_for_envy_freeness.initialize_assessment_matrix())
+        [[ 0 -1 -2]
+         [-1  0 -2]
+         [-1 -2  0]
+         [ 0  0  0]]
+        
+        
+        >>> matrix = [[50, 20, 10, 20],[60, 40, 15, 10],[0, 40, 25, 35], [50, 35, 10, 30]]
+        >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
+        >>> print(bidding_for_envy_freeness.initialize_assessment_matrix())
+        [[  0 -20 -15 -10]
+         [ 10   0 -10 -20]
+         [-50   0   0   5]
+         [  0  -5 -15   0]
+         [  0   0   0   0]]
+        
+        
+        >>> matrix = [[50, 40, 35], [25, 25, 25], [10, 20, 25]]
+        >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
+        >>> print(bidding_for_envy_freeness.initialize_assessment_matrix())
+        [[  0  15  10]
+         [-25   0   0]
+         [-40  -5   0]
+         [  0   0   0]]
+        """
+        
+        # for tests, debugging and standalone use
+        if matrix is None:
+            matrix = self.players_bids_for_bundles            
 
-    def switch_row_column(self, matrix: list):
+        
+        # creating the assessment matrix, each players enviness is:
+        #   ( his bid for a bundle ( [player, bid] ) ) - ( the accepted bid for that bundle ( [bid, bid] ) )
+        assessment_matrix = [
+            [matrix[player][bid] - matrix[bid][bid] 
+             for bid in range(matrix.num_of_objects)]
+            for player in range(matrix.num_of_agents)]
+        
+        # adding a row of zeros to the end of the matrix for the initial players discounts
+        assessment_matrix.append([0 for _ in range(matrix.num_of_agents)])
+        
+        # returning the assessment matrix as a numpy array
+        return np.array(assessment_matrix)
+    
+    def compensation_procedure(self, assessment_matrix: np.ndarray = None, MC: int = None) -> np.ndarray:
         '''
-        This function switches the rows and columns of the matrix.
+        The compensation procedure for the Bidding for Envy Freeness algorithm.
+        :param assessment_matrix: the assessment matrix to perform the compensation procedure on.
+        :return: the assessment matrix after the compensation procedure.
         '''
-        return pd.DataFrame(data=matrix)
+        
+        # for tests, debugging and standalone use
+        if assessment_matrix is None and MC is None:
+            assessment_matrix = self.assessment_matrix
+            MC = self.MC
 
-    def find_m_c_best(self, matrix: ValuationMatrix) -> tuple:
-        '''
-        This function intitalizes the algorithm M and C values,
-        Where:
-            - M stands for the total value of initially invested amount of money by each agent, for the bundle of items allocated to him.
-            - C stands for the minimum total biddings of a single agent for all available bundles.
-            - best stands for the best option index.
+        # if all players enviness is less or equal to zero, return the assessment matrix
+        if all(
+            [all([x <= assessment_matrix[player][player] for x in assessment_matrix[player]]) for player in range(len(assessment_matrix)-1)]
+            ):
+            
+            # adding the remaining MC to the last row of the assessment matrix (the players discounts) evenly
+            assessment_matrix[-1, :] += int((self.MC - sum(self.assessment_matrix[-1, :])) / self.players_bids_for_bundles.num_of_agents)
+            logger.debug(f'\n----------< DEBUG (compensation_procedure) >----------\nCompensation procedure finished with assessment matrix:\n{pprint.pformat(assessment_matrix)}\n----------<\ DEBUG (compensation_procedure) >----------')
 
-        For Example:
-        For the following matrix: (Bi stands for bundle i, Ai stands for agent i)
-                B1  B2  B3
-                __  __  __
-            A1  |50  45  10     # C1 = 105
-            A2  |30  35  20     # C2 = 85
-            A3  |50  40  30     # C3 = 120
-                __  __  __
-                130 120 60
-
-        So the bidding matrix will be:
-        AB = [[50, 45, 10],
-            [30, 35, 20],
-            [50, 40, 30]]
-
-        # Mind that the diagonal of the matrix is the sum of the values of the bundles allocated to each agent.
-        M = AB[0,0] + AB[1, 1] + AB[2, 2] = 50 + 35 + 30 = 115
-        C = Min(C1, C2, C3) = 85
-
-        And the output will be the following tuple (M, C):
-            (M, C, best) = (115, 85, 1)
-
-        TESTS:
-        >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 25, 10], [40, 25, 20], [35, 25, 25]]))
-        >>> m.find_m_c_best(ValuationMatrix([[50, 25, 10], [40, 25, 20], [35, 25, 25]]))
-        (100, 55, 0)
-        >>> m = BiddingForEnvyFreeness(ValuationMatrix([[45, 35, 40], [50, 30, 50], [10, 20, 35]]))
-        >>> m.find_m_c_best(ValuationMatrix([[45, 35, 40], [50, 30, 50], [10, 20, 35]]))
-        (120, 85, 2)
-        >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 45, 10, 25], [30, 35, 20, 10], [50, 40, 35, 0], [50, 35, 35, 20]]))
-        >>> m.find_m_c_best(ValuationMatrix([[50, 45, 10, 25], [30, 35, 20, 10], [50, 40, 35, 0], [50, 35, 35, 20]]))
-        (145, 55, 15)
-        '''
-        players_num = list(range(matrix.num_of_agents))
-
-        self.players_options = list(permutations(players_num))
-        options = self.make_list(
-            values=matrix, players_options=self.players_options)
-        best, m = self.best_option(options)
-        c = INF
-        for x in range(matrix.num_of_agents):
-            sum = 0
-            for j in range(0, len(matrix[x])):
-                sum += matrix[j][x]
-            if c > sum:
-                c = sum
-        return m, c, best
-
-    def player_package(self, opt: list):
-        res = []
-        for i in range(0, len(opt)):
-            temp = []
-            temp.append(i)
-            temp.append(opt[i])
-            res.append(temp)
-        return res
-
-    def bidding_to_envy(self, matrix: ValuationMatrix, options) -> ValuationMatrix:
-        '''
-        The 1st stage of the algorithm, initialize a table of envy values based the bidding matrix,
-        by the following rules:
-            - If an agent bidded a higher value for a bundle than the agent who gets it,
-            then the envy value is a positive number - the difference between both bids (the higher offer and the one that been accepted).
-            - If an agent bidded a lower value for a bundle than the agent who gets it,
-            then the envy value is a negative number - the difference between both bids (the lower offer and the one that been accepted).
-            - The last column of the table initilized with zeros, and represents accumulated discounts for each agent.
-        Input: Bidding Matrix and Option list.
-        For Example:
-            b = [[50, 40, 35],
-                [25, 25, 25],
-                [10, 20, 35]]
-
-        Output: Envy Matrix + initializes the envy matrix
-        For Example:
-            e = [[  0, -10, -15, 0],
-                [  0,   0,   0, 0],
-                [-15,  -5,   0, 0]]
-
-        TESTS:
-        >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 40, 35], [25, 25, 25], [10, 20, 35]]))
-        >>> m.bidding_to_envy(m.bidding_matrix, list(m.players_options[m.best]))
-        [[0, -10, -15, 0], [0, 0, 0, 0], [-25, -15, 0, 0]]
-
-        >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 30, 50], [45, 35, 40], [10, 20, 35]]))
-        >>> m.bidding_to_envy(m.bidding_matrix, list(m.players_options[m.best]))
-        [[0, -20, 0, 0], [10, 0, 5, 0], [-25, -15, 0, 0]]
-
-        >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 60, 0, 50], [20, 40, 40, 35], [10, 15, 25, 10], [20, 10, 35, 30]]))
-        >>> m.bidding_to_envy(m.bidding_matrix, list(m.players_options[m.best]))
-        [[0, 10, -50, 0, 0], [-20, 0, 0, -5, 0], [-15, -10, 0, -15, 0], [-10, -20, 5, 0, 0]]
-
-        >>> m = BiddingForEnvyFreeness(ValuationMatrix([[50, 30, 50, 50], [45, 35, 40, 35], [10, 20, 35, 35], [25, 10, 0, 20]]))
-        >>> m.bidding_to_envy(m.bidding_matrix, list(m.players_options[m.best]))
-        [[0, -20, 0, 0, 0], [10, 0, 5, 0, 0], [0, 10, 25, 25, 0], [25, 10, 0, 20, 0]]
-
-        '''
-        table = list(list())
-        for x in range(0, matrix.num_of_agents):
-            y = x
-            sub = matrix[x][options[x]]
-            logger.debug(f'sub: {sub}')
-            temp = list()
-            x = matrix[x]
-            for j in range(0, len(x)):
-                temp.append(x[j] - sub) if y == j else temp.append(x[j] - sub)
-            temp.append(0)
-            table.append(temp)
-        logger.debug(f'Stage 1: Making a table\n{table}')
-        return table
-
-    def calculate_discounts(self, stage: int):
-        '''
-        This recursive function calculates the discounts for each agent,
-        based on the envy values in the envy matrix, which being manipulated along the way.
-        As the first stage is being applied before, the first stage being calculated here is 2 (2nd stage).
-
-        This is a recursive function, which means that it calls itself until the last stage is reached.
-
-        Input: Stage, for debugging purposes.
-        For Example, if m is the initial envy matrix (after the first stage):
-            m = [[ 0,  10, -50,   0, 0],
-                [-20,   0,   0,  -5, 0],
-                [-15, -10,   0, -15, 0],
-                [-10, -20,   5,   0, 0]]
-
-        Output: The envy matrix after the discounts are calculated.
-        For Example:
-                [[  0,  10, -50,  0,  0],
-                [-10,  10,  10,  5, 10],
-                [ -5,   0,  10, -5, 10],
-                [ -5, -15,  10,  5,  5]]
-
-        Where the last column represents the final discounts for each agent.
-        '''
-        g = self.switch_row_column(self.table)
-        # print(g)
-        count = 0
-        for i in range(0, len(g)):
-            m = 0
-            for j in g[i]:
-                if g[self.options_list[i][0]][self.options_list[i][1]] < j and j != i and m < j:
-                    m = j - g[i][i]
-                    logger.debug(f'--- Player {i+1}: discount {j} ---')
-            if m > 0:
-                count += 1
-                for x in range(0, len(g[i])+1):
-                    self.table[i][x] += m
-                # print(self.table)
-            self.MC -= m
-        if self.MC < 0:
-            logger.warning('There is no good division for this problem')
-            raise NameError('There is no good division for this problem')
-        if count == 0:
-            c = 1
-            for x in self.table:
-                self.dct[c] = x[len(self.table)]
-                c += 1
-            dis = self.MC/len(self.table)
-            result = ''
-            for x in range(1, len(self.dct)+1):
-                self.dct[x] += dis
-                # print(self.options_list[x-1][1])
-                result += f'player {x} got package: {self.options_list[x-1][1]+1} with discount: {self.dct[x]}\n'
-            logger.debug(
-                f'Final Stage:\n{result}\n--------------------------\n')
-            # print(f'Final Stage:\n{self.dct}\n--------------------------\n')
-            return
-        logger.debug(f'\nStage {stage}:\n{self.table}\n')
-        self.calculate_discounts(stage+1)
-
-
-def run(matrix: ValuationMatrix):
+            # returning the assessment matrix - final result
+            return assessment_matrix
+        
+        # compensation procedure is not finished, continue
+        else:
+            
+            logger.debug(f'\n----------< DEBUG (compensation_procedure) >----------\nCompensation procedure started with assessment matrix:\n{pprint.pformat(assessment_matrix)}\n----------<\ DEBUG (compensation_procedure) >----------')
+            
+            # finding the maximum enviness of each player, if exists. else - zero
+            compansations = [max(assessment_matrix[player]) - assessment_matrix[player][player] if any([x > assessment_matrix[player][player] for x in assessment_matrix[player]]) else 0 for player in range(len(assessment_matrix)-1)]
+            logger.debug(f'\n----------< DEBUG (compensation_procedure) >----------\nCompansations:\n{pprint.pformat(compansations)}\n----------<\ DEBUG (compensation_procedure) >----------')
+            
+           # adding the compansations to the assessment matrix
+            for compansation in range(len(compansations)):
+                # adding the compansation to the player's column
+                assessment_matrix[:, compansation] += compansations[compansation]
+            logger.debug(f'\n----------< DEBUG (compensation_procedure) >----------\nCompensation procedure finished with assessment matrix:\n{pprint.pformat(assessment_matrix)}\n----------<\ DEBUG (compensation_procedure) >----------')
+            
+            # if total discount is greater than MC, raise an exception
+            if MC and sum(self.assessment_matrix[-1, :]) > MC:
+                logger.warning(f'\n--------!!!\ WARNING !!!--------\nNo fair division exists for the given bidding matrix:\n{self.players_bids_for_bundles}\n--------!!!\ WARNING !!!--------')
+                raise Exception('No fair division exists for the given bidding matrix')
+            
+            # returning the assessment matrix after the compensation procedure step
+            return self.compensation_procedure(assessment_matrix, MC)
+                
+def bidding_for_envy_freeness(bidding_matrix: ValuationMatrix | list) -> dict:
     '''
-    This function runs the algorithm on the given matrix.
-
-    TESTS:
-    >>> m = ValuationMatrix([[50, 25, 10], [40, 25, 20], [35, 25, 25]])
-    >>> run(m)
-    Bidding for Envy Freeness
-    Initial Bidding Matrix: 
-    [[50 25 10]
-     [40 25 20]
-     [35 25 25]]
-    {'Player 1': {'Bundle': 1, 'Discount': 25.0},
-     'Player 2': {'Bundle': 2, 'Discount': 10.0},
-     'Player 3': {'Bundle': 3, 'Discount': 10.0}}
+    The Bidding for Envy Freeness function.
+    :param bidding_matrix: the bidding matrix to perform the Bidding for Envy Freeness algorithm on.
+    :return: the allocation of bundles and discounts after the Bidding for Envy Freeness algorithm.
     '''
+    bfef =  BiddingForEnvyFreeness(bidding_matrix)
+    return {player: {'bundle': index, 'discount': bfef.assessment_matrix[-1][index]} for index, player in enumerate(bfef.players_order)}
+        
+if __name__ == '__main__':
+    import sys 
+    import doctest
+    # doctest.testmod()
     logger.addHandler(logging.StreamHandler(sys.stdout))
     logger.setLevel(logging.INFO)
-    b = BiddingForEnvyFreeness(matrix)
-
-
-if __name__ == "__main__":
-    # doctest.testmod()
-    # logger.addHandler(logging.StreamHandler(sys.stdout))
-    # logger.setLevel(logging.INFO)
-    b1 = ValuationMatrix([[50, 25, 10], [40, 25, 20], [35, 25, 25]])
-    run(b1)
+    
+    matrix = ValuationMatrix([[50, 20, 10, 20], [60, 40, 15, 10], [0, 40, 25, 35], [50, 35, 10, 30]])
+    # matrix = ValuationMatrix([[60, 40, 15, 10], [50, 20, 10, 20], [0, 40, 25, 35], [50, 35, 10, 30]])
+    # matrix = ValuationMatrix([[60, 40, 15, 10], [0, 40, 25, 35], [50, 20, 10, 20], [50, 35, 10, 30]])
+    # matrix = ValuationMatrix([[60, 40, 15, 10], [0, 40, 25, 35], [50, 35, 10, 30], [50, 20, 10, 20]])
+    # matrix = ValuationMatrix([[60, 40, 15, 10], [0, 40, 25, 35], [50, 20, 10, 20], [50, 35, 10, 30]])
+    # matrix = ValuationMatrix([[50, 20, 10, 20],[50, 40, 15, 10],[0, 40, 25, 30], [50, 35, 10, 40]])
+    # matrix = ValuationMatrix([[25, 25, 25], [50, 40, 35], [10, 20, 25]])
+    # matrix = ValuationMatrix([[50, 40, 35], [25, 25, 25], [10, 20, 25]])
+    # matrix = ValuationMatrix([[10, 20, 25], [50, 40, 35], [25, 25, 25]])
+    # bfef = BiddingForEnvyFreeness(matrix)
+    
+    print(bidding_for_envy_freeness(matrix))
+    # print(bfef.M, bfef.C, bfef.MC)
