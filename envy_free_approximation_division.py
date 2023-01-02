@@ -4,7 +4,7 @@ import numpy as np
 from fairpy import AllocationMatrix, Allocation, ValuationMatrix
 
 logger = logging.getLogger()
-logging.basicConfig(filename="ev.log", level=logging.INFO)
+# logging.basicConfig(filename="ev.log", level=logging.INFO)
 
 """
 "Achieving Envy-freeness and Equitability with Monetary Transfers" by Haris Aziz (2021),
@@ -106,28 +106,40 @@ def envy_free_approximation(allocation: Allocation, eps: float = 0) -> dict:
     value_matrix = allocation.utility_profile_matrix()
     payments = np.zeros(allocation.num_of_agents)
     bundles = [[i] for i in range(allocation.num_of_agents)]
+    logger.info("envy value for each agent (before): %s", [x[0] - x[1] for x in
+                                                           zip([get_max(value_matrix[i], payments) for i in
+                                                                range(allocation.num_of_agents)],
+                                                               [value_matrix[i][i] - payments[i] for i in
+                                                                range(allocation.num_of_agents)])])
     still_envy = True
     while still_envy:
         still_envy = False
         # run on all agents and check if exist ε-envy
-        for i in range(len(value_matrix)):
-            if value_matrix[i][i] - payments[i] < get_max(value_matrix[i], payments) - eps:
+        for agent_i in range(len(value_matrix)):
+            if value_matrix[agent_i][agent_i] - payments[agent_i] < get_max(value_matrix[agent_i], payments) - eps:
                 # get the agent with max utility
-                agent_j = get_argmax(value_matrix[i], payments)
-                u1 = get_max(value_matrix[i], payments)
-                u2 = get_second_max(agent_j, value_matrix[i], payments)
+                agent_j = get_argmax(value_matrix[agent_i], payments)
+                u1 = get_max(value_matrix[agent_i], payments)
+                u2 = get_second_max(agent_j, value_matrix[agent_i], payments)
                 logger.debug("u1,u2: %g, %g", u1, u2)
                 # replace bundles
-                swap_columns(value_matrix, i, agent_j)
-                temp = bundles[i]
-                bundles[i] = bundles[agent_j]
+                swap_columns(value_matrix, agent_i, agent_j)
+                temp = bundles[agent_i]
+                bundles[agent_i] = bundles[agent_j]
                 bundles[agent_j] = temp
                 # replace payment value
-                temp_p = payments[i]
-                payments[i] = payments[agent_j] + (u1 - u2) + eps
+                temp_p = payments[agent_i]
+                payments[agent_i] = payments[agent_j] + (u1 - u2) + eps
                 payments[agent_j] = temp_p
-                logger.info("replace between agent_%g to agent_%g.", i, agent_j)
+                logger.debug("replace between agent_%g to agent_%g.", agent_i, agent_j)
                 still_envy = True
+
+    logger.info("envy value for each agent (after): %s", [x[0] - x[1] for x in
+                                                          zip([get_max(value_matrix[i], payments) for i in
+                                                               range(allocation.num_of_agents)],
+                                                              [value_matrix[i][i] - payments[i] for i in
+                                                               range(allocation.num_of_agents)])])
+
     return {"allocation": bundles, "payments": payments.tolist()}
 
 
