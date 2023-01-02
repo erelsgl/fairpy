@@ -145,7 +145,7 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
             temp_price_vector = copy.deepcopy(price_vector)
             for i in range(0, len(price_vector)):
                 temp = copy.deepcopy(price_vector)
-                temp[i] += (random.randint(1, 9)/10)*max_budget
+                temp[i] = (random.randint(1, 9)/10)*max_budget
                 queue.append(temp)
             queue = sorted(queue, key=lambda x: alpha_error(x))
             found_step = False
