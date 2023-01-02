@@ -4,6 +4,22 @@ import logging
 logging.basicConfig(filename="my_logger_file.log", level=logging.DEBUG)
 logger = logging.getLogger()
 
+
+def list_to_sort_str(bundle: list):
+    """
+    A function that sorts a list and turns it into a string
+    :param bundle: A list that we will sort and turn into a string
+    >>> list_to_sort_str(["a","c","b"])
+    'abc'
+    >>> list_to_sort_str(["v","t","y","b","r","k","e"])
+    'bekrtvy'
+    >>> list_to_sort_str(["z","y","x","w","f","s","q"])
+    'fqswxyz'
+    """
+    sort_str = "".join(sorted(bundle))
+    return sort_str
+
+
 def get_value(agent: str, boundle: list, eval_func: dict):
     """"
     A function that returns an agent's evaluation of a particular bundle
@@ -20,7 +36,7 @@ def get_value(agent: str, boundle: list, eval_func: dict):
     >>> get_value("A",[], eval_2)
     0
     """
-    curr_bundles = "".join(map(str, sorted(boundle))) #Convert the list to a sorted string
+    curr_bundles = list_to_sort_str(boundle) #Convert the list to a sorted string
     if curr_bundles:  #if the bundle not empty
         return eval_func[agent][curr_bundles]
     return 0
@@ -77,26 +93,26 @@ def calcuSWave(allocation: dict, eval_func: dict):
     sum_values = 0
     for agent in allocation:
         if allocation[agent]:  #Go through all the agents and sum up their social welfare in the given allocation
-            sum_values = sum_values + eval_func[agent]["".join(sorted(allocation[agent]))]
+            sum_values = sum_values + eval_func[agent][list_to_sort_str(allocation[agent])]
             logger.debug("current sum_value after agent %s: %d", agent, sum_values)
     logger.info("average of SW: %f",sum_values / len(allocation))
     return sum_values / len(allocation)  #return the average (the received sum divided by the number of agents)
 
 
-def list_sw(allo: dict, eval_func: dict, pay_list: dict):
+def check_equal(allo: dict, eval_func: dict, pay_list: dict):
     """
     A function to check if we have achieved equality
     :param allo: The current allocation
     :param eval_func: A dictionary of the evaluations of each agent for each bundle
     :param pay_list: A dictionary of each agent's payment
 
-    >>> list_sw(allocation_2, eval_2, {'A': -16.0, 'B': -16.0, 'C': -16.0, 'D': 64.0, 'E': -16.0})
+    >>> check_equal(allocation_2, eval_2, {'A': 56.0, 'B': -14.0, 'C': -14.0, 'D': -14.0, 'E': -14.0})
     True
-    >>> list_sw(allocation_2, eval_2, {'A': -16.0, 'B': -16.0, 'C': -15.0, 'D': 64.0, 'E': -16.0})
+    >>> check_equal(allocation_2, eval_2, {'A': -16.0, 'B': -16.0, 'C': -15.0, 'D': 64.0, 'E': -16.0})
     False
-    >>> list_sw(allocation_3, eval_3, {'A': -16.0, 'B': -16.0, 'C': -16.0, 'D': 64.0, 'E': -16.0})
+    >>> check_equal(allocation_3, eval_3, {'A': -16.0, 'B': -16.0, 'C': -16.0, 'D': 64.0, 'E': -16.0})
     False
-    >>> list_sw(allocation_3, eval_3, {'A': 2.5, 'B': -2.5, 'C': 7.5, 'D': -7.5})
+    >>> check_equal(allocation_3, eval_3, {'A': 2.5, 'B': -2.5, 'C': 7.5, 'D': -7.5})
     True
     """
     sw_list = []
@@ -154,7 +170,7 @@ def envy_freeness_and_equitability_with_payments(evaluation: dict, allocation: A
     payments = {}
     for agent in allocation:
         payments[agent] = get_value(agent, allocation[agent], evaluation) - sw_ave   #Calculation of the payment to each agent (the distance of the evaluation of the current bundle from the average of social welfare)
-    logger.warning("check if %g", list_sw(allocation, evaluation, payments))
+    logger.warning("check if %g", check_equal(allocation, evaluation, payments))
     return {"allocation": allocation, "payments": payments}
 
 
