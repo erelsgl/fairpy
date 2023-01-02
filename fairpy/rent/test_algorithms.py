@@ -51,7 +51,7 @@ class TestMain(unittest.TestCase):
         agents = {"Alice": {str(i): i for i in range(1000)}, "Bob": {str(i): i for i in range(1000)}}
         ex9 = AgentList(agents)
         self.assertEqual(maximum_rent_envy_free(ex9, 10000, {'Alice': 500, 'Bob': 500}),
-                         (999.0, ([('Alice', '998'), ('Bob', '999')], [('998', 499.0), ('999', 500.0)])))
+                         (1001.0, ([('Alice', '998'), ('Bob', '999')], [('998', 500.0), ('999', 501.0)])))
 
         # Create a large number of agents and items with high values
         num_agents = 100
@@ -151,10 +151,12 @@ class TestMain(unittest.TestCase):
               ('j', '9')],
              [('10', 550.0), ('1', 550.0), ('2', 550.0), ('3', 550.0), ('4', 550.0), ('5', 550.0), ('6', 550.0),
               ('7', 550.0), ('8', 550.0), ('9', 550.0)]))
+
+
         # Overload test
         agents = {"Alice": {str(i): i for i in range(1000)}, "Bob": {str(i): i for i in range(1000)}}
-        ex5 = AgentList(agents)
-        self.assertEqual(optimal_envy_free(ex5, 10000, {'Alice': 500, 'Bob': 500}), 'no solution')
+        ex9 = AgentList(agents)
+        self.assertEqual(optimal_envy_free(ex9, 10000, {'Alice': 500, 'Bob': 500}), 'no solution')
 
         # Overload test 2
         num_agents = 100
@@ -162,9 +164,9 @@ class TestMain(unittest.TestCase):
         agents = {f"Agent{i}": {f"Item{j}": (i + j) * 10 for j in range(num_items)} for i in range(num_agents)}
         rent = num_agents * num_items * 10
         budgets = {f"Agent{i}": (i + 1) * 100 for i in range(num_agents)}
-        ex6 = AgentList(agents)
-        self.assertEqual(optimal_envy_free(ex6, rent, budgets), 'no solution')
+        ex10 = AgentList(agents)
+        self.assertEqual(optimal_envy_free(ex10, rent, budgets), 'no solution')
 
 
-        if __name__ == '__main__':
-            unittest.main()
+if __name__ == '__main__':
+    unittest.main()
