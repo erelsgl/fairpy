@@ -2,6 +2,7 @@
 from fairpy import AgentList
 from typing import List, Tuple
 import networkx as nx
+from itertools import permutations
 
 def bundles_from_edges(match:set, G:nx.Graph) -> dict:
     bundles = {}
@@ -52,3 +53,13 @@ def selection_by_order(agents:AgentList, items:list, allocation:List[list], num_
 
 def isEven(n):
     return n % 2 == 0
+
+def get_agents_with_permutations_of_valuations(n,k):
+    ans = []
+    if n == 0 or k == 0:
+        raise ValueError(f"n and k must be at least 0, but n={n}, k={k}")
+    for i in permutations(range(k)):
+        ans.append(list(i))
+        if len(ans) == n:
+            break
+    return AgentList(ans)

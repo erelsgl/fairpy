@@ -12,9 +12,8 @@ from fairpy.items.proportional_borda_allocations.proportional_borda_allocations 
 import utils
 from fairpy import AgentList
 import pytest
-from itertools import permutations
+from itertools import permutations, chain
 from typing import Callable
-from itertools import chain
 
 
 def test_proportional_division_equal_number_of_items_and_players():
