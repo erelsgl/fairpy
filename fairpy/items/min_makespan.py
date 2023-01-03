@@ -122,7 +122,7 @@ class scedual:
     # delet all assignments, start over
     def clear(self): self._assignments.clear()
 
-    # are all jobs scedual
+    # are all jobs scedualed
     def complete(self) -> bool: return len(self._assignments) == self.jobs
 
     # current workload of spesific mechine
@@ -268,11 +268,6 @@ def LinearProgram(output: scedual, apprx_bound: float) -> bool:
     variables = cp.Variable(output.shape)
     # all variables are at least 0
     constraints = [variables >= 0]
-    # add a constraint that requires that at most #jobs + #mechines entries will be non 0
-    actives = cp.Variable(output.shape, boolean = True)
-    constraints.append(actives >= variables)
-    constraints.append(cp.sum(actives) <= output.jobs + output.mechines)
-
 
     # out of all mechines that can do job j in time <= aprrx_bound
     # only 1 may be assigned to handle it, for j in all Jobs
@@ -301,7 +296,8 @@ def LinearProgram(output: scedual, apprx_bound: float) -> bool:
     objective = cp.Minimize(makespan)
 
     prob = cp.Problem(objective, constraints)
-    prob.solve()
+    # simplex solver version opt to find most sparse solutions
+    prob.solve(solver = cp.GLPK)
     
     if prob.status != 'optimal':
         logger.info('LP status: %s', prob.status)
