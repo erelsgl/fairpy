@@ -45,7 +45,7 @@ class BiddingForEnvyFreeness:
         
         '''
         
-        logger.info(f'\n----------[ INFO ]----------\nInitializing BiddingForEnvyFreeness with bidding matrix:\n{matrix}\n----------[\ INFO ]----------')
+        logger.info(f'\n----------[ INFO ]----------\nInitializing BiddingForEnvyFreeness with bidding matrix:\n{matrix}\n----------------------------')
         
         # initializing the players bids for bundles matrix
         self.players_bids_for_bundles = matrix
@@ -56,25 +56,25 @@ class BiddingForEnvyFreeness:
         
 
         self.players_order = self.find_best_matching()
-        logger.debug(f'\n----------[ INFO ]----------\nFound best players order:\n{pprint.pformat(self.players_order)}\n----------[\ INFO ]----------')
+        logger.debug(f'\n----------[ INFO ]----------\nFound best players order:\n{pprint.pformat(self.players_order)}\n----------------------------')
         
         self.players_bids_for_bundles = ValuationMatrix([self.players_bids_for_bundles[i] for i in self.players_order])
-        logger.debug(f'\n----------[ INFO ]----------\nReordered players bids for bundles matrix:\n{pprint.pformat(self.players_bids_for_bundles)}\n----------[\ INFO ]----------')
+        logger.debug(f'\n----------[ INFO ]----------\nReordered players bids for bundles matrix:\n{pprint.pformat(self.players_bids_for_bundles)}\n----------------------------')
         
                 
         # finding M and C
         self.M, self.C, self.MC = self.find_m_c()
-        logger.debug(f'\n----------[ INFO ]----------\nFound M = {self.M}, C = {self.C}, M-C = {self.MC}\n----------[\ INFO ]----------')
+        logger.debug(f'\n----------[ INFO ]----------\nFound M = {self.M}, C = {self.C}, M-C = {self.MC}\n----------------------------')
         
         # initializing the assessment matrix
         self.assessment_matrix = self.initialize_assessment_matrix()
-        logger.debug(f'\n----------[ INFO ]----------\nInitialized assessment matrix:\n{pprint.pformat(self.assessment_matrix)}\n----------[\ INFO ]----------')
+        logger.info(f'\n----------[ INFO ]----------\nInitialized assessment matrix:\n{pprint.pformat(self.assessment_matrix)}\n----------------------------')
         
         # running the compensation procedure
         self.compensation_procedure()
         
         
-        logger.info(f'\n----------[ INFO ]----------\nFinished BiddingForEnvyFreeness with assessment matrix:\n{pprint.pformat(self.assessment_matrix)}\n----------[\ INFO ]----------')
+        logger.info(f'\n----------[ INFO ]----------\nFinished BiddingForEnvyFreeness with assessment matrix:\n{pprint.pformat(self.assessment_matrix)}\n----------------------------')
         
         
     def find_best_matching(self, matrix: ValuationMatrix = None) -> list:
@@ -96,32 +96,32 @@ class BiddingForEnvyFreeness:
         :return: a list of allocated bundles for each player.
         >>> matrix = [[3, 2, 1], [2, 3, 1], [2, 1, 3]]
         >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
-        >>> print(bidding_for_envy_freeness.find_best_matching())
+        >>> print(bidding_for_envy_freeness.find_best_matching(ValuationMatrix(matrix)))
         [0, 1, 2]
         >>> matrix = [[2, 3, 1], [3, 2, 1], [2, 1, 3]]
         >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
-        >>> print(bidding_for_envy_freeness.find_best_matching())
+        >>> print(bidding_for_envy_freeness.find_best_matching(ValuationMatrix(matrix)))
         [1, 0, 2]
         >>> matrix = [[2, 3, 1], [2, 1, 3], [3, 2, 1]]
         >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
-        >>> print(bidding_for_envy_freeness.find_best_matching())
+        >>> print(bidding_for_envy_freeness.find_best_matching(ValuationMatrix(matrix)))
         [2, 0, 1]
         
         >>> matrix = [[50, 20, 10, 20], [60, 40, 15, 10], [0, 40, 25, 35], [50, 35, 10, 30]]
         >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
-        >>> print(bidding_for_envy_freeness.find_best_matching())
+        >>> print(bidding_for_envy_freeness.find_best_matching(ValuationMatrix(matrix)))
         [0, 1, 2, 3]
         >>> matrix = [[60, 40, 15, 10], [50, 20, 10, 20], [0, 40, 25, 35], [50, 35, 10, 30]]
         >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
-        >>> print(bidding_for_envy_freeness.find_best_matching())
+        >>> print(bidding_for_envy_freeness.find_best_matching(ValuationMatrix(matrix)))
         [1, 0, 2, 3]
         >>> matrix = [[60, 40, 15, 10], [0, 40, 25, 35], [50, 20, 10, 20], [50, 35, 10, 30]]
         >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
-        >>> print(bidding_for_envy_freeness.find_best_matching())
+        >>> print(bidding_for_envy_freeness.find_best_matching(ValuationMatrix(matrix)))
         [2, 0, 1, 3]
         >>> matrix = [[60, 40, 15, 10], [0, 40, 25, 35], [50, 35, 10, 30], [50, 20, 10, 20]]
         >>> bidding_for_envy_freeness = BiddingForEnvyFreeness(matrix)
-        >>> print(bidding_for_envy_freeness.find_best_matching())
+        >>> print(bidding_for_envy_freeness.find_best_matching(ValuationMatrix(matrix)))
         [3, 0, 1, 2]
         
         '''
@@ -272,7 +272,7 @@ class BiddingForEnvyFreeness:
             
             # adding the remaining MC to the last row of the assessment matrix (the players discounts) evenly
             assessment_matrix[-1, :] += int((self.MC - sum(self.assessment_matrix[-1, :])) / self.players_bids_for_bundles.num_of_agents)
-            logger.debug(f'\n----------< DEBUG (compensation_procedure) >----------\nCompensation procedure finished with assessment matrix:\n{pprint.pformat(assessment_matrix)}\n----------<\ DEBUG (compensation_procedure) >----------')
+            logger.debug(f'\n----------< DEBUG (compensation_procedure) >----------\nCompensation procedure finished with assessment matrix:\n{pprint.pformat(assessment_matrix)}\n------------------------------------------------------')
 
             # returning the assessment matrix - final result
             return assessment_matrix
@@ -280,21 +280,21 @@ class BiddingForEnvyFreeness:
         # compensation procedure is not finished, continue
         else:
             
-            logger.debug(f'\n----------< DEBUG (compensation_procedure) >----------\nCompensation procedure started with assessment matrix:\n{pprint.pformat(assessment_matrix)}\n----------<\ DEBUG (compensation_procedure) >----------')
+            logger.debug(f'\n----------< DEBUG (compensation_procedure) >----------\nCompensation procedure started with assessment matrix:\n{pprint.pformat(assessment_matrix)}\n------------------------------------------------------')
             
             # finding the maximum enviness of each player, if exists. else - zero
             compansations = [max(assessment_matrix[player]) - assessment_matrix[player][player] if any([x > assessment_matrix[player][player] for x in assessment_matrix[player]]) else 0 for player in range(len(assessment_matrix)-1)]
-            logger.debug(f'\n----------< DEBUG (compensation_procedure) >----------\nCompansations:\n{pprint.pformat(compansations)}\n----------<\ DEBUG (compensation_procedure) >----------')
+            logger.debug(f'\n----------< DEBUG (compensation_procedure) >----------\nCompansations:\n{pprint.pformat(compansations)}\n------------------------------------------------------')
             
            # adding the compansations to the assessment matrix
             for compansation in range(len(compansations)):
                 # adding the compansation to the player's column
                 assessment_matrix[:, compansation] += compansations[compansation]
-            logger.debug(f'\n----------< DEBUG (compensation_procedure) >----------\nCompensation procedure finished with assessment matrix:\n{pprint.pformat(assessment_matrix)}\n----------<\ DEBUG (compensation_procedure) >----------')
+            logger.debug(f'\n----------< DEBUG (compensation_procedure) >----------\nCompensation procedure finished with assessment matrix:\n{pprint.pformat(assessment_matrix)}\n------------------------------------------------------')
             
             # if total discount is greater than MC, raise an exception
             if MC and sum(self.assessment_matrix[-1, :]) > MC:
-                logger.warning(f'\n--------!!!\ WARNING !!!--------\nNo fair division exists for the given bidding matrix:\n{self.players_bids_for_bundles}\n--------!!!\ WARNING !!!--------')
+                logger.warning(f'\n--------!!! WARNING !!!--------\nNo fair division exists for the given bidding matrix:\n{self.players_bids_for_bundles}\n-------------------------------')
                 raise Exception('No fair division exists for the given bidding matrix')
             
             # returning the assessment matrix after the compensation procedure step
@@ -312,7 +312,7 @@ def bidding_for_envy_freeness(bidding_matrix: ValuationMatrix | list) -> dict:
 if __name__ == '__main__':
     import sys 
     import doctest
-    # doctest.testmod()
+    doctest.testmod()
     logger.addHandler(logging.StreamHandler(sys.stdout))
     logger.setLevel(logging.INFO)
     
@@ -325,7 +325,7 @@ if __name__ == '__main__':
     # matrix = ValuationMatrix([[25, 25, 25], [50, 40, 35], [10, 20, 25]])
     # matrix = ValuationMatrix([[50, 40, 35], [25, 25, 25], [10, 20, 25]])
     # matrix = ValuationMatrix([[10, 20, 25], [50, 40, 35], [25, 25, 25]])
-    # bfef = BiddingForEnvyFreeness(matrix)
+    bfef = BiddingForEnvyFreeness(matrix)
     
-    print(bidding_for_envy_freeness(matrix))
+    # print(bidding_for_envy_freeness(matrix))
     # print(bfef.M, bfef.C, bfef.MC)
