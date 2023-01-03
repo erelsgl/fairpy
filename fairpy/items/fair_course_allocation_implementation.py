@@ -393,19 +393,37 @@ if __name__ == '__main__':
     # capacity: List[int] = [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1]
     # num_of_courses = 4
     #
-    # placements = []
-    # for i in utilities.agents():
-    #     placements.append(max_utility(utilities[i], budgets[i], prices, num_of_courses))
     #
-    # # course_allocation test:
-    # print("course_allocation:")
-    # print(np.array(course_allocation(utilities, budgets, prices, capacity, num_of_courses)))
-    # # neighbors test:
-    # print("neighbors:")
-    # print(neighbors(utilities, budgets, prices, capacity, num_of_courses))
-    # # score test:
-    # print("score:")
-    # print(score(placements, capacity))
-    # # max_utility test:
-    # print("max_utility")
-    # print(max_utility(utilities[0], budgets[0], prices, num_of_courses))
+    utilities = ValuationMatrix([[1, 2, 33, 44, 34],
+                                 [4, 9, 90, 6, 8],
+                                 [1, 2, 7, 3, 14],
+                                 [58, 95, 9, 5, 2],
+                                 [77, 7, 14, 21, 63],
+                                 [3, 6, 1, 64, 3],
+                                 [88, 2, 4, 6, 78],
+                                 [5, 1, 7, 3, 14],
+                                 [58, 95, 33, 5, 2],
+                                 [7, 8, 34, 21, 28]])
+
+    bound: float = 0
+    budgets: List[float] = [1.0, 1.11, 1.2, 1.7, 1.56, 1.3, 1.41, 1.62, 1.52, 1.435]
+    prices: List[float] = [1.9, 0.3, 1.6, 1.2, 0.8]
+    capacity: List[int] = [2, 2, 2, 2, 2]
+    num_of_courses = 2
+
+    placements = []
+    for i in utilities.agents():
+        placements.append(max_utility(utilities[i], budgets[i], prices, num_of_courses))
+
+    # course_allocation test:
+    print("course_allocation:")
+    print(np.array(course_allocation(utilities, budgets, prices, capacity, num_of_courses)))
+    # neighbors test:
+    print("neighbors:")
+    print(neighbors(utilities, budgets, prices, capacity, num_of_courses))
+    # score test:
+    print("score:")
+    print(score(placements, capacity))
+    # max_utility test:
+    print("max_utility")
+    print(max_utility(utilities[0], budgets[0], prices, num_of_courses))
