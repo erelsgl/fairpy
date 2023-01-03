@@ -127,3 +127,4 @@ def algorithm2(price_vector:list[float], maximum:int, eps:float, csp_mapping:cal
         # if(J_hat.capacity <= J_hat.max_capacity or maximum-J_hat.price <= eps):
         #     return [c.price for c in courses]
     return [c.price for c in courses] #return at the end
+

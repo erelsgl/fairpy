@@ -1,6 +1,6 @@
 from algorithm2 import algorithm2,Course,Student,csp_mapping,copy,math,cmp_to_key
 
-def test1(): 
+def test_1(): 
     a = Course(name='a', price=9, max_capacity=5)
     b = Course(name='b', price=2, max_capacity=3)
     c = Course(name='c', price=4.5, max_capacity=5)
@@ -17,7 +17,7 @@ def test1():
     price_vector = [9,2,4.5]
     assert algorithm2(price_vector, maximum, eps, csp_mapping, students, courses) == [9,10,4.5]
 
-def test2(): 
+def test_2(): 
     a = Course(name='a', price=2.4, capacity=0, max_capacity=5)
     b = Course(name='b', price=5, capacity=0, max_capacity=4)
     c = Course(name='c', price=10.4, capacity=0, max_capacity=5)
@@ -37,7 +37,7 @@ def test2():
     assert algorithm2(price_vector, maximum, eps, csp_mapping, students, courses) == [2.4,8.125,10.4]
 
 
-def test3():
+def test_3():
     a = Course(name='a', price=3, max_capacity=5)
     b = Course(name='b', price=4, max_capacity=3)
     c = Course(name='c', price=3, max_capacity=5)

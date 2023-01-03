@@ -6,12 +6,13 @@ import logging
 
 
 logger = logging.getLogger(__name__)
-console = logging.StreamHandler()  
-logger.setLevel(logging.WARNING)
+console = logging.StreamHandler()  # writes to stderr (= cerr)
 logfile = logging.FileHandler("my_logger3.log", mode="w") 
 logger.handlers = [console,logfile]
 logfile.setFormatter(logging.Formatter('%(asctime)s: %(levelname)s: %(name)s: Line %(lineno)d: %(message)s'))
-logfile.setLevel(logging.DEBUG)
+
+logger.setLevel(logging.DEBUG)
+console.setLevel(logging.INFO)
 
 def mapping_csp(courses:list[Course], students:list[Student], helper:dict, students_matrix:list[list[bool]]):
     '''

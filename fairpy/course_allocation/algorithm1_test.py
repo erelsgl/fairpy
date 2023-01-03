@@ -54,6 +54,8 @@ def test3():
     max_budget = 18
     assert(algorithm1(students, courses, max_budget, time_to= 1, seed = 3) == [5.3999999999999995, 14.4, 7.2, 16.2, 1.8, 12.6])#7
 
+
+
 '''
 disclaimer for testing
 the tests are not conclusive since computing power may vary
