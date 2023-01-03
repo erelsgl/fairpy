@@ -6,6 +6,16 @@ import time
 import random
 import copy
 import doctest
+import logging
+
+logger = logging.getLogger(__name__)
+console = logging.StreamHandler()  # writes to stderr (= cerr)
+logfile = logging.FileHandler("my_logger1.log", mode="w") 
+logger.handlers = [console,logfile]
+logfile.setFormatter(logging.Formatter('%(asctime)s: %(levelname)s: %(name)s: Line %(lineno)d: %(message)s'))
+
+logger.setLevel(logging.DEBUG)
+console.setLevel(logging.INFO)
 
 def reset_update_prices(price_vector, courses:list[Course]):
     '''
@@ -120,9 +130,7 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
     >>> students = [s1, s2, s3, s4, s5, s6]
     >>> max_budget = 18
     >>> algorithm1(students, courses, max_budget, time_to= 2.0, seed = 3)
-    [9.0, 1.8, 7.2]
-    >>> algorithm1(students, courses, max_budget, time_to= 0.001, seed = 3)
-    [5.3999999999999995, 7.2, 5.3999999999999995]
+    [5.3999999999999995, 5.3999999999999995, 1.8]
     '''
     def alpha_error(price_vector):
         map_price_demand(price_vector, max_budget, students, courses)
@@ -133,7 +141,7 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
     pStar = [] 
     start_time = time.time()
     best_error = float("inf")
-    random.seed(seed)
+    random.seed(seed) #to hold the random number generator
     while(time.time() - start_time < time_to):
         price_vector = [((random.randint(1, 9)/10)*max_budget) for i in range(len(courses))]
         map_price_demand(price_vector, max_budget, students, courses)
@@ -142,25 +150,27 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
         c = 0
         while c < 5:
             queue = []
-            temp_price_vector = copy.deepcopy(price_vector)
             for i in range(0, len(price_vector)):
                 temp = copy.deepcopy(price_vector)
                 temp[i] = (random.randint(1, 9)/10)*max_budget
                 queue.append(temp)
             queue = sorted(queue, key=lambda x: alpha_error(x))
+            # for price in queue:
             found_step = False
             while(queue and not found_step):#3
                 temp = queue.pop()
                 if temp not in tabu_list:
+                    logger.debug("%s", str(temp))
                     found_step = True
             #end of while 3
             if(not queue) : c = 5
             else:
-                price_vector = temp_price_vector
+                price_vector = temp
                 tabu_list.add(temp)
                 current_error = alpha_error(price_vector)
                 if(current_error < search_error):
                     search_error = current_error
+                    logger.debug("best error is %d", search_error)
                     c = 0
                 else:
                     c = c + 1
@@ -168,10 +178,10 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
                 if(current_error < best_error):
                     best_error = current_error
                     pStar = price_vector
+                    logger.info("best error is %d and it price vector \n%s", best_error, str(pStar))
             #end of if
         #end of while 2
     #end of while 1
-    map_price_demand(pStar, max_budget, students, courses)
     return pStar
 
 def check_this():
@@ -196,7 +206,5 @@ def check_this():
     s12 = Student(name='s12', budget=18, year=1, courses=[], preferences=([d,f,e]))
     students = [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12]
     max_budget = 18
-    # assert(algorithm1(students, courses, max_budget, time_to= 1, seed = 3) == [3.0, 4.0, 3.0])
-    # #when we giving sufficient time for the algorithm it's getting the (best error == 3)
     print(algorithm1(students, courses, max_budget, time_to= 1, seed = 3))
 check_this()

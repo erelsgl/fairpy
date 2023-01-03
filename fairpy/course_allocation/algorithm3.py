@@ -6,7 +6,7 @@ import logging
 
 
 logger = logging.getLogger(__name__)
-console = logging.StreamHandler()  # writes to stderr (= cerr)
+console = logging.StreamHandler()  
 logger.setLevel(logging.WARNING)
 logfile = logging.FileHandler("my_logger3.log", mode="w") 
 logger.handlers = [console,logfile]

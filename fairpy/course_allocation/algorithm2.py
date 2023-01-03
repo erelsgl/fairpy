@@ -7,24 +7,13 @@ import doctest
 import logging
 
 logger = logging.getLogger(__name__)
-console = logging.StreamHandler()  # writes to stderr (= cerr)
+console = logging.StreamHandler() 
 logfile = logging.FileHandler("my_logger2.log", mode="w") 
 logger.handlers = [console,logfile]
 logfile.setFormatter(logging.Formatter('%(asctime)s: %(levelname)s: %(name)s: Line %(lineno)d: %(message)s'))
 
 logger.setLevel(logging.DEBUG)
 console.setLevel(logging.WARNING)
-# console.setLevel(logging.WARNING)
-# logfile = logging.FileHandler("./my_logger3.log", mode="w") 
-
-
-# logger = logging.getLogger(__name__)
-# console = logging.StreamHandler()  # writes to stderr (= cerr)
-# # logfile = logging.FileHandler("my_logger2.log", mode="w") 
-# logger.handlers = [console]
-# # logfile.setFormatter(logging.Formatter('%(asctime)s: %(levelname)s: %(name)s: Line %(lineno)d: %(message)s'))
-# console.setLevel(logging.WARNING)
-# logfile.setLevel(logging.DEBUG)
 
 def csp_mapping(students:list[Student],courses:list[Course]):
     '''

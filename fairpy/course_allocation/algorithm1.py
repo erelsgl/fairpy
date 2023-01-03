@@ -6,6 +6,16 @@ import time
 import random
 import copy
 import doctest
+import logging
+
+logger = logging.getLogger(__name__)
+console = logging.StreamHandler() 
+logfile = logging.FileHandler("my_logger1.log", mode="w") 
+logger.handlers = [console,logfile]
+logfile.setFormatter(logging.Formatter('%(asctime)s: %(levelname)s: %(name)s: Line %(lineno)d: %(message)s'))
+
+logger.setLevel(logging.DEBUG)
+console.setLevel(logging.INFO)
 
 def reset_update_prices(price_vector, courses:list[Course]):
     '''
@@ -145,10 +155,12 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
                 temp[i] = (random.randint(1, 9)/10)*max_budget
                 queue.append(temp)
             queue = sorted(queue, key=lambda x: alpha_error(x))
+            # for price in queue:
             found_step = False
             while(queue and not found_step):#3
                 temp = queue.pop()
                 if temp not in tabu_list:
+                    logger.debug("%s", str(temp))
                     found_step = True
             #end of while 3
             if(not queue) : c = 5
@@ -158,6 +170,7 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
                 current_error = alpha_error(price_vector)
                 if(current_error < search_error):
                     search_error = current_error
+                    logger.debug("best error is %d", search_error)
                     c = 0
                 else:
                     c = c + 1
@@ -165,6 +178,7 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
                 if(current_error < best_error):
                     best_error = current_error
                     pStar = price_vector
+                    logger.info("best error is %d and it price vector \n%s", best_error, str(pStar))
             #end of if
         #end of while 2
     #end of while 1
