@@ -2,8 +2,8 @@
 
 
 
-from ast import List
 from collections import defaultdict
+import math
 from fairpy.agents import AdditiveAgent
 from fairpy.allocations import Allocation
 import pytest
@@ -15,7 +15,7 @@ def create_bid_sets(num_players, bid_set_size):
     """
     This function create the bid set for each Agent with this bids he can buy courses
     >>> create_bid_sets(3,2)
-    [[6, 1], [5, 3], [4, 2]]
+    [[6, 1], [5, 2], [4, 3]]
     """
     # Define the global bid set B as a list of integers from 1 to num_players*bid_set_size
     B = [i for i in range(1, num_players*bid_set_size+1)]
@@ -37,14 +37,15 @@ def create_turns(num_players, num_picks):
     """
     This function create a an array that represt turn of each player by index to create a fair bids.
     >>> create_turns(3,6)
-    [0, 1, 2, 1, 2, 0]
+    [0, 1, 2, 2, 1, 0]
     """
     turns = []
   
-    for i in range(num_picks):
-        # Add the player to the turns list, rotating the order of the picks between rounds
-        turns.append((i + (i // num_players)) % num_players)
-        # The expression (i + (i // num_players)) % num_players rotates the order of the picks between rounds
+    for i in range(int(num_picks / num_players)):
+        if i % 2 == 0:
+            turns.extend([player for player in range(0,num_players)])
+        else:
+            turns.extend(reversed([player for player in range(0,num_players)]))
     return turns
 
 def has_common_object(list1, list2):
@@ -113,19 +114,23 @@ def course_allocation(agents: list[AdditiveAgent],course_capacity:int,course_lis
     {'Alice': {c1,c4}, 'Bob': {c2,c3}}
     """
     list_of_course_preference = [[] for _ in agents]
+
     for i,agent in enumerate(agents):
         list_of_course_preference [i] = sorted([course for course in course_list],key= lambda x: agent.value({x})) 
     bids_coins =create_bid_sets(len(agents),course_amount_per_agent)
     LOGGER.info(f"Created the bids for each player: {bids_coins}")
+
     Ac = {}
     for course in course_list:
         Ac[course] = [] 
     active = True
+
     while active:
         active = False
         for i in range(len(agents)):
             B_TAG = []
             LOGGER.info(f"{agents[i].name()} start its turn")
+
             for course in list_of_course_preference[i]:
                 if has_common_object(bids_coins[i],Ac[course]) is False:
                     p_Ac  = 0 if len(Ac[course])< course_capacity else min(Ac[course])
@@ -139,11 +144,14 @@ def course_allocation(agents: list[AdditiveAgent],course_capacity:int,course_lis
                             Ac[course].remove(min(Ac[course]))
                             LOGGER.info(f"Bid coin {p_Ac} removed from {course} bids group current bids are:{Ac[course]}")
                         active = True
+
                 else:
                     b_star = [bid for bid in bids_coins[i] if bid in Ac[course]][0]
                     b_double_star = calculate_b_double_star(bids_coins[i],B_TAG,b_star)
+
                     if b_double_star:
                         B_TAG.append(b_double_star)
+
                     else:
                         Ac[course].remove(b_star)
                         LOGGER.info(f"Bid coin {b_star} removed from {course} current bids are:{Ac[course]}")
