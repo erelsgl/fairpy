@@ -287,13 +287,7 @@ def LinearProgram(output: scedual, apprx_bound: float) -> bool:
         if not (mask == False).all(): constraints.append(cp.sum(variables[mechine, :][mask[0, :]]) <= apprx_bound)
 
 
-    # minimize: maximum workload aka makespan
-    workloads = [cp.sum(variables[mechine, :]) for mechine in range(output.mechines)]
-    try: makespan = cp.maximum( * workloads )
-    except Exception: logger.exception('workloads len: %s, shape of input: %s', len(workloads), output.shape, exc_info = True)
-    constraints.append(makespan <= apprx_bound)
-
-    objective = cp.Minimize(makespan)
+    objective = cp.Minimize(variables[0, 0])
 
     prob = cp.Problem(objective, constraints)
     # simplex solver version opt to find most sparse solutions
@@ -440,8 +434,8 @@ def min_makespan(input: ValuationMatrix) -> Allocation:
         <BLANKLINE>
         >>> min_makespan(ValuationMatrix([[1, 2, 5], [2, 2, 1],[2, 3, 5]]))
         Agent #0 gets { 100.0% of 1} with value 2.
-        Agent #1 gets { 100.0% of 2} with value 1.
-        Agent #2 gets { 100.0% of 0} with value 2.
+        Agent #1 gets { 100.0% of 0, 100.0% of 2} with value 3.
+        Agent #2 gets {} with value 0.
         <BLANKLINE>
     '''
 

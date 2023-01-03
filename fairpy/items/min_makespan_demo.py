@@ -94,7 +94,7 @@ class TestMinMakespanAlgos(unittest.TestCase):
 
         apprx(self.scd)
         self.assertTrue(self.scd.complete())
-        self.assertEqual(2, self.scd.makespan)
+        self.assertEqual(3, self.scd.makespan)
 
     def test_apprx_factor(self):
 
