@@ -1,6 +1,6 @@
 # data structures
 import numpy as np
-from fairpy import ValuationMatrix
+from fairpy import ValuationMatrix, Allocation, AllocationMatrix
 # psedu random functions
 from numpy.random import randint, uniform
 # convex optimization
@@ -8,7 +8,7 @@ import cvxpy as cp
 # graph search algorithms
 import networkx as nx
 # data types
-from typing import Callable, Iterable, Iterator, Tuple, Dict, Any
+from typing import Callable, Iterator, Tuple, Dict, Any
 # iteration tool
 from itertools import product
 # deep copy
@@ -22,16 +22,10 @@ logging_format = '%(levelname)s - %(message)s'
 
 logging.basicConfig(level = logging.DEBUG, filename = 'pyproject.log', filemode = 'w', format = logging_format)
 
-file_handler = logging.FileHandler("pyproject.log")
-file_handler.setLevel(logging.INFO)
 stream_handler = logging.StreamHandler()
 stream_handler.setLevel(logging.ERROR)
-
 formatter = logging.Formatter(logging_format)
-file_handler.setFormatter(formatter)
 stream_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
 
 
@@ -76,7 +70,6 @@ class scedual:
      '''
 
     def __init__(self) -> None:
-        super().__init__()
 
         self.costs : ValuationMatrix
         self._assignments : dict
@@ -397,7 +390,7 @@ def RandomTesting(algo: MinMakespanAlgo, iterations: int, **kwargs):
     scd = scedual()
 
     for i in range(iterations):
-        MinMakespan(algo, ValuationMatrix(uniform(1, 3, (randint(1, 20), randint(1, 20)))), scd, **kwargs)
+        MinMakespan(algo, ValuationMatrix(uniform(1, 3, (randint(1, 60), randint(1, 20)))), scd, **kwargs)
         yield scd.makespan
 
 
@@ -422,7 +415,7 @@ def compare(algo1: Tuple[MinMakespanAlgo, Dict[str, Any]], algo2: Tuple[MinMakes
 
     for i in range(iterations):
 
-        inpt = ValuationMatrix(uniform(1, 3, (randint(1, 20), randint(1, 20))))
+        inpt = ValuationMatrix(uniform(1, 3, (randint(1, 60), randint(1, 20))))
 
         MinMakespan(algo1[0], inpt, scd1, **algo1[1])
         MinMakespan(algo2[0], inpt, scd2, **algo2[1])
@@ -434,7 +427,43 @@ def compare(algo1: Tuple[MinMakespanAlgo, Dict[str, Any]], algo2: Tuple[MinMakes
 
     return score1, score2
 
+
+" The Interface Method "
+
+def min_makespan(input: ValuationMatrix) -> Allocation:
+
+    ''' 
+        This method returns a 2-approximation of the optimal minimum makespan.
+        Both as the actuall scedualing and the makespan.
+
+        >>> min_makespan(ValuationMatrix([[1, 5, 1, 10], [2, 4, 4, 3], [2, 5, 3, 3], [3, 3, 7, 10]]))
+        Agent #0 gets { 100.0% of 0, 100.0% of 2} with value 2.
+        Agent #1 gets { 100.0% of 3} with value 3.
+        Agent #2 gets {} with value 0.
+        Agent #3 gets { 100.0% of 1} with value 3.
+        <BLANKLINE>
+        >>> min_makespan(ValuationMatrix([[1, 2, 5], [2, 2, 1],[2, 3, 5]]))
+        Agent #0 gets { 100.0% of 1} with value 2.
+        Agent #1 gets { 100.0% of 2} with value 1.
+        Agent #2 gets { 100.0% of 0} with value 2.
+        <BLANKLINE>
+    '''
+
+    # executing algorithm
+    output = scedual()
+    output.build(input)
+    apprx(output)
+
+    # casting output
+    assignments = output.assignments
+    allocations = np.zeros(output.shape)
+    for job in assignments: allocations[assignments[job], job] = 1
+
+    return Allocation(agents = input, bundles = AllocationMatrix(allocations))
+
 if __name__ == '__main__':
 
     import doctest
-    doctest.testmod(verbose = True) 
+    
+    failures, tests = doctest.testmod(report = True)
+    print("{} failures, {} tests".format(failures, tests))

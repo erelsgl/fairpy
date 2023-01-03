@@ -1,4 +1,4 @@
-from israels_MinMakespan_algorithm import *
+from fairpy.items.min_makespan import *
 import unittest
 
 
@@ -143,12 +143,6 @@ class TestMinMakespanAlgos(unittest.TestCase):
         self.assertEqual(5, self.scd.makespan)
         MinMakespan(greedy, tradeof, self.scd)
         self.assertEqual(7, self.scd.makespan)
-
-    def test_supiriorty(self):
-
-       print('avg makespan for the approximation algorithm: ', sum(res for res in RandomTesting(apprx, 80)) / 80)
-       print('----------')
-       print('avg makespan for the greedy algorithm: ', sum(res for res in RandomTesting(greedy, 80)) / 80)
 
 
 if __name__ == '__main__':
