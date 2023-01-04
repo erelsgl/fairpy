@@ -17,6 +17,8 @@ from typing import *
 from fairpy import AgentList
 from fairpy.items.utilitarian_matching import instance_to_graph, matching_to_allocation
 from fairpy import AdditiveAgent
+import numpy as np
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -70,6 +72,10 @@ def Bounded_Subsidy(agents: AgentList, items: Dict[str,int]=None, weights: Dict[
     >>> print(Bounded_Subsidy(agents5))
     {'Alice': ['b'], 'Bob': ['a']}
 
+    >>> agents6 = AgentList([[3,2],[4,1]])
+    >>> print(Bounded_Subsidy(agents6))
+    {'Agent #0': [1], 'Agent #1': [0]}
+
     """
     assert isinstance(agents, AgentList)
     allTheItems = agents[0].all_items() # list of all items
@@ -111,21 +117,34 @@ def allocate_items_with_Subsidy(agents: AgentList, items: Dict[str,int]=None, we
     and it returns a bundle of agents each holding the best allocation for their own valuation,
     with the subsidy that eliminates envy
 
+    ###### Two agens ######
     >>> agents1 = AgentList({"Alice": {"a":3, "b":5}, "Bob": {"a":6, "b":7}})
     >>> allocate_items_with_Subsidy(agents1)
-    Alice gets ['b'] ,Bob gets ['a'] and subsidy of 1
+    Alice gets ['b'] with no subsidy
+    Bob gets ['a'] with subsidy of 1
 
     >>> agents2 = AgentList({"Alice": {"a":3, "b":2}, "Bob": {"a":4, "b":1}})
     >>> allocate_items_with_Subsidy(agents2)
-    Alice gets ['b'] and subsidy of 1 ,Bob gets ['a']
+    Alice gets ['b'] with subsidy of 1
+    Bob gets ['a'] with no subsidy
 
     >>> agents3 = AgentList({"Alice": {"a":4, "b":10, "c":8, "d":7}, "Bob": {"a":5, "b":9, "c":5, "d":10}})
     >>> allocate_items_with_Subsidy(agents3)
-    Alice gets ['b', 'c'] ,Bob gets ['d', 'a'] .No subsidy
+    Alice gets ['b', 'c'] with no subsidy
+    Bob gets ['d', 'a'] with no subsidy
 
     >>> agents4 = AgentList({"Alice": {"a":10, "b":8, "c":5, "d":9, "e":3, "f":0}, "Bob": {"a":9, "b":2, "c":4, "d":7, "e":10, "f":1}})
     >>> allocate_items_with_Subsidy(agents4)
-    Alice gets ['a', 'b', 'c'] ,Bob gets ['e', 'd', 'f'] .No subsidy
+    Alice gets ['a', 'b', 'c'] with no subsidy
+    Bob gets ['e', 'd', 'f'] with no subsidy
+
+    ###### Three agents ######
+
+    >>> agents6 = AgentList({"Alice": {"a":3, "b":4, "c":6}, "Bob": {"a":4, "b":3, "c":1}, "Max": {"a":4, "b":5, "c":1}})
+    >>> allocate_items_with_Subsidy(agents5)
+    Alice gets ['c'] with subsidy of 1
+    Bob gets ['a'] with no subsidy
+    Max gets ['b'] with no subsidy
 
     """
 
@@ -133,16 +152,25 @@ def allocate_items_with_Subsidy(agents: AgentList, items: Dict[str,int]=None, we
     assert isinstance(agents, AgentList)
     allTheItems = agents[0].all_items() # list of all items
 
-    sum_of_all_values_Alice = agents[0].value(list(allTheItems))
-    sum_of_all_values_bob = agents[1].value(list(allTheItems))
+    # list of the sum of all the values of the items for all agents
+    sum_of_all_values_agents = {}
+    # list of the values of the items that allocate to the agent
+    sum_items_val_that_agent_gets = {}
+
+    # Initialize both lists
+    i = 0
+    while i < len(agents):
+        key = agents[i].name()
+        value = agents[i].value(list(allTheItems))
+        sum_of_all_values_agents[key] = value
+        sum_items_val_that_agent_gets[key] = 0
+        i += 1
 
     if items is None:
         items = {item:1 for item in allTheItems}
-    result = {agent.name(): [] for agent in agents} # empty list for the result => {agent.name: ['item.name']}
-    # print(allTheItems)
-    
-    sum_Alice = 0
-    sum_Bob = 0
+
+    # empty list for the result => {agent.name: ['item.name']}
+    result = {agent.name(): [] for agent in agents} 
 
     while len(items) > 0: # The process ends when every item has been allocated
         # The valuation graph H is the complete bipartite graph on vertex sets I and J, where edge (i, j) has weight vi(j)
@@ -155,12 +183,6 @@ def allocate_items_with_Subsidy(agents: AgentList, items: Dict[str,int]=None, we
         logger.info("Matching: %s", Mt)
         # if agent i is matched to item j = µti then we allocate item µti to that agent
         agentsBundle = matching_to_allocation(Mt, agent_names=agents.agent_names()) # ממירה התאמה של אחד לרבים בגרף דו-חלקי
-        # print(agentsBundle)
-        agent1 = (list(agentsBundle.keys())[0])
-        # agent2 = (list(agentsBundle.keys())[1])
-        
-        Alice = agents[0].name()
-        # Bob = agents[1].name()
 
         for agent_name,item_name in agentsBundle.items():
             result[agent_name] += item_name
@@ -168,26 +190,33 @@ def allocate_items_with_Subsidy(agents: AgentList, items: Dict[str,int]=None, we
         # The items that allocated to the agents in this round
         allocated_items = sum([item for item in agentsBundle.values()], []) 
 
-        if(agent1 == Alice):
-            sum_Alice += agents[0].value(allocated_items[0])
-            sum_Bob += agents[1].value(allocated_items[1])
-        else:
-            sum_Alice += agents[0].value(allocated_items[1])
-            sum_Bob += agents[1].value(allocated_items[0])
+        # add the values of the items that allocate to the agents into the appropriate list
+        j,k = 0,0
+        while j < len(sum_items_val_that_agent_gets):
+            k=0
+            while k < len(agentsBundle):
+                if (list(agentsBundle)[k] == list(sum_items_val_that_agent_gets)[j]):
+                    sum_items_val_that_agent_gets[agents[j].name()] += agents[j].value(allocated_items[k])
+                k +=1
+            j += 1
         
         # Remove the allocated items and recurse on the remaining items
         items = delete_items(items, allocated_items) # delete_items
-    
-    # subsid value 
-    subsid_alice = ((2 * sum_Alice)-sum_of_all_values_Alice) 
-    subsid_Bob = ((2 * sum_Bob)-sum_of_all_values_bob)
 
-    if (subsid_alice < 0):
-        print("Alice gets", list(result.values())[0], "and subsidy of",subsid_alice*-1, ",Bob gets", list(result.values())[1])
-    elif (subsid_Bob < 0):
-        print("Alice gets", list(result.values())[0], ",Bob gets", list(result.values())[1],"and subsidy of",subsid_Bob*-1)
-    else:
-        print("Alice gets", list(result.values())[0], ",Bob gets", list(result.values())[1],".No subsidy")
+    # create a list of subsidies for the items that allocate to the agents
+    i=0
+    subsid_list = {}
+    while i < len(agents):
+        key = agents[i].name()
+        value = (2 * sum_items_val_that_agent_gets[key]) - sum_of_all_values_agents[key]
+        subsid_list[key] = value
+
+        # print the results
+        if (subsid_list[key] < 0):
+            print(agents[i].name(), "gets", list(result.values())[i], "with subsidy of", subsid_list[key]*-1)
+        else:
+            print(agents[i].name(), "gets", list(result.values())[i], "with no subsidy")
+        i += 1
 
 allocate_items_with_Subsidy.logger = logger
 
@@ -196,14 +225,14 @@ def delete_items(items:Dict[str,int], items_to_remove:List)->Dict[str,int]:
     """
     # This is help function that Remove the given items from the graph
 
-    >>> stringify(delete_items({"a":4, "b":10, "c":8, "d":7}, ["a","b","d"]))
-    '{a:3, b:9, c:8, d:6}'
+    >>> print(delete_items({"a":4, "b":10, "c":8, "d":7}, ["a","b","d"]))
+    {'a': 3, 'b': 9, 'c': 8, 'd': 6}
 
-    >>> stringify(delete_items({"a":9, "b":2, "c":4, "d":7, "e":10, "f":0}, ["b","c"]))
-    '{a:9, b:1, c:3, d:7, e:10}'
+    >>> print(delete_items({"a":9, "b":2, "c":4, "d":7, "e":10, "f":0}, ["b","c"]))
+    {'a': 9, 'b': 1, 'c': 3, 'd': 7, 'e': 10}
 
-    >>> stringify(delete_items({"a":1, "b":2, "c":1}, ["a", "b", "c"]))
-    '{b:1}'
+    >>> print(delete_items({"a":1, "b":2, "c":1}, ["a", "b", "c"]))
+    {'b': 1}
     """
     for i in items_to_remove:
         items[i] -= 1
@@ -211,19 +240,18 @@ def delete_items(items:Dict[str,int], items_to_remove:List)->Dict[str,int]:
     return {item:newSize for item,newSize in items.items() if newSize > 0}
 
 
-
 #### MAIN
 
 if __name__ == "__main__":
-    # import sys
+    import sys
     # logger.addHandler(logging.StreamHandler(sys.stdout))
     # logger.setLevel(logging.INFO)
     (failures, tests) = doctest.testmod(report=True,optionflags=doctest.NORMALIZE_WHITESPACE)
     print("{} failures, {} tests".format(failures, tests))
-    # agents4 = AgentList({"Alice": {"a":3, "b":5}, "Bob": {"a":6, "b":7}})
-    # agents1 = AgentList({"Alice": {"a":4, "b":10, "c":8, "d":7}, "Bob": {"a":5, "b":9, "c":5, "d":10}})
-    # agents5 = AgentList({"Alice": {"a":3, "b":2}, "Bob": {"a":4, "b":1}})
-    # agents2 = AgentList({"Alice": {"a":10, "b":8, "c":5, "d":9, "e":3, "f":0}, "Bob": {"a":9, "b":2, "c":4, "d":7, "e":10, "f":1}})
-
-    # Bounded_Subsidy(agents1)
-    # allocate_items_with_Subsidy(agents2)
+    # agents1 = AgentList({"Alice": {"a":3, "b":5}, "Bob": {"a":6, "b":7}})
+    # agents2 = AgentList({"Alice": {"a":3, "b":10, "c":8, "d":7}, "Bob": {"a":5, "b":9, "c":5, "d":10}})
+    # agents3 = AgentList({"Alice": {"a":3, "b":2}, "Bob": {"a":4, "b":1}})
+    # agents4 = AgentList({"Alice": {"a":10, "b":8, "c":5, "d":9, "e":3, "f":0}, "Bob": {"a":9, "b":2, "c":4, "d":7, "e":10, "f":1}})
+    # agents5 = AgentList({"Alice": {"a":3, "b":4, "c":6}, "Bob": {"a":4, "b":3, "c":1}, "Max": {"a":4, "b":5, "c":1}})
+    # allocate_items_with_Subsidy(agents5)
+    
