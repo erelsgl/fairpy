@@ -13,7 +13,6 @@ def make_agent_list(size):
     """
     A function to create a list of agents of size 'size'
     """
-
     return ["agent_" + str(i) for i in range(1, size + 1)]
 
 
