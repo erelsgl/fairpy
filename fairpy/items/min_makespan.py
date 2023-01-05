@@ -314,6 +314,7 @@ def Round(output: scedual, fractional_sol: np.ndarray):
 
     mechine_nodes = ['M' + str(i) for i in range(output.mechines)]
     job_nodes =     ['J' + str(i) for i in range(output.jobs)]
+
     G = nx.Graph()
     G.add_nodes_from(mechine_nodes, bipartite = 0)
     G.add_nodes_from(job_nodes, bipartite = 1)
@@ -441,8 +442,7 @@ def min_makespan(input: ValuationMatrix) -> Allocation:
 
     # executing algorithm
     output = scedual()
-    output.build(input)
-    apprx(output)
+    MinMakespan(apprx, input, output)
 
     # casting output
     assignments = output.assignments
