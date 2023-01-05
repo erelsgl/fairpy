@@ -92,13 +92,13 @@ def map_price_demand(price_vector:list[float], max_budget: float, students:list[
         '''
         reset_update_prices(price_vector, courses)
         reset_students(students, max_budget)
-        def get_course(s) -> bool:
-            for i in range(0, len(s.preferences)):
-                if (s.budget >= s.preferences[i].price and 
-                    s.preferences[i] not in s.courses):
-                    s.courses.append(s.preferences[i])
-                    s.budget = s.budget - s.preferences[i].price
-                    s.preferences[i].capacity += 1
+        def get_course(s:Student) -> bool:
+            for preference in s.preferences:
+                if (s.budget >= preference.price and 
+                    preference not in s.courses):
+                    s.courses.append(preference)
+                    s.budget = s.budget - preference.price
+                    preference.capacity += 1
                     return True
             return False
         while True:
@@ -138,6 +138,8 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
         for course in courses:
             s = s + (course.max_capacity - course.capacity)**2
         return s
+    if time_to < 0.01:
+        logger.warning("to little time can crash the program")
     pStar = [] 
     start_time = time.time()
     best_error = float("inf")
@@ -183,3 +185,6 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
         #end of while 2
     #end of while 1
     return pStar
+
+if __name__=="main_":
+    doctest.testmod()

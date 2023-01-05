@@ -54,7 +54,9 @@ def test3():
     max_budget = 18
     assert(algorithm1(students, courses, max_budget, time_to= 1, seed = 3) == [5.3999999999999995, 14.4, 7.2, 16.2, 1.8, 12.6])#7
 
-
+if __name__=="main_":
+    import pytest
+    pytest.main()
 
 '''
 disclaimer for testing

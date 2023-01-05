@@ -46,3 +46,7 @@ def test3():
     students = [s1, s2, s3, s4, s5]
     students_matrix =  [[True,False,False],[True,True,False],[False,False,True],[False,True,True],[False,True,True]]
     assert algorithm3(courses, students, students_matrix, mapping_csp) == [[True,False,False],[True,True,False],[False,False,True],[False,True,True],[False,True,True]]
+
+if __name__=="main_":
+    import pytest
+    pytest.main()

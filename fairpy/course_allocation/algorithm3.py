@@ -39,16 +39,16 @@ def mapping_csp(courses:list[Course], students:list[Student], helper:dict, stude
     ['course name: a capacity 2/5 and priced 12', 'course name: b capacity 3/3 and priced 2', 'course name: c capacity 3/5 and priced 4.5']
     '''
     def get_course(s: Student, stud_num:int) -> bool:
-        for i in range(0, len(s.preferences)):
-            if (s.budget >= s.preferences[i].price and
-                   students_matrix[stud_num][helper.get(s.preferences[i].name)] == False and
-                   s.preferences[i] not in s.courses and
-                   s.preferences[i].capacity < s.preferences[i].max_capacity):
-                s.courses.append(s.preferences[i])
-                s.budget = s.budget - s.preferences[i].price
-                s.preferences[i].capacity += 1
-                students_matrix[stud_num][helper.get(s.preferences[i].name)] = True
-                logger.debug("change in (%g, %g) in matrix from 0 to 1", stud_num, helper.get(s.preferences[i].name))
+        for preference in s.preferences:
+            if (s.budget >= preference.price and 
+                preference not in s.courses and
+                students_matrix[stud_num][helper.get(preference.name)] == False and
+                preference.capacity < preference.max_capacity):
+                s.courses.append(preference)
+                s.budget = s.budget - preference.price
+                preference.capacity += 1
+                students_matrix[stud_num][helper.get(preference.name)] = True
+                logger.debug("change in (%g, %g) in matrix from 0 to 1", stud_num, helper.get(preference.name))
                 return True
         return False
     while True:
@@ -118,3 +118,6 @@ def algorithm3(courses, students, students_matrix:list[list[bool]],csp_students:
         s+="\n"
     logger.debug(s)
     return students_matrix
+
+if __name__=="main_":
+    doctest.testmod()

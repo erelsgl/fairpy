@@ -52,3 +52,7 @@ def test_3():
     maximum = 6
     price_vector = [3,4,3]
     assert(algorithm2(price_vector, maximum, eps, csp_mapping, students, courses)==[3,6,3])
+
+if __name__=="main_":
+    import pytest
+    pytest.main()

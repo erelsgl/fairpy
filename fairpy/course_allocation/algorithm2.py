@@ -33,12 +33,12 @@ def csp_mapping(students:list[Student],courses:list[Course]):
     ['course name: a capacity 5/5 and priced 2.4', 'course name: b capacity 5/4 and priced 5', 'course name: c capacity 5/5 and priced 10.4']
     '''
     def get_course(s) -> bool:
-        for i in range(0, len(s.preferences)):
-            if (s.budget >= s.preferences[i].price and 
-                    s.preferences[i] not in s.courses):
-                s.courses.append(s.preferences[i])
-                s.budget = s.budget - s.preferences[i].price
-                s.preferences[i].capacity += 1
+        for preference in s.preferences:
+            if (s.budget >= preference.price and 
+                preference not in s.courses):
+                s.courses.append(preference)
+                s.budget = s.budget - preference.price
+                preference.capacity += 1
                 return True
         return False
     for course in courses:
@@ -127,3 +127,6 @@ def algorithm2(price_vector:list[float], maximum:int, eps:float, csp_mapping:cal
         # if(J_hat.capacity <= J_hat.max_capacity or maximum-J_hat.price <= eps):
         #     return [c.price for c in courses]
     return [c.price for c in courses] #return at the end
+
+if __name__=="main_":
+    doctest.testmod()
