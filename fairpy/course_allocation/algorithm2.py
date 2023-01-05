@@ -46,7 +46,7 @@ def csp_mapping(students:list[Student],courses:list[Course]):
     while True:
         flag = False
         for student in students:
-            if (len(student.preferences) > 0):
+            if (len(student.preferences) >  len(student.courses)):
                 if (get_course(student)):
                     flag = True
         if(not flag):
@@ -127,4 +127,3 @@ def algorithm2(price_vector:list[float], maximum:int, eps:float, csp_mapping:cal
         # if(J_hat.capacity <= J_hat.max_capacity or maximum-J_hat.price <= eps):
         #     return [c.price for c in courses]
     return [c.price for c in courses] #return at the end
-

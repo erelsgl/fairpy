@@ -55,7 +55,7 @@ def mapping_csp(courses:list[Course], students:list[Student], helper:dict, stude
         flag = False
         i = 0
         for student in students:
-            if (len(student.preferences) > 0):
+            if (len(student.preferences) > len(student.courses)):
                 if (get_course(student,i)):
                     flag = True
             i += 1

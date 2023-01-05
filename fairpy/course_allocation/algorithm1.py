@@ -104,7 +104,7 @@ def map_price_demand(price_vector:list[float], max_budget: float, students:list[
         while True:
             flag = False
             for student in students:
-                if (len(student.preferences) > 0):
+                if (len(student.preferences) > len(student.courses)):
                     if (get_course(student)):
                         flag = True
             if(not flag):
