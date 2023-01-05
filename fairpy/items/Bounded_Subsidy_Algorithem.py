@@ -77,7 +77,6 @@ def Bounded_Subsidy(agents: AgentList, items: Dict[str,int]=None, weights: Dict[
     {'Agent #0': [1], 'Agent #1': [0]}
 
     """
-    assert isinstance(agents, AgentList)
     allTheItems = agents[0].all_items() # list of all items
     if items is None:
         items = {item:1 for item in allTheItems}
@@ -117,7 +116,13 @@ def allocate_items_with_Subsidy(agents: AgentList, items: Dict[str,int]=None, we
     and it returns a bundle of agents each holding the best allocation for their own valuation,
     with the subsidy that eliminates envy
 
-    ###### Two agens ######
+    ###### Two agens, one items ######
+    >>> agents0 = AgentList({"Alice": {"a":5}, "Bob": {"a":4}})
+    >>> allocate_items_with_Subsidy(agents0)
+    Alice gets ['a'] with no subsidy
+    Bob gets [] with subsidy of 4
+
+    ###### Two agens, Two items ######
     >>> agents1 = AgentList({"Alice": {"a":3, "b":5}, "Bob": {"a":6, "b":7}})
     >>> allocate_items_with_Subsidy(agents1)
     Alice gets ['b'] with no subsidy
@@ -138,18 +143,37 @@ def allocate_items_with_Subsidy(agents: AgentList, items: Dict[str,int]=None, we
     Alice gets ['a', 'b', 'c'] with no subsidy
     Bob gets ['e', 'd', 'f'] with no subsidy
 
-    ###### Three agents ######
+    ###### Three agents, Three items ######
 
-    >>> agents6 = AgentList({"Alice": {"a":3, "b":4, "c":6}, "Bob": {"a":4, "b":3, "c":1}, "Max": {"a":4, "b":5, "c":1}})
+    >>> agents5 = AgentList({"Alice": {"a":3, "b":4, "c":6}, "Bob": {"a":4, "b":3, "c":1}, "Max": {"a":4, "b":5, "c":1}})
     >>> allocate_items_with_Subsidy(agents5)
     Alice gets ['c'] with subsidy of 1
     Bob gets ['a'] with no subsidy
     Max gets ['b'] with no subsidy
 
+    >>> agents6 = AgentList({"Alice": {"a":1, "b":2, "c":3}, "Bob": {"a":1, "b":3, "c":2}, "Max": {"a":3, "b":2, "c":1}})
+    >>> allocate_items_with_Subsidy(agents6)
+    Alice gets ['c'] with no subsidy
+    Bob gets ['b'] with no subsidy
+    Max gets ['a'] with no subsidy
+
+    >>> agents7 = AgentList({"Alice": {"a":1, "b":5, "c":3}, "Bob": {"a":1, "b":3, "c":2}, "Max": {"a":3, "b":2, "c":1}})
+    >>> allocate_items_with_Subsidy(agents7)
+    Alice gets ['b'] with no subsidy
+    Bob gets ['c'] with subsidy of 2
+    Max gets ['a'] with no subsidy
+
+    ###### Four agents ######
+    >>> agents8 = AgentList({"Alice": {"a":5}, "Bob": {"a":3}, "Max": {"a":2}, "Nancy": {"a":2}})
+    >>> allocate_items_with_Subsidy(agents8)
+    Alice gets ['a'] with no subsidy
+    Bob gets [] with subsidy of 3
+    Max gets [] with subsidy of 2
+    Nancy gets [] with subsidy of 2
+
     """
 
 
-    assert isinstance(agents, AgentList)
     allTheItems = agents[0].all_items() # list of all items
 
     # list of the sum of all the values of the items for all agents
