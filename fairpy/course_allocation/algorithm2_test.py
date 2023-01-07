@@ -53,6 +53,6 @@ def test_3():
     price_vector = [3,4,3]
     assert(algorithm2(price_vector, maximum, eps, csp_mapping, students, courses)==[3,6,3])
 
-if __name__=="main_":
+if __name__=="__main__":
     import pytest
-    pytest.main()
+    pytest.main(args=["fairpy/course_allocation"])

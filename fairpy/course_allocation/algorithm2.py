@@ -128,5 +128,6 @@ def algorithm2(price_vector:list[float], maximum:int, eps:float, csp_mapping:cal
         #     return [c.price for c in courses]
     return [c.price for c in courses] #return at the end
 
-if __name__=="main_":
-    doctest.testmod()
+if __name__=="__main__":
+    import pytest
+    pytest.main(args=["fairpy/course_allocation"])

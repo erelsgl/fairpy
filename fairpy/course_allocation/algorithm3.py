@@ -119,5 +119,6 @@ def algorithm3(courses, students, students_matrix:list[list[bool]],csp_students:
     logger.debug(s)
     return students_matrix
 
-if __name__=="main_":
-    doctest.testmod()
+if __name__=="__main__":
+    import pytest
+    pytest.main(args=["fairpy/course_allocation"])

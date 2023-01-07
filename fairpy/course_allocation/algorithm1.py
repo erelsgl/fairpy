@@ -186,5 +186,6 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
     #end of while 1
     return pStar
 
-if __name__=="main_":
-    doctest.testmod()
+if __name__=="__main__":
+    import pytest
+    pytest.main(args=["fairpy/course_allocation"])

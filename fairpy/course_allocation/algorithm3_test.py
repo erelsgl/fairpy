@@ -47,6 +47,6 @@ def test3():
     students_matrix =  [[True,False,False],[True,True,False],[False,False,True],[False,True,True],[False,True,True]]
     assert algorithm3(courses, students, students_matrix, mapping_csp) == [[True,False,False],[True,True,False],[False,False,True],[False,True,True],[False,True,True]]
 
-if __name__=="main_":
+if __name__=="__main__":
     import pytest
-    pytest.main()
+    pytest.main(args=["fairpy/course_allocation"])
