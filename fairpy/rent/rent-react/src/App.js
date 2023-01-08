@@ -10,6 +10,7 @@ function App() {
   const [agents, setAgents] = useState([]);
   const [totalRent, setTotalRent] = useState(0);
   const [error, setError] = useState('');
+  const [results, setResults] = useState(null);
 
   function handleNumRoomsChange(event) {
     setNumRooms(event.target.value);
@@ -43,41 +44,58 @@ function App() {
   }
     const [isVisible, setIsVisible] = useState(false);
 
-    function startVisibility() {
-        if (isVisible) {
-            return
-        }
-        setIsVisible(!isVisible);
-    }
-    function restVisibility(){
-        if (isVisible) {
-            setIsVisible(!isVisible);
-        }
-        return
-    }
-    return (
-        <div>
-            <About/>
-            <br/>
-            <div style={{padding: '5px' }}>
-                <Stack spacing={2} direction="row" display= 'flex' justifyContent= 'center'>
-                    <Button variant="contained" onClick={startVisibility}>Start</Button>
-                    <Button variant="contained" onClick={restVisibility}>Rest</Button>
-                </Stack>
-                <br/>
-                <div style={{padding: '10px' ,visibility: isVisible ? 'visible' : 'hidden'}}>
-                    <SimpleAccordion />
-                </div>
-            </div>
-        </div>
-
-    )
-        ;
-        return agent;
-      }),
-    );
+//    function startVisibility() {
+//        if (isVisible) {
+//            return
+//        }
+//        setIsVisible(!isVisible);
+//    }
+//    function restVisibility(){
+//        if (isVisible) {
+//            setIsVisible(!isVisible);
+//        }
+//        return
+//    }
+//    return (
+//        <div>
+//            <About/>
+//            <br/>
+//            <div style={{padding: '5px' }}>
+//                <Stack spacing={2} direction="row" display= 'flex' justifyContent= 'center'>
+//                    <Button variant="contained" onClick={startVisibility}>Start</Button>
+//                    <Button variant="contained" onClick={restVisibility}>Rest</Button>
+//                </Stack>
+//                <br/>
+//                <div style={{padding: '10px' ,visibility: isVisible ? 'visible' : 'hidden'}}>
+//                    <SimpleAccordion />
+//                </div>
+//            </div>
+//        </div>
+//
+//    )
+//        ;
+//        return agent;
+//      }),
+//    );
+//  }
+    function handleValueChange(event, i, j) {
+        setAgents(
+          agents.map((agent, k) => {
+            if (i === k) {
+              return {
+                ...agent,
+                values: agent.values.map((value, l) => {
+                  if (j === l) {
+                    return event.target.value;
+                  }
+                  return value;
+                }),
+              };
+            }
+            return agent;
+          }),
+        );
   }
-
   function handleBudgetChange(event, i) {
     setAgents(
       agents.map((agent, j) => {
@@ -112,6 +130,7 @@ function App() {
         console.log("React: ", agents, totalRent)
         const response = await axios.post('http://localhost:5000/submit', { agents: agents , rent: totalRent});
         console.log("Flask: ", response.data);
+        setResults(response.data);
       } catch (error) {
         console.error(error);
       }
@@ -162,12 +181,32 @@ function App() {
         </table>
       ) : null}
       <br />
+      {error ? <p style={{color: 'red'}}>{error}</p> : null}
       <button type="submit" onClick={handleSubmit} disabled={isDisabled()}>
         Submit
       </button>
-      {error && <div>{error}</div>}
-    </form>
-  );
+      {results && results != "no solution" ? (
+        <table>
+          <thead>
+            <tr>
+              <th>Agent</th>
+              <th>Room</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {results[0].map((result, i) => (
+              <tr key={result[0]}>
+                <td>{result[0]}</td>
+                <td>{result[1]}</td>
+                <td>{results[1][i][1]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : results == "no solution" ? <p>No solution</p> : null}
+        </form>
+      );
 }
 
 export default App;
