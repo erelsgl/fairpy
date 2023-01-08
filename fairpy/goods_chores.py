@@ -23,8 +23,6 @@ def  Double_RoundRobin_Algorithm(agent_list :AgentList)->dict:
         {'Agent1': [4, 6], 'Agent2': [2, 5], 'Agent3': [7, 3], 'Agent4': [1]}
     """
 
-
-
     N = agent_list.agent_names()
     O = agent_list.all_items()
     logger.info(f'Agents : {[agent.name() for agent in agent_list]}')
@@ -36,26 +34,25 @@ def  Double_RoundRobin_Algorithm(agent_list :AgentList)->dict:
     o_plus = []
     o_minus = []
 
-    for chore in range(1,len(O)+1):
+    for chore in O:
         for agent in agent_list:
             flag = False
             # if any agent values chore for more than 0
-            if agent.value(str(chore)) > 0 :
-                o_plus.append(chore)
+            if agent.value(str(chore)) > 0:
+                o_plus.append(str(chore))
                 flag = True
                 break;
         # if all agent values chore for less than or equal 0
-        if flag is False :
-            o_minus.append(chore)
+        if flag is False:
+            o_minus.append(str(chore))
 
     logger.info(f'O plus contains : {[o for o in o_plus]}')
     logger.info(f'O minus contains : {[o for o in o_minus]}')
 
-
     # Add k dummy items to O- such that |O- | = an
-    # k = len(o_minus) % len👎
-    # o_minus += [0] * k
-    # print(k)
+    k = len(N) - (len(o_minus) % len(N))
+    o_minus += [None] * k
+    logger.info(f'there are k dummy items k= : {k}')
 
     # Allocate items in O- to agents in round-robin sequence
 
@@ -63,19 +60,20 @@ def  Double_RoundRobin_Algorithm(agent_list :AgentList)->dict:
         for agent in agent_list:
             best_val = -math.inf
             allocate_chore = 0
-            for chore in o_minus:
+            for chore in o_minus[0:len(o_minus) - k]:
+
                 curr_agent_val = agent.value(str(chore))
                 if curr_agent_val > best_val:
                     best_val = curr_agent_val
                     allocate_chore = chore
-
+            if best_val < 0 and k > 0:
+                allocate_chore = None
+                k -= 1
             allocation[agent.name()].append(allocate_chore)
             o_minus.remove(allocate_chore)
-            # print(allocation)
+
             if len(o_minus) == 0:
                 break
-
-
 
     # Allocate items in O+ to agents in reverse round-robin sequence
     while len(o_plus) != 0:
@@ -86,7 +84,7 @@ def  Double_RoundRobin_Algorithm(agent_list :AgentList)->dict:
                 curr_agent_val = agent.value(str(chore))
                 if curr_agent_val > best_val:
                     best_val = curr_agent_val
-                    allocate_chore = chore
+                    allocate_chore = str(chore)
 
             allocation[agent.name()].append(allocate_chore)
             o_plus.remove(allocate_chore)
@@ -94,13 +92,11 @@ def  Double_RoundRobin_Algorithm(agent_list :AgentList)->dict:
             if len(o_plus) == 0:
                 break
 
-
-
     # Remove dummy items from allocation
     for i in N:
         allocation[i] = [o for o in allocation[i] if o is not None]
 
-    # logger.info(f'after alocating O alocation contains : {allocation}')
+    logger.info(f'after alocating O alocation contains : {allocation}')
     return allocation
 
 
@@ -169,7 +165,7 @@ def  Generalized_Adjusted_Winner_Algorithm(agent_list :AgentList)->dict:
 
     for t in O_plus_O_minus:
         if is_EF1(winner , looser , Winner_bundle , Looser_bundle):
-            return {"Agent1" : sorted(Winner_bundle , key=lambda x: int(x)) , "Agent2" : sorted(Looser_bundle , key=lambda x: int(x))}
+            return {"Agent1" : sorted(Winner_bundle , key=lambda x: x) , "Agent2" : sorted(Looser_bundle , key=lambda x: x)}
         if t in O_plus:
             Winner_bundle.remove(t)
             Looser_bundle.append(t)
