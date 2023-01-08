@@ -7,6 +7,9 @@ import random
 import copy
 import doctest
 import logging
+import threading
+import concurrent.futures
+WORKERS=4
 
 logger = logging.getLogger(__name__)
 console = logging.StreamHandler() 
@@ -110,6 +113,11 @@ def map_price_demand(price_vector:list[float], max_budget: float, students:list[
             if(not flag):
                 break 
 
+def process_queue(price_vector, max_budget, i):
+    temp = copy.deepcopy(price_vector)
+    temp[i] = (random.randint(1, 9)/10)*max_budget
+    return temp
+
 def algorithm1(students:list[Student], courses:list[Course], max_budget:float, time_to:float, seed:int) -> list:
     '''
     Heuristic search algorithm through price space, originally developed in Othman et al. 2010
@@ -132,7 +140,7 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
     >>> algorithm1(students, courses, max_budget, time_to= 2.0, seed = 3)
     [5.3999999999999995, 5.3999999999999995, 1.8]
     '''
-    def alpha_error(price_vector):
+    def alpha_error(price_vector:list[float]):
         map_price_demand(price_vector, max_budget, students, courses)
         s = 0
         for course in courses:
@@ -148,16 +156,28 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
         price_vector = [((random.randint(1, 9)/10)*max_budget) for i in range(len(courses))]
         map_price_demand(price_vector, max_budget, students, courses)
         search_error = alpha_error(price_vector)
-        tabu_list = TabuList(5)
+        tabu_list = TabuList(5 + int(time_to/10))
         c = 0
-        while c < 5:
+        while c < tabu_list.size:
+            # proccess pool use
+
             queue = []
-            for i in range(0, len(price_vector)):
-                temp = copy.deepcopy(price_vector)
-                temp[i] = (random.randint(1, 9)/10)*max_budget
-                queue.append(temp)
+            # when using process pool it finds better best error, 
+            # not time improved but better performance  
+            if(len(price_vector) > 10):#10 need to be changed to Workers
+                with concurrent.futures.ProcessPoolExecutor(max_workers=WORKERS) as executor:
+                    futures = [executor.submit(process_queue, price_vector,max_budget,i) for i in range(len(price_vector))] 
+                    for future in concurrent.futures.as_completed(futures):   # return each result as soon as it is completed:
+                        queue.append(future.result())
+            else:
+                for i in range(0, len(price_vector)):
+                    temp = copy.deepcopy(price_vector)
+                    temp[i] = (random.randint(1, 9)/10)*max_budget
+                    queue.append(temp)          
+            # proccess pool use 
+
+
             queue = sorted(queue, key=lambda x: alpha_error(x))
-            # for price in queue:
             found_step = False
             while(queue and not found_step):#3
                 temp = queue.pop()
@@ -165,7 +185,7 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
                     logger.debug("%s", str(temp))
                     found_step = True
             #end of while 3
-            if(not queue) : c = 5
+            if(not queue) : c = tabu_list.size
             else:
                 price_vector = temp
                 tabu_list.add(temp)
@@ -180,7 +200,8 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
                 if(current_error < best_error):
                     best_error = current_error
                     pStar = price_vector
-                    logger.info("best error is %d and it price vector \n%s", best_error, str(pStar))
+                    logger.info("best error is %d ", best_error)
+                    logger.debug("and its price vector is %s", pStar)
             #end of if
         #end of while 2
     #end of while 1
@@ -188,4 +209,4 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
 
 if __name__=="__main__":
     import pytest
-    pytest.main(args=["fairpy/course_allocation"])
+    pytest.main(args=["fairpy/course_allocation"],)

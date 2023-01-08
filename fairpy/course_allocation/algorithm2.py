@@ -5,6 +5,9 @@ from Student import Student
 from functools import cmp_to_key
 import doctest
 import logging
+import threading
+import concurrent.futures
+WORKERS=4
 
 logger = logging.getLogger(__name__)
 console = logging.StreamHandler() 
@@ -52,6 +55,12 @@ def csp_mapping(students:list[Student],courses:list[Course]):
         if(not flag):
             break
 
+def process_copy(student:Student, i):
+    copy_student = copy.deepcopy(student)
+    copy_student.preferences = []
+    for pre in copy_student.preferences:
+        copy_student.preferences.append(pre)
+    return copy_student, i
 
 def algorithm2(price_vector:list[float], maximum:int, eps:float, csp_mapping:callable, students, courses)->list[float]:
     '''
@@ -89,9 +98,10 @@ def algorithm2(price_vector:list[float], maximum:int, eps:float, csp_mapping:cal
             a.preferences.append(pre)
         wow.append(a)
     flag = False
-    if(sorted([student.budget for student in students])[-1] < maximum):
-        #the algorithm requires maximum to be less than maximum budget
-        logger.warning("maximum greater than max budget")
+    # if(sorted([student.budget for student in students])[-1] < maximum):
+    #     #the algorithm requires maximum to be less than maximum budget
+    #     # maximum = sorted([student.budget for student in students])[-1]
+    #     # logger.warning("maximum greater than max budget")
     logger.debug("%g is the greatest budget", sorted([student.budget for student in students])[-1])
 
     csp_mapping(wow, courses)
@@ -106,13 +116,28 @@ def algorithm2(price_vector:list[float], maximum:int, eps:float, csp_mapping:cal
         while(True): #6
             J_hat.price = (p_l + p_h)/2 #7
             ##same here as above, for line 8 if section
+
+            ### try with proccess pool
+
             wow = []
             for s in students:
                 a = copy.deepcopy(s)
                 a.preferences = []
                 for pre in s.preferences:
                     a.preferences.append(pre)
-                wow.append(a)
+                wow.append(a)   
+
+            # stitch on the wound       
+            # dict_to_sort = {}
+            # with concurrent.futures.ProcessPoolExecutor(max_workers=WORKERS) as executor:
+            #     futures = [executor.submit(process_copy, students[i], i) for i in range(len(students))] 
+            #     for future in concurrent.futures.as_completed(futures):   # return each result as soon as it is completed:
+            #         dict_to_sort[future.result()[0]] = future.result()[1]
+            # sorteda = sorted(dict_to_sort.items(), key = lambda x:x[1])
+            # wow = [b[0] for b in sorteda]
+            # wow = []
+            ### try with proccess pool
+
             csp_mapping(wow,courses) # mapping here after price changes
             if((J_hat.capacity-J_hat.max_capacity) >= d_star): #line 8
                 p_l = J_hat.price #9
