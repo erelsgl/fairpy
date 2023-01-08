@@ -34,14 +34,11 @@ def results():
     algorithm = form_data.get('algorithm')
     # Get the file from the request
     file = request.files['input_file']
-
-    # Read the contents of the file
     file_contents = file.read().decode('utf-8')
-
-    # Convert the contents of the file to a list of rows
     reader = csv.reader(file_contents.splitlines())
     rows = list(reader)
     print(rows)
+
     # Perform the calculation using the rows and the desired algorithm
     result = perform_calculation(rows, algorithm)
 
@@ -53,6 +50,7 @@ def validate_input(data):
     agents = {}
     try:
         items = json.loads(data[1][1])
+        print(items.keys())
     except:
         return False
     for a in range(1, len(data)):
@@ -60,40 +58,47 @@ def validate_input(data):
         try:
             name = agent[0]
             evaluations = json.loads(agent[1])
+            # validate the length of the items list
             if len(evaluations) != len(items):
                 return False
+            # validate the items names is string , and validate that the items equals to the items list
             for i in evaluations.keys():
-                if type(i) != str:
+                if type(i) != str or i not in items:
                     return False
+            # validate the evaluations is a numeric value
             for i in evaluations.values():
                 if type(i) != float and type(i) != int:
                     return False
             agents[name] = evaluations
         except:
             return False
-    print(AgentList(agents))
     return AgentList(agents)
 
 
 def perform_calculation(data, algorithm):
     result = None
     # validate correct structure of the input and parse it to AgentList
-    inp = validate_input(data)
-    if algorithm == 'algorithm1':
-        if inp:
-            result = Double_RoundRobin_Algorithm(inp)
-        else:
-            raise 'Invalid Input'
-    elif algorithm == 'algorithm2':
+    try:
         inp = validate_input(data)
-        if inp:
-            result = Generalized_Adjusted_Winner_Algorithm(inp)
-    elif algorithm == 'algorithm3':
-        inp = validate_input(data)
-        if inp:
-            result = Generalized_Moving_knife_Algorithm(inp, list(inp[0].all_items()))
-    else:
-        raise ValueError('Invalid algorithm')
+        if algorithm == 'algorithm1':
+            if inp:
+                result = Double_RoundRobin_Algorithm(inp)
+            else:
+                result =  'Error - Invalid Input'
+        elif algorithm == 'algorithm2':
+            inp = validate_input(data)
+            if inp and len(inp) == 2:
+                result = Generalized_Adjusted_Winner_Algorithm(inp)
+            else:
+                result =  'Error - Invalid Input'
+        elif algorithm == 'algorithm3':
+            inp = validate_input(data)
+            if inp:
+                result = Generalized_Moving_knife_Algorithm(inp, list(inp[0].all_items()))
+            else:
+                result =  'Error - Invalid Input'
+    except:
+        result = 'Error - Invalid Input'
     return result
 
 
