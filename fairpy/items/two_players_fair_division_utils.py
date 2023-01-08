@@ -52,12 +52,16 @@ def is_envy_free_partial_allocation(agents: AgentList, allocations: List[Any]):
     True
 
     """
-    A_sum = 0
-    B_sum = 0
+    A_A_sum = 0
+    A_B_sum = 0
+    B_A_sum = 0
+    B_B_sum = 0
     for idx in range(len(allocations[0])):
-        A_sum += agents[0].value(allocations[0][idx])
-        B_sum += agents[1].value(allocations[1][idx])
-    if A_sum == B_sum:
+        A_A_sum += agents[0].value(allocations[0][idx])
+        A_B_sum += agents[0].value(allocations[1][idx])
+        B_A_sum += agents[1].value(allocations[0][idx])
+        B_B_sum += agents[1].value(allocations[1][idx])
+    if A_A_sum <= A_B_sum and B_A_sum >= B_B_sum:
         return True
     return False
 
