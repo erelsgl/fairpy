@@ -9,12 +9,6 @@ from fairpy import AgentList, AdditiveAgent
 from fairpy.items.two_players_fair_division_utils import *
 from typing import Dict, Any, List
 
-# from two_players_fair_division_utils import *
-# from fairpy import fairpy
-# from fairpy.agentlist import AgentList
-
-
-# logging.basicConfig(level=loggining.DEBUG)
 
 logger = logging.getLogger(__name__)
 
@@ -854,8 +848,3 @@ def trump(agents: AgentList, items: List[Any] = None) -> Dict:
     end_allocation = {agents[0].name(): allocations[0], agents[1].name(): allocations[1]}
     return end_allocation
 
-
-# if __name__ == '__main__':
-#     Alice = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 3, 'tv': 2, 'book': 4}, name='Alice')
-#     George = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 2, 'tv': 3, 'book': 4}, name='George')
-#     sequential([Alice, George], ['computer', 'phone', 'tv', 'book'])
