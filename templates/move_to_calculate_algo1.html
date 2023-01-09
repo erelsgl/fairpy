@@ -1,0 +1,34 @@
+<html dir="rtl" lang="he">
+
+<body>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type=text/javascript>
+        $(function() {
+// <!--          // $('button#test').on('click', function(e) {-->
+// <!--          //   e.preventDefault()-->
+// <!--          //   $.getJSON('/background_process_test', function(data) {});-->
+// <!--          //   return false;-->
+// <!--          // });-->
+          $('button#run').on('click', function(e) {
+            e.preventDefault()
+            $.getJSON('/run_the_algo1?url='+encodeURIComponent('{{url}}'), function(data) {});
+            return false;
+          });
+        });
+</script>
+<div style="display: flex; align-items: center; justify-content: center">
+<h1>טבלת ההערכות שהזנת</h1>
+</div>
+<iframe width='100%' height='70%' src="{{url}}">
+</iframe>
+<!--<a href="/rrrr" style="font-size: 30px">מצא חלוקה שיויונית וחסרת קנאה</a>-->
+
+ <div style="display: flex; align-items: center; justify-content: center">
+    <button id='run' style="background-color: green;"><h2>מצא חלוקה שיויונית וחסרת קנאה</h2></button>
+<!--   <button onclick="/run_the_algorithm({url})">מצא חלוקה שיויונית וחסרת קנאה</button>-->
+ </div>
+
+
+</body>
+</html>

@@ -1,6 +1,6 @@
 <html dir="rtl" lang="{{lang}}">
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
-  
+
 <body>
 
 <div style="display: flex; align-items: center; justify-content: center">
@@ -8,7 +8,7 @@
 </div>
 <br>
 <div style="display: flex; align-items: center; justify-content: center">
-<h2>כדי לחשב חלוקה הוגנת וחסרת קנאה עקוב אחר ההוראות הבאות</h2>
+<h2>כדי לחשב חלוקה חסרת קנאה (בקירוב של אפסילון שתבחרו) עקבו אחר ההוראות הבאות</h2>
 </div>
 
 {% if error %}
@@ -19,8 +19,15 @@
     <ol>
     <li>צרו גליון אלקטרוני חדש של גוגל (Google Spreadsheet);</li>
     <li>שתפו את הגליון עם הכתובת הבאה: <br/><b>eitan280@pythonexe10.iam.gserviceaccount.com</b></li>
-    <li>הכניסו את הקישור (URL) של הגליון לכאן:
-    <form method="GET" action="/proceed">
+    <li>: בחרו את האפסילון הרצוי
+    <form method="GET" action="/proceed2">
+        <input name="eps" size='10' value="{{ eps }}"/>
+
+<!--      <input type='submit' name="url" value="המשך" />-->
+    </form>
+    </li>
+        <li> הכניסו את הקישור (URL) של הגליון לכאן:
+    <form method="GET" action="/proceed2">
       <input name="url" size='100'/>
       <input type='submit' name="url" value="המשך" />
     </form>

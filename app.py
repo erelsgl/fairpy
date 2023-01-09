@@ -10,8 +10,14 @@ def root():
 
 
 @app.route('/first_algo')
-def upload_file():
-    return render_template(f'upload_sheets.html')
+def upload_file1():
+    return render_template(f'upload_sheets_algo1.html')
+
+
+@app.route('/second_algo')
+def upload_file2():
+    return render_template(f'upload_sheets_algo2.html')
+
 
 @app.route('/proceed')
 def move_to_calculate():
@@ -31,12 +37,21 @@ def move_to_calculate():
     #     error = type(e).__name__ + "! Please check your URL and try again."
     # if error is not None:
     #     print("error=", error)
-    #     return render_template(f'upload_sheets.html', error=error)
+    #     return render_template(f'upload_sheets_algo1.html', error=error)
     # else:
-    return render_template(f'move_to_calculate.html', url=url)
+    return render_template(f'move_to_calculate_algo1.html', url=url)
 
 
-def run_algo(url: str):
+@app.route('/proceed2')
+def algo2():
+    url = request.args.get('url')
+    # print(url)
+    # eps = request.args.get('eps')
+    # print(eps)
+    return render_template(f'move_to_calculate_algo2.html', url=url)
+
+
+def run_algo1(url: str):
     from envy_freeness_and_equitability_with_payments import envy_freeness_and_equitability_with_payments
     account = gspread.service_account("credentials.json")
     spreadsheet = account.open_by_url(url)
@@ -66,14 +81,21 @@ def run_algo(url: str):
     print(res)
     return res
 
+@app.route('/run_the_algo2')
+def run_the_algo2():
+    # ---fill in implement for algo2----
+    # run_algo2(url: str)
+    url = request.args.get('url')
+    print(url)
+    print("this is algo2")
+    return render_template(f'try.html')
 
-# @app.route('/run_the_algorithm')
-@app.route('/run')
-def run_the_algorithm(url: str):
+@app.route('/run_the_algo1')
+def run_the_algo1():
     # import run
-    # url = request.args.get('url')
+    url = request.args.get('url')
     # print(url)
-    run_algo(url=url)
+    run_algo1(url=url)
     print("Run complete")
     return render_template(f'try.html')
 
