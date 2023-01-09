@@ -14,14 +14,15 @@ def  Double_RoundRobin_Algorithm(agent_list :AgentList)->dict:
         Ayumi Igarashi, Toby Walsh and Haris Aziz.(2021) , link
         Algorithm 1: Finding an EF1 allocation
         Programmer: Yair Raviv , Rivka Strilitz
-        Example 1:
         >>> Double_RoundRobin_Algorithm(AgentList({"Agent1":{"1":-2,"2":1,"3":0,"4":1,"5":-1,"6":4},"Agent2":{"1":1,"2":-3,"3":-4,"4":3,"5":2,"6":-1},"Agent3":{"1":1,"2":0,"3":0,"4":6,"5":0,"6":0}}))
-        {'Agent1': [3, 6], 'Agent2': [5, 2], 'Agent3': [4, 1]}
-
-        Example 2:
+        {'Agent1': ['3', '6'], 'Agent2': ['5', '2'], 'Agent3': ['4', '1']}
         >>> Double_RoundRobin_Algorithm(AgentList({"Agent1":{"1":-2,"2":-2,"3":1,"4":0,"5":5,"6":3,"7":-2},"Agent2":{"1":3,"2":-1,"3":0,"4":0,"5":7,"6":2,"7":-1},"Agent3":{"1":4,"2":-3,"3":6,"4":-2,"5":4,"6":1,"7":0},"Agent4":{"1":3,"2":-4,"3":2,"4":0,"5":3,"6":-1,"7":-4}}))
-        {'Agent1': [4, 6], 'Agent2': [2, 5], 'Agent3': [7, 3], 'Agent4': [1]}
+        {'Agent1': ['4', '6'], 'Agent2': ['5'], 'Agent3': ['7', '3'], 'Agent4': ['2', '1']}
+        >>> Double_RoundRobin_Algorithm(AgentList({"Agent1":{"1t":-2,"2d":-2,"3":1,"4":0,"5":5,"6":3,"7":-2},"Agent2":{"1t":3,"2d":-1,"3":0,"4":0,"5":7,"6":2,"7":-1},"Agent3":{"1t":4,"2d":-3,"3":6,"4":-2,"5":4,"6":1,"7":0},"Agent4":{"1t":3,"2d":-4,"3":2,"4":0,"5":3,"6":-1,"7":-4}}))
+        {'Agent1': ['4', '6'], 'Agent2': ['5'], 'Agent3': ['7', '3'], 'Agent4': ['2d', '1t']}
     """
+
+
 
     N = agent_list.agent_names()
     O = agent_list.all_items()
@@ -38,21 +39,24 @@ def  Double_RoundRobin_Algorithm(agent_list :AgentList)->dict:
         for agent in agent_list:
             flag = False
             # if any agent values chore for more than 0
-            if agent.value(str(chore)) > 0:
+            if agent.value(str(chore)) > 0 :
                 o_plus.append(str(chore))
                 flag = True
                 break;
         # if all agent values chore for less than or equal 0
-        if flag is False:
+        if flag is False :
             o_minus.append(str(chore))
+
 
     logger.info(f'O plus contains : {[o for o in o_plus]}')
     logger.info(f'O minus contains : {[o for o in o_minus]}')
 
+
     # Add k dummy items to O- such that |O- | = an
-    k = len(N) - (len(o_minus) % len(N))
+    k = len(N)-(len(o_minus) % len(N))
     o_minus += [None] * k
     logger.info(f'there are k dummy items k= : {k}')
+
 
     # Allocate items in O- to agents in round-robin sequence
 
@@ -60,7 +64,7 @@ def  Double_RoundRobin_Algorithm(agent_list :AgentList)->dict:
         for agent in agent_list:
             best_val = -math.inf
             allocate_chore = 0
-            for chore in o_minus[0:len(o_minus) - k]:
+            for chore in o_minus[0:len(o_minus)-k]:
 
                 curr_agent_val = agent.value(str(chore))
                 if curr_agent_val > best_val:
@@ -74,6 +78,8 @@ def  Double_RoundRobin_Algorithm(agent_list :AgentList)->dict:
 
             if len(o_minus) == 0:
                 break
+
+
 
     # Allocate items in O+ to agents in reverse round-robin sequence
     while len(o_plus) != 0:
