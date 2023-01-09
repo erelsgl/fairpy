@@ -189,7 +189,7 @@ def opt_piecewise_linear(agents: AgentList) -> Allocation:
         :param intervals: (x's) to apply function and from pieces will be returned
         :return: list of intervals
         """
-        return [(start, end) for start, end in intervals if op(agents[i].eval(start, end), agents[j].eval(start, end))]
+        return [(start, end) for start, end in intervals if op(agents[i].eval_1(start, end), agents[j].eval_1(start, end))]
 
     def isIntersect(poly_1: np.poly1d, poly_2: np.poly1d) -> float:
         """
@@ -210,8 +210,8 @@ def opt_piecewise_linear(agents: AgentList) -> Allocation:
         :param x: interval
         :return: ratio
         """
-        if agents[1].eval(x[0], x[1]) > 0:
-            return agents[0].eval(x[0], x[1]) / agents[1].eval(x[0], x[1])
+        if agents[1].eval_1(x[0], x[1]) > 0:
+            return agents[0].eval_1(x[0], x[1]) / agents[1].eval_1(x[0], x[1])
         return 0
 
     def V_l(agent_index, inter_list):
@@ -233,7 +233,7 @@ def opt_piecewise_linear(agents: AgentList) -> Allocation:
         :return: value of interval for agent
         """
         logger.info(f'V(agent_index={agent_index},start={start},end={end})')
-        return agents[agent_index].eval(start, end)
+        return agents[agent_index].eval_1(start, end)
 
     def get_optimal_allocation():
         """
@@ -273,7 +273,7 @@ def opt_piecewise_linear(agents: AgentList) -> Allocation:
         """
         result = []
         for start, end in intervals:
-            if agents[0].eval(start, end) < agents[1].eval(start, end) and op(R((start, end)), r):
+            if agents[0].eval_1(start, end) < agents[1].eval_1(start, end) and op(R((start, end)), r):
                 result.append((start, end))
         return result
 

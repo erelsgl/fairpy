@@ -122,8 +122,8 @@ def checkWhile(agents: AgentList, pieces:List[Any], remain:List[tuple], epsilon:
         for agent,i in zip(agents,range(len(agents))):
             if (pieces[i] == None or len(pieces[i])==0):
                 continue
-            if (agent.eval(pieces[i][0][0], pieces[i][0][1]) <
-                    (agent.eval(interval[0],interval[1]) - (epsilon/nSquared))):
+            if (agent.eval_1(pieces[i][0][0], pieces[i][0][1]) <
+                    (agent.eval_1(interval[0], interval[1]) - (epsilon / nSquared))):
                 return interval
     return None
 
@@ -167,8 +167,8 @@ def getC(agents: AgentList, pieces:List[Any], epsilon:float, interval:tuple)->Ag
         if(pieces[i]==None or len(pieces[i])==0):
             newAgents.append((agent,i))
             continue
-        if (agent.eval(pieces[i][0][0], pieces[i][0][1]) <
-                agent.eval(interval[0], interval[1]) - (epsilon / nSquared)):
+        if (agent.eval_1(pieces[i][0][0], pieces[i][0][1]) <
+                agent.eval_1(interval[0], interval[1]) - (epsilon / nSquared)):
             newAgents.append((agent,i))
     return newAgents
 
@@ -247,8 +247,8 @@ def setRemain(partialAlloc:List[List[tuple]], agents: AgentList)->List[List[tupl
         if(pieces==None):
             maxPiece , maxEval = 0,0
             for remainPiece in remain:
-                if agents[i].eval(remainPiece[0],remainPiece[1])>=maxEval:
-                    maxEval = agents[i].eval(remainPiece[0],remainPiece[1])
+                if agents[i].eval_1(remainPiece[0], remainPiece[1])>=maxEval:
+                    maxEval = agents[i].eval_1(remainPiece[0], remainPiece[1])
                     maxPiece = remainPiece
             remain.remove(maxPiece)
             partialAlloc[i] = [maxPiece]
@@ -335,7 +335,7 @@ def efCheck(allocation:Allocation, epsilon:float)->str:
     for i,a in zip(range(len(agents)),agents):
         aPiece = allocation[i][0]
         for piece in allocation:
-            if a.eval(aPiece[0],aPiece[1])<o*a.eval(piece[0][0],piece[0][1]):
+            if a.eval_1(aPiece[0], aPiece[1])<o*a.eval_1(piece[0][0], piece[0][1]):
                 return "The Allocation isn't (3 + 9ε/n)approximately envy-free allocation"
     return "The Allocation is (3 + 9ε/n)approximately envy-free allocation"
 

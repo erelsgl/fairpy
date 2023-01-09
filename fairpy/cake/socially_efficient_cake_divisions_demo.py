@@ -24,7 +24,7 @@ def print_result(result, items, agents):
 
     print('\n')
     for j in range(num_of_players):
-        print("player {}'s value of his item is {}".format(j, agents[j].eval(items[result[0][j]], items[result[1][j] + 1])))
+        print("player {}'s value of his item is {}".format(j, agents[j].eval_1(items[result[0][j]], items[result[1][j] + 1])))
 
 
 def demo_of_subroutines():

@@ -48,7 +48,7 @@ def discretization_procedure(agents: AgentList, epsilon:float):
     size_of_the_cake = max([agent.cake_length() for agent in agents])
     a = 0
     C = [0]
-    condition = [agent.eval(a,size_of_the_cake) > epsilon for agent in agents]
+    condition = [agent.eval_1(a, size_of_the_cake) > epsilon for agent in agents]
     while any(condition):
         values = []
         for i in agents:
@@ -58,7 +58,7 @@ def discretization_procedure(agents: AgentList, epsilon:float):
         b = min(values)
         C.append(b)
         a = b
-        condition = [agent.eval(a, size_of_the_cake) > epsilon for agent in agents]
+        condition = [agent.eval_1(a, size_of_the_cake) > epsilon for agent in agents]
     C.append(size_of_the_cake)
     return C
 
@@ -98,7 +98,7 @@ def get_players_valuation(agents: AgentList, c : List[float]):
 
     matrix = []
     for agent in agents:
-        valuations = [agent.eval(c[i], c[i + 1]) for i in range(len(c) - 1)]
+        valuations = [agent.eval_1(c[i], c[i + 1]) for i in range(len(c) - 1)]
         matrix.append(valuations)
     return matrix
 

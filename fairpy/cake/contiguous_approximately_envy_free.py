@@ -46,7 +46,7 @@ def hasBiggerThanThird(left, agentN, agentL):
     # for every agent
     for agentIndex in agentN:
         # if the segment [left,1] is evaluated >= 1/3
-        if (agentL[agentIndex].eval(left, 1.0) >= (1 / 3)):
+        if (agentL[agentIndex].eval_1(left, 1.0) >= (1 / 3)):
             logger.info("There is a agent with more then 1/3 value - Therefore and accordingly we are doing another round in the loop")
             return True
     logger.info("There isn't a agent with more then 1/3 value - we are exist the loop")
@@ -100,7 +100,7 @@ def algor1(AgentList)->Allocation:
     # the main loop
     while hasBiggerThanThird(l, N, AgentList):
         for i in N:
-            if AgentList[i].eval(l, 1.0) >= (1 / 3):
+            if AgentList[i].eval_1(l, 1.0) >= (1 / 3):
                 #where it equal 1/3
                 rList[i] = (AgentList[i].mark(l, (1 / 3)))
             else:

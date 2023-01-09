@@ -122,7 +122,7 @@ class CakeSlice(object):
         2
         >>> a = PiecewiseConstantAgent([1, 3, 11], "agent")
         >>> s = CakeSlice(0, 1)
-        >>> s.slice_to_value(a, a.eval(0, 1) / 2)
+        >>> s.slice_to_value(a, a.eval_1(0, 1) / 2)
         [(0,0.5), (0.5,1)]
         """
         amount = int(cutter.eval(self.start, self.end) / value)

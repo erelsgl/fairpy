@@ -96,7 +96,7 @@ def equally_sized_pieces(agents: AgentList, piece_size: float) -> Allocation:
     for piece in normalize_partitions:
         # For every piece get evaluation for every agent
         for agent in agents:
-            evaluations[(agent, piece)] = agent.eval(start=piece[0], end=piece[1])
+            evaluations[(agent, piece)] = agent.eval_1(start=piece[0], end=piece[1])
     # Create the matching graph
     # One side is the agents, the other side is the partitions and the weights are the evaluations
     logger.info("Create the partition graphs G_0_l and G_d_l")
@@ -178,7 +178,7 @@ def discrete_setting(agents: AgentList, pieces: List[Tuple[float, float]]) -> Al
             # Go over each Agent
             for agent in agents:
                 # Evaluate the piece according to the Agent
-                evaluations[(agent, piece)] = agent.eval(start=piece[0], end=piece[1])
+                evaluations[(agent, piece)] = agent.eval_1(start=piece[0], end=piece[1])
 
         logger.info("create the partition graph G - Pt=%d", t)
         # Create the matching graph according to the new partition

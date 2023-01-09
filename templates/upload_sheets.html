@@ -1,0 +1,31 @@
+<html dir="rtl" lang="{{lang}}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+  
+<body>
+
+<div style="display: flex; align-items: center; justify-content: center">
+<h1>חלוקה הוגנת</h1>
+</div>
+<br>
+<div style="display: flex; align-items: center; justify-content: center">
+<h2>כדי לחשב חלוקה הוגנת וחסרת קנאה עקוב אחר ההוראות הבאות</h2>
+</div>
+
+{% if error %}
+<p class="error">{{error}}</p>
+{% endif %}
+<div style="display: flex; align-items: center; justify-content: center">
+
+    <ol>
+    <li>צרו גליון אלקטרוני חדש של גוגל (Google Spreadsheet);</li>
+    <li>שתפו את הגליון עם הכתובת הבאה: <br/><b>eitan280@pythonexe10.iam.gserviceaccount.com</b></li>
+    <li>הכניסו את הקישור (URL) של הגליון לכאן:
+    <form method="GET" action="/proceed">
+      <input name="url" size='100'/>
+      <input type='submit' name="url" value="המשך" />
+    </form>
+    </li>
+    </ol>
+</div>
+</body>
+</html>
