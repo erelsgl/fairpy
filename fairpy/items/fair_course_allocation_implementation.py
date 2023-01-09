@@ -65,7 +65,7 @@ def general_course_allocation(utilities: ValuationMatrix, capacity: List[int], n
 
 
 def course_allocation(utilities: ValuationMatrix, budgets: List[float], prices: List[float], capacity: List[int],
-                      num_of_courses: int,
+                      num_of_courses: int, bound = 0,
                       effect_variables: List[Dict[Set, int]] = None, constraint: List[Dict[Set, int]] = None) \
         -> ValuationMatrix:
     """
@@ -103,10 +103,11 @@ def course_allocation(utilities: ValuationMatrix, budgets: List[float], prices: 
     best_node = curr_node
 
     counter = 0
+    max_iterations = 100
 
-    while best_node.score() > 0:
+    while best_node.score() > bound:
 
-        if counter == 100:
+        if counter == max_iterations:
             break
 
         tabu.append(curr_node)
@@ -355,6 +356,9 @@ class Course_Bundle:
 
     def __lt__(self, other):
         return self.score() < other.score()
+
+    def __eq__(self, other):
+        return np.array_equal(np.array(self.prices), np.array(other.prices))
 
 
 if __name__ == '__main__':
