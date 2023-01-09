@@ -55,10 +55,10 @@ def csp_mapping(students:list[Student],courses:list[Course]):
         if(not flag):
             break
 
-def process_copy(student:Student, i):
+def process_copy(student:Student, pref:list[Course], i:int):
     copy_student = copy.deepcopy(student)
     copy_student.preferences = []
-    for pre in copy_student.preferences:
+    for pre in pref:
         copy_student.preferences.append(pre)
     return copy_student, i
 
@@ -122,20 +122,9 @@ def algorithm2(price_vector:list[float], maximum:int, eps:float, csp_mapping:cal
             wow = []
             for s in students:
                 a = copy.deepcopy(s)
-                a.preferences = []
-                for pre in s.preferences:
-                    a.preferences.append(pre)
+                a.preferences = s.preferences[:]
                 wow.append(a)   
-
-            # stitch on the wound       
-            # dict_to_sort = {}
-            # with concurrent.futures.ProcessPoolExecutor(max_workers=WORKERS) as executor:
-            #     futures = [executor.submit(process_copy, students[i], i) for i in range(len(students))] 
-            #     for future in concurrent.futures.as_completed(futures):   # return each result as soon as it is completed:
-            #         dict_to_sort[future.result()[0]] = future.result()[1]
-            # sorteda = sorted(dict_to_sort.items(), key = lambda x:x[1])
-            # wow = [b[0] for b in sorteda]
-            # wow = []
+                logger.debug(str(s.preferences))
             ### try with proccess pool
 
             csp_mapping(wow,courses) # mapping here after price changes
@@ -155,4 +144,5 @@ def algorithm2(price_vector:list[float], maximum:int, eps:float, csp_mapping:cal
 
 if __name__=="__main__":
     import pytest
-    pytest.main(args=["fairpy/course_allocation"])
+    #run algorithm and test of the algorithm
+    pytest.main(args=["fairpy/course_allocation/algorithm2.py", "fairpy/course_allocation/algorithm2_test.py"])

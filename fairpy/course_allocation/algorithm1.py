@@ -146,6 +146,15 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
         for course in courses:
             s = s + (course.max_capacity - course.capacity)**2
         return s
+    ###
+    def alpha_error_mod(price_vector:list[float]):
+        map_price_demand(price_vector, max_budget, students, courses)
+        s = 0
+        for course in courses:
+            s = s + (course.max_capacity - course.capacity)**2
+        return s
+
+    ###
     if time_to < 0.01:
         logger.warning("to little time can crash the program")
     pStar = [] 
@@ -156,28 +165,20 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
         price_vector = [((random.randint(1, 9)/10)*max_budget) for i in range(len(courses))]
         map_price_demand(price_vector, max_budget, students, courses)
         search_error = alpha_error(price_vector)
-        tabu_list = TabuList(5 + int(time_to/10))
+        tabu_list = TabuList(5)
         c = 0
         while c < tabu_list.size:
             # proccess pool use
 
             queue = []
             # when using process pool it finds better best error, 
-            # not time improved but better performance  
-            if(len(price_vector) > 10):#10 need to be changed to Workers
-                with concurrent.futures.ProcessPoolExecutor(max_workers=WORKERS) as executor:
-                    futures = [executor.submit(process_queue, price_vector,max_budget,i) for i in range(len(price_vector))] 
-                    for future in concurrent.futures.as_completed(futures):   # return each result as soon as it is completed:
-                        queue.append(future.result())
-            else:
-                for i in range(0, len(price_vector)):
-                    temp = copy.deepcopy(price_vector)
-                    temp[i] = (random.randint(1, 9)/10)*max_budget
-                    queue.append(temp)          
+            for i in range(0, len(price_vector)):
+                temp = copy.deepcopy(price_vector)
+                temp[i] = (random.randint(1, 9)/10)*max_budget
+                queue.append(temp)          
             # proccess pool use 
-
-
             queue = sorted(queue, key=lambda x: alpha_error(x))
+
             found_step = False
             while(queue and not found_step):#3
                 temp = queue.pop()
@@ -185,7 +186,7 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
                     logger.debug("%s", str(temp))
                     found_step = True
             #end of while 3
-            if(not queue) : c = tabu_list.size
+            if(not queue) : c = 5
             else:
                 price_vector = temp
                 tabu_list.add(temp)
@@ -206,7 +207,7 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
         #end of while 2
     #end of while 1
     return pStar
-
 if __name__=="__main__":
     import pytest
-    pytest.main(args=["fairpy/course_allocation"],)
+    #run algorithm and test of the algorithm
+    pytest.main(args=["fairpy/course_allocation/algorithm1.py", "fairpy/course_allocation/algorithm1_test.py"])
