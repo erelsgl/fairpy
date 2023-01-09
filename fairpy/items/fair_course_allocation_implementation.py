@@ -42,7 +42,7 @@ Epsilon = 0.01
 
 
 def general_course_allocation(utilities: ValuationMatrix, capacity: List[int], num_of_courses: int,
-                      effect_variables: List[Dict[Set, int]] = None, constraint: List[Dict[Set, int]] = None) \
+                      bound: int = 0, effect_variables: List[Dict[Set, int]] = None, constraint: List[Dict[Set, int]] = None) \
         -> ValuationMatrix:
 
     """
@@ -61,11 +61,11 @@ def general_course_allocation(utilities: ValuationMatrix, capacity: List[int], n
     for course in utilities.objects():
         prices.append(np.random.randint(1, 100)/100)
 
-    return course_allocation(utilities, budgets, prices, capacity, num_of_courses, effect_variables, constraint)
+    return course_allocation(utilities, budgets, prices, capacity, num_of_courses, bound, effect_variables, constraint)
 
 
 def course_allocation(utilities: ValuationMatrix, budgets: List[float], prices: List[float], capacity: List[int],
-                      num_of_courses: int, bound = 0,
+                      num_of_courses: int, bound: int = 0,
                       effect_variables: List[Dict[Set, int]] = None, constraint: List[Dict[Set, int]] = None) \
         -> ValuationMatrix:
     """
