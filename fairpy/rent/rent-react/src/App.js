@@ -1,8 +1,12 @@
 import React, {useState} from 'react';
 import axios from 'axios';
 import './about.css'
-
-
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Typography from '@mui/material/Typography';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Container from '@mui/material/Container';
 function App() {
     const [numRooms, setNumRooms] = useState('');
     const [agents, setAgents] = useState([]);
@@ -104,23 +108,60 @@ function App() {
     }
 
     return (
-        <div  className="About">
+        <div className="About">
             <h1>Fair Rent Division on a Budget</h1>
-            <h2>About</h2>
-            <p>
-                "Fair Rent Division on a Budget" by Procaccia, A., Velez, R., & Yu, D. (2018),
-                https://doi.org/10.1609/aaai.v32i1.11465  .<br/>
-                The algorithm calculates Optimal envy-free allocation subject to budget constraints, or in simple
-                words,
-                calculates a fair rent division under budget constraints.
-            </p>
-            <h3>manual</h3>
-            <p>
-                Select the number of rooms, enter the total rent.<br/>
+            <Container maxWidth="sm">
+                <Accordion >
+                 <AccordionSummary
+                         sx={{
+                             backgroundColor: '#282c34', color: "#61dafb"
+
+                         }}
+                         expandIcon={<ExpandMoreIcon sx={{color: "#61dafb"}}/>}
+                         aria-controls="panel1a-content"
+                         id="panel1a-header"
+                         text-align="center"
+                     >
+                    <Typography >About</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <Typography>
+                        "Fair Rent Division on a Budget" by Procaccia, A., Velez, R., & Yu, D. (2018),
+                        https://doi.org/10.1609/aaai.v32i1.11465 .<br/>
+                        The algorithm calculates Optimal envy-free allocation subject to budget constraints, or in
+                        simple
+                        words,
+                        calculates a fair rent division under budget constraints.
+                    </Typography>
+                </AccordionDetails>
+            </Accordion>
+            </Container>
+            <Container maxWidth="sm">
+                <Accordion >
+                 <AccordionSummary
+                         sx={{
+                             backgroundColor: '#282c34', color: "#61dafb"
+
+                         }}
+                         expandIcon={<ExpandMoreIcon sx={{color: "#61dafb"}}/>}
+                         aria-controls="panel1a-content"
+                         id="panel1a-header"
+                         text-align="center"
+                     >
+                    <Typography >manual</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <Typography>
+                        Select the number of rooms, enter the total rent.<br/>
                 Enter the names of roommates and enter the budget of each .<br/>
                 Enter the evaluation of each room so that the total equals rent.<br/>
                 For the end click on submit for result.
-            </p>
+                    </Typography>
+                </AccordionDetails>
+            </Accordion>
+            </Container>
+            <br/>
+            <h3>START</h3>
             <form>
                 <label>
                     Number of rooms:
