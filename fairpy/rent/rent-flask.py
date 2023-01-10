@@ -1,10 +1,13 @@
-from flask import *
-from flask_cors import CORS
+from flask import Flask, send_from_directory, request, jsonify
 from fairpy.rent.Algorithms import optimal_envy_free
 from fairpy.agentlist import AgentList
 
-app = Flask(__name__)
-CORS(app)
+app = Flask(__name__, static_folder='rent-react/build', static_url_path='/')
+
+
+@app.route('/')
+def serve():
+    return send_from_directory('rent-react/build', 'index.html')
 
 
 @app.route('/submit', methods=['POST'])
@@ -26,4 +29,4 @@ def handle_submit():
 
 
 if __name__ == '__main__':
-    app.run(debug=False, host="0.0.0.0", port=5001)
+    app.run(debug=False, host="0.0.0.0", port=5000)

@@ -99,7 +99,7 @@ function App() {
             setError('');
             try {
                 console.log("React: ", agents, totalRent)
-                const response = await axios.post('http://localhost:5001/submit', {agents: agents, rent: totalRent});
+                const response = await axios.post('http://localhost:5000/submit', {agents: agents, rent: totalRent});
                 console.log("Flask: ", response.data);
                 setResults(response.data);
                 setExpanded('panel1')
