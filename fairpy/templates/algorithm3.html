@@ -1,6 +1,12 @@
+
+{% extends "layout.html" %}
+
 <html>
   <body>
-    <h1>Generalized_Moving_knife Algorithm</h1>
+    {% block hedder %}
+    Generalized_Moving_knife Algorithm
+    {% endblock hedder %}
+    {% block content %}
     <p>Please choose a CSV file for input:</p>
     <form method="post" action="/results" enctype="multipart/form-data">
       <input type="file" id="input_file" name="input_file"><br><br>
@@ -9,3 +15,4 @@
     </form>
   </body>
 </html>
+{% endblock content %}
