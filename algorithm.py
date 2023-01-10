@@ -62,6 +62,7 @@ def output_sheets_algo1(result, spreadsheet):
         output_sheet.update_acell(f"C{i + 2}", all_payments[i])
     return output_sheet.url
 
+
 def run_algo2(url: str, eps: float):
     account = gspread.service_account("credentials.json")
     spreadsheet = account.open_by_url(url)

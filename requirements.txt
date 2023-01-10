@@ -5,7 +5,7 @@ networkx~=2.8.8
 matplotlib~=3.6.2
 repackage
 pytest
-pandas
+pandas~=1.5.2
 cvxpy_base>=1.1.17
 cvxpy_leximin>=0.4.4
 prtpy>=0.7.0
@@ -20,3 +20,4 @@ Flask~=2.2.2
 dicttools~=1.2.1
 setuptools~=57.0.0
 Cython~=0.29.32
+gspread~=5.7.2
