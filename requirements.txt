@@ -16,13 +16,5 @@ scs
 ecos
 fairpy @ git+https://github.com/erelsgl/fairpy.git
 flask
-operator
-logging
-unittest
-sys
-random
-itertools
-csv
-json
-math
+
 
