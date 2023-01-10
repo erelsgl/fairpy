@@ -1,8 +1,8 @@
 cmake
 numpy>=1.21.3
 scipy>=1.6.1
-networkx~=2.8.8
-matplotlib~=3.3.3
+networkx
+matplotlib
 repackage
 pytest
 cvxpy_base>=1.1.17
@@ -15,5 +15,3 @@ osqp
 scs
 ecos
 flask
-
-
