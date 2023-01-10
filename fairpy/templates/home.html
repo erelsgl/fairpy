@@ -1,6 +1,13 @@
+
+{% extends "layout.html" %}
+
 <html>
   <body>
-    <h1>Welcome to Yair & Rivka Algorithms Web Page</h1>
+    {% block hedder %}
+    Welcome to Yair & Rivka Algorithms Web Page
+    {% endblock hedder %}
+
+    {% block content %}
     <p>You can choose Algorithm for goods & Chores allocation from the following:</p>
     <ul>
       <li><a href="/algorithm1">Algorithm 1</a> - Double Round Robin - for EF1 Allocation.</li>
@@ -9,3 +16,4 @@
     </ul>
   </body>
 </html>
+{% endblock content %}
