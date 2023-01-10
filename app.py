@@ -2,8 +2,11 @@ import gspread
 import numpy as np
 from flask import Flask, request, render_template
 import pandas as pd
+from gspread import Spreadsheet
+
 from fairpy import Allocation, AllocationMatrix, ValuationMatrix
 from envy_free_approximation_division import envy_free_approximation_division
+
 # from gspread_utils import get_worksheet_by_list_of_possible_names
 app = Flask(__name__)
 
@@ -63,15 +66,11 @@ def run_algo1(url: str):
                 allo[agent].append(bundles.pop(0))
     res = envy_freeness_and_equitability_with_payments(mydict, allo)
     print(res)
-    return res
+    return res, spreadsheet
 
 
-def output_sheets_algo1(url: str, result):
-    account = gspread.service_account("credentials.json")
-    spreadsheet = account.open_by_url(url)
-    sheet1 = spreadsheet.worksheet('input')
-    all_agent = sheet1.col_values(1)[1:]
-    size_all_agents = len(all_agent)
+def create_output_layer(spreadsheet: Spreadsheet):
+    sheet1 = spreadsheet.get_worksheet(0)
     worksheet_names = [ws.title for ws in spreadsheet.worksheets()]
     if "output" in worksheet_names:
         output_sheet = spreadsheet.worksheet("output")
@@ -80,22 +79,31 @@ def output_sheets_algo1(url: str, result):
     output_sheet.update_acell("A1", "שם הסוכן")
     output_sheet.update_acell("B1", "חבילות")
     output_sheet.update_acell("C1", "תשלום")
+    return output_sheet
+
+
+def output_sheets_algo1(result, spreadsheet):
+    output_sheet = create_output_layer(spreadsheet)
+    sheet1 = spreadsheet.get_worksheet(0)
+    all_agent = sheet1.col_values(1)[1:]
+    size_all_agents = len(all_agent)
     for i in range(size_all_agents):
         output_sheet.update_acell(f"A{i + 2}", all_agent[i])
     all_bundles = list(result["allocation"].values())
     for i in range(len(all_bundles)):
-        output_sheet.update_acell(f"B{i+2}", "".join(all_bundles[i]))
+        output_sheet.update_acell(f"B{i + 2}", "".join(all_bundles[i]))
     all_payments = list(result["payments"].values())
     for i in range(len(all_payments)):
         output_sheet.update_acell(f"C{i + 2}", all_payments[i])
     return output_sheet.url
 
+
 @app.route('/play_algo1')
 def run_the_algo1():
     url = request.args.get('url')
-    result = run_algo1(url=url)
+    result, spreadsheet = run_algo1(url=url)
     print("Run complete")
-    output = output_sheets_algo1(url, result)
+    output = output_sheets_algo1(result, spreadsheet)
     return render_template(f'answer.html', url=output, result=result)
 
 
@@ -106,33 +114,53 @@ def run_algo2(url: str, eps: float):
     df = pd.DataFrame(sheet1.get_all_records())
     df = df.set_index(df.columns[0]).to_numpy()
     allo = Allocation(agents=ValuationMatrix(df), bundles=AllocationMatrix(np.eye(len(df), len(df)).astype('int')))
-    return envy_free_approximation_division(allo,eps)
+    return envy_free_approximation_division(allo, eps), spreadsheet
+
+
+def output_sheets_algo2(result: dict, spreadsheet: Spreadsheet):
+    output_sheet = create_output_layer(spreadsheet)
+    sheet1 = spreadsheet.get_worksheet(0)
+    all_agent = sheet1.col_values(1)[1:]
+    all_bundles = sheet1.row_values(1)[1:]
+    size_all_agents = len(all_agent)
+
+    for i in range(size_all_agents):
+        output_sheet.update_acell(f"A{i + 2}", all_agent[i])
+    for i in range(size_all_agents):
+        if result["allocation"][i]:
+            output_sheet.update_acell(f"B{i + 2}", all_bundles[result["allocation"][i][0]])
+        else:
+            output_sheet.update_acell(f"B{i + 2}", None)
+    all_payments = result["payments"]
+    for i in range(len(all_payments)):
+        output_sheet.update_acell(f"C{i + 2}", all_payments[i])
+    return output_sheet.url
 
 
 @app.route('/play_algo2')
 def run_the_algo2():
     url = request.args.get('url')
     eps = float(request.args.get('eps'))
-    result = run_algo2(url, eps)
-    # output = output_sheets_algo1(url, result)
-    # ---need insert the 'output' to 'url' in next line----
-    return render_template(f'answer.html', url=url, result=result)
+    result, spreadsheet = run_algo2(url, eps)
+    print("Run complete")
+    output = output_sheets_algo2(result, spreadsheet)
+    return render_template(f'answer.html', url=output, result=result)
 
 
-def get_worksheet_by_list_of_possible_names(spreadsheet:gspread.Spreadsheet, possible_names:list)->gspread.Worksheet:
-	"""
+def get_worksheet_by_list_of_possible_names(spreadsheet: gspread.Spreadsheet,
+                                            possible_names: list) -> gspread.Worksheet:
+    """
 	Searches the given spreadsheet for a worksheet with a name from the given list.
 	If none is found, return None.
 	"""
-	worksheet_names = [ws.title for ws in spreadsheet.worksheets()]
-	for name in possible_names:
-		if name in worksheet_names:
-			return spreadsheet.worksheet(name)
-	return None
+    worksheet_names = [ws.title for ws in spreadsheet.worksheets()]
+    for name in possible_names:
+        if name in worksheet_names:
+            return spreadsheet.worksheet(name)
+    return None
 
 
-
-def worksheet(spreadsheet:gspread.Spreadsheet)->gspread.Worksheet:
+def worksheet(spreadsheet: gspread.Spreadsheet) -> gspread.Worksheet:
     output_sheet = get_worksheet_by_list_of_possible_names(spreadsheet, "input")
     print(type(output_sheet))
     return output_sheet
