@@ -1,6 +1,6 @@
 cmake
 numpy>=1.21.3
-scipy>=1.6.1
+scipy
 networkx
 matplotlib
 repackage
