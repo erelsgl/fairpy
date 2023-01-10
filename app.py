@@ -20,35 +20,16 @@ def upload_file2():
 
 
 @app.route('/proceed')
-def move_to_calculate():
+def move_to_calculate_algo1():
     url = request.args.get('url')
-    # error = None
-    # try:
-    #     import gspread
-    #     account = gspread.service_account("credentials.json")
-    #     spreadsheet = account.open_by_url(url)
-    # except gspread.exceptions.APIError:
-    #     error = "Google Spreadsheet API error! Please verify that you shared your spreadsheet with the above address."
-    # except gspread.exceptions.NoValidUrlKeyFound:
-    #     error = "Google Spreadsheet could not find a key in your URL! Please check that the URL you entered points to a valid spreadsheet."
-    # except gspread.exceptions.SpreadsheetNotFound:
-    #     error = "Google Spreadsheet could not find the spreadsheet you entered! Please check that the URL points to a valid spreadsheet."
-    # except Exception as e:
-    #     error = type(e).__name__ + "! Please check your URL and try again."
-    # if error is not None:
-    #     print("error=", error)
-    #     return render_template(f'upload_sheets_algo1.html', error=error)
-    # else:
-    return render_template(f'move_to_calculate_algo1.html', url=url)
+    return render_template(f'calculate_algo1.html', url=url)
 
 
 @app.route('/proceed2')
-def algo2():
+def move_to_calculate_algo2():
     url = request.args.get('url')
-    # print(url)
-    # eps = request.args.get('eps')
-    # print(eps)
-    return render_template(f'move_to_calculate_algo2.html', url=url)
+    eps = request.args.get('eps')
+    return render_template(f'calculate_algo2.html', url=url, eps=eps)
 
 
 def run_algo1(url: str):
@@ -57,8 +38,7 @@ def run_algo1(url: str):
     spreadsheet = account.open_by_url(url)
     sheet1 = spreadsheet.worksheet("טבלת הערכות")
 
-    # Open sheet by index:
-    sheet1 = spreadsheet.get_worksheet(0)  # Same as above
+    sheet1 = spreadsheet.get_worksheet(0)
 
     list_of_dicts = sheet1.get_all_records()
     mydict = {}
@@ -81,23 +61,27 @@ def run_algo1(url: str):
     print(res)
     return res
 
-@app.route('/run_the_algo2')
-def run_the_algo2():
-    # ---fill in implement for algo2----
-    # run_algo2(url: str)
-    url = request.args.get('url')
-    print(url)
-    print("this is algo2")
-    return render_template(f'try.html')
 
-@app.route('/run_the_algo1')
+@app.route('/play_algo1')
 def run_the_algo1():
-    # import run
     url = request.args.get('url')
-    # print(url)
-    run_algo1(url=url)
+    result = run_algo1(url=url)
     print("Run complete")
-    return render_template(f'try.html')
+    return render_template(f'answer.html', result=result)
+
+
+def run_algo2(url: str, eps: float):
+    # ---fill in the implement for algo2----
+    pass
+
+
+@app.route('/play_algo2')
+def run_the_algo2():
+    url = request.args.get('url')
+    eps = float(request.args.get('eps'))
+    print("this is algo2")
+    result = run_algo2(url, eps)
+    return render_template(f'answer.html', result=result)
 
 
 if __name__ == "__main__":
