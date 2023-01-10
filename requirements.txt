@@ -5,6 +5,7 @@ networkx~=2.8.8
 matplotlib~=3.6.2
 repackage
 pytest
+pandas
 cvxpy_base>=1.1.17
 cvxpy_leximin>=0.4.4
 prtpy>=0.7.0
