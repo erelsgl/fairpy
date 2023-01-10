@@ -1,0 +1,19 @@
+
+{% extends "layout.html" %}
+
+<html>
+  <body>
+    {% block hedder %}
+    Welcome to Yair & Rivka Algorithms Web Page
+    {% endblock hedder %}
+
+    {% block content %}
+    <p>You can choose Algorithm for goods & Chores allocation from the following:</p>
+    <ul>
+      <li><a href="/algorithm1">Algorithm 1</a> - Double Round Robin - for EF1 Allocation.</li>
+      <li><a href="/algorithm2">Algorithm 2</a> - Generalized Adjusted Winner - for EF1 and PO Allocation.</li>
+      <li><a href="/algorithm3">Algorithm 3</a> - Generalized_Moving_knife - for Prop1 and continuous Allocation.</li>
+    </ul>
+  </body>
+</html>
+{% endblock content %}

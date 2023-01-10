@@ -1,0 +1,60 @@
+
+<head>
+    
+</head>
+<body>
+    <header>
+        <h2>
+            {% block hedder %}
+            {% endblock hedder %}
+        </h2>
+    </header>
+    <section>
+      
+        {% block content %}
+        {% endblock content%} 
+
+    </section>
+    
+</body>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  header {
+    background-color: lightblue;
+    text-align: center;
+    padding: 2px;
+    font-size: 25px;
+    color: white;
+  }
+  nav {
+    float: left;
+    width: 30%;
+    height: 300px;
+    background: #fff;
+    padding: 20px;
+  }
+  nav ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  article {
+    float: left;
+    padding: 20px;
+    width: 70%;
+    background-color: #f1f1f1;
+    height: 300px; 
+  }
+  footer {
+    background-color: lightblue;
+    padding: 10px;
+    text-align: center;
+    color: white;
+  }
+  section::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+</style>
