@@ -1,7 +1,7 @@
 from fairpy import Allocation
 import logging
 
-logging.basicConfig(filename="my_logger_file.log", level=logging.DEBUG)
+logging.basicConfig(filename="../../my_logger_file.log", level=logging.DEBUG)
 logger = logging.getLogger()
 
 

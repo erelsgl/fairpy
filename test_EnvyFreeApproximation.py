@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-from fairpy import Allocation, Valuation, ValuationMatrix, AllocationMatrix, compute_agent_bundle_value_matrix
-from envy_free_approximation_division import envy_free_approximation_division
+from fairpy import Allocation, ValuationMatrix, AllocationMatrix
+from fairpy.items.envy_free_approximation_division import envy_free_approximation_division
 
 
 def calculateSW(res: dict, v: ValuationMatrix):

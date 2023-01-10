@@ -3,7 +3,7 @@ import numpy as np
 import pyximport
 from improve_performance.cython_algorithm2 import envy_free_approximation_cython
 from fairpy import ValuationMatrix, AllocationMatrix, Allocation
-from envy_free_approximation_division import envy_free_approximation_division
+from fairpy.items.envy_free_approximation_division import envy_free_approximation_division
 
 pyximport.install()
 

@@ -1,7 +1,7 @@
 import random
 import itertools
 import time
-from envy_freeness_and_equitability_with_payments import envy_freeness_and_equitability_with_payments
+from fairpy.items.envy_freeness_and_equitability_with_payments import envy_freeness_and_equitability_with_payments
 from improve_performance_algo1.envy_freeness_and_equitability_with_payments_cython import envy_freeness_and_equitability_with_payments_cython
 import matplotlib.pyplot as plt
 import pyximport

@@ -3,11 +3,11 @@ import pandas as pd
 from fairpy import Allocation, AllocationMatrix, ValuationMatrix
 import gspread
 import numpy as np
-from envy_free_approximation_division import envy_free_approximation_division
+from fairpy.items.envy_free_approximation_division import envy_free_approximation_division
 
 
 def run_algo1(url: str):
-    from envy_freeness_and_equitability_with_payments import envy_freeness_and_equitability_with_payments
+    from fairpy.items.envy_freeness_and_equitability_with_payments import envy_freeness_and_equitability_with_payments
     account = gspread.service_account("credentials.json")
     spreadsheet = account.open_by_url(url)
     sheet1 = spreadsheet.worksheet('input')

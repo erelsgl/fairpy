@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from fairpy import Allocation, AllocationMatrix, ValuationMatrix
-from envy_freeness_and_equitability_with_payments import envy_freeness_and_equitability_with_payments
+from fairpy.items.envy_freeness_and_equitability_with_payments import envy_freeness_and_equitability_with_payments
 from test_EnvyFreeApproximation import agent_is_EF, agent_is_EQ, calculateSW
 
 
