@@ -133,7 +133,7 @@ def  Generalized_Adjusted_Winner_Algorithm(agent_list :AgentList)->dict:
         Programmer: Yair Raviv , Rivka Strilitz
         Example 1:
         >>> Generalized_Adjusted_Winner_Algorithm(AgentList({"Agent1":{"1":1,"2":-1,"3":-2,"4":3,"5":5,"6":0,"7":0,"8":-1,"9":2,"10":3},"Agent2":{"1":-3,"2":4,"3":-6,"4":2,"5":4,"6":-3,"7":2,"8":-2,"9":4,"10":5}}))
-        {'Agent1': ['1', '4', '5', '6', '9', '10'], 'Agent2': ['2', '3', '7', '8']}
+        {'Agent1': ['1', '10', '4', '5', '6', '9'], 'Agent2': ['2', '3', '7', '8']}
 
         Example 2:
         >>> Generalized_Adjusted_Winner_Algorithm(AgentList({"Agent1":{"1":1,"2":-1,"3":-2}, "Agent2":{"1":-3,"2":4,"3":-6}}))
@@ -178,7 +178,7 @@ def  Generalized_Adjusted_Winner_Algorithm(agent_list :AgentList)->dict:
         else:
             Winner_bundle.append(t)
             Looser_bundle.remove(t)
-    return {}
+    raise exception("the algorithem sould alwayse return an allocation")
 
 
 
