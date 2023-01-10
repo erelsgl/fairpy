@@ -7,6 +7,7 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Container from '@mui/material/Container';
+
 function App() {
     const [numRooms, setNumRooms] = useState('');
     const [agents, setAgents] = useState([]);
@@ -98,67 +99,73 @@ function App() {
             setError('');
             try {
                 console.log("React: ", agents, totalRent)
-                const response = await axios.post('http://localhost:5000/submit', {agents: agents, rent: totalRent});
+                const response = await axios.post('http://localhost:5001/submit', {agents: agents, rent: totalRent});
                 console.log("Flask: ", response.data);
                 setResults(response.data);
+                setExpanded('panel1')
             } catch (error) {
                 console.error(error);
             }
         }
     }
 
+    const [expanded, setExpanded] = useState(false);
+    const handleChange = (panel) => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+
+    };
     return (
         <div className="About">
             <h1>Fair Rent Division on a Budget</h1>
             <Container maxWidth="sm">
-                <Accordion >
-                 <AccordionSummary
-                         sx={{
-                             backgroundColor: '#282c34', color: "#61dafb"
+                <Accordion>
+                    <AccordionSummary
+                        sx={{
+                            backgroundColor: '#282c34', color: "#61dafb"
 
-                         }}
-                         expandIcon={<ExpandMoreIcon sx={{color: "#61dafb"}}/>}
-                         aria-controls="panel1a-content"
-                         id="panel1a-header"
-                         text-align="center"
-                     >
-                    <Typography >About</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <Typography>
-                        "Fair Rent Division on a Budget" by Procaccia, A., Velez, R., & Yu, D. (2018),
-                        https://doi.org/10.1609/aaai.v32i1.11465 .<br/>
-                        The algorithm calculates Optimal envy-free allocation subject to budget constraints, or in
-                        simple
-                        words,
-                        calculates a fair rent division under budget constraints.
-                    </Typography>
-                </AccordionDetails>
-            </Accordion>
+                        }}
+                        expandIcon={<ExpandMoreIcon sx={{color: "#61dafb"}}/>}
+                        aria-controls="panel1a-content"
+                        id="panel1a-header"
+                        text-align="center"
+                    >
+                        <Typography>About</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Typography>
+                            "Fair Rent Division on a Budget" by Procaccia, A., Velez, R., & Yu, D. (2018),
+                            https://doi.org/10.1609/aaai.v32i1.11465 .<br/>
+                            The algorithm calculates Optimal envy-free allocation subject to budget constraints, or in
+                            simple
+                            words,
+                            calculates a fair rent division under budget constraints.
+                        </Typography>
+                    </AccordionDetails>
+                </Accordion>
             </Container>
             <Container maxWidth="sm">
-                <Accordion >
-                 <AccordionSummary
-                         sx={{
-                             backgroundColor: '#282c34', color: "#61dafb"
+                <Accordion>
+                    <AccordionSummary
+                        sx={{
+                            backgroundColor: '#282c34', color: "#61dafb"
 
-                         }}
-                         expandIcon={<ExpandMoreIcon sx={{color: "#61dafb"}}/>}
-                         aria-controls="panel1a-content"
-                         id="panel1a-header"
-                         text-align="center"
-                     >
-                    <Typography >manual</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <Typography>
-                        Select the number of rooms, enter the total rent.<br/>
-                Enter the names of roommates and enter the budget of each .<br/>
-                Enter the evaluation of each room so that the total equals rent.<br/>
-                For the end click on submit for result.
-                    </Typography>
-                </AccordionDetails>
-            </Accordion>
+                        }}
+                        expandIcon={<ExpandMoreIcon sx={{color: "#61dafb"}}/>}
+                        aria-controls="panel1a-content"
+                        id="panel1a-header"
+                        text-align="center"
+                    >
+                        <Typography>manual</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Typography>
+                            Select the number of rooms, enter the total rent.<br/>
+                            Enter the names of roommates and enter the budget of each .<br/>
+                            Enter the evaluation of each room so that the total equals rent.<br/>
+                            For the end click on submit for result.
+                        </Typography>
+                    </AccordionDetails>
+                </Accordion>
             </Container>
             <br/>
             <h3>START</h3>
@@ -212,27 +219,49 @@ function App() {
                 <button type="submit" onClick={handleSubmit} disabled={isDisabled()}>
                     Submit
                 </button>
-                {results && results != "no solution" ? (
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Agent</th>
-                            <th>Room</th>
-                            <th>Value</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {results[0].map((result, i) => (
-                            <tr key={result[0]}>
-                                <td>{result[0]}</td>
-                                <td>{result[1]}</td>
-                                <td>{results[1][i][1]}</td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                ) : results == "no solution" ? <p>No solution</p> : null}
             </form>
+            <Container maxWidth="sm">
+                <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
+                    <AccordionSummary
+                        sx={{
+                            backgroundColor: '#282c34', color: "#61dafb"
+
+                        }}
+                        expandIcon={<ExpandMoreIcon sx={{color: "#61dafb"}}/>}
+                        aria-controls="panel1a-content"
+                        id="panel1a-header"
+                        text-align="center"
+                    >
+                        <Typography>Result</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Typography>
+                            <div>
+                                {results && results != "no solution" ? (
+                                    <table>
+                                        <thead>
+                                        <tr>
+                                            <th>Agent</th>
+                                            <th>Room</th>
+                                            <th>Value</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {results[0].map((result, i) => (
+                                            <tr key={result[0]}>
+                                                <td>{result[0]}</td>
+                                                <td>{result[1]}</td>
+                                                <td>{results[1][i][1]}</td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
+                                ) : results == "no solution" ? <p>No solution</p> : null}
+                            </div>
+                        </Typography>
+                    </AccordionDetails>
+                </Accordion>
+            </Container>
         </div>
     );
 }
