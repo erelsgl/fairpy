@@ -16,7 +16,6 @@ scs
 ecos
 fairpy @ git+https://github.com/erelsgl/fairpy.git
 flask
-math
 operator
 logging
 unittest
@@ -25,4 +24,5 @@ random
 itertools
 csv
 json
+math
 
