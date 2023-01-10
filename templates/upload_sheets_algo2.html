@@ -3,18 +3,18 @@
 
 <body>
 
-<div style="display: flex; align-items: center; justify-content: center">
+<div style="display: flex;font-family:Arial,monospace;  align-items: center; justify-content: center">
 <h1>חלוקה הוגנת</h1>
 </div>
 <br>
-<div style="display: flex; align-items: center; justify-content: center">
+<div style="display: flex; align-items: center;font-family:Arial,monospace;  justify-content: center">
 <h2>כדי לחשב חלוקה חסרת קנאה (בקירוב של אפסילון שתבחרו) עקבו אחר ההוראות הבאות</h2>
 </div>
 
 {% if error %}
 <p class="error">{{error}}</p>
 {% endif %}
-<div style="display: flex; align-items: center; justify-content: center">
+<div style="display: flex;font-family:Arial,monospace; align-items: center; justify-content: center">
 
     <ol>
     <li>צרו גליון אלקטרוני חדש של גוגל (Google Spreadsheet) בשם 'input';</li>
@@ -22,10 +22,7 @@
     <li>שתפו את הגליון עם הכתובת הבאה: <br/><b>eitan280@pythonexe10.iam.gserviceaccount.com</b></li>
     <li> בחרו את האפסילון הרצוי:
     <form method="GET" action="/proceed2">
-        <input type='text' name="eps" size='10'/>
-<!--        <input type='submit' name="eps"/>-->
-<!--    </form>-->
-    </li>
+        <input type='text' name="eps" size='10'/></li>
         <li> הכניסו את הקישור (URL) של הגליון לכאן:
 <!--    <form method="GET" action="/proceed2">-->
       <input name="url" size='100'/>
