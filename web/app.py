@@ -46,6 +46,9 @@ def find_allocation(data):
 
     return placement_matrix
 
+if __name__ == '__main__':
+    app.run(debug=False, host="0.0.0.0", port=5000)
+    # app.run(debug=True)
 # https://stackoverflow.com/questions/33070395/not-able-to-parse-a-csv-file-uploaded-using-flask
 
 
