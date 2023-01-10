@@ -14,3 +14,4 @@ cvxopt>=1.2
 osqp
 scs
 ecos
+flask
