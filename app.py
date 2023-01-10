@@ -1,5 +1,9 @@
 import gspread
-from flask import Flask, request, render_template, redirect, url_for
+import numpy as np
+from flask import Flask, request, render_template
+import pandas as pd
+from fairpy import Allocation, AllocationMatrix, ValuationMatrix
+from envy_free_approximation_division import envy_free_approximation_division
 
 app = Flask(__name__)
 
@@ -36,7 +40,7 @@ def run_algo1(url: str):
     from envy_freeness_and_equitability_with_payments import envy_freeness_and_equitability_with_payments
     account = gspread.service_account("credentials.json")
     spreadsheet = account.open_by_url(url)
-    sheet1 = spreadsheet.worksheet("טבלת הערכות")
+    sheet1 = spreadsheet.worksheet('input')
 
     sheet1 = spreadsheet.get_worksheet(0)
 
@@ -71,32 +75,26 @@ def run_the_algo1():
 
 
 def run_algo2(url: str, eps: float):
-    # ---fill in the implement for algo2----
-    pass
+    account = gspread.service_account("credentials.json")
+    spreadsheet = account.open_by_url(url)
+
+    sheet1 = spreadsheet.get_worksheet(0)
+    df = pd.DataFrame(sheet1.get_all_records())
+    df = df.set_index(df.columns[0]).to_numpy()
+    allo = Allocation(agents=ValuationMatrix(df), bundles=AllocationMatrix(np.eye(len(df), len(df)).astype('int')))
+    return envy_free_approximation_division(allo,eps)
 
 
 @app.route('/play_algo2')
 def run_the_algo2():
     url = request.args.get('url')
     eps = float(request.args.get('eps'))
-    print("this is algo2")
     result = run_algo2(url, eps)
     return render_template(f'answer.html', result=result)
 
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
-
-
-
-
-
-
-
-
 
 # rendering the HTML page which has the button
 # @app.route('/log')

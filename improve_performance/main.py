@@ -3,7 +3,7 @@ import numpy as np
 import pyximport
 from improve_performance.cython_algorithm2 import envy_free_approximation_cython
 from fairpy import ValuationMatrix, AllocationMatrix, Allocation
-from envy_free_approximation_division import envy_free_approximation
+from envy_free_approximation_division import envy_free_approximation_division
 
 pyximport.install()
 
@@ -21,7 +21,7 @@ for i in range(1, 21):
     envy_free_approximation_cython(alloc, 0.1)
     cy.append(time.time() - st)
     st = time.time()
-    envy_free_approximation(alloc2, 0.1)
+    envy_free_approximation_division(alloc2, 0.1)
     py.append(time.time() - st)
 
 print("improve_performance", cy)

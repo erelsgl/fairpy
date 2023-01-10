@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from fairpy import Allocation, Valuation, ValuationMatrix, AllocationMatrix, compute_agent_bundle_value_matrix
-from envy_free_approximation_division import envy_free_approximation
+from envy_free_approximation_division import envy_free_approximation_division
 
 
 def calculateSW(res: dict, v: ValuationMatrix):
@@ -79,22 +79,22 @@ class TestApproximationDivison(unittest.TestCase):
             self.a1[i][i] = 1
         self.allocationBefore1 = Allocation(agents=ValuationMatrix(self.v),
                                             bundles=AllocationMatrix(self.a1))
-        self.allocationResult1 = envy_free_approximation(self.allocationBefore1)
+        self.allocationResult1 = envy_free_approximation_division(self.allocationBefore1)
         self.a2 = np.zeros_like(self.v2).tolist()
         for i in range(len(self.a2)):
             self.a2[i][i] = 1
         self.allocationBefore2 = Allocation(agents=ValuationMatrix(self.v2),
                                             bundles=AllocationMatrix(self.a2))
-        self.allocationResult2 = envy_free_approximation(self.allocationBefore2)
+        self.allocationResult2 = envy_free_approximation_division(self.allocationBefore2)
 
     def test_sw(self):
         """
         check that SW of forst allocation <= SW of result allocation
         """
         self.assertLessEqual(calculateSW(self.allocationBefore1, self.v),
-                             calculateSW(envy_free_approximation(self.allocationBefore1), self.v))
+                             calculateSW(envy_free_approximation_division(self.allocationBefore1), self.v))
         self.assertLessEqual(calculateSW(self.allocationBefore2, self.v2),
-                             calculateSW(envy_free_approximation(self.allocationBefore2), self.v2))
+                             calculateSW(envy_free_approximation_division(self.allocationBefore2), self.v2))
 
     def test_init(self):
         """
@@ -106,14 +106,14 @@ class TestApproximationDivison(unittest.TestCase):
             amt[i][i] = 1
         alloc = Allocation(agents=ValuationMatrix(mat),
                            bundles=AllocationMatrix(amt))
-        self.assertIsNotNone(envy_free_approximation(alloc))
+        self.assertIsNotNone(envy_free_approximation_division(alloc))
         mat2 = [[1 + x + y * 100 for x in range(100)] for y in range(100)]
         amt2 = np.zeros_like(mat).tolist()
         for i in range(len(amt2)):
             amt2[i][i] = 1
         alloc2 = Allocation(agents=ValuationMatrix(mat2),
                             bundles=AllocationMatrix(amt2))
-        self.assertIsNotNone(envy_free_approximation(alloc2))
+        self.assertIsNotNone(envy_free_approximation_division(alloc2))
 
     def test_ef(self):
         """

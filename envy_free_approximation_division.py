@@ -75,7 +75,7 @@ def get_second_max(idx: int, agent_valuation: np.array, payments: np.array) -> f
     return m[0] - m[1]
 
 
-def envy_free_approximation(allocation: Allocation, eps: float = 0) -> dict:
+def envy_free_approximation_division(allocation: Allocation, eps: float = 0) -> dict:
     """
     "Achieving Envy-freeness and Equitability with Monetary Transfers" by Haris Aziz (2021),
     https://ojs.aaai.org/index.php/AAAI/article/view/16645
@@ -88,19 +88,19 @@ def envy_free_approximation(allocation: Allocation, eps: float = 0) -> dict:
     ...      [20,10,15,25],
     ...      [15,25,22,20]]
     >>> a = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]
-    >>> envy_free_approximation(Allocation(agents = ValuationMatrix(v), bundles=AllocationMatrix(a)))
+    >>> envy_free_approximation_division(Allocation(agents = ValuationMatrix(v), bundles=AllocationMatrix(a)))
     {'allocation': [[3], [1], [0], [2]], 'payments': [11.0, 12.0, 5.0, 0.0]}
     >>> v2 = [[0,50,0,0],
     ...       [0,40,0,0],
     ...       [0,30,0,0],
     ...       [0,45,0,0]]
-    >>> envy_free_approximation(Allocation(agents = ValuationMatrix(v2), bundles=AllocationMatrix(a)))
+    >>> envy_free_approximation_division(Allocation(agents = ValuationMatrix(v2), bundles=AllocationMatrix(a)))
     {'allocation': [[1], [0], [2], [3]], 'payments': [50.0, 0.0, 0.0, 0.0]}
     >>> v3 = [[-5,20,10,25],
     ...      [15,-15,-12,-15],
     ...      [-10,12,9,-5],
     ...      [12,20,30,-10]]
-    >>> envy_free_approximation(Allocation(agents = ValuationMatrix(v3), bundles=AllocationMatrix(a)))
+    >>> envy_free_approximation_division(Allocation(agents = ValuationMatrix(v3), bundles=AllocationMatrix(a)))
     {'allocation': [[3], [0], [1], [2]], 'payments': [5.0, 27.0, 3.0, 0.0]}
     """
     value_matrix = allocation.utility_profile_matrix()
