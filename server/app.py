@@ -80,11 +80,15 @@ def res():
         if total_rent != sum_value:
             return render_template("table.html", rooms=num_room, rents=total_rent)
     res_algo = optimal_envy_free(AgentList(values), float(total_rent), budgets)
+
     return redirect(url_for("page_result", user_input=res_algo))
 
 
 @app.route("/result/<user_input>")
 def page_result(user_input):
+    if user_input == 'no solution':
+        print('no solution')
+        return render_template("result.html", string_res='no solution')
     print(type(user_input))
     tuple_of_lists = ast.literal_eval(user_input)
     dict1 = dict(tuple_of_lists[0])

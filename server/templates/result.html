@@ -16,11 +16,21 @@
     <button type="submit">Home</button>
 </form>
 
+
+{% block content %}
+{% if string_res == "no solution" %}
+<p>
+    no solution
+</p>
+{% else %}
 <div>{% for i in string_res %}
     <p>
         {{i}}
     </p>
     {% endfor %}
 </div>
+{% endif %}
+{% endblock content %}
+
 </body>
 </html>
