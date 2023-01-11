@@ -110,141 +110,6 @@ def Bounded_Subsidy(agents: AgentList, items: Dict[str,int]=None, weights: Dict[
 Bounded_Subsidy.logger = logger
 
 
-def allocate_items_with_Subsidy(agents: AgentList, items: Dict[str,int]=None, weights: Dict[str, int]=None):
-    """
-    The algorithm getting a list of agents, list of goods and array of the weights of the goods
-    and it returns a bundle of agents each holding the best allocation for their own valuation,
-    with the subsidy that eliminates envy
-
-    ###### Two agens, one items ######
-    >>> agents0 = AgentList({"Alice": {"a":5}, "Bob": {"a":4}})
-    >>> allocate_items_with_Subsidy(agents0)
-    Alice gets ['a'] with no subsidy
-    Bob gets [] with subsidy of 4
-
-    ###### Two agens, Two items ######
-    >>> agents1 = AgentList({"Alice": {"a":3, "b":5}, "Bob": {"a":6, "b":7}})
-    >>> allocate_items_with_Subsidy(agents1)
-    Alice gets ['b'] with no subsidy
-    Bob gets ['a'] with subsidy of 1
-
-    >>> agents2 = AgentList({"Alice": {"a":3, "b":2}, "Bob": {"a":4, "b":1}})
-    >>> allocate_items_with_Subsidy(agents2)
-    Alice gets ['b'] with subsidy of 1
-    Bob gets ['a'] with no subsidy
-
-    >>> agents3 = AgentList({"Alice": {"a":4, "b":10, "c":8, "d":7}, "Bob": {"a":5, "b":9, "c":5, "d":10}})
-    >>> allocate_items_with_Subsidy(agents3)
-    Alice gets ['b', 'c'] with no subsidy
-    Bob gets ['d', 'a'] with no subsidy
-
-    >>> agents4 = AgentList({"Alice": {"a":10, "b":8, "c":5, "d":9, "e":3, "f":0}, "Bob": {"a":9, "b":2, "c":4, "d":7, "e":10, "f":1}})
-    >>> allocate_items_with_Subsidy(agents4)
-    Alice gets ['a', 'b', 'c'] with no subsidy
-    Bob gets ['e', 'd', 'f'] with no subsidy
-
-    ###### Three agents, Three items ######
-
-    >>> agents5 = AgentList({"Alice": {"a":3, "b":4, "c":6}, "Bob": {"a":4, "b":3, "c":1}, "Max": {"a":4, "b":5, "c":1}})
-    >>> allocate_items_with_Subsidy(agents5)
-    Alice gets ['c'] with subsidy of 1
-    Bob gets ['a'] with no subsidy
-    Max gets ['b'] with no subsidy
-
-    >>> agents6 = AgentList({"Alice": {"a":1, "b":2, "c":3}, "Bob": {"a":1, "b":3, "c":2}, "Max": {"a":3, "b":2, "c":1}})
-    >>> allocate_items_with_Subsidy(agents6)
-    Alice gets ['c'] with no subsidy
-    Bob gets ['b'] with no subsidy
-    Max gets ['a'] with no subsidy
-
-    >>> agents7 = AgentList({"Alice": {"a":1, "b":5, "c":3}, "Bob": {"a":1, "b":3, "c":2}, "Max": {"a":3, "b":2, "c":1}})
-    >>> allocate_items_with_Subsidy(agents7)
-    Alice gets ['b'] with no subsidy
-    Bob gets ['c'] with subsidy of 2
-    Max gets ['a'] with no subsidy
-
-    ###### Four agents ######
-    >>> agents8 = AgentList({"Alice": {"a":5}, "Bob": {"a":3}, "Max": {"a":2}, "Nancy": {"a":2}})
-    >>> allocate_items_with_Subsidy(agents8)
-    Alice gets ['a'] with no subsidy
-    Bob gets [] with subsidy of 3
-    Max gets [] with subsidy of 2
-    Nancy gets [] with subsidy of 2
-
-    """
-
-
-    allTheItems = agents[0].all_items() # list of all items
-
-    # list of the sum of all the values of the items for all agents
-    sum_of_all_values_agents = {}
-    # list of the values of the items that allocate to the agent
-    sum_items_val_that_agent_gets = {}
-
-    # Initialize both lists
-    i = 0
-    while i < len(agents):
-        key = agents[i].name()
-        value = agents[i].value(list(allTheItems))
-        sum_of_all_values_agents[key] = value
-        sum_items_val_that_agent_gets[key] = 0
-        i += 1
-
-    if items is None:
-        items = {item:1 for item in allTheItems}
-
-    # empty list for the result => {agent.name: ['item.name']}
-    result = {agent.name(): [] for agent in agents} 
-
-    while len(items) > 0: # The process ends when every item has been allocated
-        # The valuation graph H is the complete bipartite graph on vertex sets I and J, where edge (i, j) has weight vi(j)
-        H = instance_to_graph(agents, agent_weights=weights, item_capacities=items) 
-        # print(H)
-        logger.info("Graph edges: %s", list(H.edges.data()))
-        # a maximum weight matching in H[I, Jt]
-        Mt = networkx.max_weight_matching(H, maxcardinality=False) # H חשב התאמה משוקללת מקסימלית של .
-        # print(Mt)
-        logger.info("Matching: %s", Mt)
-        # if agent i is matched to item j = µti then we allocate item µti to that agent
-        agentsBundle = matching_to_allocation(Mt, agent_names=agents.agent_names()) # ממירה התאמה של אחד לרבים בגרף דו-חלקי
-
-        for agent_name,item_name in agentsBundle.items():
-            result[agent_name] += item_name
-            
-        # The items that allocated to the agents in this round
-        allocated_items = sum([item for item in agentsBundle.values()], []) 
-
-        # add the values of the items that allocate to the agents into the appropriate list
-        j,k = 0,0
-        while j < len(sum_items_val_that_agent_gets):
-            k=0
-            while k < len(agentsBundle):
-                if (list(agentsBundle)[k] == list(sum_items_val_that_agent_gets)[j]):
-                    sum_items_val_that_agent_gets[agents[j].name()] += agents[j].value(allocated_items[k])
-                k +=1
-            j += 1
-        
-        # Remove the allocated items and recurse on the remaining items
-        items = delete_items(items, allocated_items) # delete_items
-
-    # create a list of subsidies for the items that allocate to the agents
-    i=0
-    subsid_list = {}
-    while i < len(agents):
-        key = agents[i].name()
-        value = (2 * sum_items_val_that_agent_gets[key]) - sum_of_all_values_agents[key]
-        subsid_list[key] = value
-
-        # print the results
-        if (subsid_list[key] < 0):
-            print(agents[i].name(), "gets", list(result.values())[i], "with subsidy of", subsid_list[key]*-1)
-        else:
-            print(agents[i].name(), "gets", list(result.values())[i], "with no subsidy")
-        i += 1
-
-allocate_items_with_Subsidy.logger = logger
-
-
 def delete_items(items:Dict[str,int], items_to_remove:List)->Dict[str,int]:
     """
     # This is help function that Remove the given items from the graph
@@ -264,6 +129,153 @@ def delete_items(items:Dict[str,int], items_to_remove:List)->Dict[str,int]:
     return {item:newSize for item,newSize in items.items() if newSize > 0}
 
 
+
+##### algorithm 2 #####
+
+def maximizes_allocation(agents: Dict[str,AgentList], item_list: List[ItemsView]):
+   
+   
+    """
+        
+   # Allocate each agent with his highest item that has not been allocated.
+
+    >>> Alice = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Alice")
+    >>> Alice.aq_items = []
+    >>> Bob = AdditiveAgent({"a":   9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Bob")
+    >>> Bob.aq_items = []
+    >>> Eve = AdditiveAgent({"a":   9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Eve")
+    >>> Eve.aq_items = []
+    >>> agents_dict = {x.name():x for x in [Alice,Bob,Eve]}
+    >>> items_remaining = list('abcdef')
+    >>> maximizes_allocation(agents_dict,items_remaining)
+    >>> [(x.name(),sorted(x.aq_items)) for x in agents_dict.values()]
+    [('Alice', ['d', 'e']), ('Bob', ['a', 'f']), ('Eve', ['b', 'c'])]
+   
+    """
+    agents_items = list(agents.items())
+    while len(item_list) > 0:
+        for k, i in (agents_items):
+            max_item = max([x for x in i.valuation.desired_items if x[0] in item_list], key=lambda x: i.value(x))
+            item_list.remove(max_item)
+            i.aq_items.append(max_item)
+        agents_items.reverse()
+
+
+def create_Envy_Graph(agents: Dict[str, AdditiveAgent]) -> networkx.DiGraph:
+    """
+    This function creates an Envy Graph of agents, and maximizes the allocation
+    for every two nodes representing agent u and v, 
+    there will be an edge from u to v if agent u believes agent vs bundle is worth more then his.
+
+    >>> Alice = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Alice")
+    >>> Alice.aq_items = ['d', 'e']
+    >>> Bob = AdditiveAgent({"a":   9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Bob")
+    >>> Bob.aq_items = ['a', 'f']
+    >>> Eve = AdditiveAgent({"a":   9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Eve")
+    >>> Eve.aq_items = ['b', 'c']
+    >>> agents = {x.name():x for x in [Alice,Bob,Eve]}
+  
+    >>> list(create_Envy_Graph(agents).nodes)
+    ['Alice', 'Bob', 'Eve']
+
+    >>> list(create_Envy_Graph(agents).edges)
+    [('Alice', 'Bob'), ('Alice', 'Eve')]
+    """
+    
+    # DiGraph — Directed graphs with self loops
+    # its stores nodes and edges with optional data, or attributes.
+    # DiGraphs hold directed edges. Self loops are allowed but multiple (parallel) edges are not.
+    envy_graph = networkx.DiGraph() 
+    for i in agents.values():
+        envy_graph.add_node(i.name())
+        i_value = i.value(i.aq_items) # values of items of agent "i" from his eyes
+        for k in agents.values():
+            if i is k:
+                continue
+            k_value = i.value(k.aq_items) # values of items of agent "k" from eyes of agent "i"
+            if k_value > i_value:
+                envy_graph.add_edge(i.name(), k.name())
+    return envy_graph
+
+
+def check_positive_weight_directed_cycles(envy_graph: networkx.DiGraph, agents: Dict[str, AdditiveAgent]) -> bool:
+    """
+    This function checks if its envy graph does not contain a positive-weight directed cycle
+
+    >>> Alice = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Alice")
+    >>> Alice.aq_items = ['d', 'e']
+    >>> Bob = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Bob")
+    >>> Bob.aq_items = ['a', 'f']
+    >>> Eve = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Eve")
+    >>> Eve.aq_items = ['b', 'c']
+    >>> agents = {x.name():x for x in [Alice,Bob,Eve]}
+
+    >>> envy_graph = create_Envy_Graph(agents)
+    >>> check_positive_weight_directed_cycles(envy_graph, agents)
+    False
+    
+    """
+
+    try:
+        cycle = networkx.find_cycle(envy_graph, orientation="original")
+        for edge in cycle[:-1]:
+            to_p, from_p = edge[0], edge[1]
+            agents[to_p].aq_items, agents[from_p].aq_items = [agents[from_p].aq_items, agents[to_p].aq_items]
+        return True
+
+    except networkx.NetworkXNoCycle:
+        return False
+
+
+def cal_Subsidy(agents: Dict[str, AdditiveAgent]):
+    """
+    This function calculates the subsidy
+
+    >>> Alice = AdditiveAgent({"a": 9, "b": 8, "c": 6, "d": 11, "e": 3, "f": 6}, name="Alice")
+    >>> Alice.aq_items = []
+    >>> Bob = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 5, "e": 3, "f": 6}, name="Bob")
+    >>> Bob.aq_items = []
+    >>> Eve = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Eve")
+    >>> Eve.aq_items = []
+    >>> agents_dict = {x.name():x for x in [Alice,Bob,Eve]}
+    >>> cal_Subsidy(agents_dict)
+    subsidy of:  Alice is 1
+
+    >>> Alice = AdditiveAgent({"a":3, "b":4, "c":6}, name="Alice")
+    >>> Alice.aq_items = []
+    >>> Bob = AdditiveAgent({"a":4, "b":3, "c":1}, name="Bob")
+    >>> Bob.aq_items = []
+    >>> Eve = AdditiveAgent({"a":4, "b":5, "c":1}, name="Eve")
+    >>> Eve.aq_items = []
+    >>> agents_dict = {x.name():x for x in [Alice,Bob,Eve]}
+    >>> cal_Subsidy(agents_dict) # no subsidy
+
+    """
+
+    for i in agents.values():
+        all_items = list(i.all_items())
+        break
+
+    maximizes_allocation(agents, all_items)
+
+
+    # DiGraph — Directed graphs with self loops
+    # its stores nodes and edges with optional data, or attributes.
+    # DiGraphs hold directed edges. Self loops are allowed but multiple (parallel) edges are not.
+    envy_graph = networkx.DiGraph() 
+    for i in agents.values():
+        envy_graph.add_node(i.name())
+        i_value = i.value(i.aq_items) # values of items of agent "i" from his eyes
+        for k in agents.values():
+            if i is k:
+                continue
+            k_value = i.value(k.aq_items) # values of items of agent "k" from eyes of agent "i"
+            if k_value > i_value and check_positive_weight_directed_cycles(create_Envy_Graph(agents), agents) == False:
+                envy_graph.add_edge(i.name(), k.name())
+                print("subsidy of: ",i.name(), "is", k_value-i_value)
+
+
+
 #### MAIN
 
 if __name__ == "__main__":
@@ -278,4 +290,15 @@ if __name__ == "__main__":
     # agents4 = AgentList({"Alice": {"a":10, "b":8, "c":5, "d":9, "e":3, "f":0}, "Bob": {"a":9, "b":2, "c":4, "d":7, "e":10, "f":1}})
     # agents5 = AgentList({"Alice": {"a":3, "b":4, "c":6}, "Bob": {"a":4, "b":3, "c":1}, "Max": {"a":4, "b":5, "c":1}})
     # allocate_items_with_Subsidy(agents5)
+
+    # Alice = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Alice")
+    # Alice.aq_items = []
+    # Bob = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Bob")
+    # Bob.aq_items = []
+    # Eve = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Eve")
+    # Eve.aq_items = []
     
+
+    # agents_dict = {x.name():x for x in [Alice,Bob,Eve]}
+
+   
