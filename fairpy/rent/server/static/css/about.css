@@ -1,3 +1,10 @@
+.About.body{
+  background-color: #282c34;
+  color: #61dafb;
+  padding: 40px;
+  font-family: Arial;
+  text-align: center;
+}
 body {
   background-color: #282c34;
   color: #61dafb;
@@ -11,3 +18,4 @@ body {
   font-family: Arial ;
   text-align: center;
 }
+
