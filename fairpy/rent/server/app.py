@@ -2,7 +2,7 @@
 from flask import Flask, request, render_template, redirect, jsonify, url_for, flash
 
 app = Flask(__name__)
-
+rent = 0
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -31,6 +31,7 @@ def submit():
 
 @app.route("/table/<user_input>")
 def new_page(user_input: str):
+    global rent
     print("user input ", user_input)
     print(type(user_input))
     s = ''
@@ -51,15 +52,27 @@ def new_page(user_input: str):
 @app.route("/home", methods=['POST'])
 def home():
     print("yesss")
+    global rent
+    rent = 0
     return redirect(url_for("index"))
 
-@app.route("/res", methods=['POST'])
+@app.route("/res", methods=['GET', 'POST'])
 def res():
-    print("yesss")
-    return redirect(url_for("result"))
+    global rent
+    # print("yesss")
+    # print(rent)
+    # # for i in request.form[0]:
+    # #     print(i)
+    # print(request.form)
+    data = {}
+    for key, value in request.form.to_dict(flat=False).items():
+        data[key] = value
+    # print(data)
+    # print(jsonify(request.form.to_dict()))
+    return redirect(url_for("page_result"))
 
-@app.route("/result")
-def result():
+@app.route("/result/<user_input>")
+def page_result():
     return render_template("result.html")
 
 if __name__ == '__main__':
