@@ -291,7 +291,7 @@ def LinearProgram(output: scedual, apprx_bound: float) -> bool:
 
     prob = cp.Problem(objective, constraints)
     # simplex solver version opt to find most sparse solutions
-    prob.solve(solver = cp.GLPK)
+    prob.solve(solver = cp.SCIPY, scipy_options = {"method" : "highs"})
     
     if prob.status != 'optimal':
         logger.info('LP status: %s', prob.status)
@@ -435,8 +435,8 @@ def min_makespan(input: ValuationMatrix) -> Allocation:
         <BLANKLINE>
         >>> min_makespan(ValuationMatrix([[1, 2, 5], [2, 2, 1],[2, 3, 5]]))
         Agent #0 gets { 100.0% of 1} with value 2.
-        Agent #1 gets { 100.0% of 0, 100.0% of 2} with value 3.
-        Agent #2 gets {} with value 0.
+        Agent #1 gets { 100.0% of 2} with value 1.
+        Agent #2 gets { 100.0% of 0} with value 2.
         <BLANKLINE>
     '''
 
