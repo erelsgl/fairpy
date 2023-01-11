@@ -1,6 +1,6 @@
 cmake
 numpy>=1.21.3
-scipy
+scipy>=1.6.1
 networkx
 matplotlib
 repackage
@@ -15,4 +15,3 @@ osqp
 scs
 ecos
 flask
-flask_cors
