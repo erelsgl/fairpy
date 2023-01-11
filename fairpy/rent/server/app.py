@@ -1,8 +1,13 @@
 # app.py
 from flask import Flask, request, render_template, redirect, jsonify, url_for, flash
+from fairpy.rent.Algorithms import optimal_envy_free
+from fairpy.agentlist import AgentList
+import ast
 
 app = Flask(__name__)
-rent = 0
+total_rent = 0
+num_room = 0
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -31,7 +36,7 @@ def submit():
 
 @app.route("/table/<user_input>")
 def new_page(user_input: str):
-    global rent
+    global total_rent, num_room
     print("user input ", user_input)
     print(type(user_input))
     s = ''
@@ -44,36 +49,54 @@ def new_page(user_input: str):
             s = ''
 
     print(res)
-    room = int(res[0])
-    rent = int(res[1])
-    return render_template("table.html", rooms=room, rents=rent)
+    num_room = int(res[0])
+    total_rent = int(res[1])
+    return render_template("table.html", rooms=num_room, rents=total_rent)
 
 
 @app.route("/home", methods=['POST'])
 def home():
     print("yesss")
-    global rent
-    rent = 0
+    global total_rent, num_room
+    total_rent = 0
+    num_room = 0
     return redirect(url_for("index"))
+
 
 @app.route("/res", methods=['GET', 'POST'])
 def res():
-    global rent
-    # print("yesss")
-    # print(rent)
-    # # for i in request.form[0]:
-    # #     print(i)
-    # print(request.form)
+    global total_rent, num_room
     data = {}
     for key, value in request.form.to_dict(flat=False).items():
         data[key] = value
-    # print(data)
-    # print(jsonify(request.form.to_dict()))
-    return redirect(url_for("page_result"))
+
+    rooms = [key for key in data.keys() if key.startswith('room')]
+    values = {name: {room: int(data[room][i]) for room in rooms} for i, name in enumerate(data['name'])}
+    budgets = {name: int(budget) for name, budget in zip(data['name'], data['budget'])}
+    for i in values.values():
+        sum_value = 0
+        for j in i.values():
+            sum_value += j
+        if total_rent != sum_value:
+            return render_template("table.html", rooms=num_room, rents=total_rent)
+    res_algo = optimal_envy_free(AgentList(values), float(total_rent), budgets)
+    return redirect(url_for("page_result", user_input=res_algo))
+
 
 @app.route("/result/<user_input>")
-def page_result():
-    return render_template("result.html")
+def page_result(user_input):
+    print(type(user_input))
+    tuple_of_lists = ast.literal_eval(user_input)
+    dict1 = dict(tuple_of_lists[0])
+    dict2 = dict(tuple_of_lists[1])
+    print(dict1)
+    print(dict2)
+    s = []
+    for i in dict1:
+        s.append(f"'{i}' get room '{dict1[i]}' for price $ {dict2[dict1[i]]} \n")
+    print("the result is : \n", s)
+    return render_template("result.html", string_res=s)
+
 
 if __name__ == '__main__':
     app.run(debug=False, host="0.0.0.0", port=5001)

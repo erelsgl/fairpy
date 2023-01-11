@@ -38,10 +38,10 @@
             <tbody>
             {% for user in range(1,rooms+1) %}
             <tr>
-               <td><input type="text" id="name{{user.index}}" name="name" placeholder="Name"></td>
-                <td><input type="number" id="budget{{user.index}}" name="budget" min="1" placeholder="Budget"></td>
+               <td><input type="text" id="name{{user.index}}" name="name" placeholder="Name" required minlength="1" maxlength="20" size="20"></td>
+                <td><input type="number" id="budget{{user.index}}" name="budget" min="0" placeholder="Budget" required min="0" ></td>
                 {% for i in range(1,rooms+1) %}
-                <td><input type="number" id="room{{i}}_{{user.index}}" name="room{{i}}" min="1" placeholder="Value room {{i}}"></td>
+                <td><input type="number" id="room{{i}}_{{user.index}}" name="room{{i}}" min="0" placeholder="Value room {{i}}" required min="0"></td>
                 {% endfor %}
             </tr>
             {% endfor %}
