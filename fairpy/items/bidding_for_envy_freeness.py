@@ -322,21 +322,10 @@ def bidding_for_envy_freeness(bidding_matrix: ValuationMatrix | list) -> dict:
         
 if __name__ == '__main__':
     import sys 
-    import doctest
-    doctest.testmod()
     logger.addHandler(logging.StreamHandler(sys.stdout))
     # logger.setLevel(logging.INFO)
     
-    # matrix = ValuationMatrix([[50, 20, 10, 20], [60, 40, 15, 10], [0, 40, 25, 35], [50, 35, 10, 30]])
-    # matrix = ValuationMatrix([[60, 40, 15, 10], [50, 20, 10, 20], [0, 40, 25, 35], [50, 35, 10, 30]])
-    # matrix = ValuationMatrix([[60, 40, 15, 10], [0, 40, 25, 35], [50, 20, 10, 20], [50, 35, 10, 30]])
-    # matrix = ValuationMatrix([[60, 40, 15, 10], [0, 40, 25, 35], [50, 35, 10, 30], [50, 20, 10, 20]])
-    # matrix = ValuationMatrix([[60, 40, 15, 10], [0, 40, 25, 35], [50, 20, 10, 20], [50, 35, 10, 30]])
-    # matrix = ValuationMatrix([[50, 20, 10, 20],[50, 40, 15, 10],[0, 40, 25, 30], [50, 35, 10, 40]])
-    # matrix = ValuationMatrix([[25, 25, 25], [50, 40, 35], [10, 20, 25]])
-    # matrix = ValuationMatrix([[50, 40, 35], [25, 25, 25], [10, 20, 25]])
-    # matrix = ValuationMatrix([[10, 20, 25], [50, 40, 35], [25, 25, 25]])
-    # bfef = BiddingForEnvyFreeness(matrix)
+    import doctest
+    (failures, tests) = doctest.testmod(report=True)
+    print("{} failures, {} tests".format(failures, tests))
     
-    # print(bidding_for_envy_freeness(matrix))
-    # print(bfef.M, bfef.C, bfef.MC)
