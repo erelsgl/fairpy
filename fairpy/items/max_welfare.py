@@ -330,7 +330,7 @@ if __name__ == '__main__':
 
     from fairpy import solve
     solve.logger.addHandler(logging.StreamHandler(sys.stdout))
-    # solve.logger.setLevel(logging.INFO)
+    solve.logger.setLevel(logging.INFO)
 
     import doctest
     (failures, tests) = doctest.testmod(report=True)
