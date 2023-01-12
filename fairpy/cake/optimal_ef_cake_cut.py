@@ -69,7 +69,7 @@ def opt_piecewise_constant(agents: AgentList) -> Allocation:
     logger.info(f'Each agent cake length is {agents[0].cake_length()}')
 
     # XiI[i][I] represents the fraction of interval I given to agent i. Should be in {0,1}.
-    XiI = [[cvxpy.Variable(name=f'{agents[agent_index].name()} interval {piece_index + 1} fraction', integer=False)
+    XiI = [[cvxpy.Variable(name=f'{agents[agent_index].name()} interval {piece_index+1} fraction', integer=False)
             for piece_index in range(num_of_pieces)]
            for agent_index in range(num_of_agents)]
     logger.info(f'Fraction matrix has {len(XiI)} rows (agents) and {len(XiI[0])} columns (intervals)')
@@ -111,12 +111,11 @@ def feasibility_constraints(XiI: list) -> list:
     num_of_items = len(XiI[0])
     for g in range(num_of_items):
         sum_of_fractions = 1 == sum([XiI[i][g] for i in range(num_of_agents)])
-        logger.info(f'Adding interval {g + 1} "sum of fractions == 1" constraint: {sum_of_fractions}')
+        logger.info(f'Adding interval {g+1} "sum of fractions == 1" constraint: {sum_of_fractions}')
         constraints.append(sum_of_fractions)
         for i in range(num_of_agents):
             bound_fraction = [XiI[i][g] >= 0, XiI[i][g] <= 1]
-            logger.info(
-                f'Adding agent {i + 1} fraction constraint for piece {g + 1} {bound_fraction[0]}, {bound_fraction[1]}')
+            logger.info(f'Adding agent {i + 1} fraction constraint for piece {g + 1} {bound_fraction[0]}, {bound_fraction[1]}')
             constraints += bound_fraction
     return constraints
 
@@ -294,7 +293,7 @@ def opt_piecewise_linear(agents: AgentList) -> Allocation:
     logger.debug(f'y_1_ge_0 {y_1_ge_0}')
 
     if (V_l(0, y_0_ge_1) >= (agents[0].total_value() / 2) and
-            V_l(1, y_1_ge_0) >= (agents[1].total_value() / 2)):
+        V_l(1, y_1_ge_0) >= (agents[1].total_value() / 2)):
         if V_l(0, y_0_gt_1) >= (agents[0].total_value() / 2):
             allocs = [y_0_gt_1, y_1_ge_0]
         else:
@@ -364,12 +363,11 @@ def opt_piecewise_linear(agents: AgentList) -> Allocation:
         logger.info(f'agent 1 pieces {agent_1_allocation}')
         allocs = [agent_0_allocation, agent_1_allocation]
         logger.info(f'Is allocation {agent_0_allocation, agent_1_allocation}, Envy Free ? {a.isEnvyFree(3)}')
-
+       
     return Allocation(agents, allocs)
 
 
 if __name__ == "__main__":
     import doctest
-
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))

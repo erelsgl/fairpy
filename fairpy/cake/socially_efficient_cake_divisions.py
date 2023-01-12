@@ -17,11 +17,9 @@ from fairpy.cake.pieces import round_allocation
 from typing import List
 
 import sys, logging
-
 logger = logging.getLogger(__name__)
 
-
-def discretization_procedure(agents: AgentList, epsilon: float):
+def discretization_procedure(agents: AgentList, epsilon:float):
     """
     reduce the continuous cake into a sequence of discrete items.
     the algorithm below receives a list of agents and a parameter epsilon,
@@ -50,7 +48,7 @@ def discretization_procedure(agents: AgentList, epsilon: float):
     size_of_the_cake = max([agent.cake_length() for agent in agents])
     a = 0
     C = [0]
-    condition = [agent.eval(a, size_of_the_cake) > epsilon for agent in agents]
+    condition = [agent.eval(a,size_of_the_cake) > epsilon for agent in agents]
     while any(condition):
         values = []
         for i in agents:
@@ -65,7 +63,8 @@ def discretization_procedure(agents: AgentList, epsilon: float):
     return C
 
 
-def get_players_valuation(agents: AgentList, c: List[float]):
+
+def get_players_valuation(agents: AgentList, c : List[float]):
     """
     this function calculates for each player its valuation of a discrete cut of the cake.
     for each player, it calulates the valuation of each item.
@@ -96,14 +95,14 @@ def get_players_valuation(agents: AgentList, c: List[float]):
     [0.23, 0.7, 0.07]
     """
 
+
     matrix = []
     for agent in agents:
         valuations = [agent.eval(c[i], c[i + 1]) for i in range(len(c) - 1)]
         matrix.append(valuations)
     return matrix
 
-
-def aprox_v(s: int, t: int, k: int, matrix: List[List[float]]):
+def aprox_v(s:int ,t:int ,k:int,matrix: List[List[float]]):
     """
     this function calculates the value of the items from s to t according to the valuation
     of player k.
@@ -143,10 +142,10 @@ def aprox_v(s: int, t: int, k: int, matrix: List[List[float]]):
     if (s == -1):
         return 0
     valuations = matrix[k]
-    return sum(valuations[s:t + 1])
+    return sum(valuations[s:t+1])
 
 
-def V_without_k(s: int, t: int, current_s: List[int], current_t: List[int], matrix: List[List[float]], k: int):
+def V_without_k(s:int ,t:int , current_s:List[int] , current_t:List[int], matrix : List[List[float]], k:int):
     """
      this function calculates the sum
      of values that the other players to which the items s through t are assigned obtain from these
@@ -188,6 +187,8 @@ def V_without_k(s: int, t: int, current_s: List[int], current_t: List[int], matr
 
     """
 
+
+
     sum = 0
     for i in range(s, t + 1):
         for j in range(len(matrix)):
@@ -197,7 +198,7 @@ def V_without_k(s: int, t: int, current_s: List[int], current_t: List[int], matr
     return sum
 
 
-def maximize_expression(t: int, num_of_players: int, S: List[int], T: List[int], matrix: List[List[float]]):
+def maximize_expression(t:int , num_of_players:int , S:List[int], T:List[int], matrix:List[List[float]]):
     """
     because of the factor 2, the algorithm gives only approximation
     this function maximizes the expression:
@@ -216,14 +217,11 @@ def maximize_expression(t: int, num_of_players: int, S: List[int], T: List[int],
     s_tag = 0
     for k in range(num_of_players):
         for s in range(t + 1):
-            v1 = aprox_v(s, t, k, matrix)  # the value of items s to t according to player k
-            v2 = aprox_v(S[k], T[k], k, matrix)  # the value of items player k currently own
-            v3 = V_without_k(s, t, S, T, matrix,
-                             k)  # the value of  all the parts from s to t that other players than k obtain
-            net_value = v1 - 2 * (
-                        v2 + v3)  # value = aprox_v(s, t, k, matrix) - 2*(aprox_v(S[k], T[k], k, matrix) + V(s,t,S,matrix))
-            logger.debug("Moving items %d..%d to player %d gains %f but loses %f+%f. Value-2cost=%f", s, t, k, v1, v2,
-                         v3, net_value)
+            v1 = aprox_v(s,t,k,matrix)  #the value of items s to t according to player k
+            v2 = aprox_v(S[k], T[k], k, matrix)   #the value of items player k currently own
+            v3 = V_without_k(s,t,S,T,matrix, k)   #the value of  all the parts from s to t that other players than k obtain
+            net_value = v1 - 2 * (v2 + v3)   #value = aprox_v(s, t, k, matrix) - 2*(aprox_v(S[k], T[k], k, matrix) + V(s,t,S,matrix))
+            logger.debug("Moving items %d..%d to player %d gains %f but loses %f+%f. Value-2cost=%f", s,t,k, v1,v2,v3,net_value)
             # logger.debug("The value of items player {} currently own = {}".format(k,v2))
             # logger.debug("the value of  all the parts from {} to {} that other players than {} obtain = {}".format(s,t,k,v3))
             # logger.debug("Value minus twice the cost = {}".format(net_value))
@@ -234,7 +232,8 @@ def maximize_expression(t: int, num_of_players: int, S: List[int], T: List[int],
     return [max, k_tag, s_tag]
 
 
-def discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items: List[float]):
+def  discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items:List[float]):
+
     """
     :param matrix: row i is the valuations of player i of the items
     :param items: the cuts to create the items
@@ -248,23 +247,23 @@ def discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items:
     >>> discrete_utilitarian_welfare_approximation([[0.125, 0.125, 0.25, 0.25, 0.25], [0.25, 0.25, 0.2, 0.2, 0.1]], [0, 0.5, 1.0, 1.5, 2.0, 3])
     [[1, 0], [4, 0]]
     """
-
-    # we count the items from 0 so if there are 6 items, the first one is 0 and the last one is 5
+    
+    #we count the items from 0 so if there are 6 items, the first one is 0 and the last one is 5
     num_of_players = len(matrix)
     num_of_items = len(items) - 1
     S = [-1] * num_of_players
     T = [-1] * num_of_players
 
-    # the main loop of the algorithm
+    #the main loop of the algorithm
     for t in range(0, num_of_items):
-        logger.debug("------Iteration %d------", t)
+        logger.debug("------Iteration %d------",t)
         maximum = maximize_expression(t, num_of_players, S, T, matrix)
         logger.debug("Max net value is %f, for player k'=%d, s'=%f.\n", maximum[0], maximum[1], maximum[2])
         while maximum[0] >= 0:
             k_tag = maximum[1]
             s_tag = maximum[2]
             for i in range(num_of_players):
-                if (S[i] >= s_tag):
+                if(S[i] >= s_tag):
                     S[i] = -1
                     T[i] = -1
             S[k_tag] = s_tag
@@ -275,10 +274,9 @@ def discrete_utilitarian_welfare_approximation(matrix: List[List[float]], items:
 
             maximum = maximize_expression(t, num_of_players, S, T, matrix)
 
-    return [S, T]
+    return [S,T]
 
-
-def divide(agents: AgentList, epsilon: float) -> Allocation:
+def divide(agents: AgentList, epsilon:float) -> Allocation:
     """
     this function gets a list of agents and epsilon and returns an approximation of the division
     :param agents: the players
@@ -293,7 +291,7 @@ def divide(agents: AgentList, epsilon: float) -> Allocation:
     Bob gets {(0.8, 1.791)} with value 0.6.
     <BLANKLINE>
     """
-    logger.info("\nStep 1: Discretizing the cake to parts with value at most epsilon=%f", epsilon)
+    logger.info("\nStep 1: Discretizing the cake to parts with value at most epsilon=%f",epsilon)
     items = discretization_procedure(agents, epsilon)
     logger.info("  Discretized cake: ")
     logger.info(items)
@@ -308,15 +306,14 @@ def divide(agents: AgentList, epsilon: float) -> Allocation:
     result = discrete_utilitarian_welfare_approximation(matrix, items)
 
     num_of_players = len(result[0])
-    pieces = num_of_players * [None]
+    pieces = num_of_players*[None]
     for j in range(num_of_players):
         pieces[j] = [(items[result[0][j]], items[result[1][j] + 1])]
-    return Allocation(agents, pieces)
-
+    return Allocation(agents,pieces)
 
 if __name__ == "__main__":
     import doctest
+    (failures,tests) = doctest.testmod(report=True)
+    print ("{} failures, {} tests".format(failures,tests))
 
-    (failures, tests) = doctest.testmod(report=True)
-    print("{} failures, {} tests".format(failures, tests))
 

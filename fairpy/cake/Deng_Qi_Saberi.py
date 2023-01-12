@@ -394,3 +394,4 @@ if __name__ == '__main__':
 
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
+
