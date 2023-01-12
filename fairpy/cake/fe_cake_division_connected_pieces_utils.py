@@ -12,22 +12,22 @@ from typing import List, Any
 import random
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
-
-def agentNormalize(agents: AgentList)->AgentList:
+def agentNormalize(agents: AgentList) -> AgentList:
     """
     replace all the agents with PiecewiseConstantAgent1Segment that normalize to (0,1) segment
     :param agents: a list of agents that need to be normalized
     :return: a list of normalized agents
     """
-    for agent,i in zip(agents,range(len(agents))):
+    for agent, i in zip(agents, range(len(agents))):
         agents[i] = PiecewiseConstantAgent1Segment(agent.valuation.values, name=agent.name())
     return agents
 
 
-def findRemainIntervals(pieces: List[Any])->List[tuple]:
+def findRemainIntervals(pieces: List[Any]) -> List[tuple]:
     """
     Returns the remaining intervals from the allocation in (0,1)
     :param allocation: an Allocation
@@ -44,25 +44,25 @@ def findRemainIntervals(pieces: List[Any])->List[tuple]:
     """
     remain = []
     piecesList = []
-    #turn the pieces from list of lists of tuples into list of tuples
+    # turn the pieces from list of lists of tuples into list of tuples
     for list in pieces:
-        if list!= None :piecesList+=list
-    if len(piecesList)==0:return [(0,1)]
+        if list != None: piecesList += list
+    if len(piecesList) == 0: return [(0, 1)]
     piecesList.sort(key=lambda ineterval: ineterval[0])
     start = 0
-    if piecesList[0][0]==0:
+    if piecesList[0][0] == 0:
         start = piecesList[0][1]
         piecesList.pop(0)
     for interval in piecesList:
-        remain.append((start,interval[0]))
-        start=interval[1]
-    if start!=1:
-        remain.append((start,1))
+        remain.append((start, interval[0]))
+        start = interval[1]
+    if start != 1:
+        remain.append((start, 1))
 
     return remain
 
 
-def checkWhile(agents: AgentList, pieces:List[Any], remain:List[tuple], epsilon:float)->tuple:
+def checkWhile(agents: AgentList, pieces: List[Any], remain: List[tuple], epsilon: float) -> tuple:
     """
     Check the while condition that in the algorithm
     :param agents: A list of agents
@@ -111,30 +111,27 @@ def checkWhile(agents: AgentList, pieces:List[Any], remain:List[tuple], epsilon:
     >>> print(checkWhile(agents, newPieces, findRemainIntervals(newPieces), 0.3))
     None
     """
-    nSquared = len(agents)*len(agents)
+    nSquared = len(agents) * len(agents)
     piecesList = []
     # turn the pieces from list of lists of tuples into list of tuples
     for list in pieces:
         if list != None: piecesList += list
-    if len(piecesList)==0:
-        return (0,1)
+    if len(piecesList) == 0:
+        return (0, 1)
     for interval in remain:
-        for agent,i in zip(agents,range(len(agents))):
-            if (pieces[i] == None or len(pieces[i])==0):
+        for agent, i in zip(agents, range(len(agents))):
+            if (pieces[i] == None or len(pieces[i]) == 0):
                 continue
-            if (agent.eval_1(pieces[i][0][0], pieces[i][0][1]) <
-                    (agent.eval_1(interval[0], interval[1]) - (epsilon / nSquared))):
+            if (agent.eval(pieces[i][0][0], pieces[i][0][1]) <
+                    (agent.eval(interval[0], interval[1]) - (epsilon / nSquared))):
                 return interval
     return None
-
 
 
 #######################################
 
 
-
-
-def getC(agents: AgentList, pieces:List[Any], epsilon:float, interval:tuple)->AgentList:
+def getC(agents: AgentList, pieces: List[Any], epsilon: float, interval: tuple) -> AgentList:
     """
     Get the C group from the Algorithm
     :param agents: A list of agents
@@ -164,16 +161,16 @@ def getC(agents: AgentList, pieces:List[Any], epsilon:float, interval:tuple)->Ag
     nSquared = len(agents) * len(agents)
     newAgents = []
     for agent, i in zip(agents, range(len(agents))):
-        if(pieces[i]==None or len(pieces[i])==0):
-            newAgents.append((agent,i))
+        if (pieces[i] == None or len(pieces[i]) == 0):
+            newAgents.append((agent, i))
             continue
-        if (agent.eval_1(pieces[i][0][0], pieces[i][0][1]) <
-                agent.eval_1(interval[0], interval[1]) - (epsilon / nSquared)):
-            newAgents.append((agent,i))
+        if (agent.eval(pieces[i][0][0], pieces[i][0][1]) <
+                agent.eval(interval[0], interval[1]) - (epsilon / nSquared)):
+            newAgents.append((agent, i))
     return newAgents
 
 
-def findRb(agent:Agent , pieces:List[Any], epsilon:float,index:int,interval:tuple,n:int)->float:
+def findRb(agent: Agent, pieces: List[Any], epsilon: float, index: int, interval: tuple, n: int) -> float:
     """
     Find the leftmost number:Rb that hold the equation of evaluation to the agent piece + (epsilon/n^2)
               is equal to the evaluation to the [l,Rb] when l is the left of the interval
@@ -195,13 +192,13 @@ def findRb(agent:Agent , pieces:List[Any], epsilon:float,index:int,interval:tupl
     0.002083
     """
     currentPieceEval = 0
-    if pieces[index]!=None:
+    if pieces[index] != None:
         currentPiece = pieces[index][0]
-        currentPieceEval = agent.eval(currentPiece[0],currentPiece[1])
-    return agent.mark(interval[0],currentPieceEval + epsilon/(n*n))
+        currentPieceEval = agent.eval(currentPiece[0], currentPiece[1])
+    return agent.mark(interval[0], currentPieceEval + epsilon / (n * n))
 
 
-def findPiece(reamin:List[tuple], attr:float , leftOrRight:int)->tuple:
+def findPiece(reamin: List[tuple], attr: float, leftOrRight: int) -> tuple:
     """
     Find the piece that her leftOrRight equal to attr
     :param reamin:The reamin intervals in (0,1)
@@ -217,12 +214,12 @@ def findPiece(reamin:List[tuple], attr:float , leftOrRight:int)->tuple:
     None
     """
     for piece in reamin:
-        if piece[leftOrRight]==attr:
+        if piece[leftOrRight] == attr:
             return piece
     return None
 
 
-def setRemain(partialAlloc:List[List[tuple]], agents: AgentList)->List[List[tuple]]:
+def setRemain(partialAlloc: List[List[tuple]], agents: AgentList) -> List[List[tuple]]:
     """
     Set the remain intervals to the agents
     :param allocation: A partial allocation of (0,1)
@@ -243,22 +240,22 @@ def setRemain(partialAlloc:List[List[tuple]], agents: AgentList)->List[List[tupl
     <BLANKLINE>
     """
     remain = findRemainIntervals(partialAlloc)
-    for i,pieces in zip(range(len(partialAlloc)),partialAlloc):
-        if(pieces==None):
-            maxPiece , maxEval = 0,0
+    for i, pieces in zip(range(len(partialAlloc)), partialAlloc):
+        if (pieces == None):
+            maxPiece, maxEval = 0, 0
             for remainPiece in remain:
-                if agents[i].eval_1(remainPiece[0], remainPiece[1])>=maxEval:
-                    maxEval = agents[i].eval_1(remainPiece[0], remainPiece[1])
+                if agents[i].eval(remainPiece[0], remainPiece[1]) >= maxEval:
+                    maxEval = agents[i].eval(remainPiece[0], remainPiece[1])
                     maxPiece = remainPiece
             remain.remove(maxPiece)
             partialAlloc[i] = [maxPiece]
-        
+
     for pieces in partialAlloc:
-        if(pieces==None):
+        if (pieces == None):
             continue
         right = pieces[0][1]
-        newPart = findPiece(remain, right,0)
-        if newPart == None : continue
+        newPart = findPiece(remain, right, 0)
+        if newPart == None: continue
         pieces.append(newPart)
         remain.remove(newPart)
 
@@ -270,13 +267,13 @@ def setRemain(partialAlloc:List[List[tuple]], agents: AgentList)->List[List[tupl
                 if remain[0][1] == piece[0]:
                     pieces.append(remain[0])
                     break
-            if(len(remain)==0):
+            if (len(remain) == 0):
                 break
-    
+
     return partialAlloc
 
 
-def intervalUnionFromList(intervals:List[tuple])->tuple:
+def intervalUnionFromList(intervals: List[tuple]) -> tuple:
     """
     Uniting a list of intervals into one
     :param intervals: A list of adjacent intervals
@@ -291,10 +288,10 @@ def intervalUnionFromList(intervals:List[tuple])->tuple:
     for interval in intervals:
         if interval[0] < minimum: minimum = interval[0]
         if interval[1] > maximum: maximum = interval[1]
-    return (minimum,maximum)
+    return (minimum, maximum)
 
 
-def allocationToOnePiece(alloction:List[List[tuple]],agents:AgentList)->Allocation:
+def allocationToOnePiece(alloction: List[List[tuple]], agents: AgentList) -> Allocation:
     """
     Get a fully allocation of (0,1) that every agent have a list of adjacent pieces and return allocation
         of the union of each list
@@ -302,15 +299,15 @@ def allocationToOnePiece(alloction:List[List[tuple]],agents:AgentList)->Allocati
     :param agents: A list of agents
     :return: New alloction of (0,1)
     """
-    new_pieces = len(agents)*[None]
-    for pieces,i in  zip(alloction,range(len(alloction))):
+    new_pieces = len(agents) * [None]
+    for pieces, i in zip(alloction, range(len(alloction))):
         if (pieces == None):
             continue
         new_pieces[i] = [intervalUnionFromList(pieces)]
     return Allocation(agents, new_pieces)
 
 
-def efCheck(allocation:Allocation, epsilon:float)->str:
+def efCheck(allocation: Allocation, epsilon: float) -> str:
     """
     Check if tha allocation is (3 + o(1))-approximately envy-free allocation.
     :param allocation:the alloction we check
@@ -331,19 +328,17 @@ def efCheck(allocation:Allocation, epsilon:float)->str:
     The Allocation is (3 + 9ε/n)approximately envy-free allocation
     """
     agents = allocation.agents
-    o = (1/(3+(9*epsilon)/len(agents)))
-    for i,a in zip(range(len(agents)),agents):
+    o = (1 / (3 + (9 * epsilon) / len(agents)))
+    for i, a in zip(range(len(agents)), agents):
         aPiece = allocation[i][0]
         for piece in allocation:
-            if a.eval_1(aPiece[0], aPiece[1])<o*a.eval_1(piece[0][0], piece[0][1]):
+            if a.eval(aPiece[0], aPiece[1]) < o * a.eval(piece[0][0], piece[0][1]):
                 return "The Allocation isn't (3 + 9ε/n)approximately envy-free allocation"
     return "The Allocation is (3 + 9ε/n)approximately envy-free allocation"
 
 
-
-
-
 if __name__ == "__main__":
     import doctest
+
     (failures, tests) = doctest.testmod(report=True)
-    print("{} failures, {} tests".format(failures,tests))
+    print("{} failures, {} tests".format(failures, tests))

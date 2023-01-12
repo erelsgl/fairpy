@@ -57,7 +57,7 @@ def asymmetric_protocol(agents: AgentList)->Allocation:
     cut = cutter.mark(0, cutter.total_value() / 2)
     logger.info("The cutter (%s) cuts at %.2f.", cutter.name(), cut)
 
-    if chooser.eval_1(0, cut) > chooser.total_value()/2:
+    if chooser.eval(0,cut) > chooser.total_value()/2:
         logger.info("The chooser (%s) chooses the leftmost piece.", chooser.name())
         pieces[1] = [(0,cut)]
         pieces[0] = [(cut, cutter.cake_length())]

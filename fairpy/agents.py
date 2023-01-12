@@ -386,7 +386,7 @@ class PiecewiseConstantAgent(Agent):
     110
     >>> a.cake_length()
     4
-    >>> a.eval_1(1,3)
+    >>> a.eval(1,3)
     55.0
     >>> a.mark(1, 77)
     3.5
@@ -406,13 +406,13 @@ class PiecewiseConstantAgent(Agent):
 class PiecewiseConstantAgentNormalized(Agent):
     """
     >>> a = PiecewiseConstantAgentNormalized([11,22,33,44])
-    >>> a.eval_1(0.5,1)
+    >>> a.eval(0.5,1)
     0.7
-    >>> np.round(a.eval_1(0.25,1),3)
+    >>> np.round(a.eval(0.25,1),3)
     0.9
-    >>> np.round(a.eval_1(0,0.25),3)
+    >>> np.round(a.eval(0,0.25),3)
     0.1
-    >>> np.round(a.eval_1(0,0.375),3)
+    >>> np.round(a.eval(0,0.375),3)
     0.2
     >>> np.round(a.mark(0.5, 0.7),3)
     1.0
@@ -448,7 +448,7 @@ class PiecewiseUniformAgent(Agent):
     6
     >>> a.cake_length()
     9
-    >>> a.eval_1(0,1.5)
+    >>> a.eval(0,1.5)
     1.0
     >>> a.mark(0, 2)
     3
@@ -478,7 +478,7 @@ class PiecewiseLinearAgent(Agent):
     110
     >>> a.cake_length()
     4
-    >>> a.eval_1(1,3)
+    >>> a.eval(1,3)
     55.0
     >>> a.value([(0,1),(2,3)])
     44.0
@@ -489,7 +489,7 @@ class PiecewiseLinearAgent(Agent):
     2
     >>> a.value([(0,1)])
     2.0
-    >>> a.eval_1(0,1)
+    >>> a.eval(0,1)
     2.0
     >>> a = PiecewiseLinearAgent([2,2],[1,0])
     >>> a.total_value()

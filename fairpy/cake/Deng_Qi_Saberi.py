@@ -323,15 +323,15 @@ def elaborate_simplex_solution(agents: AgentList, epsilon) -> Allocation:
         logger.info("%s gets the the piece [%f,%f].", solver.agents[first_index].name(), 0, or_indices[0])
         # find which of the next two has more envious between the leftovers pieces, and let him be second
         options = [(or_indices[0], or_indices[1]), (or_indices[1], n)]
-        sec_dif = agents[second_index].eval_1(or_indices[0], or_indices[1]) - agents[second_index].eval_1(or_indices[1], n)
-        thr_dif = agents[third_index].eval_1(or_indices[0], or_indices[1]) - agents[third_index].eval_1(or_indices[1], n)
+        sec_dif = agents[second_index].eval(or_indices[0], or_indices[1]) - agents[second_index].eval(or_indices[1], n)
+        thr_dif = agents[third_index].eval(or_indices[0], or_indices[1]) - agents[third_index].eval(or_indices[1], n)
         second = second_index if abs(sec_dif) >= abs(thr_dif) else third_index
         third = second_index if abs(sec_dif) < abs(thr_dif) else third_index
 
         # define which option goes to the second as first priority
-        max_option = options[np.argmax(agents[second].eval_1(start, end) for (start, end) in options)]
+        max_option = options[np.argmax(agents[second].eval(start, end) for (start, end) in options)]
         options.remove(max_option)
-        min_option = options[np.argmin(agents[second].eval_1(start, end) for (start, end) in options)]
+        min_option = options[np.argmin(agents[second].eval(start, end) for (start, end) in options)]
 
         # allocate both players
 
@@ -347,15 +347,15 @@ def elaborate_simplex_solution(agents: AgentList, epsilon) -> Allocation:
 
         # find which of the next two has more envious between the leftovers pieces, and let him be second
         options = [(0, or_indices[0]), (or_indices[1], n)]
-        sec_dif = agents[second_index].eval_1(0, or_indices[0]) - agents[second_index].eval_1(or_indices[1], n)
-        thr_dif = agents[third_index].eval_1(0, or_indices[0]) - agents[third_index].eval_1(or_indices[1], n)
+        sec_dif = agents[second_index].eval(0, or_indices[0]) - agents[second_index].eval(or_indices[1], n)
+        thr_dif = agents[third_index].eval(0, or_indices[0]) - agents[third_index].eval(or_indices[1], n)
         second = second_index if abs(sec_dif) >= abs(thr_dif) else third_index
         third = second_index if abs(sec_dif) <= abs(thr_dif) else third_index
 
         # define which option goes to the second as first priority
-        max_option = options[np.argmax(agents[second].eval_1(start, end) for (start, end) in options)]
+        max_option = options[np.argmax(agents[second].eval(start, end) for (start, end) in options)]
         options.remove(max_option)
-        min_option = options[np.argmin(agents[second].eval_1(start, end) for (start, end) in options)]
+        min_option = options[np.argmin(agents[second].eval(start, end) for (start, end) in options)]
 
         # allocate both players
 
@@ -370,15 +370,15 @@ def elaborate_simplex_solution(agents: AgentList, epsilon) -> Allocation:
 
         # find which of the next two has more envious between the leftovers pieces, and let him be second
         options = [(0, or_indices[0]), (or_indices[0], or_indices[1])]
-        sec_dif = agents[second_index].eval_1(0, or_indices[0]) - agents[second_index].eval_1(or_indices[0], or_indices[1])
-        thr_dif = agents[third_index].eval_1(0, or_indices[0]) - agents[third_index].eval_1(or_indices[0], or_indices[1])
+        sec_dif = agents[second_index].eval(0, or_indices[0]) - agents[second_index].eval(or_indices[0], or_indices[1])
+        thr_dif = agents[third_index].eval(0, or_indices[0]) - agents[third_index].eval(or_indices[0], or_indices[1])
         second = second_index if abs(sec_dif) >= abs(thr_dif) else third_index
         third = second_index if abs(sec_dif) <= abs(thr_dif) else third_index
 
         # define which option goes to the second as first priority
-        max_option = options[np.argmax(agents[second].eval_1(start, end) for (start, end) in options)]
+        max_option = options[np.argmax(agents[second].eval(start, end) for (start, end) in options)]
         options.remove(max_option)
-        min_option = options[np.argmin(agents[second].eval_1(start, end) for (start, end) in options)]
+        min_option = options[np.argmin(agents[second].eval(start, end) for (start, end) in options)]
 
         # allocate both players
         pieces[second] = [max_option]
@@ -394,4 +394,3 @@ if __name__ == '__main__':
 
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
-

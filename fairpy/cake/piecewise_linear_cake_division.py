@@ -65,7 +65,7 @@ def Cover(a: float, b: float, agents: AgentList, roundAcc = 6)->List:
         end = float('inf')
         #logger.info("start is %f.", start)
         for agent in agents:
-            tmp = agent.mark(start, agent.eval_1(a, b) / agentNum)
+            tmp = agent.mark(start, agent.eval(a, b)/agentNum)
             if tmp == None:
                 continue
             tmp = round(tmp, roundAcc)
@@ -92,7 +92,7 @@ def Cover(a: float, b: float, agents: AgentList, roundAcc = 6)->List:
         """we want to mark for [,b], but we can only mark for [a,].
         Since [x,b] is the same as [a,b]-[a,x], we will mark for [a,x] using
         1 - the value we need."""
-        tmp = agent.mark(a, agent.eval_1(a, b) / agentNum)
+        tmp = agent.mark(a, agent.eval(a,b)/agentNum)
         if tmp == None:
             continue
         tmp = round(tmp, roundAcc)

@@ -95,7 +95,7 @@ class PiecewiseConstantValuation(Valuation):
     110
     >>> a.cake_length()
     4
-    >>> a.eval_1(1,3)
+    >>> a.eval(1,3)
     55.0
     >>> a.mark(1, 77)
     3.5
@@ -126,19 +126,19 @@ class PiecewiseConstantValuation(Valuation):
         :return: Value of [start,end]
 
         >>> a = PiecewiseConstantValuation([11,22,33,44])
-        >>> a.eval_1(1,3)
+        >>> a.eval(1,3)
         55.0
-        >>> a.eval_1(1.5,3)
+        >>> a.eval(1.5,3)
         44.0
-        >>> a.eval_1(1,3.25)
+        >>> a.eval(1,3.25)
         66.0
-        >>> a.eval_1(1.5,3.25)
+        >>> a.eval(1.5,3.25)
         55.0
-        >>> a.eval_1(3,3)
+        >>> a.eval(3,3)
         0.0
-        >>> a.eval_1(3,7)
+        >>> a.eval(3,7)
         44.0
-        >>> a.eval_1(-1,7)
+        >>> a.eval(-1,7)
         110.0
         """
         # the cake to the left of 0 and to the right of length is considered worthless.
@@ -302,7 +302,7 @@ class PiecewiseUniformValuation(Valuation):
     6
     >>> a.cake_length()
     9
-    >>> a.eval_1(0,1.5)
+    >>> a.eval(0,1.5)
     1.0
     >>> a.mark(0, 2)
     3
@@ -332,21 +332,21 @@ class PiecewiseUniformValuation(Valuation):
         :return: Value of [start,end]
 
         >>> a = PiecewiseUniformValuation([(0,1),(2,4),(6,9)])
-        >>> a.eval_1(0,1)
+        >>> a.eval(0,1)
         1.0
-        >>> a.eval_1(-1, 1.5)
+        >>> a.eval(-1, 1.5)
         1.0
-        >>> a.eval_1(0.5, 1.5)
+        >>> a.eval(0.5, 1.5)
         0.5
-        >>> a.eval_1(0.5, 2.5)
+        >>> a.eval(0.5, 2.5)
         1.0
-        >>> a.eval_1(0.5, 4.5)
+        >>> a.eval(0.5, 4.5)
         2.5
-        >>> a.eval_1(1.5, 11)
+        >>> a.eval(1.5, 11)
         5.0
-        >>> a.eval_1(3, 11)
+        >>> a.eval(3, 11)
         4.0
-        >>> a.eval_1(3, 1)
+        >>> a.eval(3, 1)
         0.0
         """
         if end <= start:
@@ -453,13 +453,13 @@ class PiecewiseConstantValuationNormalized(Valuation):
         :return: Value of [start,end]
 
         >>> a = PiecewiseConstantValuationNormalized([11,22,33,44])
-        >>> a.eval_1(0.5,1)
+        >>> a.eval(0.5,1)
         0.7
-        >>> a.eval_1(0.25,1)
+        >>> a.eval(0.25,1)
         0.9
-        >>> a.eval_1(0,0.25)
+        >>> a.eval(0,0.25)
         0.1
-        >>> a.eval_1(0,0.375)
+        >>> a.eval(0,0.375)
         0.2
 
         """
@@ -575,13 +575,13 @@ class PiecewiseConstantValuationNormalized(Valuation):
         :return: Value of [start,end]
 
         >>> a = PiecewiseConstantValuationNormalized([11,22,33,44])
-        >>> a.eval_1(0.5,1)
+        >>> a.eval(0.5,1)
         0.7
-        >>> np.round(a.eval_1(0.25,1), decimals=1)
+        >>> np.round(a.eval(0.25,1), decimals=1)
         0.9
-        >>> a.eval_1(0,0.25)
+        >>> a.eval(0,0.25)
         0.1
-        >>> np.round(a.eval_1(0,0.375), decimals=1)
+        >>> np.round(a.eval(0,0.375), decimals=1)
         0.2
 
         """
@@ -674,7 +674,7 @@ class PiecewiseLinearValuation(Valuation):
     110
     >>> a.cake_length()
     4
-    >>> a.eval_1(1,3)
+    >>> a.eval(1,3)
     55.0
     >>> a.value([(0,1),(2,3)])
     44.0
@@ -687,7 +687,7 @@ class PiecewiseLinearValuation(Valuation):
     2
     >>> a.value([(0,1)])
     2.0
-    >>> a.eval_1(0,1)
+    >>> a.eval(0,1)
     2.0
     >>> a = PiecewiseLinearValuation([2,2],[1,0])
     >>> a.total_value()
@@ -730,15 +730,15 @@ class PiecewiseLinearValuation(Valuation):
         :return: Value of [start,end]
 
         >>> a = PiecewiseLinearValuation([11,22,33,44],[1,2,3,-2])
-        >>> a.eval_1(1,3)
+        >>> a.eval(1,3)
         55.0
-        >>> a.eval_1(1.5,3)
+        >>> a.eval(1.5,3)
         44.25
-        >>> a.eval_1(1,3.25)
+        >>> a.eval(1,3.25)
         66.1875
-        >>> a.eval_1(1.5,3.25)
+        >>> a.eval(1.5,3.25)
         55.4375
-        >>> a.eval_1(3,3)
+        >>> a.eval(3,3)
         0.0
         """
         if start < 0 or end > self.length:
