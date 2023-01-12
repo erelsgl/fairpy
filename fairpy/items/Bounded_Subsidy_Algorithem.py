@@ -9,7 +9,6 @@
 #-----------------------------------------------------
 """
 
-
 import networkx
 import sys
 import doctest
@@ -311,6 +310,15 @@ def Subsidy_calculation(agents: Dict[str, AdditiveAgent]):
     subsidy of: Bob is 1
 
     ##### tets 2 #####
+    >>> Alice = AdditiveAgent({"a": 2, "b": 1}, name="Alice")
+    >>> Alice.aq_items = []
+    >>> Bob = AdditiveAgent({"a": 4, "b": 2}, name="Bob")
+    >>> Bob.aq_items = []
+    >>> agents = {x.name():x for x in [Alice,Bob]}
+    >>> Subsidy_calculation(agents)
+    subsidy of: Bob is 2
+
+    ##### tets 3 #####
     >>> Alice = AdditiveAgent({"a": 1, "b": 5, "c": 3}, name="Alice")
     >>> Alice.aq_items = []
     >>> Bob = AdditiveAgent({"a": 1, "b": 3, "c": 2}, name="Bob")
@@ -321,7 +329,7 @@ def Subsidy_calculation(agents: Dict[str, AdditiveAgent]):
     >>> Subsidy_calculation(agents)
     subsidy of: Bob is 1
 
-    ##### test 3 #####
+    ##### test 4 #####
     >>> Alice = AdditiveAgent({"a":3, "b":4, "c":6}, name="Alice")
     >>> Alice.aq_items = []
     >>> Bob = AdditiveAgent({"a":4, "b":3, "c":1}, name="Bob")
@@ -331,7 +339,7 @@ def Subsidy_calculation(agents: Dict[str, AdditiveAgent]):
     >>> agents_dict = {x.name():x for x in [Alice,Bob,Eve]}
     >>> Subsidy_calculation(agents_dict) # no subsidy
 
-    ##### test 4 #####
+    ##### test 5 #####
     >>> Alice = AdditiveAgent({"a": 9, "b": 8, "c": 6, "d": 11, "e": 3, "f": 6}, name="Alice")
     >>> Alice.aq_items = []
     >>> Bob = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 5, "e": 3, "f": 6}, name="Bob")
@@ -367,7 +375,6 @@ def Subsidy_calculation(agents: Dict[str, AdditiveAgent]):
                 print("subsidy of:",i.name(), "is", k_value-i_value)
 
 
-
 #### MAIN
 
 if __name__ == "__main__":
@@ -376,28 +383,6 @@ if __name__ == "__main__":
     # logger.setLevel(logging.INFO)
     (failures, tests) = doctest.testmod(report=True,optionflags=doctest.NORMALIZE_WHITESPACE)
     print("{} failures, {} tests".format(failures, tests))
-    # agents1 = AgentList({"Alice": {"a":3, "b":5}, "Bob": {"a":6, "b":7}})
-    # agents2 = AgentList({"Alice": {"a":3, "b":10, "c":8, "d":7}, "Bob": {"a":5, "b":9, "c":5, "d":10}})
-    # agents3 = AgentList({"Alice": {"a":3, "b":2}, "Bob": {"a":4, "b":1}})
-    # agents4 = AgentList({"Alice": {"a":10, "b":8, "c":5, "d":9, "e":3, "f":0}, "Bob": {"a":9, "b":2, "c":4, "d":7, "e":10, "f":1}})
-    # agents5 = AgentList({"Alice": {"a":3, "b":4, "c":6}, "Bob": {"a":4, "b":3, "c":1}, "Max": {"a":4, "b":5, "c":1}})
-    # allocate_items_with_Subsidy(agents5)
 
-    Alice = AdditiveAgent({"a": 1, "b": 5, "c": 3}, name="Alice")
-    Alice.aq_items = []
-    Bob = AdditiveAgent({"a": 1, "b": 3, "c": 2}, name="Bob")
-    Bob.aq_items = []
-    Eve = AdditiveAgent({"a": 3, "b": 2, "c": 1}, name="Eve")
-    Eve.aq_items = []
-    agents = {x.name():x for x in [Alice,Bob,Eve]}
-    items_list = list('abc')
-    # maximizes_allocation(agents,items_list)
-    # [(x.name(),sorted(x.aq_items)) for x in agents.values()]
-    # [('Alice', ['b']), ('Bob', ['c']), ('Eve', ['a'])]
-
-    # for i in agents.values():
-    #     print(Alice.all_items())
-
-    # agents_dict = {x.name():x for x in [Alice,Bob,Eve]}
 
    
