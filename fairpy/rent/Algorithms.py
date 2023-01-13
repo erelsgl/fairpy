@@ -34,9 +34,9 @@ def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict) -> (dict
         >>> optimal_envy_free(agentList1, 1000, {'Alice': 200,'Bob': 100,'Clair': 200,})
         --------THE RESULT--------
         'no solution'
-        >>> agentList2 = AgentList({'P1': {'Ra': 600, 'Rb': 100, 'Rc': 150},'P2': {'Ra': 250, 'Rb': 250, 'Rc': 250},'P3': {'Ra': 100, 'Rb': 400, 'Rc': 250}})
+        >>> agentList2 = AgentList({'P1': {'Ra': 500, 'Rb': 100, 'Rc': 150},'P2': {'Ra': 250, 'Rb': 250, 'Rc': 250},'P3': {'Ra': 100, 'Rb': 400, 'Rc': 250}})
         >>> optimal_envy_free(agentList2, 1000, {'P1': 600,'P2': 400,'P3': 400})
-        ([('P1', 'Ra'), ('P2', 'Rc'), ('P3', 'Rb')], [('Rc', 166.67), ('Rb', 316.67), ('Ra', 516.67)])
+        ([('P1', 'Ra'), ('P2', 'Rc'), ('P3', 'Rb')], [('Rc', 200.0), ('Rb', 350.0), ('Ra', 450.0)])
 
         >>> ex3 = AgentList({"Alice":{'1' : 250, '2' : 750}, "Bob": {'1': 250, '2' : 750}})
         >>> optimal_envy_free(ex3, 1000, {'Alice': 600, 'Bob': 500})
