@@ -132,7 +132,7 @@ def build_weak_envy_graph(sigma: dict, vector_p: dict, agentList: AgentList) -> 
     return weak_envy_graph
 
 
-def LP1(µ: dict, rent, val: dict[dict], budget: dict):
+def LP1(µ: dict, rent, val: dict, budget: dict):
     """
         This function is for calculation of LP(1) from the article.
         LP(1) is : Linear Programming of :
