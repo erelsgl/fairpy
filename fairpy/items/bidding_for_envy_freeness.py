@@ -300,7 +300,7 @@ class BiddingForEnvyFreeness:
             # returning the assessment matrix after the compensation procedure step
             return self.compensation_procedure(assessment_matrix, MC)
                 
-def bidding_for_envy_freeness(bidding_matrix: ValuationMatrix | list) -> dict:
+def bidding_for_envy_freeness(bidding_matrix: ValuationMatrix) -> dict:
     '''
     The Bidding for Envy Freeness function.
     :param bidding_matrix: the bidding matrix to perform the Bidding for Envy Freeness algorithm on.
