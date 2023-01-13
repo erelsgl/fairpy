@@ -151,7 +151,7 @@ class BiddingForEnvyFreeness:
         return [int(m[1][1:]) for m in matching]
     
         
-    def find_m_c(self, matrix: ValuationMatrix | list = None) -> tuple:
+    def find_m_c(self, matrix: ValuationMatrix = None) -> tuple:
         '''
         Find M and C for the given bidding matrix.
         :param matrix: a matrix of players bids for bundles.
