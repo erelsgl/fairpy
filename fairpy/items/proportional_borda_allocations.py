@@ -23,7 +23,6 @@ def proportional_division_equal_number_of_items_and_players(agents: AgentList) -
     Finds a proportional division for the items 
     
     :param agents: represents the n agents.
-    :param items: n the items that are allocated.
     :return: the proportional allocation, or none if no proportional allocation exists.
     Notes: 
         1. len(items) must be equal to len(agents)
@@ -62,7 +61,6 @@ def proportional_division_with_p_even(agents: AgentList) -> Allocation:
     Proposition 3 from "Proportional Borda Allocations":
     Finds a proportional division for the items
     :param agents: represents the agents.
-    :param items: The items which are being allocated.
     :return: the proportional allocation, There is always a proportional allocation
     Notes: 
         1. p:= len(items)/len(agents) must be an even positive integer
@@ -93,7 +91,6 @@ def proportional_division_with_number_of_agents_odd(agents: AgentList) -> Alloca
     Theorem 1 from "Proportional Borda Allocations":
     Finds a proportional division for the items
     :param agents: represents the agents.
-    :param items: The items which are being allocated.
     :return: the proportional allocation, There is always a proportional allocation
     Notes: 
         1. len(agents) must be an odd positive integer and  len(items)/len(agents) must be a positive integer of at least 3
@@ -113,7 +110,6 @@ def proportional_division(agents: AgentList) -> Allocation:
     Theorem 3 from "Proportional Borda Allocations":
     Finds a proportional division for the items
     :param agents: represents the agents.
-    :param items: The items which are being allocated.
     :return the proportional allocation, 
         or an approximately proportional allocation if no proportional allocation exists.
 

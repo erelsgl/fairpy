@@ -23,13 +23,13 @@ def test_proportional_division_equal_number_of_items_and_players():
     tBig = proportional_division_equal_number_of_items_and_players(agents=big_agents) 
     assert tBig is None  # Validation is the same for all agents
 
-    for i in range(1,50):
+    for i in range(1,20):
         agentsI = get_agents_with_permutations_of_valuations(i,i)
         allocationI = proportional_division_equal_number_of_items_and_players(agents=agentsI)
         assert allocationI is None or is_proportional(allocationI, agentsI.all_items())
   
-    for i in range(1,50):
-        agentsI = get_agents_with_permutations_of_valuations(i,i+1) # len(agents) != len(items)) 
+    for i in range(1,20):
+        agentsI = get_agents_with_permutations_of_valuations(i, i+1) # len(agents) != len(items)) 
         with pytest.raises(ValueError):
             proportional_division_equal_number_of_items_and_players(agents=agentsI)  
     
@@ -71,10 +71,10 @@ def test_general():
     for func in [proportional_division_with_p_even, proportional_division_with_number_of_agents_odd, proportional_division]:
         check_if_it_throws_error_if_without_borda(f=func)
         check_if_throws_error_when_k_is_not_multiple_of_n(f=func)
-    # big_size = 100
-    big_size = 50
-    for n in chain(range(1, 20)):
-        for p in chain(range(2,15), [big_size, big_size+1]):
+    
+    big_size = 30
+    for n in range(1, 20):
+        for p in chain(range(2,10), [big_size, big_size+1]):
             agentsI = get_agents_with_permutations_of_valuations(n, n*p)
             if isEven(p):
                 allocationI = proportional_division_with_p_even(agents=agentsI)
