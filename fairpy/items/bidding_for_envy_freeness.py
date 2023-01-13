@@ -20,7 +20,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class BiddingForEnvyFreeness:
-    def __init__(self, matrix: ValuationMatrix | list = None):
+    def __init__(self, matrix: ValuationMatrix = None):
         '''
         Bidding for Envy Freeness algorithm.
         :param matrix: a matrix of players bids for bundles.
