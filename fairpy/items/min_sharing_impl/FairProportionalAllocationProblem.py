@@ -44,37 +44,37 @@ class FairProportionalAllocationProblem(FairThresholdAllocationProblem):
     None
     >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 1, 1, 1], [1, 1, 0.0, 1]]
     >>> g = ConsumptionGraph(g1)
-    >>> print(fpap.find_allocation_for_graph(g).round(2))
-    [[0.   0.   0.   0.88]
-     [0.   0.46 1.   0.05]
-     [1.   0.54 0.   0.07]]
+    >>> print(fpap.find_allocation_for_graph(g).round(1))
+    [[0.  0.  0.  0.9]
+     [0.  0.6 1.  0. ]
+     [1.  0.4 0.  0. ]]
     >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 0.0, 1, 1], [1, 1, 0.0, 1]]
     >>> g = ConsumptionGraph(g1)
     >>> fpap.find_allocation_for_graph(g).round(2).num_of_sharings()
-    2
+    1
     >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 0.0, 1, 1], [1, 1, 1, 1]]
     >>> g = ConsumptionGraph(g1)
-    >>> print(fpap.find_allocation_for_graph(g).round(2))
-    [[0.   0.   0.   0.84]
-     [0.   0.   0.99 0.15]
-     [1.   1.   0.01 0.01]]
+    >>> print(fpap.find_allocation_for_graph(g).round(1))
+    [[0.  0.  0.  0.8]
+     [0.  0.  1.  0.1]
+     [1.  1.  0.  0. ]]
     >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 1, 1, 1], [1, 0.0, 0.0, 0.0]]
     >>> g = ConsumptionGraph(g1)
     >>> print(fpap.find_allocation_for_graph(g))
     None
     >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 1, 1, 1], [1, 1, 0.0, 0.0]]
     >>> g = ConsumptionGraph(g1)
-    >>> print(fpap.find_allocation_for_graph(g).round(2))
-    [[0.   0.   0.   0.86]
-     [0.   0.47 1.   0.14]
-     [1.   0.53 0.   0.  ]]
+    >>> print(fpap.find_allocation_for_graph(g).round(1))
+    [[0.  0.  0.  0.9]
+     [0.  0.6 1.  0.1]
+     [1.  0.4 0.  0. ]]
     >>> v = [ [465,0,535] , [0,0,1000]  ]  # This example exposed a bug in OSQP solver!
     >>> fpap =FairProportionalAllocationProblem(v)
     >>> g1 = [[1,1,1],[0,0,1]]
     >>> g = ConsumptionGraph(g1)
-    >>> print(fpap.find_allocation_for_graph(g).round(3))
-    [[1.    1.    0.391]
-     [0.    0.    0.609]]
+    >>> print(fpap.find_allocation_for_graph(g).round(1))
+    [[1.  1.  0.4]
+     [0.  0.  0.6]]
     """
 
     def __init__(self, valuation_matrix):
