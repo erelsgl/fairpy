@@ -13,6 +13,8 @@ import numpy as np
 from fairpy import AllocationMatrix, Allocation, ValuationMatrix
 
 logger = logging.getLogger()
+
+
 # logging.basicConfig(filename="ev.log", level=logging.INFO)
 
 
@@ -84,6 +86,17 @@ def envy_free_approximation_division(allocation: Allocation, eps: float = 0) -> 
     return {"allocation": bundles, "payments": payments.tolist()}
 
 
+def call_to_envy_free_aprximation(v: ValuationMatrix, eps: float = 0):
+    """
+    create arbitrary allocation by valuation matrix.
+    """
+    matrix = np.eye(v.num_of_agents, v.num_of_objects)
+    if v.num_of_agents < v.num_of_objects:
+        for i in range(v.num_of_agents, v.num_of_objects):
+            matrix[-1, i] = 1
+    return envy_free_approximation_division(Allocation(agents=v, bundles=AllocationMatrix(matrix)), eps)
+
+
 def swap_columns(matrix: np.array, idx_1: int, idx_2: int) -> None:
     """
     swap between 2 columns in matrix.
@@ -141,9 +154,6 @@ def get_second_max(idx: int, agent_valuation: np.array, payments: np.array) -> f
     m = max(zip(temp_a, temp_p), key=lambda x: x[0] - x[1])
     logger.debug('get second max (tuple): %s', m)
     return m[0] - m[1]
-
-
-
 
 
 if __name__ == '__main__':
