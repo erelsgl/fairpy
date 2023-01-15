@@ -1,7 +1,10 @@
 
 #!python3
 """
-Tests to proportional_borda_allocations
+Tests to proportional_borda_allocations -
+Article: "Proportional Borda Allocations"
+Authors: Andreas Darmann and Christian Klamler. See https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5075029/
+Publishing the article: 2016
 
 Programmer: Shlomo Glick
 Since:  2022-12
