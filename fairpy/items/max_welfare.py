@@ -339,4 +339,3 @@ if __name__ == '__main__':
     # Testing specific functions:
     # doctest.run_docstring_examples(max_welfare_envyfree_allocation, globals())
     # doctest.run_docstring_examples(max_sum_allocation, globals())
-
