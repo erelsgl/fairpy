@@ -201,6 +201,7 @@ def selection_by_order(agents:AgentList, items:list, allocation:List[list], num_
 def isEven(n):
     return n % 2 == 0
 
+proportional_division.logger = logger
 ### MAIN
 import sys
 if __name__ == "__main__":
