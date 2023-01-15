@@ -134,7 +134,7 @@ def test_compensation_procedure():
     assert_matrix_equal(expected, actual)
 
 
-def test_full_cases():
+def test_full_cases(big_size: int = 10):
     '''
     Test full cases.
     '''
@@ -167,9 +167,16 @@ def test_full_cases():
                 3: {'bundle': 0, 'discount': 5}}
     
     assert bidding_for_envy_freeness(matrix) == expected
+
+    # Big zized matrix
+    
+    matrix, assertion = prepare_assertion_for_n_sized(big_size)
+    
+    assert_dict_equal(assertion, bidding_for_envy_freeness(matrix))
+
     
 
-# Helper function
+# Helper functions
 def assert_matrix_equal(expected, actual):
     '''
     Assert that two matrices are equal.
@@ -178,6 +185,26 @@ def assert_matrix_equal(expected, actual):
         for j in range(len(expected[0])):
             assert expected[i][j] == actual[i][j]
 
+def assert_dict_equal(expected, actual):
+    '''
+    Assert that two dictionaries are equal.
+    '''
+    for key in expected:
+        assert expected[key] == actual[key]
+
+def prepare_assertion_for_n_sized(n):
+    import random
+    bundles = list(range(n))
+    assertion = {}
+    matrix = []
+    for i in range(n):
+        matrix.append([0] * n)
+        bundle = bundles[random.randint(0, len(bundles) - 1)]
+        bundles.remove(bundle)
+        matrix[i][bundle] = 1
+        assertion[i] = {'bundle': bundle, 'discount': 0}
+    
+    return ValuationMatrix(matrix), assertion
 
 def run_tests():
     '''
@@ -188,6 +215,8 @@ def run_tests():
     test_initialize_assessment_matrix()
     test_compensation_procedure()
     test_full_cases()
+    test_full_cases(100)
+    test_full_cases(1000)
 
 if __name__ == '__main__':
     run_tests()
