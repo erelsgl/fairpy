@@ -8,6 +8,9 @@ Since: 2023-01
 import fairpy
 from fairpy.items.bidding_for_envy_freeness import bidding_for_envy_freeness
 
+import logging
+bidding_for_envy_freeness.logger.addHandler(logging.StreamHandler())
+bidding_for_envy_freeness.logger.setLevel(logging.INFO)
 
 # Example from article:
 matrix1 = [[50, 20, 10, 20], [60, 40, 15, 10], [0, 40, 25, 35], [50, 35, 10, 30]]
