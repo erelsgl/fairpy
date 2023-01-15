@@ -121,7 +121,9 @@ class BiddingForEnvyFreeness:
         
         logger.info(f'\n----------[ INFO ]----------\nFinished BiddingForEnvyFreeness with assessment matrix:\n{pprint.pformat(self.assessment_matrix)}\n----------------------------')
         
-        
+        self.bundle_discount_allocation = {player: {'bundle': index, 'discount': self.assessment_matrix[-1][index]} for index, player in enumerate(self.players_order)}
+
+
     def find_best_matching(self, matrix: ValuationMatrix = None) -> list:
         '''
         Find the best matching for the given bidding matrix.

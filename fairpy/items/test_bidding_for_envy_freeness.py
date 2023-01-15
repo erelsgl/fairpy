@@ -142,23 +142,29 @@ def test_full_cases(big_size: int = 10):
     expected = {0: {'bundle': 0, 'discount': 25},
                 1: {'bundle': 1, 'discount': 10},
                 2: {'bundle': 2, 'discount': 10}}
+
+    bfef = BiddingForEnvyFreeness(matrix)
     
-    assert bidding_for_envy_freeness(matrix) == expected
+    assert bfef.bundle_discount_allocation == expected
     
     matrix = ValuationMatrix([[25, 25, 25], [50, 40, 35], [10, 20, 25]])
     expected = {0: {'bundle': 1, 'discount': 10},
                 1: {'bundle': 0, 'discount': 25},
                 2: {'bundle': 2, 'discount': 10}}
     
-    assert bidding_for_envy_freeness(matrix) == expected
+    bfef = BiddingForEnvyFreeness(matrix)
     
+    assert bfef.bundle_discount_allocation == expected    
+
     matrix = ValuationMatrix([[50, 20, 10, 20], [60, 40, 15, 10], [0, 40, 25, 35], [50, 35, 10, 30]])
     expected = {0: {'bundle': 0, 'discount': 5},
                 1: {'bundle': 1, 'discount': 15},
                 2: {'bundle': 2, 'discount': 15},
                 3: {'bundle': 3, 'discount': 10}}
     
-    assert bidding_for_envy_freeness(matrix) == expected
+    bfef = BiddingForEnvyFreeness(matrix)
+    
+    assert bfef.bundle_discount_allocation == expected
     
     matrix = ValuationMatrix([[60, 40, 15, 10], [50, 35, 10, 30], [0, 40, 25, 35], [50, 20, 10, 20]])
     expected = {0: {'bundle': 1, 'discount': 15},
@@ -166,13 +172,17 @@ def test_full_cases(big_size: int = 10):
                 2: {'bundle': 2, 'discount': 15},
                 3: {'bundle': 0, 'discount': 5}}
     
-    assert bidding_for_envy_freeness(matrix) == expected
+    bfef = BiddingForEnvyFreeness(matrix)
+    
+    assert bfef.bundle_discount_allocation == expected
 
     # Big zized matrix
     
     matrix, assertion = prepare_assertion_for_n_sized(big_size)
     
-    assert_dict_equal(assertion, bidding_for_envy_freeness(matrix))
+    bfef = BiddingForEnvyFreeness(matrix)
+    
+    assert_dict_equal(assertion, bfef.bundle_discount_allocation)
 
     
 
