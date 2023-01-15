@@ -58,42 +58,42 @@ class FairEnvyFreeAllocationProblem(FairAllocationProblem):
         >>> fefap =FairEnvyFreeAllocationProblem(v)
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 0.0], [1, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fefap.find_allocation_for_graph(g).round(1))
-        [[0.3 1.  0.  0. ]
-         [0.3 0.  1.  0. ]
-         [0.3 0.  0.  1. ]]
+        >>> print(fefap.find_allocation_for_graph(g).round(2))
+        [[0.34 1.   0.   0.  ]
+         [0.34 0.   1.   0.  ]
+         [0.32 0.   0.   1.  ]]
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 0.0], [1, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fefap.find_allocation_for_graph(g).round(1))
-        [[0.3 1.  0.  0. ]
-         [0.3 0.  1.  0. ]
-         [0.3 0.  0.  1. ]]
+        >>> print(fefap.find_allocation_for_graph(g).round(2))
+        [[0.34 1.   0.   0.  ]
+         [0.34 0.   1.   0.  ]
+         [0.32 0.   0.   1.  ]]
         >>> g1 = [[1, 1, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [1, 0.0, 1, 1]]
         >>> g = ConsumptionGraph(g1)
         >>> print(fefap.find_allocation_for_graph(g))
         None
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 1], [1, 0.0, 0.0, 0.0]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fefap.find_allocation_for_graph(g).round(1))
-        [[0.3 1.  0.  0. ]
-         [0.  0.  1.  1. ]
-         [0.6 0.  0.  0. ]]
+        >>> print(fefap.find_allocation_for_graph(g).round(2))
+        [[0.3  1.   0.   0.  ]
+         [0.05 0.   1.   1.  ]
+         [0.65 0.   0.   0.  ]]
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 1], [1, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fefap.find_allocation_for_graph(g).round(1))
-        [[0.3 1.  0.  0. ]
-         [0.2 0.  1.  0.4]
-         [0.4 0.  0.  0.6]]
+        >>> print(fefap.find_allocation_for_graph(g).round(2))
+        [[0.32 1.   0.   0.  ]
+         [0.25 0.   1.   0.33]
+         [0.43 0.   0.   0.67]]
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 1], [0.0, 0.0, 0.0, 0.0]]
         >>> g = ConsumptionGraph(g1)
         >>> print(fefap.find_allocation_for_graph(g))
         None
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 0.0], [1, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fefap.find_allocation_for_graph(g).round(1))
-        [[0.3 1.  0.  0. ]
-         [0.3 0.  1.  0. ]
-         [0.3 0.  0.  1. ]]
+        >>> print(fefap.find_allocation_for_graph(g).round(2))
+        [[0.34 1.   0.   0.  ]
+         [0.34 0.   1.   0.  ]
+         [0.32 0.   0.   1.  ]]
         """
         mat = cvxpy.Variable((self.valuation.num_of_agents, self.valuation.num_of_objects))
         constraints = []
@@ -139,5 +139,6 @@ if __name__ == '__main__':
     import doctest
     (failures, tests) = doctest.testmod(report=True)
     print("{} failures, {} tests".format(failures, tests))
+
 
 

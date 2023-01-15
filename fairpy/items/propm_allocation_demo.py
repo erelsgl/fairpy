@@ -1,13 +1,3 @@
-"""
-Demo for the PROPm allocation algorithm. Reference:
-
-    Artem Baklanov, Pranav Garimidi, Vasilis Gkatzelis, and Daniel Schoepflin (2021).
-    ["PROPm Allocations of Indivisible Goods to Multiple Agents"](https://arxiv.org/abs/2105.11348).
-
-Programmer: Maksim Timokhin
-Since:  2021-05
-"""
-
 import fairpy
 from fairpy.items.propm_allocation import propm_allocation
 

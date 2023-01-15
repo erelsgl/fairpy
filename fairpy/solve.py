@@ -10,11 +10,11 @@ Since:  2021-05
 import cvxpy
 from typing import List, Dict, Tuple
 
-DEFAULT_SOLVERS = [ 
-	(cvxpy.SCIPY, {'method':'highs'}),   # for linear programs
-	(cvxpy.SCS, {}),                     # for convex programs
-	(cvxpy.OSQP, {}),       # should be installed by: pip install osqp
-	(cvxpy.XPRESS, {}),     # should be installed from their website
+DEFAULT_SOLVERS = [
+	(cvxpy.SCIPY, {'method':'highs'}),
+	(cvxpy.OSQP, {}),
+	(cvxpy.SCS, {}),
+	(cvxpy.XPRESS, {}),
 ]
 
 import logging
@@ -65,13 +65,13 @@ def minimize(objective, constraints, solvers:list=DEFAULT_SOLVERS):
 
 	>>> import numpy as np
 	>>> x = cvxpy.Variable()
-	>>> np.round(minimize(x, [x>=1, x<=3]),3)
+	>>> minimize(x, [x>=1, x<=3])
 	1.0
-	>>> np.round(minimize(x, [x>=1, x<=3], solvers=[(cvxpy.MOSEK,{}),(cvxpy.SCS,{}),(cvxpy.SCIPY,{})]),3)
+	>>> minimize(x, [x>=1, x<=3], solvers=[(cvxpy.OSQP,{}),(cvxpy.SCS,{})])
 	1.0
-	>>> np.round(minimize(x, [x>=1, x<=3], solvers=[(cvxpy.SCS,{}),(cvxpy.SCIPY,{}),(cvxpy.MOSEK,{})]),2)
+	>>> np.round(minimize(x, [x>=1, x<=3], solvers=[(cvxpy.SCS,{}),(cvxpy.OSQP,{})]),2)
 	1.0
-	>>> np.round(minimize(x, [x>=1, x<=3], solvers=[(cvxpy.MOSEK,{'bfs':True}),(cvxpy.SCIPY,{'method':'highs'})]),3)
+	>>> minimize(x, [x>=1, x<=3], solvers=[(cvxpy.MOSEK,{'bfs':True}),(cvxpy.SCIPY,{'method':'highs'})])
 	1.0
 	"""
 	problem = cvxpy.Problem(cvxpy.Minimize(objective), constraints)
@@ -84,7 +84,7 @@ solve.logger = logger
 if __name__ == '__main__':
 	import sys
 	logger.addHandler(logging.StreamHandler(sys.stdout))
-	logger.setLevel(logging.INFO)
+	# logger.setLevel(logging.INFO)
 
 	import doctest
 	(failures, tests) = doctest.testmod(report=True)

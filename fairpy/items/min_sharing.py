@@ -63,10 +63,10 @@ def maxproduct_allocation_with_min_sharing(instance:ValuationMatrix, tolerance:f
     >>> print(maxproduct_allocation_with_min_sharing(ValuationMatrix([ [3,2] , [1,4] ])).round(2))   # two items
     [[1. 0.]
      [0. 1.]]
-    >>> print(maxproduct_allocation_with_min_sharing(ValuationMatrix([ [10,18,1,1] , [10,18,1,1] , [10,10,5,5] ])).round(1))   # three items
-    [[0.7 0.3 0.  0. ]
-     [0.  0.7 0.  0. ]
-     [0.3 0.  1.  1. ]]
+    >>> print(maxproduct_allocation_with_min_sharing(ValuationMatrix([ [10,18,1,1] , [10,18,1,1] , [10,10,5,5] ])))   # three items
+    [[0.73  0.295 0.    0.   ]
+     [0.    0.705 0.    0.   ]
+     [0.27  0.    1.    1.   ]]
     """
     return FairMaxProductAllocationProblem(instance,tolerance).find_allocation_with_min_sharing(num_of_decimal_digits)
 

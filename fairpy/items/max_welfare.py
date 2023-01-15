@@ -330,7 +330,7 @@ if __name__ == '__main__':
 
     from fairpy import solve
     solve.logger.addHandler(logging.StreamHandler(sys.stdout))
-    solve.logger.setLevel(logging.INFO)
+    # solve.logger.setLevel(logging.INFO)
 
     import doctest
     (failures, tests) = doctest.testmod(report=True)
@@ -339,3 +339,4 @@ if __name__ == '__main__':
     # Testing specific functions:
     # doctest.run_docstring_examples(max_welfare_envyfree_allocation, globals())
     # doctest.run_docstring_examples(max_sum_allocation, globals())
+
