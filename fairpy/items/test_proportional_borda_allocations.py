@@ -57,21 +57,8 @@ def test_proportional_division_with_p_even():
     with pytest.raises(ValueError):
         proportional_division_with_p_even(agents=agents9)  # p == 3
 
-def test_proportional_division_with_number_of_agents_odd():
-    sizeA = 2
-    agentsA = AgentList([list(range(2*sizeA)) for i in range(sizeA)])
-    sizeB = 4
-    agentsB = AgentList([list(range(3*sizeB)) for i in range(sizeB)])    
-    
-    # Check for cases where n is even
-    with pytest.raises(ValueError):
-        proportional_division_with_number_of_agents_odd(agents=agentsA) # n == 2
- 
-    with pytest.raises(ValueError):
-        proportional_division_with_number_of_agents_odd(agents=agentsB) # n == 4
-
 def test_general():
-    for func in [proportional_division_with_p_even, proportional_division_with_number_of_agents_odd, proportional_division]:
+    for func in [proportional_division_with_p_even, proportional_division]:
         check_if_it_throws_error_if_without_borda(f=func)
         check_if_throws_error_when_k_is_not_multiple_of_n(f=func)
     
@@ -81,9 +68,6 @@ def test_general():
             agentsI = get_agents_with_permutations_of_valuations(n, n*p)
             if isEven(p):
                 allocationI = proportional_division_with_p_even(agents=agentsI)
-                assert is_proportional(allocationI, agentsI.all_items())
-            if not isEven(n):
-                allocationI = proportional_division_with_number_of_agents_odd(agents=agentsI)
                 assert is_proportional(allocationI, agentsI.all_items())
             allocationI = proportional_division(agents=agentsI)
             if isEven(n) and not isEven(p):
@@ -142,5 +126,4 @@ def check_if_throws_error_when_k_is_not_multiple_of_n(f:Callable):
 if __name__ == "__main__":
     test_proportional_division_equal_number_of_items_and_players()
     test_proportional_division_with_p_even()
-    test_proportional_division_with_number_of_agents_odd()
     test_general()
