@@ -19,6 +19,30 @@ import pprint
 import logging
 logger = logging.getLogger(__name__)
 
+
+# Main function
+def bidding_for_envy_freeness(bidding_matrix: ValuationMatrix) -> dict:
+    '''
+    The Bidding for Envy Freeness function.
+    :param bidding_matrix: the bidding matrix to perform the Bidding for Envy Freeness algorithm on.
+    :return: the allocation of bundles and discounts after the Bidding for Envy Freeness algorithm.
+    >>> bidding_for_envy_freeness([[50, 20, 10, 20], [60, 40, 15, 10], [0, 40, 25, 35], [50, 35, 10, 30]])
+    {0: {'bundle': 0, 'discount': 5}, 1: {'bundle': 1, 'discount': 15}, 2: {'bundle': 2, 'discount': 15}, 3: {'bundle': 3, 'discount': 10}}
+    
+    >>> bidding_for_envy_freeness([[60, 40, 15, 10], [50, 20, 10, 20], [0, 40, 25, 35], [50, 35, 10, 30]])
+    {1: {'bundle': 0, 'discount': 5}, 0: {'bundle': 1, 'discount': 15}, 2: {'bundle': 2, 'discount': 15}, 3: {'bundle': 3, 'discount': 10}}
+    
+    >>> bidding_for_envy_freeness([[50, 40, 35], [25, 25, 25], [10, 20, 25]])
+    {0: {'bundle': 0, 'discount': 25}, 1: {'bundle': 1, 'discount': 10}, 2: {'bundle': 2, 'discount': 10}}
+    
+    >>> bidding_for_envy_freeness([[25, 25, 25], [10, 20, 25], [50, 40, 35]])
+    {2: {'bundle': 0, 'discount': 25}, 0: {'bundle': 1, 'discount': 10}, 1: {'bundle': 2, 'discount': 10}}
+    '''
+    bfef =  BiddingForEnvyFreeness(bidding_matrix)
+    return {player: {'bundle': index, 'discount': bfef.assessment_matrix[-1][index]} for index, player in enumerate(bfef.players_order)}
+
+
+# Algorithm Class
 class BiddingForEnvyFreeness:
     def __init__(self, matrix: ValuationMatrix = None):
         '''
@@ -300,26 +324,7 @@ class BiddingForEnvyFreeness:
             # returning the assessment matrix after the compensation procedure step
             return self.compensation_procedure(assessment_matrix, MC)
                 
-def bidding_for_envy_freeness(bidding_matrix: ValuationMatrix) -> dict:
-    '''
-    The Bidding for Envy Freeness function.
-    :param bidding_matrix: the bidding matrix to perform the Bidding for Envy Freeness algorithm on.
-    :return: the allocation of bundles and discounts after the Bidding for Envy Freeness algorithm.
-    >>> bidding_for_envy_freeness([[50, 20, 10, 20], [60, 40, 15, 10], [0, 40, 25, 35], [50, 35, 10, 30]])
-    {0: {'bundle': 0, 'discount': 5}, 1: {'bundle': 1, 'discount': 15}, 2: {'bundle': 2, 'discount': 15}, 3: {'bundle': 3, 'discount': 10}}
-    
-    >>> bidding_for_envy_freeness([[60, 40, 15, 10], [50, 20, 10, 20], [0, 40, 25, 35], [50, 35, 10, 30]])
-    {1: {'bundle': 0, 'discount': 5}, 0: {'bundle': 1, 'discount': 15}, 2: {'bundle': 2, 'discount': 15}, 3: {'bundle': 3, 'discount': 10}}
-    
-    >>> bidding_for_envy_freeness([[50, 40, 35], [25, 25, 25], [10, 20, 25]])
-    {0: {'bundle': 0, 'discount': 25}, 1: {'bundle': 1, 'discount': 10}, 2: {'bundle': 2, 'discount': 10}}
-    
-    >>> bidding_for_envy_freeness([[25, 25, 25], [10, 20, 25], [50, 40, 35]])
-    {2: {'bundle': 0, 'discount': 25}, 0: {'bundle': 1, 'discount': 10}, 1: {'bundle': 2, 'discount': 10}}
-    '''
-    bfef =  BiddingForEnvyFreeness(bidding_matrix)
-    return {player: {'bundle': index, 'discount': bfef.assessment_matrix[-1][index]} for index, player in enumerate(bfef.players_order)}
-        
+
 if __name__ == '__main__':
     import sys 
     logger.addHandler(logging.StreamHandler(sys.stdout))

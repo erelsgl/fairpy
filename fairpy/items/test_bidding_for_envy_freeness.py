@@ -70,13 +70,6 @@ def test_find_m_c():
     bfef = BiddingForEnvyFreeness(matrix)
     assert bfef.find_m_c() == (145, 100, 45)
 
-def assert_matrix_equal(expected, actual):
-    '''
-    Assert that two matrices are equal.
-    '''
-    for i in range(len(expected)):
-        for j in range(len(expected[0])):
-            assert expected[i][j] == actual[i][j]
 
 def test_initialize_assessment_matrix():
     '''
@@ -175,3 +168,26 @@ def test_full_cases():
     
     assert bidding_for_envy_freeness(matrix) == expected
     
+
+# Helper function
+def assert_matrix_equal(expected, actual):
+    '''
+    Assert that two matrices are equal.
+    '''
+    for i in range(len(expected)):
+        for j in range(len(expected[0])):
+            assert expected[i][j] == actual[i][j]
+
+
+def run_tests():
+    '''
+    Run all tests.
+    '''
+    test_find_best_matching()
+    test_find_m_c()
+    test_initialize_assessment_matrix()
+    test_compensation_procedure()
+    test_full_cases()
+
+if __name__ == '__main__':
+    run_tests()
