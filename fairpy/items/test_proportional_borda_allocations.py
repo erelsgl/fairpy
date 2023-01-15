@@ -137,3 +137,10 @@ def check_if_throws_error_when_k_is_not_multiple_of_n(f:Callable):
     with pytest.raises(ValueError):
         agents3 = get_agents_with_permutations_of_valuations(size, size*4+1)   # 13 % 3 != 0
         f(agents=agents3)
+
+
+if __name__ == "__main__":
+    test_proportional_division_equal_number_of_items_and_players()
+    test_proportional_division_with_p_even()
+    test_proportional_division_with_number_of_agents_odd()
+    test_general()
