@@ -19,6 +19,8 @@ from fairpy.items.utilitarian_matching import instance_to_graph, matching_to_all
 from fairpy.agents import Agent, AdditiveAgent
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -64,7 +66,7 @@ def Bounded_Subsidy(agents: AgentList, items: Dict[str,int]=None, weights: Dict[
     >>> print(Bounded_Subsidy(agents3))
     {'Agent #0': [0, 1], 'Agent #1': [3, 2]}
 
-    >>> agents4 = AgentList({"Alice": {"a":3, "b":5}, "Bob": {"a":6, "b":7}})
+    >>> agents4 = AgentList({"Alice": {"a":3, "b":6}, "Bob": {"a":5, "b":7}})
     >>> print(Bounded_Subsidy(agents4))
     {'Alice': ['b'], 'Bob': ['a']}
 
@@ -75,6 +77,10 @@ def Bounded_Subsidy(agents: AgentList, items: Dict[str,int]=None, weights: Dict[
     >>> agents6 = AgentList([[3,2],[4,1]])
     >>> print(Bounded_Subsidy(agents6))
     {'Agent #0': [1], 'Agent #1': [0]}
+
+    >>> agents7 = AgentList({"Alice": {"a":5, "b":5}, "Bob": {"a":3, "b":4}, "Max": {"a":2, "b":2}, "Nancy": {"a":2, "b":1}})
+    >>> print(Bounded_Subsidy(agents7))
+    {'Alice': ['a'], 'Bob': ['b'], 'Max': [], 'Nancy': []}
 
     """
     allTheItems = agents[0].all_items() # list of all items
@@ -98,7 +104,7 @@ def Bounded_Subsidy(agents: AgentList, items: Dict[str,int]=None, weights: Dict[
         for agent_name,item_name in agentsBundle.items():
             result[agent_name] += item_name
             # print(agent_name, item_name)
-            # print(result)
+        # print(result)
         # The items that allocated to the agents in this round
         allocated_items = sum([item for item in agentsBundle.values()], []) 
         # print(allocated_items)
@@ -129,132 +135,175 @@ def delete_items(items:Dict[str,int], items_to_remove:List)->Dict[str,int]:
     return {item:newSize for item,newSize in items.items() if newSize > 0}
 
 
-
 ##### algorithm 2 #####
 
-def maximizes_allocation(agents: Dict[str,Agent], item_list: List[Any]):
+def create_Envy_Graph(agents: AgentList)->networkx.DiGraph():
+    """
+    The algorithm getting a list of agents, list of goods and array of the weights of the goods
+    and it returns a bundle of agents each holding the best allocation for their own valuation,
+    with the subsidy that eliminates envy
+
+    ###### Two agens, one items ######
+    >>> agents0 = AgentList({"Alice": {"a":5}, "Bob": {"a":4}})
+    >>> allocate_items_with_Subsidy(agents0)
+    Alice gets ['a'] with no subsidy
+    Bob gets [] with subsidy of 4
+
+    ###### Two agens, Two items ######
+    >>> agents1 = AgentList({"Alice": {"a":3, "b":5}, "Bob": {"a":6, "b":7}})
+    >>> allocate_items_with_Subsidy(agents1)
+    Alice gets ['b'] with no subsidy
+    Bob gets ['a'] with subsidy of 1
+
+    >>> agents2 = AgentList({"Alice": {"a":3, "b":2}, "Bob": {"a":4, "b":1}})
+    >>> allocate_items_with_Subsidy(agents2)
+    Alice gets ['b'] with subsidy of 1
+    Bob gets ['a'] with no subsidy
+
+    >>> agents3 = AgentList({"Alice": {"a":4, "b":10, "c":8, "d":7}, "Bob": {"a":5, "b":9, "c":5, "d":10}})
+    >>> allocate_items_with_Subsidy(agents3)
+    Alice gets ['b', 'c'] with no subsidy
+    Bob gets ['d', 'a'] with no subsidy
+
+    >>> agents4 = AgentList({"Alice": {"a":10, "b":8, "c":5, "d":9, "e":3, "f":0}, "Bob": {"a":9, "b":2, "c":4, "d":7, "e":10, "f":1}})
+    >>> allocate_items_with_Subsidy(agents4)
+    Alice gets ['a', 'b', 'c'] with no subsidy
+    Bob gets ['e', 'd', 'f'] with no subsidy
+
+    ###### Three agents, Three items ######
+
+    >>> agents5 = AgentList({"Alice": {"a":3, "b":4, "c":6}, "Bob": {"a":4, "b":3, "c":1}, "Max": {"a":4, "b":5, "c":1}})
+    >>> allocate_items_with_Subsidy(agents5)
+    Alice gets ['c'] with subsidy of 1
+    Bob gets ['a'] with no subsidy
+    Max gets ['b'] with no subsidy
+
+    >>> agents6 = AgentList({"Alice": {"a":1, "b":2, "c":3}, "Bob": {"a":1, "b":3, "c":2}, "Max": {"a":3, "b":2, "c":1}})
+    >>> allocate_items_with_Subsidy(agents6)
+    Alice gets ['c'] with no subsidy
+    Bob gets ['b'] with no subsidy
+    Max gets ['a'] with no subsidy
+
+    >>> agents7 = AgentList({"Alice": {"a":1, "b":5, "c":3}, "Bob": {"a":1, "b":3, "c":2}, "Max": {"a":3, "b":2, "c":1}})
+    >>> allocate_items_with_Subsidy(agents7)
+    Alice gets ['b'] with no subsidy
+    Bob gets ['c'] with subsidy of 2
+    Max gets ['a'] with no subsidy
+
+    ###### Four agents ######
+    # >>> agents8 = AgentList({"Alice": {"a":5, "b":5}, "Bob": {"a":3, "b":4}, "Max": {"a":2, "b":2}, "Nancy": {"a":2, "b":1}})
+    # >>> allocate_items_with_Subsidy(agents8)
+    # Alice gets ['a'] with no subsidy
+    # Bob gets ['b'] with no subsidy
+    # Max gets [] with subsidy of 2
+    # Nancy gets [] with subsidy of 2
+
+    # >>> agents9 = AgentList({"Alice": {"a":5, "b":6}, "Bob": {"a":3, "b":4}, "Max": {"a":2, "b":2}, "Nancy": {"a":2, "b":1}})
+
+    """
+
+    # list of all items
+    allTheItems = list(agents[0].all_items())
+     
+    # maximum matching for all the agents
+    maximum_matching = Bounded_Subsidy(agents)
    
-    """
-        
-   # Allocate each agent with his highest item that has not been allocated.
+    # calculate the values of the items that allocate to the agent
+    agent_names = list(maximum_matching.keys()) # agent names
+    agent_items_allocated = list(maximum_matching.values()) # The items that allocated for the agent
+    items_values_for_agent = {} # Dict of the values of the items that allocate to the agent
 
-    ##### test 1 #####
-    >>> Alice = AdditiveAgent({"a": 1, "b": 5, "c": 3}, name="Alice")
-    >>> Alice.aq_items = []
-    >>> Bob = AdditiveAgent({"a": 1, "b": 3, "c": 2}, name="Bob")
-    >>> Bob.aq_items = []
-    >>> Eve = AdditiveAgent({"a": 3, "b": 2, "c": 1}, name="Eve")
-    >>> Eve.aq_items = []
-    >>> agents = {x.name():x for x in [Alice,Bob,Eve]}
-    >>> items_list = list('abc')
-    >>> maximizes_allocation(agents,items_list)
-    >>> [(x.name(),sorted(x.aq_items)) for x in agents.values()]
-    [('Alice', ['b']), ('Bob', ['c']), ('Eve', ['a'])]
+    # indexes for the loops
+    i,j = 0,0
+    while i < len(agent_names):
+        item_value = 0
+        j = 0
+        while j < len(allTheItems):
+            name = agent_names[i]
+            if allTheItems[j] in agent_items_allocated[i]:
+                item_value += agents[i].value(allTheItems[j])
+            j += 1
+            items_values_for_agent[name] = item_value
+        i += 1
 
-    ##### test 2 #####
-    >>> Alice = AdditiveAgent({"a": 1, "b": 5, "c": 3, "d":2}, name="Alice")
-    >>> Alice.aq_items = []
-    >>> Bob = AdditiveAgent({"a": 2, "b": 3, "c": 3, "d":1}, name="Bob")
-    >>> Bob.aq_items = []
-    >>> agents = {x.name():x for x in [Alice,Bob]}
-    >>> items_list = list('abcd')
-    >>> maximizes_allocation(agents,items_list)
-    >>> [(x.name(),sorted(x.aq_items)) for x in agents.values()]
-    [('Alice', ['b', 'd']), ('Bob', ['a', 'c'])]
+    # calculate the values of the edges in the Envy Graph
+    list_to_create_Envy_Graph = [] # list of values of the edges in the Envy Graph
+    list_of_subsidy_value = {} # list of subsidy value
 
-    ##### test 3 #####
-    >>> Alice = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Alice")
-    >>> Alice.aq_items = []
-    >>> Bob = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Bob")
-    >>> Bob.aq_items = []
-    >>> Eve = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Eve")
-    >>> Eve.aq_items = []
-    >>> agents = {x.name():x for x in [Alice,Bob,Eve]}
-    >>> items_list = list('abcdef')
-    >>> maximizes_allocation(agents,items_list)
-    >>> [(x.name(),sorted(x.aq_items)) for x in agents.values()]
-    [('Alice', ['d', 'e']), ('Bob', ['a', 'f']), ('Eve', ['b', 'c'])]
-   
-    """
+    # index for the loop
+    k = 0
+    while k < len(agent_names):
+        i = 0
+        while i < len(items_values_for_agent):
+            subsidy_value = 0
+            j = 0
+            while j < len(allTheItems):
+                name = agent_names[i]
+                if allTheItems[j] in agent_items_allocated[i]:
+                    subsidy_value += agents[k].value(allTheItems[j])
+                j += 1
+            list_of_subsidy_value[name] = subsidy_value - list(items_values_for_agent.values())[k]
+            i += 1
+        list_to_create_Envy_Graph.append(list_of_subsidy_value.copy()) 
+        k += 1
 
-    agents_items = list(agents.items())
-    while len(item_list) > 0:
-        for name, val in (agents_items):
-            max_item = max([x for x in val.valuation.desired_items if x[0] in item_list], key=lambda x: val.value(x))
-            item_list.remove(max_item)
-            val.aq_items.append(max_item)
-        agents_items.reverse()
+    # create an empty graph
+    envy_graph = networkx.DiGraph() # DiGraph — Directed graphs with self loops
 
-
-def create_Envy_Graph(agents: Dict[str, AdditiveAgent]) -> networkx.DiGraph:
-    """
-    This function creates an Envy Graph of agents, and maximizes the allocation
-    for every two nodes representing agent u and v, 
-    there will be an edge from u to v if agent u believes agent vs bundle is worth more then his.
-
-    ##### test 1 #####
-    >>> Alice = AdditiveAgent({"a": 5}, name="Alice")
-    >>> Alice.aq_items = ['a']
-    >>> Bob = AdditiveAgent({"a":4}, name="Bob")
-    >>> Bob.aq_items = []
-    >>> agents = {x.name():x for x in [Alice,Bob]}
-    >>> list(create_Envy_Graph(agents).nodes)
-    ['Alice', 'Bob']
-    >>> list(create_Envy_Graph(agents).edges)
-    [('Bob', 'Alice')]
-
-    ##### test 2 #####
-    >>> Alice = AdditiveAgent({"a": 1, "b": 5, "c": 3}, name="Alice")
-    >>> Alice.aq_items = ['b']
-    >>> Bob = AdditiveAgent({"a": 1, "b": 3, "c": 2}, name="Bob")
-    >>> Bob.aq_items = ['c']
-    >>> Eve = AdditiveAgent({"a": 3, "b": 2, "c": 1}, name="Eve")
-    >>> Eve.aq_items = ['a']
-    >>> agents = {x.name():x for x in [Alice,Bob,Eve]}
-    >>> list(create_Envy_Graph(agents).nodes)
-    ['Alice', 'Bob', 'Eve']
-    >>> list(create_Envy_Graph(agents).edges)
-    [('Bob', 'Alice')]
-
-    ##### test 3 #####
-    >>> Alice = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Alice")
-    >>> Alice.aq_items = ['d', 'e']
-    >>> Bob = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Bob")
-    >>> Bob.aq_items = ['a', 'f']
-    >>> Eve = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Eve")
-    >>> Eve.aq_items = ['b', 'c']
-    >>> agents = {x.name():x for x in [Alice,Bob,Eve]}
-    >>> list(create_Envy_Graph(agents).nodes)
-    ['Alice', 'Bob', 'Eve']
-    >>> list(create_Envy_Graph(agents).edges)
-    [('Alice', 'Bob'), ('Alice', 'Eve')]
-
-    """
+    # create nodes of the Envy Graph
+    for name_node in agent_names:
+        envy_graph.add_node(name_node)
     
-    # DiGraph — Directed graphs with self loops
-    # its stores nodes and edges with optional data, or attributes.
-    # DiGraphs hold directed edges. Self loops are allowed but multiple (parallel) edges are not.
-    envy_graph = networkx.DiGraph() 
-    for i in agents.values():
-        envy_graph.add_node(i.name())
-        i_value = i.value(i.aq_items) # values of items of agent "i" from his eyes
-        for k in agents.values():
-            if i is k:
-                continue
-            k_value = i.value(k.aq_items) # values of items of agent "k" from eyes of agent "i"
-            if k_value > i_value:
-                envy_graph.add_edge(i.name(), k.name())
+    # create edges to the nodes in the Envy Graph
+    i=0
+    while i < len(agent_names):
+        j=0
+        while j < len(list_to_create_Envy_Graph):
+            node1 = agent_names[i]
+            node2 = list(list_to_create_Envy_Graph[i].keys())[j]
+            if node1 is node2:
+                j += 1
+                continue 
+            envy_graph.add_edge(agent_names[i], list(list_to_create_Envy_Graph[i].keys())[j], weight=list(list_to_create_Envy_Graph[i].values())[j])
+            j += 1
+        i += 1
+    
+    # Envy Graph show
+    # # positions for all nodes - seed for reproducibility
+    # pos = networkx.spring_layout(envy_graph, seed=1)
+
+    # # nodes
+    # networkx.draw_networkx_nodes(envy_graph, pos, node_size=500)
+
+    # # edges
+    # networkx.draw_networkx_edges(envy_graph, pos, connectionstyle="arc3,rad=-0.3")
+    # networkx.draw_networkx_edges(envy_graph, pos, alpha=0.5, edge_color="b", style="dashed")
+
+    # # node labels
+    # networkx.draw_networkx_labels(envy_graph, pos, font_size=10, font_family="sans-serif")
+
+    # # edge weight labels
+    # edge_labels = networkx.get_edge_attributes(envy_graph, "weight")
+    # networkx.draw_networkx_edge_labels(envy_graph, pos, edge_labels)
+
+    # ax = plt.gca()
+    # ax.margins(0.08)
+    # plt.axis("off")
+    # plt.tight_layout()
+    # plt.show()
+
     return envy_graph
 
+create_Envy_Graph.logger = logger
 
-def check_positive_weight_directed_cycles(envy_graph: networkx.DiGraph, agents: Dict[str, AdditiveAgent]) -> bool:
+def check_positive_weight_directed_cycles(envy_graph: networkx.DiGraph)->bool:
     """
     This function checks if its envy graph does not contain a positive-weight directed cycle
 
     ##### test 1 #####
     >>> Alice = AdditiveAgent({"a": 5, "b": 3}, name="Alice")
     >>> Alice.aq_items = ['b']
-    >>> Bob = AdditiveAgent({"a": 3, "b": 5}, name="Bob")
+    >>> Bob = AdditiveAgent({"a": 4, "b": 1}, name="Bob")
     >>> Bob.aq_items = ['a']
     >>> agents = {x.name():x for x in [Alice,Bob]}
     >>> envy_graph = create_Envy_Graph(agents)
@@ -287,93 +336,46 @@ def check_positive_weight_directed_cycles(envy_graph: networkx.DiGraph, agents: 
     
     """
 
-    try:
-        # The cycle is a list of edges indicating the cyclic path. Orientation of directed edges is controlled
-        networkx.find_cycle(envy_graph, orientation="original")
-        return True
+    nodes = envy_graph.nodes
+    edges = envy_graph.edges.data()
+    G = networkx.DiGraph()
+    G.add_nodes_from(nodes)
+    G.add_edges_from(edges)
+    
+    cycles = networkx.simple_cycles(G)
+    weights = networkx.get_edge_attributes(G, 'weight')
+    for cycle in cycles:
+        cycle.append(cycle[0])
+        cycle_weight = sum([weights[(cycle[i-1], cycle[i])] for i in range(1, len(cycle))])
+        print (cycle,cycle_weight)
+        if cycle_weight > 0:
+            return True
 
-    except networkx.NetworkXNoCycle:
-        return False
-
-
-def Subsidy_calculation(agents: Dict[str, AdditiveAgent]):
-    """
-    This function calculates the subsidy
-
-    ##### tets 1 #####
-    >>> Alice = AdditiveAgent({"a": 1, "b": 5}, name="Alice")
-    >>> Alice.aq_items = []
-    >>> Bob = AdditiveAgent({"a": 2, "b": 3}, name="Bob")
-    >>> Bob.aq_items = []
-    >>> agents = {x.name():x for x in [Alice,Bob]}
-    >>> Subsidy_calculation(agents)
-    subsidy of: Bob is 1
-
-    ##### tets 2 #####
-    >>> Alice = AdditiveAgent({"a": 2, "b": 1}, name="Alice")
-    >>> Alice.aq_items = []
-    >>> Bob = AdditiveAgent({"a": 4, "b": 2}, name="Bob")
-    >>> Bob.aq_items = []
-    >>> agents = {x.name():x for x in [Alice,Bob]}
-    >>> Subsidy_calculation(agents)
-    subsidy of: Bob is 2
-
-    ##### tets 3 #####
-    >>> Alice = AdditiveAgent({"a": 1, "b": 5, "c": 3}, name="Alice")
-    >>> Alice.aq_items = []
-    >>> Bob = AdditiveAgent({"a": 1, "b": 3, "c": 2}, name="Bob")
-    >>> Bob.aq_items = []
-    >>> Eve = AdditiveAgent({"a": 3, "b": 2, "c": 1}, name="Eve")
-    >>> Eve.aq_items = []
-    >>> agents = {x.name():x for x in [Alice,Bob,Eve]}
-    >>> Subsidy_calculation(agents)
-    subsidy of: Bob is 1
-
-    ##### test 4 #####
-    >>> Alice = AdditiveAgent({"a":3, "b":4, "c":6}, name="Alice")
-    >>> Alice.aq_items = []
-    >>> Bob = AdditiveAgent({"a":4, "b":3, "c":1}, name="Bob")
-    >>> Bob.aq_items = []
-    >>> Eve = AdditiveAgent({"a":4, "b":5, "c":1}, name="Eve")
-    >>> Eve.aq_items = []
-    >>> agents_dict = {x.name():x for x in [Alice,Bob,Eve]}
-    >>> Subsidy_calculation(agents_dict) # no subsidy
-
-    ##### test 5 #####
-    >>> Alice = AdditiveAgent({"a": 9, "b": 8, "c": 6, "d": 11, "e": 3, "f": 6}, name="Alice")
-    >>> Alice.aq_items = []
-    >>> Bob = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 5, "e": 3, "f": 6}, name="Bob")
-    >>> Bob.aq_items = []
-    >>> Eve = AdditiveAgent({"a": 9, "b": 8, "c": 7, "d": 11, "e": 3, "f": 6}, name="Eve")
-    >>> Eve.aq_items = []
-    >>> agents_dict = {x.name():x for x in [Alice,Bob,Eve]}
-    >>> Subsidy_calculation(agents_dict)
-    subsidy of: Alice is 1
-
-    """
-
-    for i in agents.values():
-        all_items = list(i.all_items())
-        break
-
-    maximizes_allocation(agents, all_items)
+    return False
 
 
-    # DiGraph — Directed graphs with self loops
-    # its stores nodes and edges with optional data, or attributes.
-    # DiGraphs hold directed edges. Self loops are allowed but multiple (parallel) edges are not.
-    envy_graph = networkx.DiGraph() 
-    for i in agents.values():
-        envy_graph.add_node(i.name())
-        i_value = i.value(i.aq_items) # values of items of agent "i" from his eyes
-        for k in agents.values():
-            if i is k:
-                continue
-            k_value = i.value(k.aq_items) # values of items of agent "k" from eyes of agent "i"
-            if k_value > i_value and check_positive_weight_directed_cycles(create_Envy_Graph(agents), agents) == False:
-                envy_graph.add_edge(i.name(), k.name())
-                print("subsidy of:",i.name(), "is", k_value-i_value)
+def cal_the_Subsidy(agents: AgentList):
 
+    envy_graph = create_Envy_Graph(agents)
+
+    if check_positive_weight_directed_cycles(envy_graph):
+        print("The graph has positive weight directed cycles")
+        return
+
+    i=0
+    flag = False
+    while i < len(envy_graph.edges.data()):
+        first_agent = list(envy_graph.edges.data())[i][0]
+        second_agent = list(envy_graph.edges.data())[i][1]
+        subside = list(list(envy_graph.edges.data())[i][2].values())[0]
+        if subside > 0: # יש קנאה
+            flag = True
+            print(first_agent, "is envious of", second_agent, "with a subsidy of:", subside)
+        i += 1
+
+    if flag == False:
+        print("There is no envy in this graph")
+    
 
 #### MAIN
 
@@ -381,8 +383,20 @@ if __name__ == "__main__":
     import sys
     # logger.addHandler(logging.StreamHandler(sys.stdout))
     # logger.setLevel(logging.INFO)
-    (failures, tests) = doctest.testmod(report=True,optionflags=doctest.NORMALIZE_WHITESPACE)
-    print("{} failures, {} tests".format(failures, tests))
+    # (failures, tests) = doctest.testmod(report=True,optionflags=doctest.NORMALIZE_WHITESPACE)
+    # print("{} failures, {} tests".format(failures, tests))
 
+    agents0 = AgentList({"Alice": {"a":5}, "Bob": {"a":4}})
+    agents1 = AgentList({"Alice": {"a":3, "b":6}, "Bob": {"a":5, "b":7}})
+    agents2 = AgentList({"Alice": {"a": 4, "b": 10, "c": 8, "d": 7}, "Bob": {"a": 5, "b": 9, "c": 5, "d": 10}})
 
+    agents7 = AgentList({"Alice": {"a":1, "b":5, "c":3}, "Bob": {"a":1, "b":3, "c":2}, "Max": {"a":3, "b":2, "c":1}})
+    agents9 = AgentList({"Alice": {"a":5, "b":6}, "Bob": {"a":3, "b":4}, "Max": {"a":2, "b":2}, "Nancy": {"a":2, "b":1}})
+    agents10 = AgentList({"Alice": {"a": 9, "b": 8, "c": 6, "d": 11, "e": 3, "f": 6}, "Bob": {"a": 9, "b": 8, "c": 6, "d": 11, "e": 3, "f": 6}, "Max": {"a": 9, "b": 8, "c": 6, "d": 11, "e": 3, "f": 6}})
+
+    # a=create_Envy_Graph(agents10)
+    # cal_the_Subsidy(agents10)
+    # check_positive_weight_directed_cycles(a)
+
+  
    
