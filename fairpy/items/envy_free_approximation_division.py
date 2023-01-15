@@ -1,3 +1,12 @@
+"""
+"Achieving Envy-freeness and Equitability with Monetary Transfers" by Haris Aziz (2021),
+https://ojs.aaai.org/index.php/AAAI/article/view/16645
+
+Algorithm 2: ε-envy-free approximation division with payment function (based on Bertsekas algorithm).
+
+Programmers: Noamya Shani, Eitan Shenkolevski.
+"""
+
 import doctest
 import logging
 import numpy as np
@@ -5,74 +14,6 @@ from fairpy import AllocationMatrix, Allocation, ValuationMatrix
 
 logger = logging.getLogger()
 # logging.basicConfig(filename="ev.log", level=logging.INFO)
-
-"""
-"Achieving Envy-freeness and Equitability with Monetary Transfers" by Haris Aziz (2021),
-https://ojs.aaai.org/index.php/AAAI/article/view/16645
-
-Algorithm 2: ε-envy-free approximation division with payment function (based on Bertsekas algorithm).
-
-Programmers: Noamya Shani, Eitan Shankolevski.
-"""
-
-
-def swap_columns(matrix: np.array, idx_1: int, idx_2: int) -> None:
-    """
-    swap between 2 columns in matrix.
-    >>> mat = np.array([[1,2,3],[4,5,6],[7,8,9]])
-    >>> swap_columns(mat,0,2)
-    >>> np.array_equal(mat, np.array([[3,2,1],[6,5,4],[9,8,7]]))
-    True
-    """
-    logger.debug('swap_columns( %s, %g , %g )', matrix, idx_1, idx_2)
-    temp = np.copy(matrix[:, idx_1])
-    matrix[:, idx_1] = matrix[:, idx_2]
-    matrix[:, idx_2] = temp
-    logger.debug('matrix after swap: %s', matrix)
-
-
-def get_max(agent_valuation: np.array, payments: np.array) -> float:
-    """
-    return maximum utility, using valuation matrix and payments.
-    >>> av = np.array([1.,2.,3.,4.])
-    >>> p = np.array([2.,2.,1.,3.])
-    >>> get_max(av,p)
-    2.0
-    >>> get_max(np.array([-1.,0.,2.,4.]),np.array([2.,-2.,-3.,1.5]))
-    5.0
-    """
-    logger.debug('get_max( %s, %s )', agent_valuation, payments)
-    m = max(zip(agent_valuation, payments), key=lambda x: x[0] - x[1])
-    logger.debug('get max (tuple): %s', m)
-    return m[0] - m[1]
-
-
-def get_argmax(agent_valuation: np.array, payments: np.array) -> int:
-    """
-    return index of maximum utility.
-    >>> get_argmax(np.array([1.,2.,3.,4.]),np.array([2.,2.,1.,3.]))
-    2
-    >>> get_argmax(np.array([-1.,2.,-3.,2.]),np.array([-5.,2.,1.,-1.]))
-    0
-    """
-    logger.debug('get_argmax( %s, %s )', agent_valuation, payments)
-    return np.argmax([x[0] - x[1] for x in zip(agent_valuation, payments)])
-
-
-def get_second_max(idx: int, agent_valuation: np.array, payments: np.array) -> float:
-    """
-    returns the maximum utility, non-idx.
-    >>> get_second_max(2, np.array([1.,2.,3.,4.]),np.array([2.,2.,1.,3.]))
-    1.0
-    >>> get_second_max(0, np.array([-1.,2.,-3.,2.]),np.array([-5.,2.,1.,-1.]))
-    3.0
-    """
-    logger.debug('get_second_max( %g, %s, %s )', idx, agent_valuation, payments)
-    temp_a = agent_valuation[np.arange(len(agent_valuation)) != idx]
-    temp_p = payments[np.arange(len(payments)) != idx]
-    m = max(zip(temp_a, temp_p), key=lambda x: x[0] - x[1])
-    logger.debug('get second max (tuple): %s', m)
-    return m[0] - m[1]
 
 
 def envy_free_approximation_division(allocation: Allocation, eps: float = 0) -> dict:
@@ -143,5 +84,67 @@ def envy_free_approximation_division(allocation: Allocation, eps: float = 0) -> 
     return {"allocation": bundles, "payments": payments.tolist()}
 
 
+def swap_columns(matrix: np.array, idx_1: int, idx_2: int) -> None:
+    """
+    swap between 2 columns in matrix.
+    >>> mat = np.array([[1,2,3],[4,5,6],[7,8,9]])
+    >>> swap_columns(mat,0,2)
+    >>> np.array_equal(mat, np.array([[3,2,1],[6,5,4],[9,8,7]]))
+    True
+    """
+    logger.debug('swap_columns( %s, %g , %g )', matrix, idx_1, idx_2)
+    temp = np.copy(matrix[:, idx_1])
+    matrix[:, idx_1] = matrix[:, idx_2]
+    matrix[:, idx_2] = temp
+    logger.debug('matrix after swap: %s', matrix)
+
+
+def get_max(agent_valuation: np.array, payments: np.array) -> float:
+    """
+    return maximum utility, using valuation matrix and payments.
+    >>> av = np.array([1.,2.,3.,4.])
+    >>> p = np.array([2.,2.,1.,3.])
+    >>> get_max(av,p)
+    2.0
+    >>> get_max(np.array([-1.,0.,2.,4.]),np.array([2.,-2.,-3.,1.5]))
+    5.0
+    """
+    logger.debug('get_max( %s, %s )', agent_valuation, payments)
+    m = max(zip(agent_valuation, payments), key=lambda x: x[0] - x[1])
+    logger.debug('get max (tuple): %s', m)
+    return m[0] - m[1]
+
+
+def get_argmax(agent_valuation: np.array, payments: np.array) -> int:
+    """
+    return index of maximum utility.
+    >>> get_argmax(np.array([1.,2.,3.,4.]),np.array([2.,2.,1.,3.]))
+    2
+    >>> get_argmax(np.array([-1.,2.,-3.,2.]),np.array([-5.,2.,1.,-1.]))
+    0
+    """
+    logger.debug('get_argmax( %s, %s )', agent_valuation, payments)
+    return np.argmax([x[0] - x[1] for x in zip(agent_valuation, payments)])
+
+
+def get_second_max(idx: int, agent_valuation: np.array, payments: np.array) -> float:
+    """
+    returns the maximum utility, non-idx.
+    >>> get_second_max(2, np.array([1.,2.,3.,4.]),np.array([2.,2.,1.,3.]))
+    1.0
+    >>> get_second_max(0, np.array([-1.,2.,-3.,2.]),np.array([-5.,2.,1.,-1.]))
+    3.0
+    """
+    logger.debug('get_second_max( %g, %s, %s )', idx, agent_valuation, payments)
+    temp_a = agent_valuation[np.arange(len(agent_valuation)) != idx]
+    temp_p = payments[np.arange(len(payments)) != idx]
+    m = max(zip(temp_a, temp_p), key=lambda x: x[0] - x[1])
+    logger.debug('get second max (tuple): %s', m)
+    return m[0] - m[1]
+
+
+
+
+
 if __name__ == '__main__':
-    doctest.testmod()
+    print(doctest.testmod())
