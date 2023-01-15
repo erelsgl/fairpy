@@ -14,7 +14,4 @@ cvxopt>=1.2
 osqp
 scs
 ecos
-fairpy @ git+https://github.com/erelsgl/fairpy.git
 flask
-
-
