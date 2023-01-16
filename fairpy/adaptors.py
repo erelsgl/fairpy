@@ -141,12 +141,9 @@ def divide(algorithm: Callable, input: Any, *args, **kwargs):
     ### Convert input to AgentList
     if first_argument_type==AgentList:
         agent_list = AgentList(input)
-        # output = algorithm(input, *args, **kwargs)
         output = algorithm(agent_list, *args, **kwargs)
         if isinstance(output,Allocation):
             return output
-        # elif isinstance(output, dict):
-        #     return output
         else:
             return Allocation(agent_list, output)
 
