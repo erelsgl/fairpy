@@ -10,13 +10,13 @@ Programmers: Yair Raviv , Rivka Strilitz
 import fairpy
 from fairpy.items.goods_chores import *
 
-DoubleRoundRobinInput = AgentList({"Agent1":{"1":-2,"2":1,"3":0},"Agent2":{"1":1,"2":-3,"3":-4},"Agent3":{"1":1,"2":0,"3":0}})
-print(fairpy.divide(algorithm=Double_RoundRobin_Algorithm, input=DoubleRoundRobinInput))
+DoubleRoundRobinInput = {"Agent1":{"1":-2,"2":1,"3":0},"Agent2":{"1":1,"2":-3,"3":-4},"Agent3":{"1":1,"2":0,"3":0}}
+print(fairpy.divide(Double_RoundRobin_Algorithm, DoubleRoundRobinInput))
 
-GeneralizedAdjustedWinnerInput = AgentList({"Agent1":{"1":-2,"2":1},"Agent2":{"1":1,"2":-3}})
-print(fairpy.divide(algorithm=Generalized_Adjusted_Winner_Algorithm, input=GeneralizedAdjustedWinnerInput))
+GeneralizedAdjustedWinnerInput = {"Agent1":{"1":-2,"2":1},"Agent2":{"1":1,"2":-3}}
+print(fairpy.divide(Generalized_Adjusted_Winner_Algorithm, GeneralizedAdjustedWinnerInput))
 
-GeneralizedMovingKnifeInput = AgentList({"Agent1":{"1":-2,"2":1,"3":0},"Agent2":{"1":1,"2":-3,"3":-4},"Agent3":{"1":-1,"2":-2,"3":-3}})
-print(fairpy.divide(algorithm=Generalized_Moving_knife_Algorithm, input=GeneralizedMovingKnifeInput))
+GeneralizedMovingKnifeInput = {"Agent1":{"1":-2,"2":1,"3":0},"Agent2":{"1":1,"2":-3,"3":-4},"Agent3":{"1":-1,"2":-2,"3":-3}}
+print(fairpy.divide(Generalized_Moving_knife_Algorithm, GeneralizedMovingKnifeInput))
 
 
