@@ -1,6 +1,6 @@
 import unittest
 from fairpy.agentlist import AgentList
-from fairpy.rent.Algorithms import maximum_rent_envy_free, optimal_envy_free
+from fairpy.items.fair_rent_division_on_a_budget import maximum_rent_envy_free, optimal_envy_free
 
 
 class TestMain(unittest.TestCase):
@@ -151,7 +151,6 @@ class TestMain(unittest.TestCase):
               ('j', '9')],
              [('10', 550.0), ('1', 550.0), ('2', 550.0), ('3', 550.0), ('4', 550.0), ('5', 550.0), ('6', 550.0),
               ('7', 550.0), ('8', 550.0), ('9', 550.0)]))
-
 
         # Overload test
         agents = {"Alice": {str(i): i for i in range(1000)}, "Bob": {str(i): i for i in range(1000)}}

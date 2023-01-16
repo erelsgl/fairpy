@@ -1,7 +1,5 @@
 import doctest
-
 import networkx as nx
-import random
 import cvxpy as cp
 from fairpy.agentlist import AgentList
 
@@ -97,6 +95,17 @@ def build_budget_aware_graph(sigma: dict, vector_p: dict, budget: dict, agentLis
     :param budget: Agents' budget
     :param val: The values of room per agent
     :return: Directed Graph
+
+    Create a simple directed graph in nx
+    >>> agents = AgentList({'P1': {'Ra': 600, 'Rb': 100, 'Rc': 150},'P2': {'Ra': 250, 'Rb': 250, 'Rc': 250},'P3': {'Ra': 100, 'Rb': 400, 'Rc': 250}})
+    >>> sig = {'P3': 'Ra', 'P2': 'Rb', 'P1': 'Rc'}
+    >>> p_vec = {'Rc': 150.0, 'Rb': 250.0, 'Ra': 600.0}
+    >>> b = {'P1': 250, 'P2': 320, 'P3': 430}
+    >>> G = build_budget_aware_graph(sig, p_vec, b, agents)
+    >>> print(G.nodes())
+    ['P3', 'P2', 'P1']
+    >>> print(G.edges())
+    [('P2', 'P1')]
     """
     budget_aware_graph = nx.DiGraph()
     budget_aware_graph.add_nodes_from(list(sigma.keys()))
@@ -119,6 +128,15 @@ def build_weak_envy_graph(sigma: dict, vector_p: dict, agentList: AgentList) -> 
     :param vector_p: Vector of prices for each room
     :param val: The values of room per agent
     :return: Directed Graph
+
+    >>> agents = AgentList({'P1': {'Ra': 600, 'Rb': 100, 'Rc': 150},'P2': {'Ra': 250, 'Rb': 250, 'Rc': 250},'P3': {'Ra': 100, 'Rb': 400, 'Rc': 250}})
+    >>> sig = {'P3': 'Ra', 'P2': 'Rb', 'P1': 'Rc'}
+    >>> p_vec = {'Rc': 150.0, 'Rb': 250.0, 'Ra': 600.0}
+    >>> G = build_weak_envy_graph(sig, p_vec, agents)
+    >>> print(G.nodes())
+    ['P3', 'P2', 'P1']
+    >>> print(G.edges())
+    [('P1', 'P3')]
     """
     weak_envy_graph = nx.DiGraph()
     weak_envy_graph.add_nodes_from(list(sigma.keys()))
@@ -202,7 +220,7 @@ def LP1(µ: dict, rent, val: dict, budget: dict):
 
 
 if __name__ == '__main__':
-    doctest.testmod()
+    print(doctest.testmod())
     agentList1 = AgentList({'bob': {'Ra': 600, 'Rb': 100, 'Rc': 150, 'Rd': 150},
                             'alice': {'Ra': 250, 'Rb': 250, 'Rc': 250, 'Rd': 250},
                             'dor': {'Ra': 100, 'Rb': 400, 'Rc': 250, 'Rd': 250},
@@ -220,14 +238,7 @@ if __name__ == '__main__':
         'dor': 1000,
         'clair': 1000
     }
-    # N = ['Alice', 'Bob', 'Clair']
-    # A = ['2ndFloor', 'Basement', 'MasterBedroom']
-    # val = {
-    #     'Alice': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},
-    #     'Bob': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},
-    #     'Clair': {'2ndFloor': 250, 'Basement': 500, 'MasterBedroom': 250},
-    # }
-    # rent = 1000
+
     sigma, p = spliddit(agentList1, rent)
     build_weak_envy_graph(sigma, p, agentList1)
     build_budget_aware_graph(sigma, p, budget, agentList1)

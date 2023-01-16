@@ -1,24 +1,21 @@
-import doctest
-import networkx as nx
-import numpy as np
-from fairpy.rent.Calculation_Assistance import *
-from fairpy.agentlist import AgentList
-import logging
-
 """
     "Fair Rent Division on a Budget"
-    
+
     Based on:
     "Fair Rent Division on a Budget" by Procaccia, A., Velez, R., & Yu, D. (2018), https://doi.org/10.1609/aaai.v32i1.11465
     The algorithm calculates Maximum-rent envy-free allocation in a fully connected economy, or in simple words,
     calculates a fair rent division under budget constraints.
-    
+
     Programmers: Daniel Sela and Asif Rot
     Date: 27-12-2022
 """
 
+from fairpy.items.fair_rent_division_on_a_budget_assist import *
+from fairpy.agentlist import AgentList
+import logging
+
 LOG_FORMAT = "%(levelname)s, time: %(asctime)s, line: %(lineno)d - %(message)s"
-logging.basicConfig(filename='algorithms_logging.log', level=logging.DEBUG, format=LOG_FORMAT)
+logging.basicConfig(filename='../items/fair_rent_division_on_a_budget_logging.log', level=logging.DEBUG, format=LOG_FORMAT)
 logger = logging.getLogger()
 
 
@@ -239,13 +236,12 @@ def case_2(sigma: dict, p: dict, budget: dict, agentsList: AgentList):
                     sigma = {j: shuffled_temp[j] for j in shuffled_temp.keys()}
                     return sigma
             except:
-                print("yess")
                 return sigma
     return sigma
 
 
 if __name__ == '__main__':
-    doctest.testmod()
+    print(doctest.testmod())
     agentList1 = AgentList({'Alice': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},
                             'Bob': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},
                             'Clair': {'2ndFloor': 250, 'Basement': 500, 'MasterBedroom': 250}})
