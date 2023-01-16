@@ -9,7 +9,6 @@ Since:  2023-01
 """
 
 import fairpy
-from fairpy.items.propm_allocation import propm_allocation
 from fairpy.items.proportional_borda_allocations import proportional_division, proportional_division_equal_number_of_items_and_players
 
 import logging
