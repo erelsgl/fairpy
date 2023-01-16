@@ -15,7 +15,7 @@ from fairpy import AllocationMatrix, Allocation, ValuationMatrix
 logger = logging.getLogger(__name__)
 
 
-def make_envy_free_approximation(allocation: Allocation, eps: float = 0) -> dict:
+def make_envy_free_approximation_with_payments(allocation: Allocation, eps: float = 0) -> dict:
     """
     "Achieving Envy-freeness and Equitability with Monetary Transfers" by Haris Aziz (2021),
     https://ojs.aaai.org/index.php/AAAI/article/view/16645
@@ -28,19 +28,19 @@ def make_envy_free_approximation(allocation: Allocation, eps: float = 0) -> dict
     ...      [20,10,15,25],
     ...      [15,25,22,20]]
     >>> a = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]
-    >>> make_envy_free_approximation(Allocation(agents = ValuationMatrix(v), bundles=AllocationMatrix(a)))
+    >>> make_envy_free_approximation_with_payments(Allocation(agents = ValuationMatrix(v), bundles=AllocationMatrix(a)))
     {'allocation': [[3], [1], [0], [2]], 'payments': [11.0, 12.0, 5.0, 0.0]}
     >>> v2 = [[0,50,0,0],
     ...       [0,40,0,0],
     ...       [0,30,0,0],
     ...       [0,45,0,0]]
-    >>> make_envy_free_approximation(Allocation(agents = ValuationMatrix(v2), bundles=AllocationMatrix(a)))
+    >>> make_envy_free_approximation_with_payments(Allocation(agents = ValuationMatrix(v2), bundles=AllocationMatrix(a)))
     {'allocation': [[1], [0], [2], [3]], 'payments': [50.0, 0.0, 0.0, 0.0]}
     >>> v3 = [[-5,20,10,25],
     ...      [15,-15,-12,-15],
     ...      [-10,12,9,-5],
     ...      [12,20,30,-10]]
-    >>> make_envy_free_approximation(Allocation(agents = ValuationMatrix(v3), bundles=AllocationMatrix(a)))
+    >>> make_envy_free_approximation_with_payments(Allocation(agents = ValuationMatrix(v3), bundles=AllocationMatrix(a)))
     {'allocation': [[3], [0], [1], [2]], 'payments': [5.0, 27.0, 3.0, 0.0]}
     """
     value_matrix = np.copy(allocation.utility_profile_matrix())
@@ -83,7 +83,7 @@ def make_envy_free_approximation(allocation: Allocation, eps: float = 0) -> dict
     return {"allocation": bundles, "payments": payments.tolist()}
 
 
-def find_envy_free_approximation(v: ValuationMatrix, eps: float = 0):
+def find_envy_free_approximation_with_payments(v: ValuationMatrix, eps: float = 0):
     """
     create arbitrary allocation by valuation matrix.
     """
@@ -91,7 +91,7 @@ def find_envy_free_approximation(v: ValuationMatrix, eps: float = 0):
     if v.num_of_agents < v.num_of_objects:
         for i in range(v.num_of_agents, v.num_of_objects):
             matrix[-1, i] = 1
-    return make_envy_free_approximation(Allocation(agents=v, bundles=AllocationMatrix(matrix)), eps)
+    return make_envy_free_approximation_with_payments(Allocation(agents=v, bundles=AllocationMatrix(matrix)), eps)
 
 
 def swap_columns(matrix: np.array, idx_1: int, idx_2: int) -> None:

@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from fairpy import Allocation, ValuationMatrix, AllocationMatrix
-from fairpy.items.envy_free_approximation import make_envy_free_approximation, find_envy_free_approximation
+from fairpy.items.envy_free_approximation_with_payments import make_envy_free_approximation_with_payments, find_envy_free_approximation_with_payments
 
 
 def calculateSW(res: dict, v: ValuationMatrix):
@@ -64,19 +64,19 @@ class TestApproximationDivison(unittest.TestCase):
         self.a1 = np.eye(len(self.v), len(self.v[0]))
         self.allocationBefore1 = Allocation(agents=ValuationMatrix(self.v),
                                             bundles=AllocationMatrix(self.a1))
-        self.allocationResult1 = make_envy_free_approximation(self.allocationBefore1)
+        self.allocationResult1 = make_envy_free_approximation_with_payments(self.allocationBefore1)
         self.a2 = np.eye(len(self.v2), len(self.v2[0]))
         self.allocationBefore2 = Allocation(agents=ValuationMatrix(self.v2),
                                             bundles=AllocationMatrix(self.a2))
         x = self.allocationBefore2.utility_profile()
-        self.allocationResult2 = make_envy_free_approximation(self.allocationBefore2)
+        self.allocationResult2 = make_envy_free_approximation_with_payments(self.allocationBefore2)
 
     def test_sw(self):
         """
         check that SW of forst allocation <= SW of result allocation
         """
         self.assertLessEqual(calculateSW(self.allocationBefore1, self.v),
-                             calculateSW(make_envy_free_approximation(self.allocationBefore1), self.v))
+                             calculateSW(make_envy_free_approximation_with_payments(self.allocationBefore1), self.v))
         self.assertLessEqual(calculateSW(self.allocationBefore2, self.v2),
                              calculateSW(self.allocationResult2, self.v2))
 
@@ -87,7 +87,7 @@ class TestApproximationDivison(unittest.TestCase):
         for i in range(1, 11):
             shape = (i * 10, i * 10)
             v = np.random.randint(-i * 10, i * 10, size=shape)
-            self.assertIsNotNone(find_envy_free_approximation(ValuationMatrix(v), eps=0.1))
+            self.assertIsNotNone(find_envy_free_approximation_with_payments(ValuationMatrix(v), eps=0.1))
 
     def test_ef(self):
         """
@@ -101,12 +101,12 @@ class TestApproximationDivison(unittest.TestCase):
     def test_edge_cases(self):
         # 0 bundles
         matrix = np.zeros((10, 10))
-        self.assertIsNotNone(find_envy_free_approximation(ValuationMatrix(matrix), eps=0.1))
+        self.assertIsNotNone(find_envy_free_approximation_with_payments(ValuationMatrix(matrix), eps=0.1))
 
         # 1 bundle
         for i in range(1, 21):
             matrix = np.random.randint(-1 * 10, i * 10, i * 5).reshape(-1, 1)
-            self.assertIsNotNone(find_envy_free_approximation(ValuationMatrix(matrix), eps=0.1))
+            self.assertIsNotNone(find_envy_free_approximation_with_payments(ValuationMatrix(matrix), eps=0.1))
 
 
 if __name__ == '__main__':

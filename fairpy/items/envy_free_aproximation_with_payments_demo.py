@@ -1,5 +1,5 @@
 from fairpy import ValuationMatrix
-from fairpy.items.envy_free_approximation import find_envy_free_approximation, logger
+from fairpy.items.envy_free_approximation_with_payments import find_envy_free_approximation_with_payments, logger
 import logging
 import sys
 
@@ -11,7 +11,7 @@ valuation_matrix = ValuationMatrix([[1, 2, 5],
                                     [5, 7, 4]])
 
 print("Envy-free_approximation Algorithm starting..\n")
-results = find_envy_free_approximation(v=valuation_matrix, eps=0.01)
+results = find_envy_free_approximation_with_payments(v=valuation_matrix, eps=0.01)
 allocation = results["allocation"]
 payments = results["payments"]
 i = 0
