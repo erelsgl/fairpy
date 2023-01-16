@@ -12,7 +12,7 @@ valuation_matrix = ValuationMatrix([[1, 2, 5],
                                     [5, 7, 4]])
 
 print("Envy-free_approximation Algorithm starting..\n")
-results = find_envy_free_aprximation(v=valuation_matrix, eps=0.01)
+results = find_envy_free_approximation(v=valuation_matrix, eps=0.01)
 allocation = results["allocation"]
 payments = results["payments"]
 i = 0
