@@ -1,14 +1,30 @@
 import unittest
-import sys
 from random import randint
 
-from fairpy import *
-from fairpy.agentlist import AgentList
-from fairpy.goods_chores import *
+from fairpy.items.goods_chores import *
 import itertools
 
 
+"""
+    "Fair allocation of indivisible goods and chores" by  Ioannis Caragiannis ,
+    Ayumi Igarashi, Toby Walsh and Haris Aziz.(2021) ,
+    Programmers: Yair Raviv , Rivka Strilitz
+"""
+
 def is_continuous(allocation:list , items : list):
+    """
+    >>> is_continuous([], ['a'])
+    True
+
+    >>> is_continuous(['a'], [])
+    False
+
+    >>> is_continuous(['a', 'b', 'c'], ['f', 'a', 'b', 'c'])
+    True
+
+    >>> is_continuous(['a', 'b', 'c'], ['f', 'a', 'b', 'd', 'c'])
+    False
+    """
     # print(allocation)
     if len(allocation) == 0:
         return True
@@ -29,7 +45,24 @@ def is_continuous(allocation:list , items : list):
     return True
 
 
-def is_PO(agents:AgentList , result:dict):
+def is_PO(agents: AgentList, result: dict):
+    """
+    >>> is_PO(AgentList({"Agent1":{"1":0}, "Agent2":{"1":1}}), {'Agent1': [], 'Agent2': ['1']})
+    True
+
+    >>> is_PO(AgentList({"Agent1":{"1":0}, "Agent2":{"1":1}}), {'Agent1': ['1'], 'Agent2': []})
+    False
+
+    >>> is_PO(AgentList({"Agent1":{"1":0,"2":-1}, "Agent2":{"1":1,"2":3}}), {'Agent1': [], 'Agent2': ['1', '2']})
+    True
+
+    >>> is_PO(AgentList({"Agent1":{"1":1,"2":-1}, "Agent2":{"1":-1,"2":1}}), {'Agent1': ['1'], 'Agent2': ['2']})
+    True
+
+    >>> is_PO(AgentList({"Agent1":{"1":1,"2":-1}, "Agent2":{"1":-1,"2":1}}), {'Agent1': ['2'], 'Agent2': ['1']})
+    False
+    """
+
     try:
         winner = agents[0]
         looser = agents[1]
@@ -49,7 +82,7 @@ def is_PO(agents:AgentList , result:dict):
     return True
 
 
-class Mytes(unittest.TestCase):
+class Goods_Chores_Tests(unittest.TestCase):
         # ---------------------------------------------------Tests for algo 1-----------------------------------------
     def test1(self):
         #only good chores

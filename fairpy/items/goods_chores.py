@@ -8,18 +8,24 @@ import logging
 logger = logging
 logger.basicConfig(format='[%(levelname)s - %(asctime)s] - %(message)s', level=logging.INFO)
 
+
+"""
+    "Fair allocation of indivisible goods and chores" by  Ioannis Caragiannis ,
+    Ayumi Igarashi, Toby Walsh and Haris Aziz.(2021) ,
+    Programmers: Yair Raviv , Rivka Strilitz
+"""
+
 def  Double_RoundRobin_Algorithm(agent_list :AgentList)->dict:
     """
-    "Fair allocation of indivisible goods and chores" by  Ioannis Caragiannis ,
-        Ayumi Igarashi, Toby Walsh and Haris Aziz.(2021) , link
-        Algorithm 1: Finding an EF1 allocation
-        Programmer: Yair Raviv , Rivka Strilitz
-        >>> Double_RoundRobin_Algorithm(AgentList({"Agent1":{"1":-2,"2":1,"3":0,"4":1,"5":-1,"6":4},"Agent2":{"1":1,"2":-3,"3":-4,"4":3,"5":2,"6":-1},"Agent3":{"1":1,"2":0,"3":0,"4":6,"5":0,"6":0}}))
-        {'Agent1': ['3', '6'], 'Agent2': ['5', '2'], 'Agent3': ['4', '1']}
-        >>> Double_RoundRobin_Algorithm(AgentList({"Agent1":{"1":-2,"2":-2,"3":1,"4":0,"5":5,"6":3,"7":-2},"Agent2":{"1":3,"2":-1,"3":0,"4":0,"5":7,"6":2,"7":-1},"Agent3":{"1":4,"2":-3,"3":6,"4":-2,"5":4,"6":1,"7":0},"Agent4":{"1":3,"2":-4,"3":2,"4":0,"5":3,"6":-1,"7":-4}}))
-        {'Agent1': ['4', '6'], 'Agent2': ['5'], 'Agent3': ['7', '3'], 'Agent4': ['2', '1']}
-        >>> Double_RoundRobin_Algorithm(AgentList({"Agent1":{"1t":-2,"2d":-2,"3":1,"4":0,"5":5,"6":3,"7":-2},"Agent2":{"1t":3,"2d":-1,"3":0,"4":0,"5":7,"6":2,"7":-1},"Agent3":{"1t":4,"2d":-3,"3":6,"4":-2,"5":4,"6":1,"7":0},"Agent4":{"1t":3,"2d":-4,"3":2,"4":0,"5":3,"6":-1,"7":-4}}))
-        {'Agent1': ['4', '6'], 'Agent2': ['5'], 'Agent3': ['7', '3'], 'Agent4': ['2d', '1t']}
+    Algorithm 1: Finding an EF1 allocation
+    >>> Double_RoundRobin_Algorithm(AgentList({"Agent1":{"1":-2,"2":1,"3":0,"4":1,"5":-1,"6":4},"Agent2":{"1":1,"2":-3,"3":-4,"4":3,"5":2,"6":-1},"Agent3":{"1":1,"2":0,"3":0,"4":6,"5":0,"6":0}}))
+    {'Agent1': ['3', '6'], 'Agent2': ['5', '2'], 'Agent3': ['4', '1']}
+
+    >>> Double_RoundRobin_Algorithm(AgentList({"Agent1":{"1":-2,"2":-2,"3":1,"4":0,"5":5,"6":3,"7":-2},"Agent2":{"1":3,"2":-1,"3":0,"4":0,"5":7,"6":2,"7":-1},"Agent3":{"1":4,"2":-3,"3":6,"4":-2,"5":4,"6":1,"7":0},"Agent4":{"1":3,"2":-4,"3":2,"4":0,"5":3,"6":-1,"7":-4}}))
+    {'Agent1': ['4', '6'], 'Agent2': ['5'], 'Agent3': ['7', '3'], 'Agent4': ['2', '1']}
+
+    >>> Double_RoundRobin_Algorithm(AgentList({"Agent1":{"1t":-2,"2d":-2,"3":1,"4":0,"5":5,"6":3,"7":-2},"Agent2":{"1t":3,"2d":-1,"3":0,"4":0,"5":7,"6":2,"7":-1},"Agent3":{"1t":4,"2d":-3,"3":6,"4":-2,"5":4,"6":1,"7":0},"Agent4":{"1t":3,"2d":-4,"3":2,"4":0,"5":3,"6":-1,"7":-4}}))
+    {'Agent1': ['4', '6'], 'Agent2': ['5'], 'Agent3': ['7', '3'], 'Agent4': ['2d', '1t']}
     """
 
 
@@ -127,18 +133,14 @@ def is_EF1(winner, looser, Winner_bundle, Looser_bundle):
 
 def  Generalized_Adjusted_Winner_Algorithm(agent_list :AgentList)->dict:
     """
-    "Fair allocation of indivisible goods and chores" by  Ioannis Caragiannis ,
-        Ayumi Igarashi, Toby Walsh and Haris Aziz.(2021) , link
-        Algorithm 2:  Finding an EF1 and PO allocation
-        Programmer: Yair Raviv , Rivka Strilitz
-        Example 1:
-        >>> Generalized_Adjusted_Winner_Algorithm(AgentList({"Agent1":{"1":1,"2":-1,"3":-2,"4":3,"5":5,"6":0,"7":0,"8":-1,"9":2,"10":3},"Agent2":{"1":-3,"2":4,"3":-6,"4":2,"5":4,"6":-3,"7":2,"8":-2,"9":4,"10":5}}))
-        {'Agent1': ['1', '10', '4', '5', '6', '9'], 'Agent2': ['2', '3', '7', '8']}
+    Algorithm 2:  Finding an EF1 and PO allocation
+    Example 1:
+    >>> Generalized_Adjusted_Winner_Algorithm(AgentList({"Agent1":{"1":1,"2":-1,"3":-2,"4":3,"5":5,"6":0,"7":0,"8":-1,"9":2,"10":3},"Agent2":{"1":-3,"2":4,"3":-6,"4":2,"5":4,"6":-3,"7":2,"8":-2,"9":4,"10":5}}))
+    {'Agent1': ['1', '10', '4', '5', '6', '9'], 'Agent2': ['2', '3', '7', '8']}
 
-        Example 2:
-        >>> Generalized_Adjusted_Winner_Algorithm(AgentList({"Agent1":{"1":1,"2":-1,"3":-2}, "Agent2":{"1":-3,"2":4,"3":-6}}))
-        {'Agent1': ['1'], 'Agent2': ['2', '3']}
-
+    Example 2:
+    >>> Generalized_Adjusted_Winner_Algorithm(AgentList({"Agent1":{"1":1,"2":-1,"3":-2}, "Agent2":{"1":-3,"2":4,"3":-6}}))
+    {'Agent1': ['1'], 'Agent2': ['2', '3']}
     """
     if len(agent_list) != 2:
         raise "Invalid agents number"
@@ -178,7 +180,6 @@ def  Generalized_Adjusted_Winner_Algorithm(agent_list :AgentList)->dict:
         else:
             Winner_bundle.append(t)
             Looser_bundle.remove(t)
-    raise exception("the algorithem sould alwayse return an allocation")
 
 
 
@@ -190,19 +191,16 @@ def  Generalized_Adjusted_Winner_Algorithm(agent_list :AgentList)->dict:
 
 def Generalized_Moving_knife_Algorithm(agent_list :AgentList , items:list):
     """
-        "Fair allocation of indivisible goods and chores" by  Ioannis Caragiannis ,
-            Ayumi Igarashi, Toby Walsh and Haris Aziz.(2021) , link
-            Algorithm 3:  Finding a Connected PROP1 Allocation
-            Programmer: Yair Raviv , Rivka Strilitz
-            Example 1: Non-Negative Proportional Utilities
-            >>> Generalized_Moving_knife_Algorithm(AgentList({"Agent1":{"1":0,"2":-1,"3":2,"4":1},"Agent2":{"1":1,"2":3,"3":1,"4":-2},"Agent3":{"1":0,"2":2,"3":0,"4":-1}}) , ['1' , '2' , '3' , '4'])
-            {'Agent1': ['3', '4'], 'Agent2': ['1'], 'Agent3': ['2']}
+    Algorithm 3:  Finding a Connected PROP1 Allocation
+    Example 1: Non-Negative Proportional Utilities
+    >>> Generalized_Moving_knife_Algorithm(AgentList({"Agent1":{"1":0,"2":-1,"3":2,"4":1},"Agent2":{"1":1,"2":3,"3":1,"4":-2},"Agent3":{"1":0,"2":2,"3":0,"4":-1}}) , ['1' , '2' , '3' , '4'])
+    {'Agent1': ['3', '4'], 'Agent2': ['1'], 'Agent3': ['2']}
 
-            Example 2: Positive and Negative Proportional Utilities
-            >>> Generalized_Moving_knife_Algorithm(AgentList({"Agent1":{"1":0,"2":2,"3":0,"4":-4},"Agent2":{"1":1,"2":-2,"3":1,"4":-2},"Agent3":{"1":0,"2":-4,"3":1,"4":1}}),['1' , '2' , '3' , '4'])
-            {'Agent1': ['1', '2', '3'], 'Agent2': [], 'Agent3': ['4']}
+    Example 2: Positive and Negative Proportional Utilities
+    >>> Generalized_Moving_knife_Algorithm(AgentList({"Agent1":{"1":0,"2":2,"3":0,"4":-4},"Agent2":{"1":1,"2":-2,"3":1,"4":-2},"Agent3":{"1":0,"2":-4,"3":1,"4":1}}),['1' , '2' , '3' , '4'])
+    {'Agent1': ['1', '2', '3'], 'Agent2': [], 'Agent3': ['4']}
 
-        """
+    """
     result = {}
     agents_num = len(agent_list)
     if agents_num <= 0:
@@ -229,7 +227,7 @@ def  Generalized_Moving_knife_Algorithm_Recursive(agent_list :AgentList , prop_v
             # allocate all items to the single agent
             result[N_plus[0].name()] = [item for item in all_items]
             # sort the result by agent number
-            return dict(sorted(result.items() , key= lambda agent: int(agent[0][5])))
+            return dict(sorted(result.items() , key= lambda agent: agent[0]))
         sums = {}
         for agent in N_plus:
             sums[agent.name()] = 0
@@ -256,7 +254,7 @@ def  Generalized_Moving_knife_Algorithm_Recursive(agent_list :AgentList , prop_v
             # allocate all items to the single agent
             result[agent_list[0].name()] = [item for item in all_items]
             # sort the result by agent number
-            return dict(sorted(result.items(), key=lambda agent: int(agent[0][5])))
+            return dict(sorted(result.items(), key=lambda agent: agent[0]))
         sums = {}
         for agent in agent_list:
             sums[agent.name()] = sum([agent.value(item) for item in all_items])
