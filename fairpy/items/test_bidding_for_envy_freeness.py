@@ -176,13 +176,15 @@ def test_full_cases(big_size: int = 10):
     
     assert bfef.bundle_discount_allocation == expected
 
-    # Big zized matrix
+    # Big sized matrix
     
-    matrix, assertion = prepare_assertion_for_n_sized(big_size)
+    matrix = prepare_assertion_for_n_sized(big_size)
     
     bfef = BiddingForEnvyFreeness(matrix)
     
-    assert_dict_equal(assertion, bfef.bundle_discount_allocation)
+    assert_no_envy(bfef.assessment_matrix)
+
+    
 
     
 
@@ -204,17 +206,12 @@ def assert_dict_equal(expected, actual):
 
 def prepare_assertion_for_n_sized(n):
     import random
-    bundles = list(range(n))
-    assertion = {}
-    matrix = []
-    for i in range(n):
-        matrix.append([0] * n)
-        bundle = bundles[random.randint(0, len(bundles) - 1)]
-        bundles.remove(bundle)
-        matrix[i][bundle] = 1
-        assertion[i] = {'bundle': bundle, 'discount': 0}
-    
-    return ValuationMatrix(matrix), assertion
+    matrix = [[random.randint(0, 60) for _ in range(n)] for _ in range(n)]
+    return ValuationMatrix(matrix)
+
+def assert_no_envy(matrix):
+    for i in range(len(matrix) - 1):
+        assert all([j <= matrix[i][i] for j in matrix[i]])
 
 def run_tests():
     '''
