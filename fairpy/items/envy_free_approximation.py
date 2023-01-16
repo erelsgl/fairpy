@@ -83,7 +83,7 @@ def make_envy_free_approximation(allocation: Allocation, eps: float = 0) -> dict
     return {"allocation": bundles, "payments": payments.tolist()}
 
 
-def find_envy_free_aprximation(v: ValuationMatrix, eps: float = 0):
+def find_envy_free_approximation(v: ValuationMatrix, eps: float = 0):
     """
     create arbitrary allocation by valuation matrix.
     """

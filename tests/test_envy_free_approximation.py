@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from fairpy import Allocation, ValuationMatrix, AllocationMatrix
-from fairpy.items.envy_free_approximation_division import make_envy_free_approximation, find_envy_free_aprximation
+from fairpy.items.envy_free_approximation import make_envy_free_approximation, find_envy_free_approximation
 
 
 def calculateSW(res: dict, v: ValuationMatrix):
@@ -50,7 +50,6 @@ def agent_is_EF(idx: int, d: dict, v: ValuationMatrix):
 
 class TestApproximationDivison(unittest.TestCase):
     def setUp(self) -> None:
-        # init allocations
         self.v = [[15, 10, 90, 35],
                   [35, 21, 95, 48],
                   [9, 28, 5, 72],
@@ -88,7 +87,7 @@ class TestApproximationDivison(unittest.TestCase):
         for i in range(1, 11):
             shape = (i * 10, i * 10)
             v = np.random.randint(-i * 10, i * 10, size=shape)
-            self.assertIsNotNone(find_envy_free_aprximation(ValuationMatrix(v), eps=0.1))
+            self.assertIsNotNone(find_envy_free_approximation(ValuationMatrix(v), eps=0.1))
 
     def test_ef(self):
         """
@@ -102,12 +101,12 @@ class TestApproximationDivison(unittest.TestCase):
     def test_edge_cases(self):
         # 0 bundles
         matrix = np.zeros((10, 10))
-        self.assertIsNotNone(find_envy_free_aprximation(ValuationMatrix(matrix), eps=0.1))
+        self.assertIsNotNone(find_envy_free_approximation(ValuationMatrix(matrix), eps=0.1))
 
         # 1 bundle
         for i in range(1, 21):
             matrix = np.random.randint(-1 * 10, i * 10, i * 5).reshape(-1, 1)
-            self.assertIsNotNone(find_envy_free_aprximation(ValuationMatrix(matrix), eps=0.1))
+            self.assertIsNotNone(find_envy_free_approximation(ValuationMatrix(matrix), eps=0.1))
 
 
 if __name__ == '__main__':
