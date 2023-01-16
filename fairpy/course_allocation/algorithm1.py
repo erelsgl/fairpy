@@ -7,9 +7,6 @@ import random
 import copy
 import doctest
 import logging
-import threading
-import concurrent.futures
-WORKERS=4
 
 logger = logging.getLogger(__name__)
 console = logging.StreamHandler() 
@@ -113,10 +110,6 @@ def map_price_demand(price_vector:list[float], max_budget: float, students:list[
             if(not flag):
                 break 
 
-def process_queue(price_vector, max_budget, i):
-    temp = copy.deepcopy(price_vector)
-    temp[i] = (random.randint(1, 9)/10)*max_budget
-    return temp
 
 def algorithm1(students:list[Student], courses:list[Course], max_budget:float, time_to:float, seed:int) -> list:
     '''
@@ -168,17 +161,12 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
         tabu_list = TabuList(5)
         c = 0
         while c < tabu_list.size:
-            # proccess pool use
-
             queue = []
-            # when using process pool it finds better best error, 
             for i in range(0, len(price_vector)):
                 temp = copy.deepcopy(price_vector)
                 temp[i] = (random.randint(1, 9)/10)*max_budget
-                queue.append(temp)          
-            # proccess pool use 
+                queue.append(temp)  
             queue = sorted(queue, key=lambda x: alpha_error(x))
-
             found_step = False
             while(queue and not found_step):#3
                 temp = queue.pop()
@@ -210,4 +198,5 @@ def algorithm1(students:list[Student], courses:list[Course], max_budget:float, t
 if __name__=="__main__":
     import pytest
     #run algorithm and test of the algorithm
-    pytest.main(args=["fairpy/course_allocation/algorithm1.py", "fairpy/course_allocation/algorithm1_test.py"])
+    #this algorithms wont run the same on different machines.. 
+    # pytest.main(args=["fairpy/course_allocation/algorithm1.py", "fairpy/course_allocation/algorithm1_test.py"])

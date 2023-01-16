@@ -38,7 +38,8 @@ def csp_mapping(students:list[Student],courses:list[Course]):
     def get_course(s) -> bool:
         for preference in s.preferences:
             if (s.budget >= preference.price and 
-                preference not in s.courses):
+                preference not in s.courses
+                and preference.capacity < preference.max_capacity):
                 s.courses.append(preference)
                 s.budget = s.budget - preference.price
                 preference.capacity += 1
@@ -54,13 +55,6 @@ def csp_mapping(students:list[Student],courses:list[Course]):
                     flag = True
         if(not flag):
             break
-
-def process_copy(student:Student, pref:list[Course], i:int):
-    copy_student = copy.deepcopy(student)
-    copy_student.preferences = []
-    for pre in pref:
-        copy_student.preferences.append(pre)
-    return copy_student, i
 
 def algorithm2(price_vector:list[float], maximum:int, eps:float, csp_mapping:callable, students, courses)->list[float]:
     '''
@@ -116,16 +110,12 @@ def algorithm2(price_vector:list[float], maximum:int, eps:float, csp_mapping:cal
         while(True): #6
             J_hat.price = (p_l + p_h)/2 #7
             ##same here as above, for line 8 if section
-
-            ### try with proccess pool
-
             wow = []
             for s in students:
                 a = copy.deepcopy(s)
                 a.preferences = s.preferences[:]
                 wow.append(a)   
                 logger.debug(str(s.preferences))
-            ### try with proccess pool
 
             csp_mapping(wow,courses) # mapping here after price changes
             if((J_hat.capacity-J_hat.max_capacity) >= d_star): #line 8

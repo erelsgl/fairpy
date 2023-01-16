@@ -105,11 +105,6 @@ def algorithm3(courses, students, students_matrix:list[list[bool]],csp_students:
             if(not(before_inc == student.courses)):
                 done = False
                 break #break of for loop and not while loop
-            ## 2 lines to get before_budget, not in algorithm 
-            # else: 
-            #     student.budget  = before_budget
-        # if(done):
-        #     break
     s = ""
     for i in range(len(students)):
         for j in range(len(courses)):
