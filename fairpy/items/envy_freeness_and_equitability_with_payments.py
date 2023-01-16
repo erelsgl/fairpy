@@ -6,11 +6,9 @@
 
     Programmers: Noamya Shani, Eitan Shenkolevski.
 """
-import fairpy
 from fairpy import Allocation, AgentList
 import logging
 
-logging.basicConfig(filename="../../my_logger_file.log", level=logging.DEBUG)
 logger = logging.getLogger()
 
 
@@ -101,7 +99,6 @@ def make_envy_freeness_and_equitability_with_payments(evaluation: AgentList, all
     payments = {}
     for agent in allocation:
         payments[agent] = get_value(agent, allocation[agent], evaluation) - sw_ave   #Calculation of the payment to each agent (the distance of the evaluation of the current bundle from the average of social welfare)
-    logger.warning("check if %g", check_equal(allocation, evaluation, payments))
     return {"allocation": allocation, "payments": payments}
 
 

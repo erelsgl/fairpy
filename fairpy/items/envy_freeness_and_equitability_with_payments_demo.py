@@ -1,7 +1,8 @@
 import fairpy
-from fairpy import AgentList
-from fairpy.items.envy_freeness_and_equitability_with_payments import find_envy_freeness_and_equitability_with_payments
-from fairpy.items.envy_freeness_and_equitability_with_payments import make_envy_freeness_and_equitability_with_payments
+from fairpy.items.envy_freeness_and_equitability_with_payments import find_envy_freeness_and_equitability_with_payments, logger
+
+logger.addHandler(logging.StreamHandler(sys.stdout))
+logger.setLevel(logging.INFO)
 
 eval_1 = {"a": {"x": 40, "y": 20, "r": 30, "xy":65, "rx": 80, "rxy": 100}, "b": {"x": 10, "y":30, "r": 70, "xy":555, "rx": 79, "rxy": 90}}
 allocation_1 = {"a": ["y"], "b": ["x", "r"]}
