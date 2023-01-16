@@ -74,7 +74,7 @@ def is_PO(agents: AgentList, result: dict):
     for i in range(len(all_items) +1):
         for bundle in itertools.combinations(all_items, i):
             W_utility = sum([winner.value(item) for item in bundle])
-            L_utility = sum([winner.value(item) for item in all_items if item not in bundle])
+            L_utility = sum([looser.value(item) for item in all_items if item not in bundle])
             notPoWinner = W_utility > winner_utility and L_utility >= looser_utility
             notPoLooser = W_utility >= winner_utility and L_utility > looser_utility
             if notPoWinner or notPoLooser:
