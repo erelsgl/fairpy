@@ -1,11 +1,10 @@
 from fairpy import ValuationMatrix
-from envy_free_approximation import find_envy_free_approximation
-from fairpy.items import envy_free_approximation
+from fairpy.items.envy_free_approximation import find_envy_free_approximation, logger
 import logging
 import sys
 
-envy_free_approximation.logger.addHandler(logging.StreamHandler(sys.stdout))
-envy_free_approximation.logger.setLevel(logging.INFO)
+logger.addHandler(logging.StreamHandler(sys.stdout))
+logger.setLevel(logging.INFO)
 
 valuation_matrix = ValuationMatrix([[1, 2, 5],
                                     [0, 6, 3],
