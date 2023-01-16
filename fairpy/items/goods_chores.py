@@ -28,7 +28,9 @@ def  Double_RoundRobin_Algorithm(agent_list :AgentList)->dict:
     {'Agent1': ['4', '6'], 'Agent2': ['5'], 'Agent3': ['7', '3'], 'Agent4': ['2d', '1t']}
     """
 
-
+    if not agent_list:
+        logger.error("Invalid arguments")
+        return {}
 
     N = agent_list.agent_names()
     O = agent_list.all_items()
@@ -142,6 +144,10 @@ def  Generalized_Adjusted_Winner_Algorithm(agent_list :AgentList)->dict:
     >>> Generalized_Adjusted_Winner_Algorithm(AgentList({"Agent1":{"1":1,"2":-1,"3":-2}, "Agent2":{"1":-3,"2":4,"3":-6}}))
     {'Agent1': ['1'], 'Agent2': ['2', '3']}
     """
+    if not agent_list:
+        logger.error("Invalid arguments")
+        return {}
+
     if len(agent_list) != 2:
         raise "Invalid agents number"
 
@@ -201,6 +207,9 @@ def Generalized_Moving_knife_Algorithm(agent_list :AgentList , items:list):
     {'Agent1': ['1', '2', '3'], 'Agent2': [], 'Agent3': ['4']}
 
     """
+    if not agent_list or not items:
+        logger.error("Invalid arguments")
+        return {}
     result = {}
     agents_num = len(agent_list)
     if agents_num <= 0:
