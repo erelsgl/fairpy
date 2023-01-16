@@ -669,6 +669,8 @@ class ValuationMatrix:
     def __init__(self, valuation_matrix: np.ndarray):
         if isinstance(valuation_matrix, list):
             valuation_matrix = np.array(valuation_matrix)
+        elif isinstance(valuation_matrix, np.matrix):
+            valuation_matrix = np.asarray(valuation_matrix)
         elif isinstance(valuation_matrix, ValuationMatrix):
             valuation_matrix = valuation_matrix._v
 
