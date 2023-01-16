@@ -37,12 +37,12 @@ budget2 = {
 rent2 = 1000
 
 print("solution agentList1")
-print(fairpy.divide(algorithm=optimal_envy_free, input=[agentList1, rent1, budget1]))
+print(optimal_envy_free(agentList1, rent1, budget1))
 print()
 print("solution agentList2")
-print(fairpy.divide(algorithm=optimal_envy_free, input=[agentList2, rent2, budget2]))
+print(optimal_envy_free(agentList2, rent2, budget2))
 print("solution ex2")
 ex2 = AgentList({"Alice": {'1': 250, '2': 250, '3': 500}, "Bob": {'1': 250, '2': 250, '3': 500},
                  "Clair": {'1': 250, '2': 250, '3': 500}})
 
-print(fairpy.divide(algorithm=optimal_envy_free, input=[ex2, 1000, {'Alice': 300, 'Bob': 300, 'Clair': 300}]))
+print(optimal_envy_free(ex2, 1000, {'Alice': 300, 'Bob': 300, 'Clair': 300}))
