@@ -5,9 +5,11 @@ from Student import Student
 from functools import cmp_to_key
 import doctest
 import logging
-import threading
-import concurrent.futures
-WORKERS=4
+'''
+Iterative oversubscription elimination algorithm, 
+reducing by half the excess demand
+of the most oversubscribed course with each pass
+'''
 
 logger = logging.getLogger(__name__)
 console = logging.StreamHandler() 

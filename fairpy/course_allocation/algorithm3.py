@@ -4,7 +4,10 @@ from functools import cmp_to_key
 import doctest
 import logging
 
-
+'''
+Automated aftermarket allocations with increased budget 
+and restricted allocations
+'''
 logger = logging.getLogger(__name__)
 console = logging.StreamHandler()  # writes to stderr (= cerr)
 logfile = logging.FileHandler("my_logger3.log", mode="w") 

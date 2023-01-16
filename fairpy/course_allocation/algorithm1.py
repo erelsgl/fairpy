@@ -8,6 +8,13 @@ import copy
 import doctest
 import logging
 
+'''
+Heuristic search algorithm through price space, originally developed in Othman et al. 2010
+designed to give each student a fixed budget at first and try find the must corresponding
+price vector to approximate competitive equilibrium with lowest clearing error.
+programmers : Aviv Danino & Ori Ariel
+'''
+
 logger = logging.getLogger(__name__)
 console = logging.StreamHandler() 
 logfile = logging.FileHandler("my_logger1.log", mode="w") 
