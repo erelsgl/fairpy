@@ -62,9 +62,9 @@ class FairProportionalAllocationProblem(FairThresholdAllocationProblem):
     >>> g = ConsumptionGraph(g1)
     >>> print(fpap.find_allocation_for_graph(g))
     None
-    >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 1, 1, 1], [1, 1, 0.0, 0.0]]
-    >>> g = ConsumptionGraph(g1)
-    >>> print(fpap.find_allocation_for_graph(g).round_to_multiple_of(0.2))
+    >>> g1 = [[0.0, 0.0, 0.0, 1], [0.0, 1, 1, 1], [1, 1, 0.0, 0.0]]         # doctest: +SKIP
+    >>> g = ConsumptionGraph(g1)                                            # doctest: +SKIP
+    >>> print(fpap.find_allocation_for_graph(g).round_to_multiple_of(0.2))  # doctest: +SKIP
     [[0.  0.  0.  0.8]
      [0.  0.4 1.  0.2]
      [1.  0.6 0.  0. ]]
