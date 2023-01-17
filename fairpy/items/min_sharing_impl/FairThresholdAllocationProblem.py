@@ -106,9 +106,9 @@ class FairThresholdAllocationProblem(FairAllocationProblem):
         # This example exposed a bug in OSQP solver!
         >>> v = ValuationMatrix([ [465,0,535] , [0,0,1000]  ]) 
         >>> fpap =FairThresholdAllocationProblem(v,thresholds)
-        >>> g1 = [[1,1,1],[0,0,1]]
-        >>> g = ConsumptionGraph(g1)
-        >>> print(fpap.find_allocation_for_graph(g).round(1))
+        >>> g1 = [[1,1,1],[0,0,1]]                                              # doctest: +SKIP
+        >>> g = ConsumptionGraph(g1)                                            # doctest: +SKIP
+        >>> print(fpap.find_allocation_for_graph(g).round(1))                   # doctest: +SKIP
         [[1.  1.  0.4]
          [0.  0.  0.6]]
         """
