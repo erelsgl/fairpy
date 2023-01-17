@@ -6,7 +6,7 @@ programmers: Itay Hasidi & Amichai Bitan
 """
 # from two_player_fair_division_utils import *
 import logging
-# from fairpy import fairpy
+from fairpy import fairpy
 from fairpy.agentlist import AgentList
 from fairpy.items.two_players_fair_division_utils import *
 
