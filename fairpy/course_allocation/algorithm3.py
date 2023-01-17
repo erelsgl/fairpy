@@ -1,13 +1,17 @@
+'''
+The algorithm takes input of student-course allocations 
+and restricted demand functions based on students, class, year and budget surplus.
+It then modifies the allocations based on the 
+input demand functions and the ordering of the students, 
+returns an altered allocations of students to courses.
+'''
+
+
 from Course import Course
 from Student import Student
 from functools import cmp_to_key
 import doctest
 import logging
-
-'''
-Automated aftermarket allocations with increased budget 
-and restricted allocations
-'''
 logger = logging.getLogger(__name__)
 console = logging.StreamHandler()  # writes to stderr (= cerr)
 logfile = logging.FileHandler("my_logger3.log", mode="w") 

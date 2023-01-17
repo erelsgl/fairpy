@@ -1,3 +1,12 @@
+'''
+The algorithm takes input a price vector generated from Algorithm 1,
+a scalar price that is greater than any budget,
+a value for the budget differences,
+a function "csp_mapping" that maps the demand of a course beyond its maximum capacity.
+returns: an altered version of p* (price vector) that does not have any oversubscription.
+programmers : Aviv Danino & Ori Ariel
+'''
+
 import copy
 import math
 from Course import Course
@@ -5,11 +14,6 @@ from Student import Student
 from functools import cmp_to_key
 import doctest
 import logging
-'''
-Iterative oversubscription elimination algorithm, 
-reducing by half the excess demand
-of the most oversubscribed course with each pass
-'''
 
 logger = logging.getLogger(__name__)
 console = logging.StreamHandler() 

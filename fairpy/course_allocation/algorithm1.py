@@ -1,3 +1,11 @@
+'''
+Heuristic search algorithm through price space, originally developed in Othman et al. 2010
+designed to give each student a fixed budget at first and try find the must corresponding
+price vector to approximate competitive equilibrium with lowest clearing error.
+programmers : Aviv Danino & Ori Ariel
+'''
+
+
 from Course import Course
 from Student import Student
 from functools import cmp_to_key
@@ -8,12 +16,6 @@ import copy
 import doctest
 import logging
 
-'''
-Heuristic search algorithm through price space, originally developed in Othman et al. 2010
-designed to give each student a fixed budget at first and try find the must corresponding
-price vector to approximate competitive equilibrium with lowest clearing error.
-programmers : Aviv Danino & Ori Ariel
-'''
 
 logger = logging.getLogger(__name__)
 console = logging.StreamHandler() 
