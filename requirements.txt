@@ -10,7 +10,6 @@ cvxpy_leximin>=0.4.4
 prtpy>=0.7.0
 more_itertools
 dicttools @ git+https://github.com/trzemecki/dicttools.git
-cvxopt>=1.2
 osqp
 scs
 ecos

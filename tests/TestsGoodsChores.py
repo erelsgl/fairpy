@@ -1,15 +1,15 @@
+"""
+    "Fair allocation of indivisible goods and chores" by  Ioannis Caragiannis ,
+    Ayumi Igarashi, Toby Walsh and Haris Aziz.(2021) ,
+    Programmers: Yair Raviv , Rivka Strilitz
+"""
+
 import unittest
 from random import randint
 
 from fairpy.items.goods_chores import *
 import itertools
 
-
-"""
-    "Fair allocation of indivisible goods and chores" by  Ioannis Caragiannis ,
-    Ayumi Igarashi, Toby Walsh and Haris Aziz.(2021) ,
-    Programmers: Yair Raviv , Rivka Strilitz
-"""
 
 def is_continuous(allocation:list , items : list):
     """
@@ -47,19 +47,19 @@ def is_continuous(allocation:list , items : list):
 
 def is_PO(agents: AgentList, result: dict):
     """
-    >>> is_PO(AgentList({"Agent1":{"1":0}, "Agent2":{"1":1}}), {'Agent1': [], 'Agent2': ['1']})
+    >>> is_PO(AgentList({"Agent1":{"item_1":0}, "Agent2":{"item_1":1}}), {'Agent1': [], 'Agent2': ["item_1"]})
     True
 
-    >>> is_PO(AgentList({"Agent1":{"1":0}, "Agent2":{"1":1}}), {'Agent1': ['1'], 'Agent2': []})
+    >>> is_PO(AgentList({"Agent1":{"item_1":0}, "Agent2":{"item_1":1}}), {'Agent1': ["item_1"], 'Agent2': []})
     False
 
-    >>> is_PO(AgentList({"Agent1":{"1":0,"2":-1}, "Agent2":{"1":1,"2":3}}), {'Agent1': [], 'Agent2': ['1', '2']})
+    >>> is_PO(AgentList({"Agent1":{"item_1":0,"item_2":-1}, "Agent2":{"item_1":1,"item_2":3}}), {'Agent1': [], 'Agent2': ["item_1", "item_2"]})
     True
 
-    >>> is_PO(AgentList({"Agent1":{"1":1,"2":-1}, "Agent2":{"1":-1,"2":1}}), {'Agent1': ['1'], 'Agent2': ['2']})
+    >>> is_PO(AgentList({"Agent1":{"item_1":1,"item_2":-1}, "Agent2":{"item_1":-1,"item_2":1}}), {'Agent1': ["item_1"], 'Agent2': ["item_2"]})
     True
 
-    >>> is_PO(AgentList({"Agent1":{"1":1,"2":-1}, "Agent2":{"1":-1,"2":1}}), {'Agent1': ['2'], 'Agent2': ['1']})
+    >>> is_PO(AgentList({"Agent1":{"item_1":1,"item_2":-1}, "Agent2":{"item_1":-1,"item_2":1}}), {'Agent1': ["item_2"], 'Agent2': ["item_1"]})
     False
     """
 
@@ -86,21 +86,21 @@ class Goods_Chores_Tests(unittest.TestCase):
         # ---------------------------------------------------Tests for algo 1-----------------------------------------
     def test1(self):
         #only good chores
-        exm = AgentList({"Agent1": {"1": 1, "2": 8, "3": 1, "4": 2}, "Agent2": {"1": 2, "2": 6, "3": 7, "4": 6},"Agent3": {"1": 4, "2": 2, "3": 2, "4": 2}})
+        exm = AgentList({"Agent1": {"item_1": 1, "item_2": 8, "item_3": 1, "item_4": 2}, "Agent2": {"item_1": 2, "item_2": 6, "item_3": 7, "item_4": 6},"Agent3": {"item_1": 4, "item_2": 2, "item_3": 2, "item_4": 2}})
         res = Double_RoundRobin_Algorithm(exm)
         self.assertEqual(res, {'Agent1': [2], 'Agent2': [3], 'Agent3': [1, 4]})
 
     def test2(self):
         # only bad chores
-        exm = AgentList({"Agent1": {"1": -1, "2": -5, "3": -1, "4": 0}, "Agent2": {"1": -5, "2": -4, "3": -7, "4": -6},
-                          "Agent3": {"1": -4, "2": 0, "3": -2, "4": 0}})
+        exm = AgentList({"Agent1": {"item_1": -1, "item_2": -5, "item_3": -1, "item_4": 0}, "Agent2": {"item_1": -5, "item_2": -4, "item_3": -7, "item_4": -6},
+                          "Agent3": {"item_1": -4, "item_2": 0, "item_3": -2, "item_4": 0}})
         res = Double_RoundRobin_Algorithm(exm)
         self.assertEqual(res, {'Agent1': [4, 1], 'Agent2': [2], 'Agent3': [3]})
 
 
     def test3(self):
-        exm = AgentList({"Agent1": {"1": 1, "2": 0, "3": -1, "4": 2}, "Agent2": {"1": 2, "2": 6, "3": 0, "4": 0},
-                          "Agent3": {"1": 0, "2": 2, "3": -2, "4": 2}})
+        exm = AgentList({"Agent1": {"item_1": 1, "item_2": 0, "item_3": -1, "item_4": 2}, "Agent2": {"item_1": 2, "item_2": 6, "item_3": 0, "item_4": 0},
+                          "Agent3": {"item_1": 0, "item_2": 2, "item_3": -2, "item_4": 2}})
         res = Double_RoundRobin_Algorithm(exm)
         self.assertEqual(res, {'Agent1': [3, 4], 'Agent2': [1], 'Agent3': [2]})
 
@@ -109,25 +109,25 @@ class Goods_Chores_Tests(unittest.TestCase):
 
 
     def test4(self):
-        exm = AgentList({"Agent1": {"1": 1, "2": 0, "3": -1, "4": 2}, "Agent2": {"1": 2, "2": 6, "3": 0, "4": 0}})
+        exm = AgentList({"Agent1": {"item_1": 1, "item_2": 0, "item_3": -1, "item_4": 2}, "Agent2": {"item_1": 2, "item_2": 6, "item_3": 0, "item_4": 0}})
         res = Generalized_Adjusted_Winner_Algorithm(exm)
-        self.assertEqual(res, {'Agent1': ['1', '4'], 'Agent2': ['2', '3']})
+        self.assertEqual(res, {'Agent1': ["item_1", "item_4"], 'Agent2': ["item_2", "item_3"]})
 
 
     def test5(self):
-        exm = AgentList({"Agent1":{"1":1,"2":-1,"3":-2,"4":3,"5":5,"6":0,"7":0,"8":-1,"9":2,"10":3},"Agent2":{"1":-3,"2":4,"3":-6,"4":2,"5":4,"6":-3,"7":2,"8":-2,"9":4,"10":5}})
+        exm = AgentList({"Agent1":{"item_1":1,"item_2":-1,"item_3":-2,"item_4":3,"item_5":5,"item_6":0,"item_7":0,"item_8":-1,"item_9":2,"item_10":3},"Agent2":{"item_1":-3,"item_2":4,"item_3":-6,"item_4":2,"item_5":4,"item_6":-3,"item_7":2,"item_8":-2,"item_9":4,"item_10":5}})
         res = Generalized_Adjusted_Winner_Algorithm(exm)
-        self.assertEqual(res, {'Agent1': ['1' , '4', '5', '6', '9', '10'], 'Agent2': ['2', '3', '7', '8']})
+        self.assertEqual(res, {'Agent1': ["item_1" , "item_4", "item_5", "item_6", "item_9", "item_10"], 'Agent2': ["item_2", "item_3", "item_7", "item_8"]})
 
     def test6(self):
-        exm = AgentList({"Agent1": {"1": -1, "2": 0, "3": -1, "4": -2},"Agent2": {"1": -2, "2": -6, "3": 0, "4": 0}})
+        exm = AgentList({"Agent1": {"item_1": -1, "item_2": 0, "item_3": -1, "item_4": -2},"Agent2": {"item_1": -2, "item_2": -6, "item_3": 0, "item_4": 0}})
 
         res = Generalized_Adjusted_Winner_Algorithm(exm)
 
-        self.assertEqual(res, {'Agent1': ['2'], 'Agent2': ['1', '3', '4']})
+        self.assertEqual(res, {'Agent1': ["item_2"], 'Agent2': ["item_1", "item_3", "item_4"]})
 
     def test7(self):
-        exm = AgentList({"Agent1": {"1": -1, "2": 0, "3": -1, "4": -2},"Agent2": {"1": -2, "2": -6, "3": 0, "4": 0}})
+        exm = AgentList({"Agent1": {"item_1": -1, "item_2": 0, "item_3": -1, "item_4": -2},"Agent2": {"item_1": -2, "item_2": -6, "item_3": 0, "item_4": 0}})
         res = Generalized_Adjusted_Winner_Algorithm(exm)
         self.assertTrue(is_PO(exm , res))
 

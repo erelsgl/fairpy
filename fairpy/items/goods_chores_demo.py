@@ -11,12 +11,12 @@ import fairpy
 from fairpy.items.goods_chores import *
 
 DoubleRoundRobinInput = AgentList({"Agent1":{"1":-2,"2":1,"3":0},"Agent2":{"1":1,"2":-3,"3":-4},"Agent3":{"1":1,"2":0,"3":0}})
-print(Double_RoundRobin_Algorithm(DoubleRoundRobinInput))
+print(Double_RoundRobin_Algorithm(agent_list=DoubleRoundRobinInput))
 
 GeneralizedAdjustedWinnerInput = AgentList({"Agent1":{"1":-2,"2":1},"Agent2":{"1":1,"2":-3}})
-print(Generalized_Adjusted_Winner_Algorithm(GeneralizedAdjustedWinnerInput))
+print(Generalized_Adjusted_Winner_Algorithm(agent_list=GeneralizedAdjustedWinnerInput))
 
 GeneralizedMovingKnifeInput = AgentList({"Agent1":{"1":-2,"2":1,"3":0},"Agent2":{"1":1,"2":-3,"3":-4},"Agent3":{"1":-1,"2":-2,"3":-3}})
-print(Generalized_Moving_knife_Algorithm(GeneralizedMovingKnifeInput, ['1', '2', '3']))
+print(Generalized_Moving_knife_Algorithm(agent_list=GeneralizedMovingKnifeInput, items=['1', '2', '3']))
 
 

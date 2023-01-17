@@ -1,19 +1,15 @@
-########## algo 1 ##############
-from typing import List
-
-from fairpy.agentlist import AgentList
-import math
-import operator
-import logging
-logger = logging
-logger.basicConfig(format='[%(levelname)s - %(asctime)s] - %(message)s', level=logging.INFO)
-
-
 """
     "Fair allocation of indivisible goods and chores" by  Ioannis Caragiannis ,
     Ayumi Igarashi, Toby Walsh and Haris Aziz.(2021) ,
     Programmers: Yair Raviv , Rivka Strilitz
 """
+
+from fairpy.agentlist import AgentList
+from fairpy.agents import Agent
+import math
+import logging
+logger = logging
+
 
 def  Double_RoundRobin_Algorithm(agent_list :AgentList)->dict:
     """
@@ -116,6 +112,27 @@ def  Double_RoundRobin_Algorithm(agent_list :AgentList)->dict:
 
 
 def is_EF1(winner, looser, Winner_bundle, Looser_bundle):
+    """
+    >>> agents = AgentList({"winner": {}, "looser": {}})
+    >>> is_EF1(agents[0], agents[1], [], [])
+    True
+
+    >>> agents = AgentList({"winner": {"item_a":1}, "looser": {"item_a":1}})
+    >>> is_EF1(agents[0], agents[1], ["item_a"], [])
+    True
+
+    >>> agents = AgentList({"winner": {"item_a":1}, "looser": {"item_a":1}})
+    >>> is_EF1(agents[0], agents[1], [], ["item_a"])
+    True
+
+    >>> agents = AgentList({"winner": {"item_a":1, "item_b": 2}, "looser": {"item_a":1, "item_b": -1}})
+    >>> is_EF1(agents[0], agents[1], ["item_a", "item_b"], [])
+    True
+
+    >>> agents = AgentList({"winner": {"item_a":1, "item_b": 2, "item_c":3}, "looser": {"item_a":3, "item_b": -5, "item_c":3}})
+    >>> is_EF1(agents[0], agents[1], ["item_a", "item_c"], ["item_b"])
+    False
+    """
 
     looser_total = sum([looser.value(x) for x in Looser_bundle])
     winner_total = sum([looser.value(x) for x in Winner_bundle])
@@ -186,6 +203,7 @@ def  Generalized_Adjusted_Winner_Algorithm(agent_list :AgentList)->dict:
         else:
             Winner_bundle.append(t)
             Looser_bundle.remove(t)
+    raise Exception("Invalid situation, this algorithm must return some allocation")
 
 
 
@@ -288,6 +306,7 @@ def  Generalized_Moving_knife_Algorithm_Recursive(agent_list :AgentList , prop_v
     return result
 
 if __name__ == '__main__':
+    logger.basicConfig(format='[%(levelname)s - %(asctime)s] - %(message)s', level=logging.INFO)
     import doctest
 
     (failures, tests) = doctest.testmod(report=True, optionflags=doctest.NORMALIZE_WHITESPACE + doctest.ELLIPSIS)
