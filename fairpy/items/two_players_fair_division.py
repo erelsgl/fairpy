@@ -7,7 +7,7 @@ programmers: Itay Hasidi & Amichai Bitan
 # from two_player_fair_division_utils import *
 import logging
 from fairpy import fairpy
-from fairpy.fairpy.agentlist import AgentList
+from fairpy.agentlist import AgentList
 
 
 # logging.basicConfig(level=loggining.DEBUG)
