@@ -6,7 +6,7 @@ programmers: Itay Hasidi & Amichai Bitan
 """
 # from two_player_fair_division_utils import *
 import logging
-from fairpy import fairpy
+# from fairpy import fairpy
 from fairpy.agentlist import AgentList
 from fairpy.items.two_players_fair_division_utils import *
 
@@ -198,7 +198,7 @@ def singles_doubles(agents: AgentList, items: List[Any] = None) -> Dict:
     >>> Alice = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 2, 'tv': 3, 'book': 4}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'computer': 4, 'phone': 2, 'tv': 3, 'book': 1}, name = 'George')
     >>> singles_doubles([Alice, George], ['computer', 'phone', 'tv', 'book'])
-    []
+    [{'Alice': ['computer', 'phone'], 'George': ['book', 'tv']}, {'Alice': ['computer', 'tv'], 'George': ['book', 'phone']}]
 
     # test 2:
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}, name = 'Alice')
@@ -278,7 +278,7 @@ def iterated_singles_doubles(agents: AgentList, items: List[Any] = None) -> Dict
     >>> Alice = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 2, 'tv': 3, 'book': 4}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'computer': 4, 'phone': 2, 'tv': 3, 'book': 1}, name = 'George')
     >>> iterated_singles_doubles([Alice, George], ['computer', 'phone', 'tv', 'book'])
-    []
+    [{'Alice': ['computer', 'phone'], 'George': ['book', 'tv']}, {'Alice': ['computer', 'tv'], 'George': ['book', 'phone']}]
 
     # test 2:
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}, name = 'Alice')
@@ -515,32 +515,32 @@ def top_down(agents: AgentList, items: List[Any] = None) -> Dict:
     >>> Alice = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 2, 'tv': 3, 'book': 4}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'computer': 4, 'phone': 2, 'tv': 3, 'book': 1}, name = 'George')
     >>> top_down([Alice, George], ['computer', 'phone', 'tv', 'book'])
-    {'Alice': ['computer', 'phone'], 'George': ['book', 'tv']}
+    [{'Alice': ['computer', 'phone'], 'George': ['book', 'tv']}]
 
     # test 2:
     >>> Alice = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 3, 'tv': 2, 'book': 4}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 2, 'tv': 3, 'book': 4}, name = 'George')
     >>> top_down([Alice, George], ['computer', 'phone', 'tv', 'book'])
-    {'Alice': ['computer', 'tv'], 'George': ['phone', 'book']}
+    [{'Alice': ['computer', 'tv'], 'George': ['phone', 'book']}]
 
 
     # test 3:
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 2, 'b': 4, 'c': 1, 'd': 3, 'e': 6, 'f': 5}, name = 'George')
     >>> top_down([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f'])
-    {'Alice': ['a', 'b', 'e'], 'George': ['c', 'd', 'f']}
+    [{'Alice': ['a', 'b', 'e'], 'George': ['c', 'd', 'f']}]
 
     # test 5: 8 items
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6,'g' :7 , 'h' : 8}, name='Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 3, 'b': 4, 'c': 5, 'd': 6, 'e': 7, 'f': 8,'g' :1 , 'h' : 2}, name='George')
     >>> top_down([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f','g','h'])
-    {'Alice': ['a', 'b', 'c', 'e'], 'George': ['g', 'h', 'd', 'f']}
+    [{'Alice': ['a', 'b', 'c', 'e'], 'George': ['g', 'h', 'd', 'f']}]
 
     # test 6: 10 items
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6,'g' :7 ,'h' : 8, 'i' : 9 ,'j': 10}, name='Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 3, 'b': 4, 'c': 5, 'd': 6, 'e': 7, 'f': 8,'g' :9 , 'h' : 10, 'i' : 1 ,'j': 2}, name='George')
     >>> top_down([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f','g','h','i' , 'j'])
-    {'Alice': ['a', 'b', 'c', 'e', 'g'], 'George': ['i', 'j', 'd', 'f', 'h']}
+    [{'Alice': ['a', 'b', 'c', 'e', 'g'], 'George': ['i', 'j', 'd', 'f', 'h']}]
     """
     logger.debug("\nAlgorithm: TD\nTwo Agents %s %s and items %s", agents[0].name(), agents[1].name(), items)
     return top_down_helper(agents, items, allocations=[])
@@ -581,31 +581,31 @@ def top_down_alternating(agents: AgentList, items: List[Any] = None) -> Dict:
     >>> Alice = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 2, 'tv': 3, 'book': 4}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'computer': 4, 'phone': 2, 'tv': 3, 'book': 1}, name = 'George')
     >>> top_down_alternating([Alice, George], ['computer', 'phone', 'tv', 'book'])
-    {'Alice': ['computer', 'tv'], 'George': ['book', 'phone']}
+    [{'Alice': ['computer', 'tv'], 'George': ['book', 'phone']}]
 
     # test 2:
     >>> Alice = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 3, 'tv': 2, 'book': 4}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 2, 'tv': 3, 'book': 4}, name = 'George')
     >>> top_down_alternating([Alice, George], ['computer', 'phone', 'tv', 'book'])
-    {'Alice': ['computer', 'book'], 'George': ['phone', 'tv']}
+    [{'Alice': ['computer', 'book'], 'George': ['phone', 'tv']}]
 
     # test 3:
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 2, 'b': 4, 'c': 1, 'd': 3, 'e': 6, 'f': 5}, name = 'George')
     >>> top_down_alternating([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f'])
-    {'Alice': ['a', 'b', 'e'], 'George': ['c', 'd', 'f']}
+    [{'Alice': ['a', 'b', 'e'], 'George': ['c', 'd', 'f']}]
 
       # test 5: 8 items
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6,'g' :7 , 'h' : 8}, name='Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 3, 'b': 4, 'c': 5, 'd': 6, 'e': 7, 'f': 8,'g' :1 , 'h' : 2}, name='George')
     >>> top_down_alternating([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f','g','h'])
-    {'Alice': ['a', 'b', 'c', 'f'], 'George': ['g', 'h', 'd', 'e']}
+    [{'Alice': ['a', 'b', 'c', 'f'], 'George': ['g', 'h', 'd', 'e']}]
 
      # test 6: 10 items
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6,'g' :7 ,'h' : 8, 'i' : 9 ,'j': 10}, name='Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 3, 'b': 4, 'c': 5, 'd': 6, 'e': 7, 'f': 8,'g' :9 , 'h' : 10, 'i' : 1 ,'j': 2}, name='George')
     >>> top_down_alternating([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f','g','h','i' , 'j'])
-    {'Alice': ['a', 'b', 'c', 'f', 'g'], 'George': ['i', 'j', 'd', 'e', 'h']}
+    [{'Alice': ['a', 'b', 'c', 'f', 'g'], 'George': ['i', 'j', 'd', 'e', 'h']}]
 
     """
     logger.debug("\nAlgorithm: TA\nTwo Agents %s %s and items %s", agents[0].name(), agents[1].name(), items)
@@ -657,31 +657,31 @@ def bottom_up(agents: AgentList, items: List[Any] = None) -> Dict:
     >>> Alice = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 2, 'tv': 3, 'book': 4}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'computer': 4, 'phone': 2, 'tv': 3, 'book': 1}, name = 'George')
     >>> bottom_up([Alice, George], ['computer', 'phone', 'tv', 'book'])
-    {'Alice': ['computer', 'phone'], 'George': ['book', 'tv']}
+    [{'Alice': ['computer', 'phone'], 'George': ['book', 'tv']}]
 
     # test 2:
     >>> Alice = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 3, 'tv': 2, 'book': 4}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 2, 'tv': 3, 'book': 4}, name = 'George')
     >>> bottom_up([Alice, George], ['computer', 'phone', 'tv', 'book'])
-    {'Alice': ['tv', 'computer'], 'George': ['book', 'phone']}
+    [{'Alice': ['tv', 'computer'], 'George': ['book', 'phone']}]
 
     # test 3:
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 2, 'b': 4, 'c': 1, 'd': 3, 'e': 6, 'f': 5}, name = 'George')
     >>> bottom_up([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f'])
-    {'Alice': ['e', 'b', 'a'], 'George': ['f', 'd', 'c']}
+    [{'Alice': ['e', 'b', 'a'], 'George': ['f', 'd', 'c']}]
 
     # test 5: 8 items
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6,'g' :7 , 'h' : 8}, name='Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 3, 'b': 4, 'c': 5, 'd': 6, 'e': 7, 'f': 8,'g' :1 , 'h' : 2}, name='George')
     >>> bottom_up([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f','g','h'])
-    {'Alice': ['f', 'e', 'c', 'a'], 'George': ['h', 'g', 'd', 'b']}
+    [{'Alice': ['f', 'e', 'c', 'a'], 'George': ['h', 'g', 'd', 'b']}]
 
     # test 6: 10 items
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6,'g' :7 ,'h' : 8, 'i' : 9 ,'j': 10}, name='Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 3, 'b': 4, 'c': 5, 'd': 6, 'e': 7, 'f': 8,'g' :9 , 'h' : 10, 'i' : 1 ,'j': 2}, name='George')
     >>> bottom_up([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f','g','h','i' , 'j'])
-    {'Alice': ['h', 'g', 'e', 'c', 'a'], 'George': ['j', 'i', 'f', 'd', 'b']}
+    [{'Alice': ['h', 'g', 'e', 'c', 'a'], 'George': ['j', 'i', 'f', 'd', 'b']}]
 
     """
     logger.debug("\nAlgorithm: BU\nTwo Agents %s %s and items %s", agents[0].name(), agents[1].name(), items)
@@ -726,31 +726,31 @@ def bottom_up_alternating(agents: AgentList, items: List[Any] = None) -> Dict:
     >>> Alice = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 2, 'tv': 3, 'book': 4}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'computer': 4, 'phone': 2, 'tv': 3, 'book': 1}, name = 'George')
     >>> bottom_up_alternating([Alice, George], ['computer', 'phone', 'tv', 'book'])
-    {'Alice': ['computer', 'tv'], 'George': ['book', 'phone']}
+    [{'Alice': ['computer', 'tv'], 'George': ['book', 'phone']}]
 
     # test 2:
     >>> Alice = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 3, 'tv': 2, 'book': 4}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 2, 'tv': 3, 'book': 4}, name = 'George')
     >>> bottom_up_alternating([Alice, George], ['computer', 'phone', 'tv', 'book'])
-    {'Alice': ['tv', 'phone'], 'George': ['book', 'computer']}
+    [{'Alice': ['tv', 'phone'], 'George': ['book', 'computer']}]
 
     # test 3:
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 2, 'b': 4, 'c': 1, 'd': 3, 'e': 6, 'f': 5}, name = 'George')
     >>> bottom_up_alternating([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f'])
-    {'Alice': ['e', 'b', 'a'], 'George': ['f', 'd', 'c']}
+    [{'Alice': ['e', 'b', 'a'], 'George': ['f', 'd', 'c']}]
 
     # test 5: 8 items
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6,'g' :7 , 'h' : 8}, name='Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 3, 'b': 4, 'c': 5, 'd': 6, 'e': 7, 'f': 8,'g' :1 , 'h' : 2}, name='George')
     >>> bottom_up_alternating([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f','g','h'])
-    {'Alice': ['f', 'e', 'c', 'b'], 'George': ['h', 'g', 'd', 'a']}
+    [{'Alice': ['f', 'e', 'c', 'b'], 'George': ['h', 'g', 'd', 'a']}]
 
     # test 6: 10 items
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6,'g' :7 ,'h' : 8, 'i' : 9 ,'j': 10}, name='Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 3, 'b': 4, 'c': 5, 'd': 6, 'e': 7, 'f': 8,'g' :9 , 'h' : 10, 'i' : 1 ,'j': 2}, name='George')
     >>> bottom_up_alternating([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f','g','h','i' , 'j'])
-    {'Alice': ['h', 'g', 'e', 'd', 'a'], 'George': ['j', 'i', 'f', 'c', 'b']}
+    [{'Alice': ['h', 'g', 'e', 'd', 'a'], 'George': ['j', 'i', 'f', 'c', 'b']}]
     """
     logger.debug("\nAlgorithm: BA\nTwo Agents %s %s and items %s", agents[0].name(), agents[1].name(), items)
     return bottom_up_alternating_helper(agents, items, allocations=[])
@@ -802,7 +802,7 @@ def trump(agents: AgentList, items: List[Any] = None) -> Dict:
     >>> Alice = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 2, 'tv': 3, 'book': 4}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'computer': 4, 'phone': 2, 'tv': 3, 'book': 1}, name = 'George')
     >>> trump([Alice, George], ['computer', 'phone', 'tv', 'book'])
-    {'Alice': ['computer', 'tv'], 'George': ['book', 'phone']}
+    [{'Alice': ['computer', 'tv'], 'George': ['book', 'phone']}]
 
     # test 2:
     >>> Alice = fairpy.agents.AdditiveAgent({'computer': 1, 'phone': 3, 'tv': 2, 'book': 4}, name = 'Alice')
@@ -814,19 +814,19 @@ def trump(agents: AgentList, items: List[Any] = None) -> Dict:
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 2, 'b': 4, 'c': 1, 'd': 3, 'e': 6, 'f': 5}, name = 'George')
     >>> trump([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f'])
-    {'Alice': ['a', 'b', 'e'], 'George': ['c', 'd', 'f']}
+    [{'Alice': ['a', 'b', 'e'], 'George': ['c', 'd', 'f']}]
 
     # test 5: 8 items
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6,'g' :7 , 'h' : 8}, name='Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 3, 'b': 4, 'c': 5, 'd': 6, 'e': 7, 'f': 8,'g' :1 , 'h' : 2}, name='George')
     >>> trump([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f','g','h'])
-    {'Alice': ['a', 'c', 'e', 'f'], 'George': ['g', 'h', 'b', 'd']}
+    [{'Alice': ['a', 'c', 'e', 'f'], 'George': ['g', 'h', 'b', 'd']}]
 
     # test 6: 10 items
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6,'g' :7 ,'h' : 8, 'i' : 9 ,'j': 10}, name='Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 3, 'b': 4, 'c': 5, 'd': 6, 'e': 7, 'f': 8,'g' :9 , 'h' : 10, 'i' : 1 ,'j': 2}, name='George')
     >>> trump([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f','g','h','i' , 'j'])
-    {'Alice': ['a', 'c', 'e', 'g', 'h'], 'George': ['i', 'j', 'b', 'd', 'f']}
+    [{'Alice': ['a', 'c', 'e', 'g', 'h'], 'George': ['i', 'j', 'b', 'd', 'f']}]
     """
     logger.debug("\nAlgorithm: TR\nTwo Agents %s %s and items %s", agents[0].name(), agents[1].name(), items)
     i = 1

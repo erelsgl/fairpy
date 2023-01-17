@@ -4,7 +4,7 @@ Utils file for two_player_fair_division.py
 programmers: Itay Hasidi & Amichai Bitan
 """
 from typing import List, Any, Dict
-from fairpy import fairpy
+# from fairpy import fairpy
 from fairpy.agentlist import AgentList, AdditiveAgent
 
 
@@ -42,7 +42,7 @@ def is_envy_free_partial_allocation(agents: AgentList, allocations: List[Any]):
     :param allocations is the allocation for each player so far.
 
     >>> Alice = AdditiveAgent({'computer': 1, 'phone': 2, 'tv': 3, 'book': 4}, name = 'Alice')
-    >>> George = AdditiveAgent({'computer': 4, 'phone': 2, 'tv': 3, 'book': 1}, name = 'George')
+    >>> George = AdditiveAgent({'computer': 1, 'phone': 2, 'tv': 3, 'book': 4}, name = 'George')
     >>> is_envy_free_partial_allocation([Alice, George], [['computer', 'phone'], ['book', 'tv']])
     False
 
