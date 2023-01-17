@@ -2,11 +2,6 @@
 
 ![PyTest result](https://github.com/erelsgl/fairpy/workflows/pytest/badge.svg)
 
-## This repository was forked from [here](https://github.com/erelsgl/fairpy).
-### We added two files named:
-* [two_players_fair_division](https://github.com/ItayHasidi/fairpy/blob/master/fairpy/items/two_players_fair_division.py) - The main algorithms file, for more information visit the [wiki](https://github.com/ItayHasidi/fairpy/wiki/Two-players-fair-division).
-* [two_players_fair_division_utils](https://github.com/ItayHasidi/fairpy/blob/master/fairpy/items/two_players_fair_division_utils.py) - Many util helper functions.
-
 An open-source library of [fair division algorithms](https://en.wikipedia.org/wiki/Fair_division) in Python.
 Designed for three target audiences:
 
