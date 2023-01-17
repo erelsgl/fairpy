@@ -8,7 +8,7 @@ import numpy as np
 from fairpy.items.valuations import ValuationMatrix
 from queue import PriorityQueue
 import cvxpy as cp
-from cvxopt import matrix
+
 
 
 
