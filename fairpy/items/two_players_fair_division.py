@@ -216,13 +216,13 @@ def singles_doubles(agents: AgentList, items: List[Any] = None) -> Dict:
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6,'g' :7 , 'h' : 8}, name='Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 3, 'b': 4, 'c': 5, 'd': 6, 'e': 7, 'f': 8,'g' :1 , 'h' : 2}, name='George')
     >>> singles_doubles([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f','g','h'])
-    []
+    [{'Alice': ['f', 'e', 'a', 'c'], 'George': ['h', 'g', 'b', 'd']}, {'Alice': ['f', 'e', 'a', 'd'], 'George': ['h', 'g', 'b', 'c']}, {'Alice': ['f', 'e', 'b', 'c'], 'George': ['h', 'g', 'a', 'd']}, {'Alice': ['f', 'e', 'b', 'd'], 'George': ['h', 'g', 'a', 'c']}]
 
     # test 6: 10 items
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6,'g' :7 ,'h' : 8, 'i' : 9 ,'j': 10}, name='Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 3, 'b': 4, 'c': 5, 'd': 6, 'e': 7, 'f': 8,'g' :9 , 'h' : 10, 'i' : 1 ,'j': 2}, name='George')
     >>> singles_doubles([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'])
-    []
+    [{'Alice': ['h', 'g', 'a', 'c', 'e'], 'George': ['j', 'i', 'b', 'd', 'f']}, {'Alice': ['h', 'g', 'a', 'c', 'f'], 'George': ['j', 'i', 'b', 'd', 'e']}, {'Alice': ['h', 'g', 'a', 'd', 'e'], 'George': ['j', 'i', 'b', 'c', 'f']}, {'Alice': ['h', 'g', 'a', 'd', 'f'], 'George': ['j', 'i', 'b', 'c', 'e']}, {'Alice': ['h', 'g', 'b', 'c', 'e'], 'George': ['j', 'i', 'a', 'd', 'f']}, {'Alice': ['h', 'g', 'b', 'c', 'f'], 'George': ['j', 'i', 'a', 'd', 'e']}, {'Alice': ['h', 'g', 'b', 'd', 'e'], 'George': ['j', 'i', 'a', 'c', 'f']}, {'Alice': ['h', 'g', 'b', 'd', 'f'], 'George': ['j', 'i', 'a', 'c', 'e']}]
     """
     logger.debug("\nAlgorithm: SD\nTwo Agents %s %s and items %s", agents[0].name(), agents[1].name(), items)
     return singles_doubles_helper(agents, items, allocations=[[], []], end_allocation=[], do_single=True)
@@ -284,7 +284,7 @@ def iterated_singles_doubles(agents: AgentList, items: List[Any] = None) -> Dict
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}, name = 'Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 2, 'b': 4, 'c': 1, 'd': 3, 'e': 6, 'f': 5}, name = 'George')
     >>> iterated_singles_doubles([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f'])
-
+    [{'Alice': ['e', 'b', 'a'], 'George': ['f', 'd', 'c']}]
 
     # test 3:
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4}, name = 'Alice')
@@ -296,13 +296,13 @@ def iterated_singles_doubles(agents: AgentList, items: List[Any] = None) -> Dict
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6,'g' :7 , 'h' : 8}, name='Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 3, 'b': 4, 'c': 5, 'd': 6, 'e': 7, 'f': 8,'g' :1 , 'h' : 2}, name='George')
     >>> iterated_singles_doubles([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f','g','h'])
-    []
+    [{'Alice': ['f', 'e', 'a', 'c'], 'George': ['h', 'g', 'b', 'd']}, {'Alice': ['f', 'e', 'a', 'd'], 'George': ['h', 'g', 'b', 'c']}, {'Alice': ['f', 'e', 'b', 'c'], 'George': ['h', 'g', 'a', 'd']}, {'Alice': ['f', 'e', 'b', 'd'], 'George': ['h', 'g', 'a', 'c']}]
 
     # test 6: 10 items
     >>> Alice = fairpy.agents.AdditiveAgent({'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6,'g' :7 ,'h' : 8, 'i' : 9 ,'j': 10}, name='Alice')
     >>> George = fairpy.agents.AdditiveAgent({'a': 3, 'b': 4, 'c': 5, 'd': 6, 'e': 7, 'f': 8,'g' :9 , 'h' : 10, 'i' : 1 ,'j': 2}, name='George')
     >>> iterated_singles_doubles([Alice, George], ['a', 'b', 'c', 'd', 'e', 'f','g','h','i' , 'j'])
-    []
+    [{'Alice': ['h', 'g', 'a', 'c', 'e'], 'George': ['j', 'i', 'b', 'd', 'f']}, {'Alice': ['h', 'g', 'a', 'c', 'f'], 'George': ['j', 'i', 'b', 'd', 'e']}, {'Alice': ['h', 'g', 'a', 'd', 'e'], 'George': ['j', 'i', 'b', 'c', 'f']}, {'Alice': ['h', 'g', 'a', 'd', 'f'], 'George': ['j', 'i', 'b', 'c', 'e']}, {'Alice': ['h', 'g', 'b', 'c', 'e'], 'George': ['j', 'i', 'a', 'd', 'f']}, {'Alice': ['h', 'g', 'b', 'c', 'f'], 'George': ['j', 'i', 'a', 'd', 'e']}, {'Alice': ['h', 'g', 'b', 'd', 'e'], 'George': ['j', 'i', 'a', 'c', 'f']}, {'Alice': ['h', 'g', 'b', 'd', 'f'], 'George': ['j', 'i', 'a', 'c', 'e']}]
     """
     logger.debug("\nAlgorithm: IS\nTwo Agents %s %s and items %s", agents[0].name(), agents[1].name(), items)
     return iterated_singles_doubles_helper(agents, items, allocations=[[], []], end_allocation=[], do_single=True)
