@@ -74,14 +74,14 @@ class FairEnvyFreeAllocationProblem(FairAllocationProblem):
         None
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 1], [1, 0.0, 0.0, 0.0]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fefap.find_allocation_for_graph(g).round(1))
-        [[0.3 1.  0.  0. ]
+        >>> print(fefap.find_allocation_for_graph(g).round_to_multiple_of(0.2))
+        [[0.4 1.  0.  0. ]
          [0.  0.  1.  1. ]
          [0.6 0.  0.  0. ]]
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 1], [1, 0.0, 0.0, 1]]
         >>> g = ConsumptionGraph(g1)
-        >>> print(fefap.find_allocation_for_graph(g).round(1))
-        [[0.3 1.  0.  0. ]
+        >>> print(fefap.find_allocation_for_graph(g).round_to_multiple_of(0.2))
+        [[0.4 1.  0.  0. ]
          [0.2 0.  1.  0.4]
          [0.4 0.  0.  0.6]]
         >>> g1 = [[1, 1, 0.0, 0.0], [1, 0.0, 1, 1], [0.0, 0.0, 0.0, 0.0]]

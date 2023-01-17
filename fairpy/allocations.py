@@ -68,26 +68,36 @@ class AllocationMatrix:
         >>> AllocationMatrix([ [1, 0.4, 0, 0] , [0, 0.6, 0.3, 0] , [0, 0, 0.7, 1] ]).num_of_sharings()   # Two sharings in different objects
         2
         """
+        EPSILON=0.0001
         num_of_edges = 0
         for i in self.agents():
             for o in self.objects():
-                num_of_edges += np.ceil(self._z[i][o])
+                num_of_edges += (self._z[i][o] > EPSILON)
         return int(num_of_edges - self.num_of_objects)
 
-    def round(self, num_digits:int):
+    def round_to_multiple_of(self, basis:float):
         """
-        Rounds the allocation to the given number of digits.
+        Rounds the allocation to a multiple of the given basis.
         WARNING: The rounding might change the sum of rows and columns.
         See here http://people.mpi-inf.mpg.de/~doerr/papers/unbimatround.pdf 
         for an unbiased matrix rounding algorithm
         """
         for i in range(len(self._z)):
             for j in range(len(self._z[i])):
-                fraction = np.round(self._z[i][j], num_digits)
+                fraction = np.round(self._z[i][j]/basis)*basis
                 if fraction==0:
                     fraction=0   # avoid "negative zero"
                 self._z[i][j] = fraction
         return self
+
+    def round(self, num_digits:int=0):
+        """
+        Rounds the allocation to the given number of digits.
+        WARNING: The rounding might change the sum of rows and columns.
+        See here http://people.mpi-inf.mpg.de/~doerr/papers/unbimatround.pdf 
+        for an unbiased matrix rounding algorithm
+        """
+        return self.round_to_multiple_of(0.1**num_digits)
 
     def utility_profile(self, v:ValuationMatrix)->np.array:
         return np.array([
