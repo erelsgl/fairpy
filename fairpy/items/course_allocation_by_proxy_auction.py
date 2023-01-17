@@ -2,6 +2,7 @@
 
 
 
+from ast import List
 from collections import defaultdict
 import math
 from fairpy.agents import AdditiveAgent
@@ -77,7 +78,7 @@ def calculate_b_double_star(Bi,B_tag_i,b_star):
     Bi_without_B_tag_i_ = [bid for bid in Bi if bid not in B_tag_i and bid >= b_star]
     return min(Bi_without_B_tag_i_) if Bi_without_B_tag_i_ else None
            
-def course_allocation(agents: list[AdditiveAgent],course_capacity:int,course_list:str,course_amount_per_agent:int) -> Allocation:
+def course_allocation(agents: List[AdditiveAgent],course_capacity:int,course_list: List[str],course_amount_per_agent:int) -> Allocation:
     """
     Allocates the given courses to the given agents using the 'Course allocation by proxy auction' algorithm which
     garantees efficient Pareto by Uthor Scott Duke Kominers, Mike Ruberry and Jonathan Ullman
