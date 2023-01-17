@@ -8,10 +8,9 @@ programmers: Itay Hasidi & Amichai Bitan
 import logging
 from fairpy import fairpy
 from fairpy.agentlist import AgentList
-
+from fairpy.items.two_players_fair_division_utils import *
 
 # logging.basicConfig(level=loggining.DEBUG)
-from fairpy.fairpy.items.two_players_fair_division_utils import *
 
 logger = logging.getLogger(__name__)
 

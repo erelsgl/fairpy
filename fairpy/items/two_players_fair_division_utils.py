@@ -4,7 +4,7 @@ Utils file for two_player_fair_division.py
 programmers: Itay Hasidi & Amichai Bitan
 """
 from typing import List, Any, Dict
-# from fairpy import fairpy
+from fairpy import fairpy
 from fairpy.agentlist import AgentList, AdditiveAgent
 
 
