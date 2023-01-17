@@ -1,2 +1,0 @@
-flask
-fairpy @ git+https://github.com/erelsgl/fairpy.git
