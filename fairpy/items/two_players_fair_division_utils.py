@@ -108,13 +108,15 @@ def allocate(items: List[Any], allocations: List[List] = [[], []], a_item=None, 
     """
     if a_item:
         allocations[0].append(a_item)
-        items.remove(a_item)
+        if a_item in items:
+            items.remove(a_item)
         if valuation_list:
             valuation_list[0].remove(a_item)
             valuation_list[1].remove(a_item)
     if b_item:
         allocations[1].append(b_item)
-        items.remove(b_item)
+        if b_item in items:
+            items.remove(b_item)
         if valuation_list:
             valuation_list[0].remove(b_item)
             valuation_list[1].remove(b_item)
