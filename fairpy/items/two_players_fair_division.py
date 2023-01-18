@@ -61,7 +61,6 @@ def sequential(agents: AgentList, items: List[Any] = None) -> Dict:
     [{'Alice': ['a', 'b', 'd', 'f', 'h'], 'George': ['i', 'j', 'c', 'e', 'g']}, {'Alice': ['a', 'b', 'd', 'g', 'h'], 'George': ['i', 'j', 'c', 'e', 'f']}, {'Alice': ['a', 'b', 'e', 'f', 'h'], 'George': ['i', 'j', 'c', 'd', 'g']}]
 
     """
-
     return recursive_sequential(agents, items, allocations=[[], []], end_allocation=[])
 
 
@@ -849,3 +848,18 @@ def trump(agents: AgentList, items: List[Any] = None) -> Dict:
         i += 2
     end_allocation = [{agents[0].name(): allocations[0], agents[1].name(): allocations[1]}]
     return end_allocation
+
+
+# two_players_fair_division.logger = logger
+
+
+if __name__ == "__main__":
+    import sys
+
+    logger.addHandler(logging.StreamHandler(sys.stdout))
+    # logger.setLevel(logging.INFO)
+
+    import doctest
+
+    (failures, tests) = doctest.testmod(report=True)
+    print("{} failures, {} tests".format(failures, tests))
