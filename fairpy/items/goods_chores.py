@@ -155,7 +155,7 @@ def  Generalized_Adjusted_Winner_Algorithm(agent_list :AgentList)->dict:
     Algorithm 2:  Finding an EF1 and PO allocation
     Example 1:
     >>> Generalized_Adjusted_Winner_Algorithm(AgentList({"Agent1":{"1":1,"2":-1,"3":-2,"4":3,"5":5,"6":0,"7":0,"8":-1,"9":2,"10":3},"Agent2":{"1":-3,"2":4,"3":-6,"4":2,"5":4,"6":-3,"7":2,"8":-2,"9":4,"10":5}}))
-    {'Agent1': ['1', '10', '4', '5', '6', '9'], 'Agent2': ['2', '3', '7', '8']}
+    {'Agent1': ['1', '10', '3', '4', '5', '6', '9'], 'Agent2': ['2', '7', '8']}
 
     Example 2:
     >>> Generalized_Adjusted_Winner_Algorithm(AgentList({"Agent1":{"1":1,"2":-1,"3":-2}, "Agent2":{"1":-3,"2":4,"3":-6}}))

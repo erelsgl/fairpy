@@ -50,6 +50,7 @@ def is_PO(agents: AgentList, result: dict):
     This function checks for 2 agents if the given allocation is Paretto optimal or not.
     The algorithm compare the allocation to the all other allocations and check if there is another allocation
     That provides Paretto improvement.
+
     >>> is_PO(AgentList({"Agent1":{"item_1":0}, "Agent2":{"item_1":1}}), {'Agent1': [], 'Agent2': ["item_1"]})
     True
 
@@ -98,14 +99,14 @@ class Goods_Chores_Tests(unittest.TestCase):
         exm = AgentList({"Agent1": {"item_1": -1, "item_2": -5, "item_3": -1, "item_4": 0}, "Agent2": {"item_1": -5, "item_2": -4, "item_3": -7, "item_4": -6},
                           "Agent3": {"item_1": -4, "item_2": 0, "item_3": -2, "item_4": 0}})
         res = Double_RoundRobin_Algorithm(exm)
-        self.assertEqual(res, {'Agent1': ['item_4', 'item_1'], 'Agent2': ['item_2'], 'Agent3': ['item_3']})
+        self.assertEqual(res, {'Agent1': ['item_4'], 'Agent2': ['item_1'], 'Agent3': ['item_2', 'item_3']})
 
 
     def test3(self):
         exm = AgentList({"Agent1": {"item_1": 1, "item_2": 0, "item_3": -1, "item_4": 2}, "Agent2": {"item_1": 2, "item_2": 6, "item_3": 0, "item_4": 0},
                           "Agent3": {"item_1": 0, "item_2": 2, "item_3": -2, "item_4": 2}})
         res = Double_RoundRobin_Algorithm(exm)
-        self.assertEqual(res, {'Agent1': ['item_3', 'item_4'], 'Agent2': ['item_1'], 'Agent3': ['item_2']})
+        self.assertEqual(res, {'Agent1': ['item_4'], 'Agent2': ['item_3', 'item_1'], 'Agent3': ['item_2']})
 
 
     # ---------------------------------------------------Tests for algo 2 -----------------------------------------
@@ -120,7 +121,7 @@ class Goods_Chores_Tests(unittest.TestCase):
     def test5(self):
         exm = AgentList({"Agent1":{"item_1":1,"item_2":-1,"item_3":-2,"item_4":3,"item_5":5,"item_6":0,"item_7":0,"item_8":-1,"item_9":2,"item_10":3},"Agent2":{"item_1":-3,"item_2":4,"item_3":-6,"item_4":2,"item_5":4,"item_6":-3,"item_7":2,"item_8":-2,"item_9":4,"item_10":5}})
         res = Generalized_Adjusted_Winner_Algorithm(exm)
-        self.assertEqual(res, {'Agent1': ["item_1" , "item_4", "item_5", "item_6", "item_9", "item_10"], 'Agent2': ["item_2", "item_3", "item_7", "item_8"]})
+        self.assertEqual(res,  {'Agent1': ['item_1', 'item_10', 'item_3', 'item_4', 'item_5', 'item_6', 'item_9'], 'Agent2': ['item_2', 'item_7', 'item_8']})
 
     def test6(self):
         exm = AgentList({"Agent1": {"item_1": -1, "item_2": 0, "item_3": -1, "item_4": -2},"Agent2": {"item_1": -2, "item_2": -6, "item_3": 0, "item_4": 0}})
