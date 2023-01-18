@@ -37,7 +37,7 @@ budget2 = {
 rent2 = 1000
 
 print("solution agentList1")
-# print(fairpy.divide(algorithm=optimal_envy_free, input=agentList1, rent=rent1, budget=budget1, stam=1))
+print(fairpy.divide(algorithm=GetOptimalEnvyFree, input=optimal_envy_free(agentList1, rent1, budget1)))
 print()
 print("solution agentList2")
 # print(fairpy.divide(algorithm=optimal_envy_free, input=agentList2, rent=rent2, budget=budget2))

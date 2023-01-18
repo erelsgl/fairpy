@@ -18,7 +18,7 @@ import sys
 logger = logging.getLogger(__name__)
 
 
-def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict) -> (dict, dict):
+def optimal_envy_free(agents, rent: float, budget: dict) -> (dict, dict):
     """
         This function implements Algorithm 2 from the article.
         :param agentsList: Evaluation for each room by agent
@@ -39,6 +39,7 @@ def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict) -> (dict
         --------THE RESULT--------
         'no solution'
         """
+    agentsList = AgentList(agents)
     logger.info(f'optimal_envy_free({agentsList}, {rent}, {budget})')
     # line 48-55 : Taking the AgentList type and splitting it to lists and dictionary
     N = list([i for i in agentsList.agent_names()])
