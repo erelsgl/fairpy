@@ -522,8 +522,8 @@ if __name__ == "__main__":
     import sys
     # logger.addHandler(logging.StreamHandler(sys.stdout))
     # logger.setLevel(logging.INFO)
-    (failures, tests) = doctest.testmod(report=True,optionflags=doctest.NORMALIZE_WHITESPACE)
-    print("{} failures, {} tests".format(failures, tests))
+    # (failures, tests) = doctest.testmod(report=True,optionflags=doctest.NORMALIZE_WHITESPACE)
+    # print("{} failures, {} tests".format(failures, tests))
 
     # agents5 = AgentList({"Alice": {"a":3, "b":4, "c":3}, "Bob": {"a":1, "b":5, "c":3}, "Max": {"a":2, "b":3, "c":2}})
     # agents2 = AgentList({"Alice": {"a":4, "b":10, "c":8, "d":7}, "Bob": {"a":5, "b":9, "c":5, "d":10}})
