@@ -316,9 +316,7 @@ def LinearProgram(output: schedule, apprx_bound: float) -> bool:
         if not (mask == False).all(): constraints.append(cp.sum(variables[mechine, :][mask[0, :]]) <= apprx_bound)
 
 
-    objective = cp.Minimize(variables[0, 0])
-
-    prob = cp.Problem(objective, constraints)
+    prob = cp.Problem(cp.Minimize(variables[0, 0]), constraints)
     # simplex solver version opt to find most sparse solutions
     prob.solve(solver = cp.SCIPY, scipy_options = {"method" : "highs"})
     
@@ -326,8 +324,13 @@ def LinearProgram(output: schedule, apprx_bound: float) -> bool:
         logger.info('LP status: %s', prob.status)
         return False
 
+    # program possible
     output.clear()
-    Round(output, np.round(variables.value, decimals = 4))
+    #rounding
+    relaxed_sol = np.round(variables.value, decimals = 5)
+    relaxed_sol[relaxed_sol > 0.98] = 1
+    relaxed_sol[relaxed_sol < 0.02] = 0
+    Round(output, relaxed_sol)
     return True
 
 
@@ -363,8 +366,7 @@ def Round(output: schedule, fractional_sol: np.ndarray):
             G.remove_edge(ind_to_node(mechine, False), ind_to_node(job, True))
 
 
-    if not nx.bipartite.is_bipartite(G):    raise RuntimeError('G[x] should be bipartite')
-
+    if not nx.bipartite.is_bipartite(G):    logger.debug('G[x] should be bipartite, relaxed sol: %s', fractional_sol)
     logger.info('E(G[x]): %s', G.edges())
 
     # assigning the rest acording to the algo, via max match

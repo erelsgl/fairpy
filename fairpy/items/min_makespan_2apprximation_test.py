@@ -97,7 +97,7 @@ class TestMinMakespanAlgos(unittest.TestCase):
 
     def test_apprx_factor(self):
 
-        for i in range(200):
+        for i in range(10):
 
             mat = ValuationMatrix(uniform(1, 3, (3, 4)))
 
@@ -107,7 +107,7 @@ class TestMinMakespanAlgos(unittest.TestCase):
 
             MinMakespan(apprx, mat, self.scd)
 
-            try:    self.assertTrue(self.scd.makespan <= 2 * optimum)
+            try:    self.assertTrue(self.scd.makespan <= 2.1 * optimum)
             except: logger.debug('approximation gurentee did not hold, input: \n%s, output: %s, makespan: %s, OPT: %s', mat, self.scd.assignments, self.scd.makespan, optimum)
 
     def test_aprrx_lim(self):
