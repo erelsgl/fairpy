@@ -390,6 +390,7 @@ def cal_the_Subsidy(agents: AgentList) -> str:
     >>> print(cal_the_Subsidy(agents1))
     Alice gets ['b'] with No Subsudy
     Bob gets ['a'] and it is envious of Alice with Subsudy of: 1
+    <BLANKLINE>
 
     ###### 2 agens, 4 items ######
     >>> agents2 = AgentList({"Alice": {"a":4, "b":10, "c":8, "d":7}, "Bob": {"a":5, "b":9, "c":5, "d":10}})
@@ -400,6 +401,7 @@ def cal_the_Subsidy(agents: AgentList) -> str:
     >>> print(cal_the_Subsidy(agents2))
     Alice gets ['b', 'c'] with No Subsudy
     Bob gets ['d', 'a'] with No Subsudy
+    <BLANKLINE>
 
     ###### 3 agents, 3 items ######
     >>> agents3 = AgentList({"Alice": {"a":1, "b":5, "c":3}, "Bob": {"a":1, "b":3, "c":2}, "Max": {"a":3, "b":2, "c":1}})
@@ -411,6 +413,7 @@ def cal_the_Subsidy(agents: AgentList) -> str:
     Alice gets ['b'] with No Subsudy
     Bob gets ['c'] and it is envious of Alice with Subsudy of: 1
     Max gets ['a'] with No Subsudy
+    <BLANKLINE>
 
     ###### 4 agents, 2 items ######
     >>> agents4 = AgentList({"Alice": {"a":5, "b":6}, "Bob": {"a":3, "b":4}, "Max": {"a":2, "b":2}, "Nancy": {"a":2, "b":1}})
@@ -423,6 +426,7 @@ def cal_the_Subsidy(agents: AgentList) -> str:
     Bob gets ['a'] and it is envious of Alice with Subsudy of: 1
     Max gets [] and it is envious of Bob with Subsudy of: 3
     Nancy gets [] and it is envious of Bob with Subsudy of: 3
+    <BLANKLINE>
 
     ###### 4 agents, 4 items ######
     >>> agents5 = AgentList({"Alice": {"a":4, "b":3, "c":2, "d":1}, "Bob": {"a":4, "b":3, "c":2, "d":1}, "Max": {"a":4, "b":3, "c":2, "d":1}, "Nancy": {"a":4, "b":3, "c":2, "d":1}})
@@ -435,6 +439,7 @@ def cal_the_Subsidy(agents: AgentList) -> str:
     Bob gets ['c'] and it is envious of Alice with Subsudy of: 2
     Max gets ['b'] and it is envious of Alice with Subsudy of: 1
     Nancy gets ['a'] with No Subsudy
+    <BLANKLINE>
 
     """
 
