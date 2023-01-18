@@ -369,7 +369,7 @@ def check_positive_weight_directed_cycles(envy_graph: networkx.DiGraph) -> bool:
 def cal_the_Subsidy(agents: AgentList) -> str:
     """
     This function calculates the Subsidy of the agentes
-    
+
     ###### 2 agens, 1 items ######
     >>> agents0 = AgentList({"Alice": {"a":5}, "Bob": {"a":4}})
     >>> print(Bounded_Subsidy(agents0))
@@ -379,6 +379,7 @@ def cal_the_Subsidy(agents: AgentList) -> str:
     >>> print(cal_the_Subsidy(agents0))
     Alice gets ['a'] with No Subsudy
     Bob gets [] and it is envious of Alice with Subsudy of: 4
+    <BLANKLINE>
 
     ###### 2 agens, 2 items ######
     >>> agents1 = AgentList({"Alice": {"a":3, "b":5}, "Bob": {"a":6, "b":7}})
@@ -522,8 +523,8 @@ if __name__ == "__main__":
     import sys
     # logger.addHandler(logging.StreamHandler(sys.stdout))
     # logger.setLevel(logging.INFO)
-    # (failures, tests) = doctest.testmod(report=True,optionflags=doctest.NORMALIZE_WHITESPACE)
-    # print("{} failures, {} tests".format(failures, tests))
+    (failures, tests) = doctest.testmod(report=True,optionflags=doctest.NORMALIZE_WHITESPACE)
+    print("{} failures, {} tests".format(failures, tests))
 
     # agents5 = AgentList({"Alice": {"a":3, "b":4, "c":3}, "Bob": {"a":1, "b":5, "c":3}, "Max": {"a":2, "b":3, "c":2}})
     # agents2 = AgentList({"Alice": {"a":4, "b":10, "c":8, "d":7}, "Bob": {"a":5, "b":9, "c":5, "d":10}})
