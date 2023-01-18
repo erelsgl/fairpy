@@ -11,14 +11,14 @@ import fairpy
 from fairpy.agentlist import AgentList
 from fairpy.items.fair_rent_division_on_a_budget import optimal_envy_free
 
-agentList1 = AgentList({'Alice': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},
-                        'Bob': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},
-                        'Clair': {'2ndFloor': 250, 'Basement': 500, 'MasterBedroom': 250}})
+agentList1 = AgentList({'Alice': {'2ndFloor': 300, 'Basement': 250, 'MasterBedroom': 450},
+                        'Bob': {'2ndFloor': 200, 'Basement': 300, 'MasterBedroom': 500},
+                        'Clair': {'2ndFloor': 150, 'Basement': 500, 'MasterBedroom': 350}})
 
 budget1 = {
-    'Alice': 200,
-    'Bob': 100,
-    'Clair': 200,
+    'Alice': 300,
+    'Bob': 500,
+    'Clair': 600,
 }
 rent1 = 1000
 
@@ -37,10 +37,10 @@ budget2 = {
 rent2 = 1000
 
 print("solution agentList1")
-print(optimal_envy_free(agentList1, rent1, budget1))
+# print(fairpy.divide(algorithm=optimal_envy_free, input=agentList1, rent=rent1, budget=budget1, stam=1))
 print()
 print("solution agentList2")
-print(optimal_envy_free(agentList2, rent2, budget2))
+# print(fairpy.divide(algorithm=optimal_envy_free, input=agentList2, rent=rent2, budget=budget2))
 print("solution ex2")
 ex2 = AgentList({"Alice": {'1': 250, '2': 250, '3': 500}, "Bob": {'1': 250, '2': 250, '3': 500},
                  "Clair": {'1': 250, '2': 250, '3': 500}})

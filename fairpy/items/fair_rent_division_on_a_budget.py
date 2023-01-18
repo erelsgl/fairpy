@@ -13,10 +13,9 @@
 from fairpy.items.fair_rent_division_on_a_budget_assist import *
 from fairpy.agentlist import AgentList
 import logging
+import sys
 
-LOG_FORMAT = "%(levelname)s, time: %(asctime)s, line: %(lineno)d - %(message)s"
-logging.basicConfig(filename='../items/fair_rent_division_on_a_budget_logging.log', level=logging.DEBUG, format=LOG_FORMAT)
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def optimal_envy_free(agentsList: AgentList, rent: float, budget: dict) -> (dict, dict):
@@ -240,8 +239,12 @@ def case_2(sigma: dict, p: dict, budget: dict, agentsList: AgentList):
     return sigma
 
 
+optimal_envy_free.logger = logger
+
 if __name__ == '__main__':
     print(doctest.testmod())
+    logger.addHandler(logging.StreamHandler(sys.stdout))
+
     agentList1 = AgentList({'Alice': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},
                             'Bob': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},
                             'Clair': {'2ndFloor': 250, 'Basement': 500, 'MasterBedroom': 250}})
