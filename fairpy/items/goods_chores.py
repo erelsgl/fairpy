@@ -141,11 +141,11 @@ def is_EF1(winner, looser, Winner_bundle, Looser_bundle):
         return True
 
     for item in Winner_bundle:
-        if (looser_total + looser.value(item) >= (winner_total - looser.value(item))):
+        if (looser_total >= (winner_total - looser.value(item))):
             return True
 
     for item in Looser_bundle:
-        if (looser_total - looser.value(item) >= (winner_total + looser.value(item))):
+        if ((looser_total - looser.value(item)) >= winner_total):
             return True
     return False
 

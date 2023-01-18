@@ -47,6 +47,9 @@ def is_continuous(allocation:list , items : list):
 
 def is_PO(agents: AgentList, result: dict):
     """
+    This function checks for 2 agents if the given allocation is Paretto optimal or not.
+    The algorithm compare the allocation to the all other allocations and check if there is another allocation
+    That provides Paretto improvement.
     >>> is_PO(AgentList({"Agent1":{"item_1":0}, "Agent2":{"item_1":1}}), {'Agent1': [], 'Agent2': ["item_1"]})
     True
 
@@ -88,21 +91,21 @@ class Goods_Chores_Tests(unittest.TestCase):
         #only good chores
         exm = AgentList({"Agent1": {"item_1": 1, "item_2": 8, "item_3": 1, "item_4": 2}, "Agent2": {"item_1": 2, "item_2": 6, "item_3": 7, "item_4": 6},"Agent3": {"item_1": 4, "item_2": 2, "item_3": 2, "item_4": 2}})
         res = Double_RoundRobin_Algorithm(exm)
-        self.assertEqual(res, {'Agent1': [2], 'Agent2': [3], 'Agent3': [1, 4]})
+        self.assertEqual(res, {'Agent1': ['item_2'], 'Agent2': ['item_3'], 'Agent3': ['item_1', 'item_4']})
 
     def test2(self):
         # only bad chores
         exm = AgentList({"Agent1": {"item_1": -1, "item_2": -5, "item_3": -1, "item_4": 0}, "Agent2": {"item_1": -5, "item_2": -4, "item_3": -7, "item_4": -6},
                           "Agent3": {"item_1": -4, "item_2": 0, "item_3": -2, "item_4": 0}})
         res = Double_RoundRobin_Algorithm(exm)
-        self.assertEqual(res, {'Agent1': [4, 1], 'Agent2': [2], 'Agent3': [3]})
+        self.assertEqual(res, {'Agent1': ['item_4', 'item_1'], 'Agent2': ['item_2'], 'Agent3': ['item_3']})
 
 
     def test3(self):
         exm = AgentList({"Agent1": {"item_1": 1, "item_2": 0, "item_3": -1, "item_4": 2}, "Agent2": {"item_1": 2, "item_2": 6, "item_3": 0, "item_4": 0},
                           "Agent3": {"item_1": 0, "item_2": 2, "item_3": -2, "item_4": 2}})
         res = Double_RoundRobin_Algorithm(exm)
-        self.assertEqual(res, {'Agent1': [3, 4], 'Agent2': [1], 'Agent3': [2]})
+        self.assertEqual(res, {'Agent1': ['item_3', 'item_4'], 'Agent2': ['item_1'], 'Agent3': ['item_2']})
 
 
     # ---------------------------------------------------Tests for algo 2 -----------------------------------------
