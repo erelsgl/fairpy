@@ -9,49 +9,49 @@ class TestMain(unittest.TestCase):
         ex1 = AgentList({"Alice": {'1': 250, '2': 250, '3': 500}, "Bob": {'1': 250, '2': 250, '3': 500},
                          "Clair": {'1': 250, '2': 500, '3': 250}})
         self.assertEqual(maximum_rent_envy_free(ex1, 1000, {'Alice': 250, 'Bob': 320, 'Clair': 430}),
-                         (1249.99,
+                         (1250,
                           ([('Alice', '1'), ('Clair', '2'), ('Bob', '3')],
                            [('1', 250.0), ('2', 500.0), ('3', 500.0)])))
 
         ex2 = AgentList({"Alice": {'1': 250, '2': 750}, "Bob": {'1': 250, '2': 750}})
         self.assertEqual(maximum_rent_envy_free(ex2, 1000, {'Alice': 600, 'Bob': 500}),
-                         (1700.0, ([('Alice', '1'), ('Bob', '2')], [('1', 600.0), ('2', 1100.0)])))
+                         (1700, ([('Alice', '1'), ('Bob', '2')], [('1', 600.0), ('2', 1100.0)])))
 
         ex3 = AgentList({"Alice": {'1': 400, '2': 600}, "Bob": {'1': 300, '2': 700}})
         self.assertEqual(maximum_rent_envy_free(ex3, 1000, {'Alice': 450, 'Bob': 550}),
-                         (1200.0, ([('Alice', '1'), ('Bob', '2')], [('1', 450.0), ('2', 750.0)])))
+                         (1200, ([('Alice', '1'), ('Bob', '2')], [('1', 450.0), ('2', 750.0)])))
 
         ex4 = AgentList({"Alice": {'1': 250, '2': 300, '3': 450}, "Bob": {'1': 300, '2': 250, '3': 450},
                          "Clair": {'1': 450, '2': 300, '3': 250}})
         self.assertEqual(maximum_rent_envy_free(ex4, 1000, {'Alice': 300, 'Bob': 320, 'Clair': 350}),
-                         (1200.01,
+                         (1200,
                           ([('Clair', '1'), ('Alice', '2'), ('Bob', '3')],
                            [('1', 450.0), ('2', 300.0), ('3', 450.0)])))
 
         ex5 = AgentList({"Alice": {'1': 300, '2': 400}, "Bob": {'1': 320, '2': 380}})
         self.assertEqual(maximum_rent_envy_free(ex5, 700, {'Alice': 310, 'Bob': 350}),
-                         (780.0, ([('Bob', '1'), ('Alice', '2')], [('1', 350.0), ('2', 430.0)])))
+                         (780, ([('Bob', '1'), ('Alice', '2')], [('1', 350.0), ('2', 430.0)])))
 
         # Checking zero values
         ex6 = AgentList({"Alice": {'1': 0, '2': 0}, "Bob": {'1': 0, '2': 0}})
         self.assertEqual(maximum_rent_envy_free(ex6, 1000, {'Alice': 250, 'Bob': 250}),
-                         (500.0, ([('Bob', '1'), ('Alice', '2')], [('1', 250.0), ('2', 250.0)])))
+                         (500, ([('Bob', '1'), ('Alice', '2')], [('1', 250.0), ('2', 250.0)])))
 
         # Checking wrong values
         ex7 = AgentList({"Alice": {'1': 300, '2': 250}, "Bob": {'1': 280, '2': 320}, "Clair": {'1': 400, '2': 370}})
         self.assertEqual(maximum_rent_envy_free(ex7, 700, {'Alice': 280, 'Bob': 290, 'Clair': 380}),
-                         (745.0, ([('Clair', '1'), ('Bob', '2')], [('1', 380.0), ('2', 350.0)])))
+                         (745, ([('Clair', '1'), ('Bob', '2')], [('1', 380.0), ('2', 350.0)])))
 
         # Checking envy case
         ex8 = AgentList({"Alice": {'1': 400, '2': 250}, "Bob": {'1': 400, '2': 320}})
         self.assertEqual(maximum_rent_envy_free(ex8, 700, {'Alice': 420, 'Bob': 410}),
-                         (900.0, ([('Alice', '1'), ('Bob', '2')], [('1', 490.0), ('2', 410.0)])))
+                         (900, ([('Alice', '1'), ('Bob', '2')], [('1', 490.0), ('2', 410.0)])))
 
         # Overload test
         agents = {"Alice": {str(i): i for i in range(1000)}, "Bob": {str(i): i for i in range(1000)}}
         ex9 = AgentList(agents)
         self.assertEqual(maximum_rent_envy_free(ex9, 10000, {'Alice': 500, 'Bob': 500}),
-                         (1001.0, ([('Alice', '998'), ('Bob', '999')], [('998', 500.0), ('999', 501.0)])))
+                         (1001, ([('Alice', '998'), ('Bob', '999')], [('998', 500.0), ('999', 501.0)])))
 
         # Create a large number of agents and items with high values
         num_agents = 100
@@ -68,7 +68,7 @@ class TestMain(unittest.TestCase):
         # Test the function
         result = maximum_rent_envy_free(ex10, rent, budgets)
         self.assertIsInstance(result, tuple)
-        self.assertIsInstance(result[0], float)
+        self.assertIsInstance(result[0], int)
         self.assertIsInstance(result[1], tuple)
         self.assertIsInstance(result[1][0], list)
         self.assertIsInstance(result[1][1], list)

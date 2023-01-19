@@ -28,7 +28,6 @@ def optimal_envy_free(agents, rent: float, budget: dict) -> (dict, dict):
                  µ: N -> A , p : is vector of prices for each room
         >>> agentList1 = AgentList({'Alice': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},'Bob': {'2ndFloor': 250, 'Basement': 250, 'MasterBedroom': 500},'Clair': {'2ndFloor': 250, 'Basement': 500, 'MasterBedroom': 250}})
         >>> optimal_envy_free(agentList1, 1000, {'Alice': 200,'Bob': 100,'Clair': 200,})
-        --------THE RESULT--------
         'no solution'
         >>> agentList2 = AgentList({'P1': {'Ra': 500, 'Rb': 100, 'Rc': 150},'P2': {'Ra': 250, 'Rb': 250, 'Rc': 250},'P3': {'Ra': 100, 'Rb': 400, 'Rc': 250}})
         >>> optimal_envy_free(agentList2, 1000, {'P1': 600,'P2': 400,'P3': 400})
@@ -36,7 +35,6 @@ def optimal_envy_free(agents, rent: float, budget: dict) -> (dict, dict):
 
         >>> ex3 = AgentList({"Alice":{'1' : 250, '2' : 750}, "Bob": {'1': 250, '2' : 750}})
         >>> optimal_envy_free(ex3, 1000, {'Alice': 600, 'Bob': 500})
-        --------THE RESULT--------
         'no solution'
         """
     agentsList = AgentList(agents)
@@ -104,7 +102,6 @@ def optimal_envy_free(agents, rent: float, budget: dict) -> (dict, dict):
         return µ, p
     else:
         logger.debug("done function ('no solution')")
-        print(f"--------THE RESULT--------")
         return "no solution"
 
 
@@ -118,13 +115,13 @@ def maximum_rent_envy_free(agentsList: AgentList, rent: float, budget: dict) -> 
              sigma: N -> A , p : is vector of prices for each room
     >>> ex1 = AgentList({"Alice":{'1' : 250, '2' : 250, '3' : 500}, "Bob": {'1': 250, '2' : 250, '3' :500}, "Clair": {'1' :250, '2' : 500, '3' : 250}})
     >>> maximum_rent_envy_free(ex1, 1000, {'Alice': 250, 'Bob': 320, 'Clair': 430})
-    (1249.99, ([('Alice', '1'), ('Clair', '2'), ('Bob', '3')], [('1', 250.0), ('2', 500.0), ('3', 500.0)]))
+    (1250, ([('Alice', '1'), ('Clair', '2'), ('Bob', '3')], [('1', 250.0), ('2', 500.0), ('3', 500.0)]))
     >>> ex2 = AgentList({"Alice":{'1' : 250, '2' : 750}, "Bob": {'1': 250, '2' : 750}})
     >>> maximum_rent_envy_free(ex2, 1000, {'Alice': 600, 'Bob': 500})
-    (1700.0, ([('Alice', '1'), ('Bob', '2')], [('1', 600.0), ('2', 1100.0)]))
+    (1700, ([('Alice', '1'), ('Bob', '2')], [('1', 600.0), ('2', 1100.0)]))
     >>> ex3 = AgentList({"Alice":{'1' : 400, '2' : 600}, "Bob": {'1': 300, '2' : 700}})
     >>> maximum_rent_envy_free(ex3, 1000, {'Alice': 450, 'Bob': 550})
-    (1200.0, ([('Alice', '1'), ('Bob', '2')], [('1', 450.0), ('2', 750.0)]))
+    (1200, ([('Alice', '1'), ('Bob', '2')], [('1', 450.0), ('2', 750.0)]))
     """
     logger.info(f'maximum_rent_envy_free({agentsList}, {rent}, {budget})')
     N = list([i for i in agentsList.agent_names()])
@@ -177,7 +174,7 @@ def maximum_rent_envy_free(agentsList: AgentList, rent: float, budget: dict) -> 
     sigma = sorted(sigma.items(), key=lambda x: x[1])
     p = sorted(p.items(), key=lambda x: x[0])
     logger.debug("done function after sorting")
-    return rent, (sigma, p)
+    return round(rent), (sigma, p)
 
 
 def check_while(budget_graph, budget: dict, p: dict, sigma: dict):
