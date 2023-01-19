@@ -224,6 +224,11 @@ def Generalized_Moving_knife_Algorithm(agent_list :AgentList , items:list):
     >>> Generalized_Moving_knife_Algorithm(AgentList({"Agent1":{"1":0,"2":2,"3":0,"4":-4},"Agent2":{"1":1,"2":-2,"3":1,"4":-2},"Agent3":{"1":0,"2":-4,"3":1,"4":1}}),['1' , '2' , '3' , '4'])
     {'Agent1': ['1', '2', '3'], 'Agent2': [], 'Agent3': ['4']}
 
+    >>> Generalized_Moving_knife_Algorithm(AgentList({"Agent1":{"1":-1,"2":-1,"3":-1,"4":-1}, "Agent2": {"1":-1,"2":-1,"3":-1,"4":-1}}),['1' , '2' , '3' , '4'])
+    {'Agent1': ['1', '2'], 'Agent2': ['3', '4']}
+
+    >>> Generalized_Moving_knife_Algorithm(AgentList({"Agent1":{"1":-1,"2":-1,"3":-1,"4":-1, "5": -1, "6": -1, "7": -1}, "Agent2":{"1":-1,"2":-1,"3":-1,"4":-1, "5": -1, "6": -1, "7": -1}, "Agent3":{"1":-1,"2":-1,"3":-1,"4":-1, "5": -1, "6": -1, "7": -1}}), ['1', '2', '3', '4', '5', '6', '7'])
+    {'Agent1': ['1', '2'], 'Agent2': ['3', '4'], 'Agent3': ['5', '6', '7']}
     """
     if not agent_list or not items:
         logger.error("Invalid arguments")
@@ -241,7 +246,7 @@ def Generalized_Moving_knife_Algorithm(agent_list :AgentList , items:list):
     logger.info(f'Agents : {[agent.name() for agent in agent_list]} , Prop values : {prop_values}')
     res = Generalized_Moving_knife_Algorithm_Recursive(agent_list= agent_list ,prop_values= prop_values , remain_items=items ,result= result)
 
-    return res
+    return dict(sorted(res.items() , key= lambda agent: agent[0]))
 
 def  Generalized_Moving_knife_Algorithm_Recursive(agent_list :AgentList , prop_values: dict , remain_items:list , result : dict)->dict:
 
@@ -252,9 +257,9 @@ def  Generalized_Moving_knife_Algorithm_Recursive(agent_list :AgentList , prop_v
     if len(N_plus) > 0:
         if len(N_plus) == 1:
             # allocate all items to the single agent
-            result[N_plus[0].name()] = [item for item in all_items]
+            result[N_plus[0].name()] = all_items
             # sort the result by agent number
-            return dict(sorted(result.items() , key= lambda agent: agent[0]))
+            return result
         sums = {}
         for agent in N_plus:
             sums[agent.name()] = 0
@@ -281,15 +286,15 @@ def  Generalized_Moving_knife_Algorithm_Recursive(agent_list :AgentList , prop_v
             # allocate all items to the single agent
             result[agent_list[0].name()] = [item for item in all_items]
             # sort the result by agent number
-            return dict(sorted(result.items(), key=lambda agent: agent[0]))
+            return result
         sums = {}
         for agent in agent_list:
             sums[agent.name()] = sum([agent.value(item) for item in all_items])
-        curr_bundle = [item for item in all_items]
+        curr_bundle = list(all_items)
         while len(curr_bundle) > 0:
             # check if there is an agent who claims the current bundle at this iteration
             for agent in agent_list:
-                if sums[agent.name()] >= (-1 * prop_values[agent.name()]):
+                if sums[agent.name()] >= (prop_values[agent.name()]):
                     logger.info(
                         f'Agent : {agent.name()} with prop value : {prop_values[agent.name()]} claims bundle {curr_bundle} , agent utility : {sums[agent.name()]}')
                     result[agent.name()] = curr_bundle
@@ -304,6 +309,7 @@ def  Generalized_Moving_knife_Algorithm_Recursive(agent_list :AgentList , prop_v
             # if no agent claims the current bundle - remove the last item from the bundle'
             curr_bundle.pop()
     return result
+
 
 if __name__ == '__main__':
     logger.basicConfig(format='[%(levelname)s - %(asctime)s] - %(message)s', level=logging.INFO)
