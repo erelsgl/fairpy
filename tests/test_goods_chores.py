@@ -4,7 +4,7 @@
     Programmers: Yair Raviv , Rivka Strilitz
 """
 
-import unittest
+import unittest, pytest
 from unittest import TestCase
 from random import randint
 
@@ -62,8 +62,12 @@ class Goods_Chores_Tests(unittest.TestCase):
         self.assertTrue(is_PO(exm , res))
 
 
-    # large input and continuous validation
+
+    @pytest.mark.skip("Takes too long for pytest")
     def test_GeneralizedMovingknifeAlgorithm_LargeInput_ContinuousTest(self):
+        """
+        large input and continuous validation
+        """
         agents = {}
         prop = {}
         result = {}
@@ -81,8 +85,11 @@ class Goods_Chores_Tests(unittest.TestCase):
         for allocation in res:
             self.assertTrue(is_continuous(res[allocation] , items =  [str(i) for i in range(1,1001)]))
 
-    # large random input and prop1 validation
+    @pytest.mark.skip("Takes too long for pytest")
     def test_GeneralizedMovingknifeAlgorithm_LargeInput_Prop1Test(self):
+        """
+        large random input and prop1 validation
+        """
         agents = {}
         prop = {}
         result = {}
@@ -187,4 +194,4 @@ def is_PO(agents: AgentList, result: dict):
     return True
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)

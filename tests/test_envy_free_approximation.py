@@ -1,4 +1,4 @@
-import unittest
+import unittest, pytest
 import numpy as np
 from fairpy import Allocation, ValuationMatrix, AllocationMatrix
 from fairpy.items.envy_free_approximation_with_payments import make_envy_free_approximation_with_payments, find_envy_free_approximation_with_payments
@@ -80,6 +80,7 @@ class TestApproximationDivison(unittest.TestCase):
         self.assertLessEqual(calculateSW(self.allocationBefore2, self.v2),
                              calculateSW(self.allocationResult2, self.v2))
 
+    @pytest.mark.skip("takes too long for pytest")
     def test_init(self):
         """
         check that algorithm run for many agents and bundles.
@@ -110,4 +111,4 @@ class TestApproximationDivison(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)

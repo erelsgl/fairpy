@@ -1,4 +1,4 @@
-import unittest
+import unittest, pytest
 from fairpy.agentlist import AgentList
 from fairpy.items.fair_rent_division_on_a_budget import maximum_rent_envy_free, optimal_envy_free
 
@@ -46,32 +46,6 @@ class TestMain(unittest.TestCase):
         ex8 = AgentList({"Alice": {'1': 400, '2': 250}, "Bob": {'1': 400, '2': 320}})
         self.assertEqual(maximum_rent_envy_free(ex8, 700, {'Alice': 420, 'Bob': 410}),
                          (900, ([('Alice', '1'), ('Bob', '2')], [('1', 490.0), ('2', 410.0)])))
-
-        # Overload test
-        agents = {"Alice": {str(i): i for i in range(1000)}, "Bob": {str(i): i for i in range(1000)}}
-        ex9 = AgentList(agents)
-        self.assertEqual(maximum_rent_envy_free(ex9, 10000, {'Alice': 500, 'Bob': 500}),
-                         (1001, ([('Alice', '998'), ('Bob', '999')], [('998', 500.0), ('999', 501.0)])))
-
-        # Create a large number of agents and items with high values
-        num_agents = 100
-        num_items = 100
-        agents = {f"Agent{i}": {f"Item{j}": (i + j) * 10 for j in range(num_items)} for i in range(num_agents)}
-        ex10 = AgentList(agents)
-
-        # Set the rent to a large value
-        rent = num_agents * num_items * 10
-
-        # Set the budgets to a high value
-        budgets = {f"Agent{i}": (i + 1) * 100 for i in range(num_agents)}
-
-        # Test the function
-        result = maximum_rent_envy_free(ex10, rent, budgets)
-        self.assertIsInstance(result, tuple)
-        self.assertIsInstance(result[0], int)
-        self.assertIsInstance(result[1], tuple)
-        self.assertIsInstance(result[1][0], list)
-        self.assertIsInstance(result[1][1], list)
 
     def test_algo2(self):
         ex1 = AgentList({"Alice": {'1': 250, '2': 250, '3': 500}, "Bob": {'1': 250, '2': 250, '3': 500},
@@ -152,11 +126,16 @@ class TestMain(unittest.TestCase):
              [('10', 550.0), ('1', 550.0), ('2', 550.0), ('3', 550.0), ('4', 550.0), ('5', 550.0), ('6', 550.0),
               ('7', 550.0), ('8', 550.0), ('9', 550.0)]))
 
-        # Overload test
+
+    @pytest.mark.skip(reason="takes too long for the usual tests")
+    def test_algo2_large_input_1(self):
+         # Overload test
         agents = {"Alice": {str(i): i for i in range(1000)}, "Bob": {str(i): i for i in range(1000)}}
         ex9 = AgentList(agents)
         self.assertEqual(optimal_envy_free(ex9, 10000, {'Alice': 500, 'Bob': 500}), 'no solution')
-
+       
+    @pytest.mark.skip(reason="takes too long for the usual tests")
+    def test_algo2_large_input_2(self):
         # Overload test 2
         num_agents = 100
         num_items = 100
@@ -166,6 +145,37 @@ class TestMain(unittest.TestCase):
         ex10 = AgentList(agents)
         self.assertEqual(optimal_envy_free(ex10, rent, budgets), 'no solution')
 
+    @pytest.mark.skip(reason="takes too long for the usual tests")
+    def test_algo1_large_input_1(self):
+        # Overload test
+        agents = {"Alice": {str(i): i for i in range(1000)}, "Bob": {str(i): i for i in range(1000)}}
+        ex9 = AgentList(agents)
+        self.assertEqual(maximum_rent_envy_free(ex9, 10000, {'Alice': 500, 'Bob': 500}),
+                         (1001, ([('Alice', '998'), ('Bob', '999')], [('998', 500.0), ('999', 501.0)])))
+
+    @pytest.mark.skip(reason="takes too long for the usual tests")
+    def test_algo1_large_input_2(self):
+        # Create a large number of agents and items with high values
+        num_agents = 100
+        num_items = 100
+        agents = {f"Agent{i}": {f"Item{j}": (i + j) * 10 for j in range(num_items)} for i in range(num_agents)}
+        ex10 = AgentList(agents)
+
+        # Set the rent to a large value
+        rent = num_agents * num_items * 10
+
+        # Set the budgets to a high value
+        budgets = {f"Agent{i}": (i + 1) * 100 for i in range(num_agents)}
+
+        # Test the function
+        result = maximum_rent_envy_free(ex10, rent, budgets)
+        self.assertIsInstance(result, tuple)
+        self.assertIsInstance(result[0], int)
+        self.assertIsInstance(result[1], tuple)
+        self.assertIsInstance(result[1][0], list)
+        self.assertIsInstance(result[1][1], list)
+
+
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(TestMain(), verbosity=2)
