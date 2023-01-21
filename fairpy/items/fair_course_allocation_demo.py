@@ -28,16 +28,17 @@ fair_course_allocation_implementation.logger.addHandler(logging.StreamHandler())
 fair_course_allocation_implementation.logger.setLevel(logging.INFO)
 
 # The preference rating of the courses for each of the students:
-utilities = ValuationMatrix(numpy.array([[1, 2, 33, 44, 34],
-                             [4, 9, 19, 64, 88],
-                             [60, 80, 7, 3, 14],
-                             [58, 76, 95, 5, 2],
-                             [7, 70, 33, 47, 63],
-                             [3, 6, 1, 64, 33],
-                             [88, 2, 4, 6, 78],
-                             [53, 39, 7, 3, 14],
-                             [58, 9, 33, 54, 2],
-                             [7, 8, 34, 47, 28]]))
+utilities = ValuationMatrix(numpy.array([[60,30,6,4],[6,2,42,26]]))
+# utilities = ValuationMatrix(numpy.array([[1, 2, 33, 44, 34],
+#                              [4, 9, 19, 64, 88],
+#                              [60, 80, 7, 3, 14],
+#                              [58, 76, 95, 5, 2],
+#                              [7, 70, 33, 47, 63],
+#                              [3, 6, 1, 64, 33],
+#                              [88, 2, 4, 6, 78],
+#                              [53, 39, 7, 3, 14],
+#                              [58, 9, 33, 54, 2],
+#                              [7, 8, 34, 47, 28]]))
 
 # The capacity for each of the existing courses:
 capacity = [2, 3, 1, 2, 3]
@@ -49,4 +50,4 @@ num_of_courses = 2
 allocation = general_course_allocation(utilities, capacity, num_of_courses)
 print(allocation)
 
-# print(fairpy.divide(general_course_allocation, utilities, capacity, num_of_courses))
+print(fairpy.divide(general_course_allocation, utilities, capacity, num_of_courses))
