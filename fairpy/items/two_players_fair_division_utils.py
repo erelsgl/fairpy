@@ -1,11 +1,18 @@
 """
 Utils file for two_player_fair_division.py
 
+Two-player fair division of indivisible items: Comparison of algorithms
+By: D. Marc Kilgour, Rudolf Vetschera
+
 programmers: Itay Hasidi & Amichai Bitan
 """
+import logging
 from typing import List, Any, Dict
 from fairpy import fairpy
 from fairpy.agentlist import AgentList, AdditiveAgent
+
+
+logger = logging.getLogger(__name__)
 
 
 def find_last_item(agent, item_list):
@@ -279,3 +286,15 @@ def sorted_valuations(agents: AgentList, items: List[Any]):
                     sorted_lst[agent].append(item)
                     break
     return sorted_lst
+
+
+if __name__ == "__main__":
+    import sys
+
+    logger.addHandler(logging.StreamHandler(sys.stdout))
+    # logger.setLevel(logging.INFO)
+
+    import doctest
+
+    (failures, tests) = doctest.testmod(report=True)
+    print("{} failures, {} tests".format(failures, tests))
