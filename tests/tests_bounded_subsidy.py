@@ -55,6 +55,34 @@ class TestMain(unittest.TestCase):
             tests for check_positive_weight_directed_cycles function, that checks if its envy graph does not contain a positive-weight directed cycle
         """
 
+        G1 = nx.DiGraph()
+        G1.add_edge(1, 2, weight=3)
+        res = check_positive_weight_directed_cycles(G1)
+        self.assertEqual(res, False)
+
+        G2 = nx.DiGraph()
+        G2.add_edge(1, 2, weight=3)
+        G2.add_edge(2, 1, weight=-2)
+        res = check_positive_weight_directed_cycles(G2)
+        self.assertEqual(res, True)
+
+        G3 = nx.DiGraph()
+        G3.add_edge(1, 2, weight=1)
+        G3.add_edge(2, 3, weight=-1)
+        G3.add_edge(3, 4, weight=1)
+        G3.add_edge(4, 1, weight=-1)
+        res = check_positive_weight_directed_cycles(G3)
+        self.assertEqual(res, False)
+
+        G4 = nx.DiGraph()
+        G4.add_edge(2, 1, weight=4)
+        G4.add_edge(1, 3, weight=-2)
+        G4.add_edge(2, 3, weight=3)
+        G4.add_edge(3, 4, weight=2)
+        G4.add_edge(4, 2, weight=-1)
+        res = check_positive_weight_directed_cycles(G4)
+        self.assertEqual(res, True)
+
         agents1 = AgentList({"Alice": {"a":5, "b":3}, "Bob": {"a":4, "b":1}})
         envy_graph1 = create_Envy_Graph(agents1)
         res = check_positive_weight_directed_cycles(envy_graph1)
@@ -76,58 +104,112 @@ class TestMain(unittest.TestCase):
         self.assertEqual(res, False)
         
 
-    def test_cal_the_Subsidy(self):
+    def test_calculate_the_Subsidy(self):
         """
             tests for cal_the_Subsidy function, that calculates the Subsidy of the agentes
         """
 
         agents1 = AgentList({"Alice": {"a":3, "b":5}, "Bob": {"a":6, "b":7}})
-        res = "Alice gets ['b'] with No Subsudy" + "\n" + "Bob gets ['a'] and it is envious of Alice with Subsudy of: 1" + "\n"
-        self.assertEqual(cal_the_Subsidy(agents1), res)
+        envy_graph1 = create_Envy_Graph(agents1)
+        res = [0, 1]
+        self.assertEqual(calculate_the_Subsidy(envy_graph1), res)
 
         agents2 = AgentList({"Alice": {"a":4, "b":10, "c":8, "d":7}, "Bob": {"a":5, "b":9, "c":5, "d":10}})
-        res = "Alice gets ['b', 'c'] with No Subsudy" + "\n" + "Bob gets ['d', 'a'] with No Subsudy" + "\n"
-        self.assertEqual(cal_the_Subsidy(agents2), res)
+        envy_graph2 = create_Envy_Graph(agents2)
+        res = [0, 0]
+        self.assertEqual(calculate_the_Subsidy(envy_graph2), res)
 
         agents3 = AgentList({"Alice": {"a":1, "b":5, "c":3}, "Bob": {"a":1, "b":3, "c":2}, "Max": {"a":3, "b":2, "c":1}})
-        res = "Alice gets ['b'] with No Subsudy" + "\n" + "Bob gets ['c'] and it is envious of Alice with Subsudy of: 1" + "\n" + "Max gets ['a'] with No Subsudy" + "\n"
-        self.assertEqual(cal_the_Subsidy(agents3), res)
+        envy_graph3 = create_Envy_Graph(agents3)
+        res = [0, 1, 0]
+        self.assertEqual(calculate_the_Subsidy(envy_graph3), res)
 
         agents4 = AgentList({"Alice": {"a":5, "b":6}, "Bob": {"a":3, "b":4}, "Max": {"a":2, "b":2}, "Nancy": {"a":2, "b":1}})
-        res = "Alice gets ['b'] with No Subsudy" + "\n" + "Bob gets ['a'] and it is envious of Alice with Subsudy of: 1" + "\n" + "Max gets [] and it is envious of Bob with Subsudy of: 3" + "\n" + "Nancy gets [] and it is envious of Bob with Subsudy of: 3" + "\n"
-        self.assertEqual(cal_the_Subsidy(agents4), res)
+        envy_graph4 = create_Envy_Graph(agents4)
+        res = [0, 1, 3, 3]
+        self.assertEqual(calculate_the_Subsidy(envy_graph4), res)
 
         agents5 = AgentList({"Alice": {"a":4, "b":3, "c":2, "d":1}, "Bob": {"a":4, "b":3, "c":2, "d":1}, "Max": {"a":4, "b":3, "c":2, "d":1}, "Nancy": {"a":4, "b":3, "c":2, "d":1}})
-        res = "Alice gets ['d'] and it is envious of Bob with Subsudy of: 3" + "\n" + "Bob gets ['c'] and it is envious of Alice with Subsudy of: 2" + "\n" + "Max gets ['b'] and it is envious of Alice with Subsudy of: 1" + "\n" + "Nancy gets ['a'] with No Subsudy" + "\n"
-        self.assertEqual(cal_the_Subsidy(agents5), res)
+        envy_graph5 = create_Envy_Graph(agents5)
+        res = [3, 2, 1, 0]
+        self.assertEqual(calculate_the_Subsidy(envy_graph5), res)
 
-    ############ random number of agents and items ############
-        random_item = random.choice(string.ascii_lowercase)
-        random_item_weight = random.randint(0, 9)
-        num_of_agents = random.randint(2, 9)
-        num_of_items = random.randint(1, 9)
+        agents6 = AgentList({"Alice": {"a":5, "b":6}, "Bob": {"a":5, "b":6}, "Max": {"a":4, "b":5}, "Nancy": {"a":4, "b":6}})    
+        envy_graph6 = create_Envy_Graph(agents6)   
+        res = [1, 6, 6, 0]
+        self.assertEqual(calculate_the_Subsidy(envy_graph6), res)
 
+        agents7 = AgentList({"Alice": {"a":5, "b":5}, "Bob": {"a":5, "b":5}, "Max": {"a":5, "b":5}, "Nancy": {"a":5, "b":5}})
+        envy_graph7 = create_Envy_Graph(agents7)
+        res = [5, 5, 0, 0]
+        self.assertEqual(calculate_the_Subsidy(envy_graph7), res)
+
+
+    def test_random_calculate_the_Subsidy(self):
+        """
+            tests of random number of agents and items
+        """
+
+        ############ create random number of agents and items ############
+        num_of_agents = random.randint(2, 300)
+        num_of_items = random.randint(2, 300)
         
-        # # create a list of random agents name
-        # list_of_agents = []
-        # for i in range(num_of_agents):
-        #     random_agent = random.choice(string.ascii_uppercase)
-        #     if random_agent not in list_of_agents:
-        #         list_of_agents.append(random_agent)
-
-
-        # # create a list of Dict of random items with values
-        # list_of_items = []
-        # for i in range(num_of_items):
-        #     random_item = random.choice(string.ascii_lowercase)
-        #     random_item_weight = random.randint(0, 9)
-        #     if random_item not in list_of_items:
-        #         list_of_items.append(dict({random_item:random_item_weight}))
-
-
+        # create a list of random agents names
+        list_of_agents = []
+        for i in range(num_of_agents):
+            random_agent = random.choice(string.ascii_uppercase)
+            if random_agent not in list_of_agents:
+                list_of_agents.append(str(random_agent))
         # print(list_of_agents)
-        # print(list_of_items)
 
+        # create a list of random items names
+        list_of_items = []
+        for i in range(num_of_items):
+            random_item = random.choice(string.ascii_lowercase)
+            if random_item not in list_of_items:
+                list_of_items.append(str(random_item))
+        # print(list_of_items)
+    
+        # create list of dict of items and the weight
+        list_of_items_and_values = []
+        items_and_values = {}
+        for i in range(len(list_of_agents)):
+            for j in range(len(list_of_items)):
+                random_item_weight = random.randint(0, 9)
+                items_and_values[str(list_of_items[j])] = random_item_weight
+            list_of_items_and_values.append(items_and_values.copy())
+        # print(list_of_items_and_values)
+
+        # create AgentList
+        agents = AgentList(dict(zip(list_of_agents,list_of_items_and_values)))
+
+        ############ Checks if the algorithm works correctly and efficiently  ############
+        
+        # list of the subsudy
+        subsudy_list = calculate_the_Subsidy(create_Envy_Graph(agents))
+
+        # maximum matching for all the agents
+        maximum_matching = Bounded_Subsidy(agents) 
+
+        # The items that allocated for the agent
+        agent_items_allocated = list(maximum_matching.values()) 
+
+        sum_item_and_subsudy = [] # The sum of the items and subsidy allocated to each agent
+        result = True
+
+        # Here we check if the value of the items that the agent received + the subsidy he received is at least as large as all the others
+        for i, agent_i in enumerate(agents): 
+            sum_item_and_subsudy.clear()
+            for k,agent_k in enumerate(agents): 
+                sum_item_and_subsudy.append(agent_i.value(agent_items_allocated[k]) + subsudy_list[k]) # The sum of the items and subsidy allocated to each agent
+            max_sum = sum_item_and_subsudy[i]
+            for l in range(len(sum_item_and_subsudy)): 
+                if sum_item_and_subsudy[l] > max_sum:  # Check if there is an envy
+                    result = False
+                    break
+
+        self.assertEqual(result, True)
+   
 
 def main():
     unittest.main()
