@@ -9,7 +9,7 @@
 #-----------------------------------------------------
 """
 
-import networkx
+import networkx as nx
 import sys
 import doctest
 from typing import *
@@ -83,6 +83,7 @@ def Bounded_Subsidy(agents: AgentList, items: Dict[str,int]=None, weights: Dict[
     {'Alice': ['a'], 'Bob': ['b'], 'Max': [], 'Nancy': []}
 
     """
+    assert isinstance(agents, AgentList)
     allTheItems = agents[0].all_items() # list of all items
     if items is None:
         items = {item:1 for item in allTheItems}
@@ -95,7 +96,7 @@ def Bounded_Subsidy(agents: AgentList, items: Dict[str,int]=None, weights: Dict[
         # print(H)
         logger.info("Graph edges: %s", list(H.edges.data()))
         # a maximum weight matching in H[I, Jt]
-        Mt = networkx.max_weight_matching(H, maxcardinality=False) # H חשב התאמה משוקללת מקסימלית של .
+        Mt = nx.max_weight_matching(H, maxcardinality=False) # H חשב התאמה משוקללת מקסימלית של .
         # print(Mt)
         logger.info("Matching: %s", Mt)
         # if agent i is matched to item j = µti then we allocate item µti to that agent
@@ -136,7 +137,8 @@ def delete_items(items:Dict[str,int], items_to_remove:List)->Dict[str,int]:
 
 
 ##### algorithm 2 #####
-def create_Envy_Graph(agents: AgentList) -> networkx.DiGraph():
+def create_Envy_Graph(agents: AgentList) -> nx.DiGraph():
+
     """
     The algorithm getting a Dict of agents, with Dict of goods and the weights of the goods
     and it returns an Envy Graph with maximum matching allocated
@@ -231,142 +233,96 @@ def create_Envy_Graph(agents: AgentList) -> networkx.DiGraph():
     """
 
     # maximum matching for all the agents
-    maximum_matching = Bounded_Subsidy(agents)
-
-    # agent names
-    agent_names = list(maximum_matching.keys()) 
+    maximum_matching = Bounded_Subsidy(agents) 
 
     # The items that allocated for the agent
     agent_items_allocated = list(maximum_matching.values()) 
 
-    # Dict of the values of the items that allocate to the agent
-    agent_items_values_allocated = {} 
-
-    # calculate the values of the items that allocate to the agent
-    i = 0
-    for name in agent_names:
-        agent_items_values_allocated[name] = agents[i].value(agent_items_allocated[i])
-        i += 1
-
-    source_agent_edges_values = {} # Dict of Envy Graph edges values by source agent
-    list_of_all_the_edges = [] # list of values of the edges in the Envy Graph
-
-    # calculate the values of the edges in the Envy Graph
-    i = 0
-    for agent in agents:
-        k=0
-        for name in agent_names:
-            source_agent_edges_values[name] = agents[i].value(agent_items_allocated[k]) - list(agent_items_values_allocated.values())[i]
-            k += 1
-        list_of_all_the_edges.append(source_agent_edges_values.copy())
-        i += 1
-
     # create an empty graph
-    envy_graph = networkx.DiGraph() # DiGraph — Directed graphs with self loops
+    envy_graph = nx.DiGraph() # DiGraph — Directed graphs with self loops
 
-    # create nodes of the Envy Graph
-    for name_node in agent_names:
-        envy_graph.add_node(name_node)
-    
+    # create the nodes of the Envy Graph
+    for agent_name in agents:
+        envy_graph.add_node(agent_name.name())
+
     # create edges to the nodes in the Envy Graph
-    i = 0
-    for node1 in agent_names:
-        k = 0
-        for node2 in list_of_all_the_edges[i]:
-            if node1 is node2:
-                k += 1
+    for i,agent_i in enumerate(agents): 
+        for k, agent_k in enumerate(agents):
+            if agent_i.name() is agent_k.name():
                 continue 
-            envy_graph.add_edge(node1, node2, weight=list(list_of_all_the_edges[i].values())[k])    
-            k += 1
-        i += 1
+            # For any pair of agents i, k ∈ I the weight of arc (i, k) in GA is the envy agent i has for agent k under the allocation A, that is, wA(i, k) = vi(Ak) − vi(Ai).
+            envy_graph.add_edge(agent_i.name(), agent_k.name(), weight=(agent_i.value(agent_items_allocated[k])) - agent_i.value(agent_items_allocated[i]))    
 
     return envy_graph
 
 create_Envy_Graph.logger = logger
 
-def check_positive_weight_directed_cycles(envy_graph: networkx.DiGraph) -> bool:
+def check_positive_weight_directed_cycles(envy_graph: nx.DiGraph) -> bool:
     """
     This function checks if its envy graph does not contain a positive-weight directed cycle
 
-    ###### 2 agens, 2 items ######
-    >>> agents1 = AgentList({"Alice": {"a":5, "b":3}, "Bob": {"a":4, "b":1}})
-    >>> print(Bounded_Subsidy(agents1))
-    {'Alice': ['b'], 'Bob': ['a']}
-    >>> envy_graph = create_Envy_Graph(agents1)
-    >>> print(envy_graph)
-    DiGraph with 2 nodes and 2 edges
-    >>> print(envy_graph.nodes)
-    ['Alice', 'Bob']
-    >>> print(envy_graph.edges.data())
-    [('Alice', 'Bob', {'weight': 2}), ('Bob', 'Alice', {'weight': -3})]
-    >>> check_positive_weight_directed_cycles(envy_graph)
+    ###### 2 nodes, 1 edges ######
+    >>> G = nx.DiGraph()
+    >>> G.add_edge(1, 2, weight=3)
+    >>> check_positive_weight_directed_cycles(G)
     False
 
-    ###### 3 agens, 3 items ######
-    >>> agents2 = AgentList({"Alice": {"a": 3, "b": 2, "c": 1}, "Bob": {"a": 2, "b": 2, "c": 3}, "Max": {"a": 1, "b": 3, "c": 2}})
-    >>> print(Bounded_Subsidy(agents2))
-    {'Alice': ['a'], 'Bob': ['c'], 'Max': ['b']}
-    >>> envy_graph = create_Envy_Graph(agents2)
-    >>> print(envy_graph)
-    DiGraph with 3 nodes and 6 edges
-    >>> print(envy_graph.nodes)
-    ['Alice', 'Bob', 'Max']
-    >>> print(envy_graph.edges.data())
-    [('Alice', 'Bob', {'weight': -2}), ('Alice', 'Max', {'weight': -1}), ('Bob', 'Alice', {'weight': -1}), ('Bob', 'Max', {'weight': -1}), ('Max', 'Alice', {'weight': -2}), ('Max', 'Bob', {'weight': -1})]
-    >>> check_positive_weight_directed_cycles(envy_graph)
+    ###### 2 nodes, 2 edges ######
+    >>> G = nx.DiGraph()
+    >>> G.add_edge(1, 2, weight=3)
+    >>> G.add_edge(2, 1, weight=-2)
+    >>> check_positive_weight_directed_cycles(G)
+    True
+
+    ###### 3 nodes, 3 edges ######
+    >>> G = nx.DiGraph()
+    >>> G.add_edge(1, 3, weight=3)
+    >>> G.add_edge(3, 2, weight=2)
+    >>> G.add_edge(2, 1, weight=-6)
+    >>> check_positive_weight_directed_cycles(G)
     False
 
-    ###### 4 agens, 2 items ######
-    >>> agents3 = AgentList({"Alice": {"a":5, "b":6}, "Bob": {"a":3, "b":4}, "Max": {"a":2, "b":2}, "Nancy": {"a":2, "b":1}})
-    >>> print(Bounded_Subsidy(agents3))
-    {'Alice': ['b'], 'Bob': ['a'], 'Max': [], 'Nancy': []}
-    >>> envy_graph = create_Envy_Graph(agents3)
-    >>> print(envy_graph)
-    DiGraph with 4 nodes and 12 edges
-    >>> print(envy_graph.nodes)
-    ['Alice', 'Bob', 'Max', 'Nancy']
-    >>> print(envy_graph.edges.data())
-    [('Alice', 'Bob', {'weight': -1}), ('Alice', 'Max', {'weight': -6}), ('Alice', 'Nancy', {'weight': -6}), ('Bob', 'Alice', {'weight': 1}), ('Bob', 'Max', {'weight': -3}), ('Bob', 'Nancy', {'weight': -3}), ('Max', 'Alice', {'weight': 2}), ('Max', 'Bob', {'weight': 2}), ('Max', 'Nancy', {'weight': 0}), ('Nancy', 'Alice', {'weight': 1}), ('Nancy', 'Bob', {'weight': 2}), ('Nancy', 'Max', {'weight': 0})]
-    >>> check_positive_weight_directed_cycles(envy_graph)
+    ###### 4 nodes, 4 edges ######
+    >>> G = nx.DiGraph()
+    >>> G.add_edge(1, 2, weight=1)
+    >>> G.add_edge(2, 3, weight=-1)
+    >>> G.add_edge(3, 4, weight=1)
+    >>> G.add_edge(4, 1, weight=-1)
+    >>> check_positive_weight_directed_cycles(G)
     False
 
-    ###### 4 agents, 4 items ######
-    >>> agents4 = AgentList({"Alice": {"a":4, "b":3, "c":2, "d":1}, "Bob": {"a":4, "b":3, "c":2, "d":1}, "Max": {"a":4, "b":3, "c":2, "d":1}, "Nancy": {"a":4, "b":3, "c":2, "d":1}})
-    >>> print(Bounded_Subsidy(agents4))
-    {'Alice': ['d'], 'Bob': ['c'], 'Max': ['b'], 'Nancy': ['a']}
-    >>> envy_graph = create_Envy_Graph(agents4)
-    >>> print(envy_graph)
-    DiGraph with 4 nodes and 12 edges
-    >>> print(envy_graph.nodes)
-    ['Alice', 'Bob', 'Max', 'Nancy']
-    >>> print(envy_graph.edges.data())
-    [('Alice', 'Bob', {'weight': 1}), ('Alice', 'Max', {'weight': 2}), ('Alice', 'Nancy', {'weight': 3}), ('Bob', 'Alice', {'weight': -1}), ('Bob', 'Max', {'weight': 1}), ('Bob', 'Nancy', {'weight': 2}), ('Max', 'Alice', {'weight': -2}), ('Max', 'Bob', {'weight': -1}), ('Max', 'Nancy', {'weight': 1}), ('Nancy', 'Alice', {'weight': -3}), ('Nancy', 'Bob', {'weight': -2}), ('Nancy', 'Max', {'weight': -1})]
-    >>> check_positive_weight_directed_cycles(envy_graph)
-    False
-    
+    ###### 4 nodes, 5 edges ######
+    >>> G = nx.DiGraph()
+    >>> G.add_edge(2, 1, weight=4)
+    >>> G.add_edge(1, 3, weight=-2)
+    >>> G.add_edge(2, 3, weight=3)
+    >>> G.add_edge(3, 4, weight=2)
+    >>> G.add_edge(4, 2, weight=-1)
+    >>> check_positive_weight_directed_cycles(G)
+    True
+
     """
 
-    copy_envy_graph = envy_graph.copy()
-    nodes = copy_envy_graph.nodes # nodes
-    edges = copy_envy_graph.edges.data() # edges
+    # copy_envy_graph = envy_graph.copy() # copy the original graph
+    nodes = envy_graph.nodes # nodes
+    edges = envy_graph.edges.data() # edges
 
     # multiply by -1 for all the edges
     for edge in edges:
         edge[2]['weight'] *= -1  
 
-    G = networkx.DiGraph() # create an envy graph
-    G.add_nodes_from(nodes) # add nodes to the graph
-    G.add_edges_from(edges) # add edges to the graph
+    envy_graph.add_nodes_from(nodes) # add nodes to the graph
+    envy_graph.add_edges_from(edges) # add edges to the graph
     
     try:
-        networkx.find_negative_cycle(G,list(nodes)[0])
+        nx.find_negative_cycle(envy_graph,list(nodes)[0])
         return True
 
-    except networkx.exception.NetworkXError:
+    except nx.NetworkXError:
         return False
 
 
-def cal_the_Subsidy(agents: AgentList) -> str:
+def calculate_the_Subsidy(envy_graph: nx.DiGraph) -> list:
     """
     This function calculates the Subsidy of the agentes
 
@@ -376,10 +332,10 @@ def cal_the_Subsidy(agents: AgentList) -> str:
     {'Alice': ['a'], 'Bob': []}
     >>> print(create_Envy_Graph(agents0).edges.data())
     [('Alice', 'Bob', {'weight': -5}), ('Bob', 'Alice', {'weight': 4})]
-    >>> print(cal_the_Subsidy(agents0))
-    Alice gets ['a'] with No Subsudy
-    Bob gets [] and it is envious of Alice with Subsudy of: 4
-    <BLANKLINE>
+    >>> print(calculate_the_Subsidy(create_Envy_Graph(agents0)))
+    ['Alice'] ==> 0
+    ['Bob', 'Alice'] ==> 4
+    [0, 4]
 
     ###### 2 agens, 2 items ######
     >>> agents1 = AgentList({"Alice": {"a":3, "b":5}, "Bob": {"a":6, "b":7}})
@@ -387,10 +343,10 @@ def cal_the_Subsidy(agents: AgentList) -> str:
     {'Alice': ['b'], 'Bob': ['a']}
     >>> print(create_Envy_Graph(agents1).edges.data())
     [('Alice', 'Bob', {'weight': -2}), ('Bob', 'Alice', {'weight': 1})]
-    >>> print(cal_the_Subsidy(agents1))
-    Alice gets ['b'] with No Subsudy
-    Bob gets ['a'] and it is envious of Alice with Subsudy of: 1
-    <BLANKLINE>
+    >>> print(calculate_the_Subsidy(create_Envy_Graph(agents1)))
+    ['Alice'] ==> 0
+    ['Bob', 'Alice'] ==> 1
+    [0, 1]
 
     ###### 2 agens, 4 items ######
     >>> agents2 = AgentList({"Alice": {"a":4, "b":10, "c":8, "d":7}, "Bob": {"a":5, "b":9, "c":5, "d":10}})
@@ -398,10 +354,10 @@ def cal_the_Subsidy(agents: AgentList) -> str:
     {'Alice': ['b', 'c'], 'Bob': ['d', 'a']}
     >>> print(create_Envy_Graph(agents2).edges.data())
     [('Alice', 'Bob', {'weight': -7}), ('Bob', 'Alice', {'weight': -1})]
-    >>> print(cal_the_Subsidy(agents2))
-    Alice gets ['b', 'c'] with No Subsudy
-    Bob gets ['d', 'a'] with No Subsudy
-    <BLANKLINE>
+    >>> print(calculate_the_Subsidy(create_Envy_Graph(agents2)))
+    ['Alice'] ==> 0
+    ['Bob'] ==> 0
+    [0, 0]
 
     ###### 3 agents, 3 items ######
     >>> agents3 = AgentList({"Alice": {"a":1, "b":5, "c":3}, "Bob": {"a":1, "b":3, "c":2}, "Max": {"a":3, "b":2, "c":1}})
@@ -409,11 +365,11 @@ def cal_the_Subsidy(agents: AgentList) -> str:
     {'Alice': ['b'], 'Bob': ['c'], 'Max': ['a']}
     >>> print(create_Envy_Graph(agents3).edges.data())
     [('Alice', 'Bob', {'weight': -2}), ('Alice', 'Max', {'weight': -4}), ('Bob', 'Alice', {'weight': 1}), ('Bob', 'Max', {'weight': -1}), ('Max', 'Alice', {'weight': -1}), ('Max', 'Bob', {'weight': -2})]
-    >>> print(cal_the_Subsidy(agents3))
-    Alice gets ['b'] with No Subsudy
-    Bob gets ['c'] and it is envious of Alice with Subsudy of: 1
-    Max gets ['a'] with No Subsudy
-    <BLANKLINE>
+    >>> print(calculate_the_Subsidy(create_Envy_Graph(agents3)))
+    ['Alice'] ==> 0
+    ['Bob', 'Alice'] ==> 1
+    ['Max'] ==> 0
+    [0, 1, 0]
 
     ###### 4 agents, 2 items ######
     >>> agents4 = AgentList({"Alice": {"a":5, "b":6}, "Bob": {"a":3, "b":4}, "Max": {"a":2, "b":2}, "Nancy": {"a":2, "b":1}})
@@ -421,12 +377,12 @@ def cal_the_Subsidy(agents: AgentList) -> str:
     {'Alice': ['b'], 'Bob': ['a'], 'Max': [], 'Nancy': []}
     >>> print(create_Envy_Graph(agents4).edges.data())
     [('Alice', 'Bob', {'weight': -1}), ('Alice', 'Max', {'weight': -6}), ('Alice', 'Nancy', {'weight': -6}), ('Bob', 'Alice', {'weight': 1}), ('Bob', 'Max', {'weight': -3}), ('Bob', 'Nancy', {'weight': -3}), ('Max', 'Alice', {'weight': 2}), ('Max', 'Bob', {'weight': 2}), ('Max', 'Nancy', {'weight': 0}), ('Nancy', 'Alice', {'weight': 1}), ('Nancy', 'Bob', {'weight': 2}), ('Nancy', 'Max', {'weight': 0})]
-    >>> print(cal_the_Subsidy(agents4))
-    Alice gets ['b'] with No Subsudy
-    Bob gets ['a'] and it is envious of Alice with Subsudy of: 1
-    Max gets [] and it is envious of Bob with Subsudy of: 3
-    Nancy gets [] and it is envious of Bob with Subsudy of: 3
-    <BLANKLINE>
+    >>> print(calculate_the_Subsidy(create_Envy_Graph(agents4)))
+    ['Alice'] ==> 0
+    ['Bob', 'Alice'] ==> 1
+    ['Max', 'Bob', 'Alice'] ==> 3
+    ['Nancy', 'Bob', 'Alice'] ==> 3
+    [0, 1, 3, 3]
 
     ###### 4 agents, 4 items ######
     >>> agents5 = AgentList({"Alice": {"a":4, "b":3, "c":2, "d":1}, "Bob": {"a":4, "b":3, "c":2, "d":1}, "Max": {"a":4, "b":3, "c":2, "d":1}, "Nancy": {"a":4, "b":3, "c":2, "d":1}})
@@ -434,92 +390,39 @@ def cal_the_Subsidy(agents: AgentList) -> str:
     {'Alice': ['d'], 'Bob': ['c'], 'Max': ['b'], 'Nancy': ['a']}
     >>> print(create_Envy_Graph(agents5).edges.data())
     [('Alice', 'Bob', {'weight': 1}), ('Alice', 'Max', {'weight': 2}), ('Alice', 'Nancy', {'weight': 3}), ('Bob', 'Alice', {'weight': -1}), ('Bob', 'Max', {'weight': 1}), ('Bob', 'Nancy', {'weight': 2}), ('Max', 'Alice', {'weight': -2}), ('Max', 'Bob', {'weight': -1}), ('Max', 'Nancy', {'weight': 1}), ('Nancy', 'Alice', {'weight': -3}), ('Nancy', 'Bob', {'weight': -2}), ('Nancy', 'Max', {'weight': -1})]
-    >>> print(cal_the_Subsidy(agents5))
-    Alice gets ['d'] and it is envious of Bob with Subsudy of: 3
-    Bob gets ['c'] and it is envious of Alice with Subsudy of: 2
-    Max gets ['b'] and it is envious of Alice with Subsudy of: 1
-    Nancy gets ['a'] with No Subsudy
-    <BLANKLINE>
+    >>> print(calculate_the_Subsidy(create_Envy_Graph(agents5)))
+    ['Alice', 'Nancy'] ==> 3
+    ['Bob', 'Nancy'] ==> 2
+    ['Max', 'Nancy'] ==> 1
+    ['Nancy'] ==> 0
+    [3, 2, 1, 0]
 
     """
 
-    envy_graph = create_Envy_Graph(agents) # create Envy Graph
-    copy_envy_graph = envy_graph.copy()
-    nodes = copy_envy_graph.nodes # nodes
-    edges = copy_envy_graph.edges.data() # edges
-    result = ""
+    subsedy_list = [] # list of the values of the subsudy of the agents in order 
+    nodes = envy_graph.nodes # nodes
 
     if check_positive_weight_directed_cycles(envy_graph): # if the graph have a positive cycles
-        result = "The graph has positive weight directed cycles"
-        return result
+        print("The graph has positive weight directed cycles") 
+        return
 
-    result = "" # to print rhe resulte
-    num_of_edges_of_source_node = len(nodes) - 1 # The number of edges coming out of the source agent
+    for node in nodes:
+        p = nx.single_source_bellman_ford(envy_graph, source=node, weight='weight') # Compute shortest path length and predecessors on shortest paths in weighted graphs. O(V*E)
+        # print(p)
+        path_weight = list(p[0].values()) # The weight of the path
+        path_nodes = list(p[1].values()) # The nodes of the path
 
-    ############  calculate the Subsidy  ############
-    index=0
-    stop_the_loop = 0
-    max_edge_weight_of_source_node = 0 # The maximum edge weight of the source node
-    for stop_the_loop in range(len(edges)):
-        for source_node_edge in edges: 
-            weight_edge = list(source_node_edge[2].values())[0]
-            if weight_edge > max_edge_weight_of_source_node:
-                max_edge_weight_of_source_node = weight_edge
-            index += 1
-            stop_the_loop += 1
+        min_path_weight = path_weight[0] # min path weight
+        min_path_nodes = path_nodes[0] # min path nodes
+        for i in range(1, len(p[0])): # search of shortest path of all targets node
+            if path_weight[i] < min_path_weight:
+                min_path_weight = path_weight[i]
+                min_path_nodes = path_nodes[i]
 
-            if index == num_of_edges_of_source_node:
-                if max_edge_weight_of_source_node > 0: # if there is an envy in the graph
-                    for edge in edges: # Give the subsidy to the appropriate agents
-                        if edge[0] is source_node_edge[0]:
-                            edge[2]['weight'] -= max_edge_weight_of_source_node  
+        print(str(min_path_nodes) + " ==> " + str(min_path_weight*(-1)))
+        subsedy_list.append(min_path_weight*(-1))
 
-                        if edge[1] is source_node_edge[0]:
-                            edge[2]['weight'] += max_edge_weight_of_source_node  
-                    max_edge_weight_of_source_node = 0
-                    stop_the_loop = 0
-                    index = 0
-                    break
-                else:
-                    index = 0
-    # print(edges)
- 
-
-    ############  print the resultes ############
-    maximum_matching = Bounded_Subsidy(agents) # gets the items that allocated to the agents
-    edges = envy_graph.edges.data()
-    copy_edges = copy_envy_graph.edges.data()
-    list_of_max_subsudy = []
- 
-    for i in range(len(edges)):
-        list_of_max_subsudy.append(list(list(edges)[i][2].values())[0] - list(list(copy_edges)[i][2].values())[0])
-
-    max_subsudy = list_of_max_subsudy[0]
-    size = len(list_of_max_subsudy)
-    j = 0
-    flag = False
-    for i in range(size):
-
-        if list_of_max_subsudy[i] > max_subsudy:
-            max_subsudy = list_of_max_subsudy[i]
-
-        if list(list(copy_edges)[i][2].values())[0] == 0 and not flag:
-            node1 = list(copy_edges)[i][0]
-            node2 = list(copy_edges)[i][1]
-            flag = True
-        
-        if ((i+1) % num_of_edges_of_source_node) == 0:
-            if max_subsudy > 0:
-                result += (str(node1) + " gets " + str(list(maximum_matching.values())[j]) + " and it is envious of " +  str(node2) + " with Subsudy of: " + str(max_subsudy) + "\n")
-                flag = False
-            else:
-                result += (list(maximum_matching.keys())[j] + " gets " + str(list(maximum_matching.values())[j]) + " with No Subsudy" + "\n")
-                flag = False
-            max_subsudy = 0
-            j += 1
-
-    return result
-
+    return subsedy_list
 
 
 #### MAIN
@@ -531,16 +434,13 @@ if __name__ == "__main__":
     (failures, tests) = doctest.testmod(report=True,optionflags=doctest.NORMALIZE_WHITESPACE)
     print("{} failures, {} tests".format(failures, tests))
 
-    # agents5 = AgentList({"Alice": {"a":3, "b":4, "c":3}, "Bob": {"a":1, "b":5, "c":3}, "Max": {"a":2, "b":3, "c":2}})
+    # agents1 = AgentList({"Alice": {"a":3, "b":4, "c":3}, "Bob": {"a":1, "b":5, "c":3}, "Max": {"a":2, "b":3, "c":2}})
     # agents2 = AgentList({"Alice": {"a":4, "b":10, "c":8, "d":7}, "Bob": {"a":5, "b":9, "c":5, "d":10}})
-    # agents1 = AgentList({"Alice": {"a":2, "b":1}, "Bob": {"a":3, "b":4}, "Max": {"a":2, "b":2}, "Nancy": {"a":5, "b":6}})
-    # agents3 = AgentList({"Alice": {"a":6, "b":7}, "Bob": {"a":3, "b":5}})
-    # agents6 = AgentList({"Alice": {"a":5, "b":6}, "Bob": {"a":3, "b":4}, "Max": {"a":2, "b":2}, "Nancy": {"a":2, "b":1}})
-    # agents7 = AgentList({"Alice": {"a":1, "b":5, "c":3}, "Bob": {"a":2, "b":3, "c":2}, "Max": {"a":3, "b":4, "c":3}})
-
-    # print(list(Bounded_Subsidy(agents6).values()))
-    # print(create_Envy_Graph(agents6).edges.data())
-    # a=check_positive_weight_directed_cycles(G)
-    # print(a)
-    # print(cal_the_Subsidy(agents6))
-    # check_envy_in_the_graph(create_Envy_Graph(agents1))
+    # agents3 = AgentList({"Alice": {"a":2, "b":1}, "Bob": {"a":3, "b":4}, "Max": {"a":2, "b":2}, "Nancy": {"a":5, "b":6}})
+    # agents4 = AgentList({"Alice": {"a":6, "b":7}, "Bob": {"a":3, "b":5}})
+    # agents5 = AgentList({"Alice": {"a":1, "b":5, "c":3}, "Bob": {"a":2, "b":3, "c":2}, "Max": {"a":3, "b":4, "c":3}})
+    # agents6 = AgentList({"Alice": {"a":3, "b":5, "c":8}, "Bob": {"a":3, "b":10, "c":5}, "Max": {"a":1, "b":2, "c":10}, "Nancy": {"a":10, "b":10, "c":10}, "Eve": {"a":8, "b":7, "c":2}})
+    # agents7 = AgentList({"Alice": {"a":5, "b":6}, "Bob": {"a":5, "b":6}, "Max": {"a":4, "b":5}, "Nancy": {"a":4, "b":6}})
+    # agents8 = AgentList({"Alice": {"a":5, "b":5}, "Bob": {"a":5, "b":5}, "Max": {"a":5, "b":5}, "Nancy": {"a":5, "b":5}})
+    # agents9 = AgentList({'Alice': {'a':5, 'b':6}, 'Bob': {"a":3, "b":4}, "Max": {"a":2, "b":2}, "Nancy": {"a":2, "b":1}})
+    # agents10 = AgentList({'R': {'a':0, 'b':6}, 'E': {"a":2, "b":2}, "S": {"a":4, "b":8}, "I": {"a":7, "b":1}, "G": {"a":7, "b":2}})
