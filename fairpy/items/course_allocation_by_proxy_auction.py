@@ -1,5 +1,14 @@
 
-
+"""
+Allocates the given courses to the given agents using the 'Course allocation by proxy auction' algorithm which
+garantees efficient Pareto.
+Reference:
+    Uthor Scott Duke Kominers, Mike Ruberry and Jonathan Ullman
+    Department of Economics, Harvard University, and Harvard Business School 
+    (http://scottkom.com/articles/Kominers_Ruberry_Ullman_Course_Allocation_with_Appendix.pdf)
+Programmer: Avihu Goren
+Since:  2023-01
+"""
 
 
 from ast import List
@@ -80,10 +89,6 @@ def calculate_b_double_star(Bi,B_tag_i,b_star):
            
 def course_allocation(agents,course_capacity:int,course_list,course_amount_per_agent:int) -> Allocation:
     """
-    Allocates the given courses to the given agents using the 'Course allocation by proxy auction' algorithm which
-    garantees efficient Pareto by Uthor Scott Duke Kominers, Mike Ruberry and Jonathan Ullman
-    Department of Economics, Harvard University, and Harvard Business School 
-    (http://scottkom.com/articles/Kominers_Ruberry_Ullman_Course_Allocation_with_Appendix.pdf)
     :param agents: The agents who participate in the allocation and there course preferences.
     :param course_capacity: The courses capacity.
     :param course_list: The names of the courses.
