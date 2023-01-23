@@ -407,52 +407,44 @@ def calculate_the_Subsidy(envy_graph: nx.DiGraph) -> list:
 
 calculate_the_Subsidy.logger = logger
 
-def print_results(agents: AgentList):
+def print_results(agents: AgentList)->list:
     """
     This is the main function, it's received an Agent List and print the result
 
     ###### 2 agens, 1 items ######
     >>> agents0 = AgentList({"Alice": {"a":5}, "Bob": {"a":4}})
     >>> print_results(agents0)
-    Alice gets ['a'] with Subsudy of: 0
-    Bob gets [] with Subsudy of: 4
+    ["Alice gets ['a'] with Subsudy of: 0", 'Bob gets [] with Subsudy of: 4']
 
     ###### 2 agens, 2 items ######
     >>> agents1 = AgentList({"Alice": {"a":3, "b":5}, "Bob": {"a":6, "b":7}})
     >>> print_results(agents1)
-    Alice gets ['b'] with Subsudy of: 0
-    Bob gets ['a'] with Subsudy of: 1
+    ["Alice gets ['b'] with Subsudy of: 0", "Bob gets ['a'] with Subsudy of: 1"]
 
     ###### 2 agens, 4 items ######
     >>> agents2 = AgentList({"Alice": {"a":4, "b":10, "c":8, "d":7}, "Bob": {"a":5, "b":9, "c":5, "d":10}})
     >>> print_results(agents2)
-    Alice gets ['b', 'c'] with Subsudy of: 0
-    Bob gets ['d', 'a'] with Subsudy of: 0
+    ["Alice gets ['b', 'c'] with Subsudy of: 0", "Bob gets ['d', 'a'] with Subsudy of: 0"]
 
     ###### 3 agents, 3 items ######
     >>> agents3 = AgentList({"Alice": {"a":1, "b":5, "c":3}, "Bob": {"a":1, "b":3, "c":2}, "Max": {"a":3, "b":2, "c":1}})
     >>> print_results(agents3)
-    Alice gets ['b'] with Subsudy of: 0
-    Bob gets ['c'] with Subsudy of: 1
-    Max gets ['a'] with Subsudy of: 0
+    ["Alice gets ['b'] with Subsudy of: 0", "Bob gets ['c'] with Subsudy of: 1", "Max gets ['a'] with Subsudy of: 0"]
 
     ###### 4 agents, 2 items ######
     >>> agents4 = AgentList({"Alice": {"a":5, "b":6}, "Bob": {"a":3, "b":4}, "Max": {"a":2, "b":2}, "Nancy": {"a":2, "b":1}})
     >>> print_results(agents4)
-    Alice gets ['b'] with Subsudy of: 0
-    Bob gets ['a'] with Subsudy of: 1
-    Max gets [] with Subsudy of: 3
-    Nancy gets [] with Subsudy of: 3
+    ["Alice gets ['b'] with Subsudy of: 0", "Bob gets ['a'] with Subsudy of: 1", 'Max gets [] with Subsudy of: 3', 'Nancy gets [] with Subsudy of: 3']
 
     ###### 4 agents, 4 items ######
     >>> agents5 = AgentList({"Alice": {"a":4, "b":3, "c":2, "d":1}, "Bob": {"a":4, "b":3, "c":2, "d":1}, "Max": {"a":4, "b":3, "c":2, "d":1}, "Nancy": {"a":4, "b":3, "c":2, "d":1}})
-    >>> print_results(agents5)
-    Alice gets ['d'] with Subsudy of: 3
-    Bob gets ['c'] with Subsudy of: 2
-    Max gets ['b'] with Subsudy of: 1
-    Nancy gets ['a'] with Subsudy of: 0
+    >>> print(print_results(agents5))
+    ["Alice gets ['d'] with Subsudy of: 3", "Bob gets ['c'] with Subsudy of: 2", "Max gets ['b'] with Subsudy of: 1", "Nancy gets ['a'] with Subsudy of: 0"]
     
     """
+    # The results
+    results = []
+
     # list of the items that allocated to the agents
     items = list(Bounded_Subsidy(agents).values()) 
 
@@ -464,7 +456,9 @@ def print_results(agents: AgentList):
 
     # print the results
     for index,agent in enumerate(agents):
-        print(str(agent.name()) + " gets " + str(items[index]) + " with Subsudy of: " + str(subsidy[index]))
+        results.append(str(agent.name()) + " gets " + str(items[index]) + " with Subsudy of: " + str(subsidy[index]))
+
+    return results
     
 
 #### MAIN
@@ -476,4 +470,5 @@ if __name__ == "__main__":
     (failures, tests) = doctest.testmod(report=True,optionflags=doctest.NORMALIZE_WHITESPACE)
     print("{} failures, {} tests".format(failures, tests))
 
+ 
     
