@@ -33,7 +33,7 @@ Epsilon = 0.01
 
 def general_course_allocation(utilities: ValuationMatrix, capacity: List[int], num_of_courses: int,
                       bound: int = 0, effect_variables: List[Dict[Set, int]] = None, constraint: List[Dict[Set, int]] = None) \
-        -> list[list[int]]:
+        -> List[List[int]]:
 
     """
     This function find the optimal course package for each student.
@@ -84,7 +84,7 @@ def general_course_allocation(utilities: ValuationMatrix, capacity: List[int], n
 def course_allocation(utilities: ValuationMatrix, budgets: List[float], prices: List[float], capacity: List[int],
                       num_of_courses: int, bound: int = 0,
                       effect_variables: List[Dict[Set, int]] = None, constraint: List[Dict[Set, int]] = None) \
-        -> list[list[bool]]:
+        -> List[List[bool]]:
     """
     The main function.
     The tabu search aims to find the price vector P for which the gap between demand and supply
