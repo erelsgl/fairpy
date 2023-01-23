@@ -6,7 +6,7 @@ Author: Israel-Yacobovich
 Since:  2023-01
 """
 
-from min_makespan_2apprximation import min_makespan_2apprximation
+from fairpy.items.min_makespan_2apprximation import min_makespan_2apprximation
 from fairpy import divide, ValuationMatrix
 import numpy as np
 
