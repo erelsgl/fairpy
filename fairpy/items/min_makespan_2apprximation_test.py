@@ -177,5 +177,4 @@ if __name__ == '__main__':
 
         return ValuationMatrix([[1, t, t + 1], [t, t + 1, (2*t + 2) / (2*t + 1)]])
 
-
     unittest.main()
