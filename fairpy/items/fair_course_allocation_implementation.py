@@ -1,4 +1,3 @@
-
 """
 Article Name:
 "Finding Approximate Competitive Equilibria: Efficient and Fair Course Allocation" (2010)
@@ -34,15 +33,14 @@ Epsilon = 0.01
 
 def general_course_allocation(utilities: ValuationMatrix, capacity: List[int], num_of_courses: int,
                       bound: int = 0, effect_variables: List[Dict[Set, int]] = None, constraint: List[Dict[Set, int]] = None) \
-        -> ValuationMatrix:
+        -> list[list[int]]:
 
     """
     This function find the optimal course package for each student.
     The function inserts random values for the price of each course (between 0 and 1)
     and for the budget of each student (between 1 and 2).
+    The function returns for each student a list containing the courses to which he was assigned.
 
-    # >>> unpredictable(MyClass()) #doctest: +ELLIPSIS
-    # [<doctest_ellipsis.MyClass object at 0x...>]
     Example 1: simple example.
     >>> general_course_allocation(ValuationMatrix([[60,30,6,4],[62,32,4,2]]), [1,1,1,1], 2)
     [[...], [...]]
@@ -61,6 +59,7 @@ def general_course_allocation(utilities: ValuationMatrix, capacity: List[int], n
 
     """
 
+    allocation = []
     budgets = []
     prices = []
 
@@ -70,13 +69,22 @@ def general_course_allocation(utilities: ValuationMatrix, capacity: List[int], n
     for course in utilities.objects():
         prices.append(np.random.randint(1, 100)/100)
 
-    return course_allocation(utilities, budgets, prices, capacity, num_of_courses, bound, effect_variables, constraint)
+    allocation_matrix = course_allocation(utilities, budgets, prices, capacity, num_of_courses, bound, effect_variables, constraint)
+
+    for student in utilities.agents():
+        courses = []
+        for course in utilities.objects():
+            if allocation_matrix[student][course] == 1:
+                courses.append(course)
+        allocation.append(courses)
+
+    return allocation
 
 
 def course_allocation(utilities: ValuationMatrix, budgets: List[float], prices: List[float], capacity: List[int],
                       num_of_courses: int, bound: int = 0,
                       effect_variables: List[Dict[Set, int]] = None, constraint: List[Dict[Set, int]] = None) \
-        -> ValuationMatrix:
+        -> list[list[bool]]:
     """
     The main function.
     The tabu search aims to find the price vector P for which the gap between demand and supply
@@ -374,74 +382,3 @@ if __name__ == '__main__':
 
     import doctest
     doctest.testmod(optionflags=doctest.ELLIPSIS)
-
-
-    # print(general_course_allocation( ValuationMatrix([[30, 70], [55, 45], [80, 20]]), [1, 1], 1))
-
-    # utilities = ValuationMatrix([[3, 7, 1, 13, 34, 23, 24, 5, 77, 32, 12, 22, 34, 18, 51],
-    #                              [5, 2, 7, 33, 14, 58, 95, 33, 5, 2, 77, 90, 34, 21, 63],
-    #                              [76, 2, 7, 33, 14, 58, 95, 33, 5, 2, 77, 90, 34, 21, 63],
-    #                              [22, 3, 7, 33, 14, 58, 95, 33, 5, 2, 77, 90, 34, 21, 63],
-    #                              [56, 2, 7, 33, 14, 58, 95, 33, 5, 2, 77, 90, 34, 21, 63],
-    #                              [28, 7, 1, 64, 34, 23, 24, 5, 77, 32, 12, 22, 34, 18, 51],
-    #                              [50, 2, 7, 33, 14, 58, 95, 33, 2, 2, 77, 90, 34, 21, 63],
-    #                              [59, 2, 7, 33, 14, 58, 95, 33, 5, 2, 77, 9, 34, 21, 63],
-    #                              [23, 2, 7, 33, 14, 58, 95, 33, 5, 2, 77, 93, 34, 21, 63],
-    #                              [86, 2, 7, 33, 14, 9, 95, 33, 5, 2, 77, 90, 34, 21, 63],
-    #                              [33, 7, 1, 64, 34, 23, 24, 5, 77, 32, 12, 22, 34, 18, 51],
-    #                              [53, 2, 7, 33, 14, 58, 95, 33, 5, 2, 77, 90, 34, 21, 63],
-    #                              [22, 2, 7, 33, 14, 58, 95, 33, 5, 2, 77, 90, 34, 21, 63],
-    #                              [40, 2, 7, 33, 14, 58, 95, 33, 5, 2, 77, 90, 34, 21, 63],
-    #                              [86, 2, 7, 33, 14, 9, 95, 33, 5, 2, 77, 90, 34, 21, 63],
-    #                              [33, 7, 1, 64, 34, 23, 24, 5, 77, 32, 12, 22, 34, 18, 51],
-    #                              [53, 2, 7, 33, 14, 58, 95, 33, 5, 2, 77, 90, 34, 21, 63],
-    #                              [22, 2, 7, 33, 14, 58, 95, 33, 5, 2, 77, 90, 34, 21, 63],
-    #                              [40, 2, 7, 33, 14, 58, 95, 33, 5, 2, 77, 90, 34, 21, 63],
-    #                              [5, 2, 7, 33, 14, 58, 95, 33, 5, 2, 77, 90, 34, 21, 63]])
-    #
-    # bound: float = 0
-    # budgets: List[float] = [1.0, 1.11, 1.2, 1.22, 1.43, 1.32, 1.65, 1.222, 1.7, 1.56, 1.3, 1.41, 1.62, 1.52, 1.435,
-    #                         1.932, 1.685, 1.24, 1.27, 1.666]
-    # prices: List[float] = [1.0, 0.0, 1.2, 1.22, 0.3, 1.32, 1.65, 1.222, 1.7, 0.2, 0.2, 0.6, 0.66, 1.4, 2.1]
-    # capacity: List[int] = [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1]
-    # num_of_courses = 4
-    #
-    #
-    # utilities = ValuationMatrix([[3, 7, 1, 64, 34],
-    #                              [88, 2, 4, 6, 8],
-    #                              [5, 2, 7, 33, 14],
-    #                              [58, 95, 33, 5, 2],
-    #                              [77, 90, 34, 21, 63],
-    #                              [3, 7, 1, 64, 34],
-    #                              [88, 2, 4, 6, 8],
-    #                              [5, 2, 7, 33, 14],
-    #                              [58, 95, 33, 5, 2],
-    #                              [77, 90, 34, 21, 63],
-    #                              [3, 7, 1, 64, 34],
-    #                              [88, 2, 4, 6, 8],
-    #                              [5, 2, 7, 33, 14],
-    #                              [58, 95, 33, 5, 2],
-    #                              [77, 90, 34, 21, 63]])
-    #
-    # bound: float = 0
-    # budgets: List[float] = [1.5, 1.11, 1.222, 1.7, 1.56, 1.3, 1.41, 1.62, 1.52, 1.435, 1.932, 1.685, 1.24, 1.27, 1.666]
-    # prices: List[float] = [1.0, 0.0, 1.2, 1.22, 0.3]
-    # capacity: List[int] = [3, 3, 3, 3, 3]
-    # num_of_courses = 3
-    #
-    # placements = []
-    # for i in utilities.agents():
-    #     placements.append(max_utility(utilities[i], budgets[i], prices, num_of_courses))
-    #
-    # # course_allocation test:
-    # print("course_allocation:")
-    # print(np.array(course_allocation(utilities, budgets, prices, capacity, num_of_courses)))
-    # # neighbors test:
-    # print("neighbors:")
-    # print(neighbors(utilities, budgets, prices, capacity, num_of_courses))
-    # # score test:
-    # print("score:")
-    # print(score(placements, capacity))
-    # # max_utility test:
-    # print("max_utility")
-    # print(max_utility(utilities[0], budgets[0], prices, num_of_courses))
