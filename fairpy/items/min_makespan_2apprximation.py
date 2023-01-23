@@ -1,5 +1,5 @@
 '''
-Find 2 approximation min makespan on unrelated parallel m.
+Find 2 approximation min makespan on unrelated parallel machines.
 Based on:
 
 Jan Karel Lenstra, David, B. Shmoys and Eva Tardo.
@@ -11,7 +11,7 @@ Date: 2023-01
 '''
 
 
-from fairpy import ValuationMatrix, Allocation, AllocationMatrix
+from fairpy import ValuationMatrix, Allocation, AllocationMatrix, divide
 
 import numpy as np
 from numpy.random import randint, uniform
@@ -55,6 +55,10 @@ def min_makespan_2apprximation(input: ValuationMatrix) -> Allocation:
         Agent #0 gets { 100.0% of 1} with value 2.
         Agent #1 gets { 100.0% of 2} with value 1.
         Agent #2 gets { 100.0% of 0} with value 2.
+        <BLANKLINE>
+        >>> divide(min_makespan_2apprximation, ValuationMatrix([[1, 1.1], [0.5, 1.2]]))
+        Agent #0 gets { 100.0% of 1} with value 1.1.
+        Agent #1 gets { 100.0% of 0} with value 0.5.
         <BLANKLINE>
     '''
 
