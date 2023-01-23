@@ -1,6 +1,38 @@
 from fairpy.items.min_makespan_2apprximation import *
 import unittest
 
+''' Testing methods, origonal and based on the paper '''
+
+def RandomTesting(algo: MinMakespanAlgo, iterations: int, **kwargs):
+
+        ''' spesefied amount of random tests generator '''
+
+        scd = schedule()
+
+        for i in range(iterations):
+
+            MinMakespan(algo, ValuationMatrix(uniform(1, 3, (randint(1, 60), randint(1, 20)))), scd, **kwargs)
+            yield scd.makespan
+
+
+def apprx_lim_exm1(m: int) -> ValuationMatrix:
+
+    '''
+    first example to show strictness of the
+    approximiation factor of the algorithm, 2
+    '''
+
+    return ValuationMatrix([[m] + [1] * (m*m - m)] * m)
+
+def apprx_lim_exm2(t: int) -> ValuationMatrix:
+
+    '''
+    second example to show strictness of the
+    approximiation factor of the algorithm, 2
+    '''
+
+    return ValuationMatrix([[1, t, t + 1], [t, t + 1, (2*t + 2) / (2*t + 1)]])
+
 
 class TestScedualing(unittest.TestCase):
 
@@ -146,35 +178,5 @@ class TestMinMakespanAlgos(unittest.TestCase):
 
 
 if __name__ == '__main__':
-
-
-    def RandomTesting(algo: MinMakespanAlgo, iterations: int, **kwargs):
-
-        ''' spesefied amount of random tests generator '''
-
-        scd = schedule()
-
-        for i in range(iterations):
-            MinMakespan(algo, ValuationMatrix(uniform(1, 3, (randint(1, 60), randint(1, 20)))), scd, **kwargs)
-            yield scd.makespan
-
-
-    def apprx_lim_exm1(m: int) -> ValuationMatrix:
-
-        '''
-        first example to show strictness of the
-        approximiation factor of the algorithm, 2
-        '''
-
-        return ValuationMatrix([[m] + [1] * (m*m - m)] * m)
-
-    def apprx_lim_exm2(t: int) -> ValuationMatrix:
-
-        '''
-        second example to show strictness of the
-        approximiation factor of the algorithm, 2
-        '''
-
-        return ValuationMatrix([[1, t, t + 1], [t, t + 1, (2*t + 2) / (2*t + 1)]])
 
     unittest.main()
