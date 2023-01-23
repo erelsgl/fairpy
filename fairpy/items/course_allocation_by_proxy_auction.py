@@ -11,7 +11,7 @@ Since:  2023-01
 """
 
 
-from ast import List
+from typing import List, Tuple
 from collections import defaultdict
 import math
 from fairpy.agents import AdditiveAgent
@@ -87,7 +87,7 @@ def calculate_b_double_star(Bi,B_tag_i,b_star):
     Bi_without_B_tag_i_ = [bid for bid in Bi if bid not in B_tag_i and bid >= b_star]
     return min(Bi_without_B_tag_i_) if Bi_without_B_tag_i_ else None
            
-def course_allocation(agents,course_capacity:int,course_list,course_amount_per_agent:int) -> Allocation:
+def course_allocation(agents: List[AdditiveAgent],course_capacity:int,course_list: List[str],course_amount_per_agent:int) -> Allocation:
     """
     :param agents: The agents who participate in the allocation and there course preferences.
     :param course_capacity: The courses capacity.

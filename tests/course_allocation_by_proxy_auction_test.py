@@ -58,4 +58,4 @@ def test_fail_zero_capacity():
 
   
 if __name__ == "__main__":
-    pytest.main(["tests/course_allocation_by_proxy_auction_test.py"])
+    pytest.main(["-v","tests/course_allocation_by_proxy_auction_test.py"])
