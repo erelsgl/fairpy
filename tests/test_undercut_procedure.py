@@ -1,12 +1,14 @@
 #!python3
 """
-Implementing the algorithm in the following article: "A note on the undercut procedure"
+Testing the undercut procedure - a procedure for fair item assignment between *two* people.
+
+The algorithm is in the following article: "A note on the undercut procedure"
 By Haris Aziz
 2014
 Link to the article: https://arxiv.org/pdf/1312.6444.pdf
+
 Programmer: Helen Yonas
 Date: 2022-05
-The undercut procedure is a procedure for fair item assignment between *two* people.
 """
 
 import fairpy
@@ -89,4 +91,4 @@ class TestAlgo(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
