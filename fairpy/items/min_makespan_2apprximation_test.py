@@ -1,11 +1,14 @@
 from fairpy.items.min_makespan_2apprximation import *
 import unittest
 
+
+
 ''' Testing methods, origonal and based on the paper '''
+
 
 def RandomTesting(algo: MinMakespanAlgo, iterations: int, **kwargs):
 
-        ''' spesefied amount of random tests generator '''
+        ''' specified amount of random tests generator '''
 
         scd = schedule()
 
@@ -19,7 +22,7 @@ def apprx_lim_exm1(m: int) -> ValuationMatrix:
 
     '''
     first example to show strictness of the
-    approximiation factor of the algorithm, 2
+    approximation factor of the algorithm, 2
     '''
 
     return ValuationMatrix([[m] + [1] * (m*m - m)] * m)
@@ -28,10 +31,11 @@ def apprx_lim_exm2(t: int) -> ValuationMatrix:
 
     '''
     second example to show strictness of the
-    approximiation factor of the algorithm, 2
+    approximation factor of the algorithm, 2
     '''
 
     return ValuationMatrix([[1, t, t + 1], [t, t + 1, (2*t + 2) / (2*t + 1)]])
+
 
 
 class TestScedualing(unittest.TestCase):
@@ -70,7 +74,7 @@ class TestScedualing(unittest.TestCase):
         for mechine, job in self.scd1:
             self.assertEqual(self.scd1.costs[mechine, job], self.mat[mechine, job])
 
-        # scedualing
+        # scheduling
 
         self.assertEqual(self.scd1.assignments[0], 0)
         with self.assertRaises(KeyError): self.scd2.assignments[0]
@@ -80,9 +84,11 @@ class TestScedualing(unittest.TestCase):
         self.assertFalse(self.scd1.complete())
         self.assertTrue(self.scd2.complete())
 
+
     def testDerived1(self):
 
         self.assertEqual({0: 0}, self.scd1.assignments)
+
 
     def testDerived2(self):
 
@@ -95,6 +101,7 @@ class TestScedualing(unittest.TestCase):
 class TestMinMakespanAlgos(unittest.TestCase):
 
     def setUp(self):    self.scd = schedule()
+
 
     def test_validaty(self):
 
@@ -127,6 +134,7 @@ class TestMinMakespanAlgos(unittest.TestCase):
         self.assertTrue(self.scd.complete())
         self.assertEqual(3, self.scd.makespan)
 
+
     def test_apprx_factor(self):
 
         for i in range(10):
@@ -140,7 +148,8 @@ class TestMinMakespanAlgos(unittest.TestCase):
             MinMakespan(apprx, mat, self.scd)
 
             try:    self.assertTrue(self.scd.makespan <= 2.1 * optimum)
-            except: logger.debug('approximation gurentee did not hold, input: \n%s, output: %s, makespan: %s, OPT: %s', mat, self.scd.assignments, self.scd.makespan, optimum)
+            except: logger.debug('approximation guarantee did not hold, input: \n%s, output: %s, makespan: %s, OPT: %s', mat, self.scd.assignments, self.scd.makespan, optimum)
+
 
     def test_aprrx_lim(self):
 
@@ -177,6 +186,16 @@ class TestMinMakespanAlgos(unittest.TestCase):
         self.assertEqual(7, self.scd.makespan)
 
 
+
 if __name__ == '__main__':
+
+    logging_format = '%(levelname)s - %(message)s'
+    logging.basicConfig(level = logging.DEBUG, filename = 'pyproject.log', filemode = 'w', format = logging_format)
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.ERROR)
+    formatter = logging.Formatter(logging_format)
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
 
     unittest.main()

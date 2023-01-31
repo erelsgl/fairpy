@@ -1,14 +1,25 @@
 """ 
-A demo program for finding apprimated min makespan schedual
-for unrelated perallel machines.
+A demo program for finding approximated min makespan schedule
+for unrelated parallel machines.
 
 Author: Israel-Yacobovich
 Since:  2023-01
 """
 
-from fairpy.items.min_makespan_2apprximation import min_makespan_2apprximation
+from fairpy.items.min_makespan_2apprximation import min_makespan_2apprximation, logger
 from fairpy import divide, ValuationMatrix
 import numpy as np
+import logging
+
+
+logging_format = '%(levelname)s - %(message)s'
+logging.basicConfig(level = logging.DEBUG, filename = 'pyproject.log', filemode = 'w', format = logging_format)
+
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.ERROR)
+formatter = logging.Formatter(logging_format)
+stream_handler.setFormatter(formatter)
+logger.addHandler(stream_handler)
 
 
 print('2 approximation min makespan', end = '\n\n')
@@ -31,7 +42,7 @@ print(divide(min_makespan_2apprximation, input))
 
 print(divide(min_makespan_2apprximation, input))
 
-print('deals well with dummy caces:\n')
+print('deals well with dummy cases:\n')
 print('indentity matrix, makespan:')
 print(sum(divide(min_makespan_2apprximation, ValuationMatrix(np.eye(100))).utility_profile()))
 

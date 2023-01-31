@@ -2,9 +2,9 @@
 Find 2 approximation min makespan on unrelated parallel machines.
 Based on:
 
-Jan Karel Lenstra, David, B. Shmoys and Eva Tardo.
+Jan Karel Lenstra, David B Shmoys and Eva Tardos.
 [2-Approximation algorithm for a generalization of scheduling on unrelated parallel machines]
-(https://www.sciencedirect.com/science/article/abs/pii/S0020019018301522),
+(https://link.springer.com/article/10.1007/BF01585745),
 
 Programmers: Israel Yacobovich
 Date: 2023-01
@@ -25,25 +25,13 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-logging_format = '%(levelname)s - %(message)s'
-
-logging.basicConfig(level = logging.DEBUG, filename = 'pyproject.log', filemode = 'w', format = logging_format)
-
-stream_handler = logging.StreamHandler()
-stream_handler.setLevel(logging.ERROR)
-formatter = logging.Formatter(logging_format)
-stream_handler.setFormatter(formatter)
-logger.addHandler(stream_handler)
-
-
-
 " The Main Method "
 
 def min_makespan_2apprximation(input: ValuationMatrix) -> Allocation:
 
     ''' 
-        This method returns a 2-approximation of the optimal minimum makespan.
-        Both as the actuall scedualing and the makespan.
+        This method returns a 2-approximation of the optimal min makespan.
+        Both as the actual scheduling and the makespan.
 
         >>> min_makespan_2apprximation(ValuationMatrix([[1, 5, 1, 10], [2, 4, 4, 3], [2, 5, 3, 3], [3, 3, 7, 10]]))
         Agent #0 gets { 100.0% of 0, 100.0% of 2} with value 2.
@@ -75,7 +63,7 @@ def min_makespan_2apprximation(input: ValuationMatrix) -> Allocation:
 
 
 
-" auxiliaries "
+" Auxiliaries "
 
 
 class schedule:
@@ -100,7 +88,6 @@ class schedule:
         >>> print(scd.assignments)
         {0: 0, 1: 1}
 
-        
      '''
 
     def __init__(self) -> None:
@@ -140,26 +127,26 @@ class schedule:
     def __iter__(self) -> Iterator[int]:
         return iter(product(self.costs.agents(), self.costs.objects()))
 
-    # lazy initilization
+    # lazy initialization
     def build(self, cost_matrix: ValuationMatrix):
 
         # different algorithms can use an instance with the same cost matrix, Flyweight design
         self.costs = cost_matrix
         self._assignments = {}
 
-    # assigning a job to a mechine to process
+    # assigning a job to a machine to process
     def scedual(self, mechine: int, job: int):
 
         if job in self._assignments.keys() : raise KeyError('assignment already scedualed')
         self._assignments[job] = mechine
 
-    # delet all assignments, start over
+    # delete all assignments, start over
     def clear(self): self._assignments.clear()
 
     # are all jobs scedualed
     def complete(self) -> bool: return len(self._assignments) == self.jobs
 
-    # current workload of spesific mechine
+    # current workload of specific machine
     def loadOf(self, mechine: int) -> float:
         return sum(self.costs[mechine, job]  for job in self.costs.objects() if job in self._assignments.keys() and self._assignments[job] == mechine)
 
@@ -206,9 +193,8 @@ def optimal(output: schedule) -> None:
 def greedy(output: schedule) -> None:
     
     ''' 
-    greedy sceduling.
-    Iterate through all jobs, at each iteration:
-    assign to the mechine that minimises the current makspan.
+    greedy scheduling. Iterate through all jobs, at each iteration:
+    assign to the machine that minimizes the current makespan.
 
     >>> output = schedule()
     >>> output.build(ValuationMatrix([[1, 2, 5], [2, 2, 1],[2, 3, 5]]))
@@ -246,7 +232,7 @@ def greedy(output: schedule) -> None:
 def apprx(output: schedule) -> None:
 
     '''
-    closing in on the optimal solution with binry search
+    closing in on the optimal solution with binary search
     using a LP and a spacial rounding algo
 
     >>> output = schedule()
@@ -296,7 +282,7 @@ def apprx(output: schedule) -> None:
 
 def LinearProgram(output: schedule, apprx_bound: float) -> bool:
 
-    ''' The linear program fassioned in the paper '''
+    ''' The linear program fashioned in the paper '''
 
     variables = cp.Variable(output.shape)
     # all variables are at least 0
@@ -341,7 +327,7 @@ def LinearProgram(output: schedule, apprx_bound: float) -> bool:
 
 def Round(output: schedule, fractional_sol: np.ndarray):
 
-    ''' The rounding theorem for the LP's solution fassioned in the paper '''
+    ''' The rounding theorem for the LP's solution fashioned in the paper '''
 
     logger.info('fractional solution for the LP: \n%s', fractional_sol)
 
@@ -365,7 +351,7 @@ def Round(output: schedule, fractional_sol: np.ndarray):
         if fractional_sol[mechine, job] == 1:
 
             try: output.scedual(mechine, job)
-            except Exception: logger.exception('Excaption while scedualing\n', exc_info = True)
+            except Exception: logger.exception('Exception while scedualing\n', exc_info = True)
             
             G.remove_edge(ind_to_node(mechine, False), ind_to_node(job, True))
 
@@ -391,7 +377,7 @@ def Round(output: schedule, fractional_sol: np.ndarray):
 def MinMakespan(algo: MinMakespanAlgo, input: ValuationMatrix, output: schedule, **kwargs):
 
     '''
-    generic function for the min-makespan problome
+    generic function for the min-makespan problem
 
     >>> scd = schedule()
     >>> MinMakespan(greedy, ValuationMatrix([[10, 5, 7], [10, 2, 5],[1, 6, 6]]), scd)
@@ -418,6 +404,15 @@ def MinMakespan(algo: MinMakespanAlgo, input: ValuationMatrix, output: schedule,
 if __name__ == '__main__':
 
     import doctest
+
+    logging_format = '%(levelname)s - %(message)s'
+    logging.basicConfig(level = logging.DEBUG, filename = 'pyproject.log', filemode = 'w', format = logging_format)
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.ERROR)
+    formatter = logging.Formatter(logging_format)
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
     
     failures, tests = doctest.testmod(report = True)
     print("{} failures, {} tests".format(failures, tests))
