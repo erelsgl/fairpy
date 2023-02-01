@@ -1,4 +1,8 @@
 from algorithm1 import algorithm1,Course,Student,random,TabuList,copy,map_price_demand,reset_update_prices,cmp_to_key,reset_students,time
+
+def pretty_testing(lst:list[float]):
+    return [round(item, 2) for item in lst]
+
 def test1(): 
     a = Course(name='a', price=0, max_capacity=5)
     b = Course(name='b', price=0, max_capacity=3)
@@ -12,7 +16,7 @@ def test1():
     s5 = Student(name='s5', budget=15, preferences=([a, b, c]))
     students = [s1, s2, s3, s4, s5]
     max_budget = 15
-    assert(algorithm1(students, courses, max_budget, time_to= 1, seed = 3, counter=4) == [4.050000000000001, 1.9500000000000002, 5.55])
+    assert(pretty_testing(algorithm1(students, courses, max_budget, time_to= 1, seed = 3, counter=4)) == [4.05, 1.95, 5.55])
 
 def test2():
     a = Course(name='a', price=0, max_capacity=3)
@@ -27,7 +31,7 @@ def test2():
     students = [s1, s2, s3, s4, s5]
 
     max_budget = 10
-    assert(algorithm1(students, courses, max_budget, time_to= 1, seed = 3, counter=2) == [2.7, 1.3, 3.7])
+    assert(pretty_testing(algorithm1(students, courses, max_budget, time_to= 1, seed = 3, counter=2)) == [2.7, 1.3, 3.7])
 
 def test3():
     a = Course(name='a', price=0, capacity=0, max_capacity=5)
@@ -51,19 +55,8 @@ def test3():
     s12 = Student(name='s12', budget=18, year=1, courses=[], preferences=([d,f,e]))
     students = [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12]
     max_budget = 18
-    assert(algorithm1(students, courses, max_budget, time_to= 1, seed = 3, counter = 3) == [3.96, 12.6, 9.9, 4.68, 1.08, 4.140000000000001])#7
+    assert(pretty_testing(algorithm1(students, courses, max_budget, time_to= 1, seed = 3, counter = 3)) == [3.96, 12.6, 9.9, 4.68, 1.08, 4.14])#7
 
 if __name__=="__main__":
     import pytest
     pytest.main(args=["fairpy/course_allocation"])
-
-'''
-disclaimer for testing
-the tests are not conclusive since computing power may vary
-and they using time which work differently in different machines.
-that worked on laptop with this specs:
-cpu = i5 6200u
-os = ubuntu
-graphics card = None
-and youtube in the background...
-'''
