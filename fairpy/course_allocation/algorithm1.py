@@ -119,12 +119,20 @@ def map_price_demand(price_vector, max_budget: float, students,
 #function returning alpha error 
 def alpha_error(price_vector, max_budget, students, courses):
     map_price_demand(price_vector, max_budget, students, courses)
-    s = 0
+    sum = 0
     for course in courses:
-        s = s + (course.max_capacity - course.capacity)**2
-    return s
+        sum += (course.max_capacity - course.capacity)**2
+    return sum
 
-#
+#return list of string representation of demands
+''' 
+    >>> a = Course(name='a', price=0, capacity = 3, max_capacity=5)
+    >>> b = Course(name='b', price=0, capacity = 4,max_capacity=3)
+    >>> c = Course(name='c', price=0, capacity = 4,max_capacity=5)
+    >>> courses = [a, b, c]
+    >>> lst = get_demand_vector(courses)
+    >>> ["3/5", "4/3", "4/5"]
+'''
 def get_demand_vector(courses):
     lst = []
     for course in courses:
@@ -165,7 +173,7 @@ def algorithm1(students, courses, max_budget:float, time_to:float, seed:int = 3,
     #for better testing 
     random_state = np.random.RandomState(seed=3)
     while(time.time() - start_time < time_to):
-        price_vector = [((random_state.randint(low=1,high=99)/100)*max_budget) for i in range(len(courses))]
+        price_vector = [((random_state.randint(low=1,high=90)/100)*max_budget) for i in range(len(courses))]
         search_error = alpha_error(price_vector, max_budget, students, courses)
         tabu_list = TabuList(5)
         c = 0
@@ -190,8 +198,9 @@ def algorithm1(students, courses, max_budget:float, time_to:float, seed:int = 3,
                 price_vector = temp
                 #add the demands and not the price vector
                 current_error = alpha_error(price_vector, max_budget, students, courses)
-                tabu_list.add(get_demand_vector(courses))
-                logger.debug((get_demand_vector(courses)))
+                demand_vector = get_demand_vector(courses)
+                tabu_list.add(demand_vector)
+                logger.debug(demand_vector)
                 if(current_error < search_error):
                     search_error = current_error
                     logger.debug("search error is %d", search_error)

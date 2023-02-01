@@ -10,6 +10,9 @@ class Student:
 
     def __str__(self) -> str:
         return self.name + " year: " + str(self.year) + "with budget of (" + str(self.budget)  + ") \n" + str(self.courses) + "\n " + str(self.preferences) 
+
+    def student_courses(self):
+        return f"student : {self.name} and courses " + str([c.name for c in self.courses])
     
     def comperator(a, b):
         if(a.year - b.year == 0):

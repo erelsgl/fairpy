@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
     # Generate 40 students
     students = []
-    for k in range(40):
+    for k in range(30):
         name = 's' + str(k+1)
         budget = 20
         year = random.randint(1, 4)
@@ -56,7 +56,7 @@ if __name__ == '__main__':
         students.append(Student(name=name, budget=budget,
             year=year, courses=courses, preferences=preferences))
 
-    max_budget = 20
+    max_budget = 25
     price_vector1 = adaptors.divide(algorithm1,input=students,courses=courses, max_budget=max_budget, seed=3, time_to=10)
 
     # price_vector1 = algorithm1(
@@ -66,18 +66,15 @@ if __name__ == '__main__':
     p_scalar = (max_budget)
     price_vector2 =adaptors.divide(algorithm2,input=[course.price for course in courses],maximum=p_scalar,
         eps=0.5, csp_mapping=csp_mapping, students=students, courses=courses)
-    # price_vector2 = algorithm2(price_vector=[course.price for course in courses], maximum=p_scalar,
-    #     eps=0.5, csp_mapping=csp_mapping, students=students, courses=courses)
+    
     print(price_vector2)
-    # map_price_demand(price_vector=price_vector2,courses=courses,max_budget=max_budget,students=students)
     reset_students(students, max_budget)
     reset_update_prices(price_vector=price_vector2, courses=courses)
     csp_mapping(students, courses)
     adaptors.divide(algorithm3,input=courses,students_matrix=get_courses_students_matrix(students, courses),students=students)    
-    # algorithm3(courses=courses, students=students,
-    #     students_matrix=get_courses_students_matrix(students, courses))
-    for s in courses:
-        print(s)
+   
+    for s in students:
+        print(s.student_courses())
     print("***********")
     print(time.time() - start_time)
 
