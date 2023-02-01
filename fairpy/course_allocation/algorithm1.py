@@ -173,7 +173,7 @@ def algorithm1(students, courses, max_budget:float, time_to:float, seed:int = 3,
     #for better testing 
     random_state = np.random.RandomState(seed=3)
     while(time.time() - start_time < time_to):
-        price_vector = [((random_state.randint(low=1,high=90)/100)*max_budget) for i in range(len(courses))]
+        price_vector = [((random_state.randint(low=1,high=99)/100)*max_budget) for i in range(len(courses))]
         search_error = alpha_error(price_vector, max_budget, students, courses)
         tabu_list = TabuList(5)
         c = 0
