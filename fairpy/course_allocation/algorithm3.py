@@ -11,15 +11,11 @@ from Course import Course
 from Student import Student
 from functools import cmp_to_key
 import doctest
+
+
 import logging
 logger = logging.getLogger(__name__)
-console = logging.StreamHandler()  # writes to stderr (= cerr)
-logfile = logging.FileHandler("my_logger3.log", mode="w") 
-logger.handlers = [console,logfile]
-logfile.setFormatter(logging.Formatter('%(asctime)s: %(levelname)s: %(name)s: Line %(lineno)d: %(message)s'))
 
-logger.setLevel(logging.DEBUG)
-console.setLevel(logging.INFO)
 
 def mapping_csp(courses, students, helper:dict, students_matrix):
     '''
