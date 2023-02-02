@@ -118,7 +118,10 @@ def algorithm3(courses, students, students_matrix,csp_students:callable =mapping
     logger.debug(logger.debug(print_matrix(students, courses, students_matrix)))
     return students_matrix
 
+algorithm3.logger = logger
+
+
 if __name__=="__main__":
     import pytest
     #run algorithm and test of the algorithm
-    pytest.main(args=["fairpy/course_allocation/algorithm3.py", "fairpy/course_allocation/algorithm3_test.py"])
+    pytest.main(args=[__file__, __file__[:-3]+"_test.py"])

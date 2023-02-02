@@ -1,6 +1,6 @@
 from algorithm1 import algorithm1,Course,Student,random,TabuList,copy,map_price_demand,reset_update_prices,cmp_to_key,reset_students,time
 
-def pretty_testing(lst:list[float]):
+def pretty_testing(lst:list):
     return [round(item, 2) for item in lst]
 
 def test1(): 
