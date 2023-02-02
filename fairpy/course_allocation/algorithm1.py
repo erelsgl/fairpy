@@ -1,4 +1,7 @@
 '''
+Course Match: A Large-Scale Implementation of Approximate Competitive Equilibrium from Equal Incomes for Combinatorial Allocation
+Published by:Eric Budish, Gérard P. Cachon, Judd B. Kessler, Abraham Othmanba
+Link: https://pubsonline.informs.org/doi/epdf/10.1287/opre.2016.1544
 Heuristic search algorithm through price space, originally developed in Othman et al. 2010
 designed to give each student a fixed budget at first and try find the must corresponding
 price vector to approximate competitive equilibrium with lowest clearing error.
@@ -15,17 +18,11 @@ import time
 import random
 import copy
 import doctest
+
+
 import logging
-
-
 logger = logging.getLogger(__name__)
-console = logging.StreamHandler() 
-logfile = logging.FileHandler("my_logger1.log", mode="w") 
-logger.handlers = [console,logfile]
-logfile.setFormatter(logging.Formatter('%(asctime)s: %(levelname)s: %(name)s: Line %(lineno)d: %(message)s'))
 
-logger.setLevel(logging.DEBUG)
-console.setLevel(logging.INFO)
 
 def reset_update_prices(price_vector, courses):
     '''
@@ -224,7 +221,12 @@ def algorithm1(students, courses, max_budget:float, time_to:float, seed:int = 3,
 
     logger.debug(logger_counter)
     return pStar
+
+algorithm1.logger = logger
+
 if __name__=="__main__":
     import pytest
-    #run algorithm and test of the algorithm 
-    pytest.main(args=["fairpy/course_allocation/algorithm1.py", "fairpy/course_allocation/algorithm1_test.py"])
+    #run algorithm and test of the algorithm
+    print(__file__)
+    # s1 = __file__[:-3] + "_test.py" 
+    pytest.main(args=[__file__, __file__[:-3]+"_test.py"])  

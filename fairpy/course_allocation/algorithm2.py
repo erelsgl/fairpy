@@ -13,16 +13,11 @@ from Course import Course
 from Student import Student
 from functools import cmp_to_key
 import doctest
+
+
 import logging
-
 logger = logging.getLogger(__name__)
-console = logging.StreamHandler() 
-logfile = logging.FileHandler("my_logger2.log", mode="w") 
-logger.handlers = [console,logfile]
-logfile.setFormatter(logging.Formatter('%(asctime)s: %(levelname)s: %(name)s: Line %(lineno)d: %(message)s'))
 
-logger.setLevel(logging.DEBUG)
-console.setLevel(logging.WARNING)
 
 def csp_mapping(students,courses):
     '''
@@ -136,8 +131,11 @@ def algorithm2(price_vector, maximum:int, eps:float, csp_mapping:callable, stude
         J_hat = max(courses, key=cmp_to_key(Course.comperator)) #15
     logger.info(get_demand_vector(courses))
     return [c.price for c in courses] #return at the end
+    
+algorithm2.logger = logger
+
 
 if __name__=="__main__":
     import pytest
     # #run algorithm and test of the algorithm
-    pytest.main(args=["fairpy/course_allocation/algorithm2.py", "fairpy/course_allocation/algorithm2_test.py"])
+    pytest.main(args=[__file__, __file__[:-3]+"_test.py"])

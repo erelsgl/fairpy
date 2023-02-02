@@ -19,6 +19,14 @@ from algorithm1 import algorithm1, random, TabuList, copy, map_price_demand, res
 from algorithm2 import algorithm2, csp_mapping, copy, math, cmp_to_key
 from algorithm3 import algorithm3, mapping_csp
 
+import logging, sys
+
+algorithm1.logger.addHandler(logging.FileHandler("my_logger1.log", mode="w"))
+algorithm1.logger.setLevel(logging.DEBUG)
+algorithm2.logger.addHandler(logging.FileHandler("my_logger2.log", mode="w"))
+algorithm2.logger.setLevel(logging.DEBUG)
+algorithm3.logger.addHandler(logging.FileHandler("my_logger3.log", mode="w"))
+algorithm3.logger.setLevel(logging.DEBUG)
 
 def get_courses_students_matrix(students, courses):
     # Initialize the matrix with all False values

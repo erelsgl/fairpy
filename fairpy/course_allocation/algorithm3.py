@@ -11,15 +11,11 @@ from Course import Course
 from Student import Student
 from functools import cmp_to_key
 import doctest
+
+
 import logging
 logger = logging.getLogger(__name__)
-console = logging.StreamHandler()  # writes to stderr (= cerr)
-logfile = logging.FileHandler("my_logger3.log", mode="w") 
-logger.handlers = [console,logfile]
-logfile.setFormatter(logging.Formatter('%(asctime)s: %(levelname)s: %(name)s: Line %(lineno)d: %(message)s'))
 
-logger.setLevel(logging.DEBUG)
-console.setLevel(logging.INFO)
 
 def mapping_csp(courses, students, helper:dict, students_matrix):
     '''
@@ -118,7 +114,10 @@ def algorithm3(courses, students, students_matrix,csp_students:callable =mapping
     logger.debug(logger.debug(print_matrix(students, courses, students_matrix)))
     return students_matrix
 
+algorithm3.logger = logger
+
+
 if __name__=="__main__":
     import pytest
     #run algorithm and test of the algorithm
-    pytest.main(args=["fairpy/course_allocation/algorithm3.py", "fairpy/course_allocation/algorithm3_test.py"])
+    pytest.main(args=[__file__, __file__[:-3]+"_test.py"])
