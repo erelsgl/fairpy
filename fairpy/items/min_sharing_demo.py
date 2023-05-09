@@ -38,7 +38,7 @@ def demo(title:str, v):
 	start = now()
 	z = divide(maxproduct_allocation_with_min_sharing, v).round(3)
 	print("Allocation:\n",z, "Time: ", now()-start)
-	z = divide(maxproduct_allocation_with_min_sharing, v, tolerance=0.001).round(3)
+	z = divide(maxproduct_allocation_with_min_sharing, v, tolerance=0.01).round(3)
 	print("Allocation:\n",z, "Time: ", now()-start)
 
 demo(
