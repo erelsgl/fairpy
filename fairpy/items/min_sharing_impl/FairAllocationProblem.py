@@ -123,10 +123,17 @@ class ErrorAllocationMatrix(AllocationMatrix):
 
     def __init__(self, default_num_of_sharings:int):
         self.default_num_of_sharings = default_num_of_sharings
+        self.num_of_agents = 0
         pass
 
     def num_of_sharings(self): 
         return self.default_num_of_sharings
+
+    def __getitem__(self, key):
+        return None
+
+    def agents(self):
+        return []
 
     def __repr__(self):
         return "ErrorAllocationMatrix"
