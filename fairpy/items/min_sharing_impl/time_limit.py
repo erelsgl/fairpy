@@ -22,6 +22,7 @@ is_time_limit_warning_issued = False
 
 @contextlib.contextmanager
 def time_limit(seconds):
+    global IS_TIME_LIMIT_SUPPORTED, is_time_limit_warning_issued
     if IS_TIME_LIMIT_SUPPORTED:
         def signal_handler(signum, frame):
             raise TimeoutException("Timed out!")
