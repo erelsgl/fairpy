@@ -1,5 +1,10 @@
 # Fair item allocation algorithms
 
+This folder contains algorithms for dividing a finite number of items.
+
+Some algorithms assume that the items are *discrete* (indivisible), as in the problem of [Fair item allocation](https://en.wikipedia.org/wiki/Fair_item_allocation).
+Other algorithms assume that the items are *continuous* (divisible).
+
 The following algorithms are implemented in this folder:
 
 * Round-robin.

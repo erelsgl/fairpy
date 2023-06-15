@@ -1,5 +1,7 @@
 # Cake-cutting algorithms
 
+[Cake-cutting](https://en.wikipedia.org/wiki/Fair_cake-cutting) means dividing a resource that is *heterogeneous* and *continuous*, such as a birthday cake. The resource is usually represented by a real interval, such as the interval [0,1].
+
 The following algorithms are implemented in this folder:
 
 * Abram and Lot (Genesis 13).
