@@ -12,7 +12,7 @@ Since:  2023-01
 import pytest
 
 from fairpy.agents import AdditiveAgent
-from fairpy.items.course_allocation_by_proxy_auction import course_allocation
+from fairpy.courses.course_allocation_by_proxy_auction import course_allocation
 
 def test_none_fail_input_agents():
     assert pytest.raises(TypeError, course_allocation, None, 5, ["c1", "c2", "c3", "c4"], 2)

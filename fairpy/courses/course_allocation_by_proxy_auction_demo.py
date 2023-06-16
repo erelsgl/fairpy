@@ -9,7 +9,7 @@ Since: 2023-01
 
 import fairpy
 from fairpy.agents import AdditiveAgent
-from fairpy.items.course_allocation_by_proxy_auction import course_allocation
+from fairpy.courses.course_allocation_by_proxy_auction import course_allocation
 
 print("Course Allocation Algorithm starting..\n")
 Alice = AdditiveAgent({"c1": 1, "c2": 2, "c3": 3,}, name="Alice")

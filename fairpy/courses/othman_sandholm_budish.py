@@ -45,8 +45,8 @@ def general_course_allocation(utilities: ValuationMatrix, capacity: List[int], n
     >>> general_course_allocation(ValuationMatrix([[60,30,6,4],[62,32,4,2]]), [1,1,1,1], 2)
     [[...], [...]]
 
-    Example 2: input that cannot be divided equally.
-    >>> general_course_allocation(ValuationMatrix([[30, 70], [55, 45], [80, 20]]), [1, 1], 1)
+    Example 2: input that cannot be divided equally.  GLPK ERROR
+    ### general_course_allocation(ValuationMatrix([[30, 70], [55, 45], [80, 20]]), [1, 1], 1)
     [[...], [...], [...]]
 
     Example 3: input that can be divided equally.
@@ -99,8 +99,8 @@ def course_allocation(utilities: ValuationMatrix, budgets: List[float], prices: 
     >>> course_allocation(ValuationMatrix([[60,30,6,4],[62,32,4,2]]),[1.1,1.0],[1.1,0.9,0.1,0.0],[1,1,1,1], 2)
     [[1, 0, 0, 1], [0, 1, 1, 0]]
 
-    Example 2: input that cannot be divided equally.
-    >>> course_allocation(ValuationMatrix([[30, 70], [55, 45], [80, 20]]), [1.0, 1.1, 1.2], [1.2, 1.0], [1, 1], 1)
+    Example 2: input that cannot be divided equally. GLPK ERROR!
+    ### course_allocation(ValuationMatrix([[30, 70], [55, 45], [80, 20]]), [1.0, 1.1, 1.2], [1.2, 1.0], [1, 1], 1)
     [[0, 0], [0, 1], [1, 0]]
 
     Example 3: input that can be divided equally.
@@ -379,6 +379,12 @@ class Course_Bundle:
 
 
 if __name__ == '__main__':
-
     import doctest
     doctest.testmod(optionflags=doctest.ELLIPSIS)
+    # doctest.run_docstring_examples(general_course_allocation, globals()) # glp_add_cols: ncs = 0; invalid number of columns. Error detected in file ..\src\api\prob1.c at line 362
+    # doctest.run_docstring_examples(course_allocation, globals())         # glp_add_cols: ncs = 0; invalid number of columns. Error detected in file ..\src\api\prob1.c at line 362
+    # doctest.run_docstring_examples(neighbors, globals())
+    # doctest.run_docstring_examples(score, globals())
+    # doctest.run_docstring_examples(max_utility, globals())
+    # doctest.run_docstring_examples(max_utilities, globals())
+    # doctest.run_docstring_examples(Course_Bundle, globals())

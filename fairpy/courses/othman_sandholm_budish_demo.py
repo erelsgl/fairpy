@@ -19,13 +19,13 @@ import numpy
 
 import fairpy
 from fairpy import ValuationMatrix
-from fairpy.items import fair_course_allocation_implementation
-from fairpy.items.fair_course_allocation_implementation import general_course_allocation
+from fairpy.courses import othman_sandholm_budish
+from fairpy.courses.othman_sandholm_budish import general_course_allocation
 
 import logging
 
-fair_course_allocation_implementation.logger.addHandler(logging.StreamHandler())
-fair_course_allocation_implementation.logger.setLevel(logging.INFO)
+othman_sandholm_budish.logger.addHandler(logging.StreamHandler())
+othman_sandholm_budish.logger.setLevel(logging.INFO)
 
 # The preference rating of the courses for each of the students:
 utilities = ValuationMatrix(numpy.array([[60,30,6,4],[6,2,42,26]]))

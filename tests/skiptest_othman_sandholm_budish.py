@@ -16,9 +16,9 @@ between courses for students given a list of preferences for each student.
 
 """
 
-import unittest
+import pytest
 from typing import List
-from fairpy.items.fair_course_allocation_implementation import course_allocation, neighbors, score, max_utility
+from fairpy.courses.othman_sandholm_budish import course_allocation, neighbors, score, max_utility
 from fairpy.items.valuations import ValuationMatrix
 
 """
@@ -237,4 +237,4 @@ def test_big_input3():
 
 
 if __name__ == '__main__':
-    unittest.main()
+    pytest.main([__file__])

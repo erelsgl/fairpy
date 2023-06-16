@@ -1,25 +1,25 @@
 
 """
-Allocates the given courses to the given agents using the 'Course allocation by proxy auction' algorithm which
-garantees efficient Pareto.
+Allocates the given courses to the given agents using a proxy auction, which guarantees Pareto efficiency.
+
 Reference:
-    Uthor Scott Duke Kominers, Mike Ruberry and Jonathan Ullman
-    Department of Economics, Harvard University, and Harvard Business School 
-    (http://scottkom.com/articles/Kominers_Ruberry_Ullman_Course_Allocation_with_Appendix.pdf)
+    Scott Duke Kominers, Mike Ruberry and Jonathan Ullman:
+    'Course allocation by proxy auction',
+    [WINE 2010](https://link.springer.com/chapter/10.1007/978-3-642-17572-5_49),
+    [Full version](http://scottkom.com/articles/Kominers_Ruberry_Ullman_Course_Allocation_with_Appendix.pdf)
+
 Programmer: Avihu Goren
 Since:  2023-01
 """
 
 
-from typing import List, Tuple
+from typing import List
 from collections import defaultdict
-import math
 from fairpy.agents import AdditiveAgent
 from fairpy.allocations import Allocation
-import pytest
 import logging
-logging.basicConfig(level = logging.INFO)
-LOGGER = logging.getLogger(__name__)
+
+logger = logging.getLogger(__name__)
 
 def create_bid_sets(num_players, bid_set_size):
     """
@@ -124,7 +124,7 @@ def course_allocation(agents: List[AdditiveAgent],course_capacity:int,course_lis
     for i,agent in enumerate(agents):
         list_of_course_preference [i] = sorted([course for course in course_list],key= lambda x: agent.value({x})) 
     bids_coins =create_bid_sets(len(agents),course_amount_per_agent)
-    LOGGER.info(f"Created the bids for each player: {bids_coins}")
+    logger.info(f"Created the bids for each player: {bids_coins}")
 
     Ac = {}
     for course in course_list:
@@ -135,7 +135,7 @@ def course_allocation(agents: List[AdditiveAgent],course_capacity:int,course_lis
         active = False
         for i in range(len(agents)):
             B_TAG = []
-            LOGGER.info(f"{agents[i].name()} start its turn")
+            logger.info(f"{agents[i].name()} start its turn")
 
             for course in list_of_course_preference[i]:
                 if has_common_object(bids_coins[i],Ac[course]) is False:
@@ -145,10 +145,10 @@ def course_allocation(agents: List[AdditiveAgent],course_capacity:int,course_lis
                         B_TAG.append(b_star)
                         min_bid_to_add = min([bid for bid in bids_coins[i] if bid > p_Ac ])
                         Ac[course].append(min_bid_to_add)
-                        LOGGER.info(f"Agent {agents[i].name()} added bid coin {min_bid_to_add} for course {course}")
+                        logger.info(f"Agent {agents[i].name()} added bid coin {min_bid_to_add} for course {course}")
                         if len(Ac[course]) > course_capacity: 
                             Ac[course].remove(min(Ac[course]))
-                            LOGGER.info(f"Bid coin {p_Ac} removed from {course} bids group current bids are:{Ac[course]}")
+                            logger.info(f"Bid coin {p_Ac} removed from {course} bids group current bids are:{Ac[course]}")
                         active = True
 
                 else:
@@ -160,18 +160,18 @@ def course_allocation(agents: List[AdditiveAgent],course_capacity:int,course_lis
 
                     else:
                         Ac[course].remove(b_star)
-                        LOGGER.info(f"Bid coin {b_star} removed from {course} current bids are:{Ac[course]}")
+                        logger.info(f"Bid coin {b_star} removed from {course} current bids are:{Ac[course]}")
 
-            LOGGER.info(f"{agents[i].name()} end its turn")
+            logger.info(f"{agents[i].name()} end its turn")
 
     bundle = defaultdict(list)
     for i,agent in enumerate(agents):
         for course in course_list:
             if [bid for bid in bids_coins[i] if bid in Ac[course]]: bundle[agent.name()].append(course)
-    LOGGER.info(f"Algorithm ends successfully")
+    logger.info(f"Algorithm ends successfully")
     return Allocation(agents=[agent.name() for agent in agents], bundles=bundle)
+
 if __name__ == "__main__":
+    # logging.basicConfig(level = logging.INFO)
     import doctest
-    doctest.testmod()
-
-
+    print(doctest.testmod())

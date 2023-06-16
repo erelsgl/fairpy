@@ -174,6 +174,7 @@ def divide(algorithm: Callable, input: Any, *args, **kwargs):
 
         # Step 2. Run the algorithm:
         output = algorithm(valuation_matrix, *args, **kwargs)
+        
         # Step 3. Adapt the output:
         if isinstance(output,Allocation):
             return output

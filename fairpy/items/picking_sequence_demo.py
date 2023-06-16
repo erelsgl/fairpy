@@ -1,7 +1,5 @@
-#!python3
-
 """
-Demonstration of the round-robin protocol.
+Demonstration of the picking-sequence protocols, particularly round-robin.
 
 Programmer: Erel Segal-Halevi
 Since: 2020-11
@@ -9,7 +7,7 @@ Since: 2020-11
 
 import fairpy
 from fairpy.agents import *
-from fairpy.items.round_robin import round_robin
+from fairpy.items.picking_sequence import picking_sequence, round_robin
 
 import logging, sys
 round_robin.logger.addHandler(logging.StreamHandler(sys.stdout))
@@ -26,8 +24,11 @@ print(fairpy.divide(round_robin, [Alice, George], agent_order=[0,1], items="wxyz
 print("\n### Round-robin when George plays first:")
 print(fairpy.divide(round_robin, [Alice, George], agent_order=[1,0], items="wxyz"))
 
-print("\n### One alternative input format:")
+print("\n### An alternative input format:")
 print(fairpy.divide(round_robin, [[11,22,44,0],[22,11,66,33]], agent_order=[1,0], items={0,1,2,3}))
+
+print("\n### Picking-sequence with advantage to Alice:")
+print(fairpy.divide(round_robin, [Alice, George], agent_order=[0,0,0,1], items="wxyz"))
 
 
 items = ["green", "red", "blue", "yellow"]
