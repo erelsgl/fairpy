@@ -24,3 +24,10 @@ class items:
 	from fairpy.items.undercut_procedure import undercut
 	from fairpy.items.approximation_maximin_share import three_quarters_MMS_allocation
 	from fairpy.items.fairly_allocating_few_queries import two_agents_ef1, three_agents_IAV
+
+
+class courses:
+	from fairpy.courses.picking_sequence import picking_sequence, round_robin
+
+
+	
