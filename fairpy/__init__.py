@@ -28,6 +28,8 @@ class items:
 
 class courses:
 	from fairpy.courses.picking_sequence import picking_sequence, round_robin
+	from fairpy.courses.instance import Instance
+	from fairpy.courses.adaptors import divide
 
 
 	

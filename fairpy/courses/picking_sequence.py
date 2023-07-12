@@ -7,9 +7,8 @@ Programmer: Erel Segal-Halevi
 Since: 2023-06
 """
 
-from fairpy import AgentList
+from fairpy.courses.instance import Instance
 from itertools import cycle
-from instance import FairCourseAllocationInstance
 
 import logging
 logger = logging.getLogger(__name__)
@@ -17,7 +16,7 @@ logger = logging.getLogger(__name__)
 from typing import List, Any, Dict
 
 
-def picking_sequence(instance: FairCourseAllocationInstance, agent_order:list) -> List[List[Any]]:
+def picking_sequence(instance: Instance, agent_order:list) -> List[List[Any]]:
     """
     Allocate the given items to the given agents using the given picking sequence.
     :param instance: an instance of the fair course allocation problem. 
@@ -30,7 +29,7 @@ def picking_sequence(instance: FairCourseAllocationInstance, agent_order:list) -
     >>> agent_capacities = {"Alice": 2, "Bob": 3, "Chana": 2, "Dana": 3}      # 10 seats required
     >>> course_capacities = {"c1": 2, "c2": 3, "c3": 4}                       # 9 seats available
     >>> valuations = {"Alice": s1, "Bob": s1, "Chana": s2, "Dana": s2}
-    >>> instance = FairCourseAllocationInstance(agent_capacities=agent_capacities, item_capacities=course_capacities, valuations=valuations)
+    >>> instance = Instance(agent_capacities=agent_capacities, item_capacities=course_capacities, valuations=valuations)
     >>> picking_sequence(instance, agent_order=["Alice","Bob", "Chana", "Dana","Dana","Chana","Bob", "Alice"])
     {'Alice': ['c1', 'c3'], 'Bob': ['c1', 'c2', 'c3'], 'Chana': ['c2', 'c3'], 'Dana': ['c2', 'c3']}
     """
@@ -64,7 +63,7 @@ def picking_sequence(instance: FairCourseAllocationInstance, agent_order:list) -
             remaining_agents.remove(agent)
     return {agent: sorted(bundle) for agent,bundle in bundles.items()}
 
-def round_robin(instance: FairCourseAllocationInstance, agent_order:list=None) -> List[List[Any]]:
+def round_robin(instance: Instance, agent_order:list=None) -> List[List[Any]]:
     """
     Allocate the given items to the given agents using the round-robin protocol, in the given agent-order.
     :param agents a list of Agent objects.
@@ -77,7 +76,7 @@ def round_robin(instance: FairCourseAllocationInstance, agent_order:list=None) -
     >>> agent_capacities = {"Alice": 2, "Bob": 3, "Chana": 2, "Dana": 3}      # 10 seats required
     >>> course_capacities = {"c1": 2, "c2": 3, "c3": 4}                       # 9 seats available
     >>> valuations = {"Alice": s1, "Bob": s1, "Chana": s2, "Dana": s2}
-    >>> instance = FairCourseAllocationInstance(agent_capacities=agent_capacities, item_capacities=course_capacities, valuations=valuations)
+    >>> instance = Instance(agent_capacities=agent_capacities, item_capacities=course_capacities, valuations=valuations)
     >>> round_robin(instance)
     {'Alice': ['c1', 'c2'], 'Bob': ['c1', 'c2', 'c3'], 'Chana': ['c2', 'c3'], 'Dana': ['c3']}
     """

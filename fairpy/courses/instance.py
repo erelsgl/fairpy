@@ -1,5 +1,5 @@
 """
-class FairCourseAllocationInstance:  an instance of the fair course allocation problem.
+class fairpy.courses.Instance:  an instance of the fair course allocation problem.
 
 Author: Erel Segal-Halevi
 Since: 2023-07
@@ -8,7 +8,7 @@ Since: 2023-07
 from typing import Callable, List, Any, Tuple
 
 
-class FairCourseAllocationInstance:
+class Instance:
     """
     Represents an instance of the fair course-allocation problem.
     Exposes the following functions:
@@ -19,7 +19,7 @@ class FairCourseAllocationInstance:
      * items: an enumeration of the items (derived from item_capacity).
 
     ### dict of dicts:
-    >>> instance = FairCourseAllocationInstance(
+    >>> instance = Instance(
     ...   agent_capacities = {"Alice": 2, "Bob": 3}, 
     ...   item_capacities  = {"c1": 4, "c2": 5}, 
     ...   valuations       = {"Alice": {"c1": 11, "c2": 22}, "Bob": {"c1": 33, "c2": 44}})
@@ -31,7 +31,7 @@ class FairCourseAllocationInstance:
     33
 
     ### dict of lists:
-    >>> instance = FairCourseAllocationInstance(
+    >>> instance = Instance(
     ...   agent_capacities = {"Alice": 2, "Bob": 3}, 
     ...   item_capacities  = [1,2,3,4], 
     ...   valuations       = {"Alice": [22,33,44,55], "Bob": [66,77,88,99]})
@@ -57,6 +57,7 @@ class FairCourseAllocationInstance:
         self.items  = items  or item_capacity_keys or item_value_keys
 
         self.agent_capacity = agent_capacity_func or default_agent_capacity_func(len(self.items))
+        self.agent_priority = agent_priority_func or default_agent_priority_func(1)
         self.item_capacity  = item_capacity_func  or default_item_capacity_func(1)
         self.agent_item_value = agent_item_value_func
 
@@ -162,6 +163,10 @@ def get_keys_and_mapping_2d(container: Any) -> Tuple[List,Callable]:
 
 def default_agent_capacity_func(default_capacity:int):
     return lambda agent:default_capacity
+
+
+def default_agent_priority_func(default_priority:int):
+    return lambda agent:default_priority
 
 
 def default_item_capacity_func(default_capacity:int=1):
