@@ -11,6 +11,7 @@ Since: 2023-07
 """
 
 import fairpy
+crs = fairpy.courses
 from typing import Callable, List, Any
 from fairpy.courses.instance import Instance
 
@@ -34,7 +35,6 @@ def divide(
 
     :return: an allocation.
 
-    >>> crs = fairpy.courses
     >>> valuations = {"Alice": {"c1":2, "c2": 3, "c3": 4}, "Bob": {"c1": 4, "c2": 5, "c3": 6}}
     >>> agent_capacities = {"Alice": 2, "Bob": 1}
     >>> item_capacities  = {"c1": 2, "c2": 1, "c3": 1}
@@ -46,7 +46,21 @@ def divide(
     return result
 
 
+def divide_random_instance(algorithm,
+                           num_of_agents, num_of_items, 
+                           agent_capacity_bounds, item_capacity_bounds, item_value_bounds,
+                           normalized_sum_of_values,
+                           **kwargs):
+    random_instance = Instance.random(num_of_agents=num_of_agents, num_of_items=num_of_items, agent_capacity_bounds=agent_capacity_bounds, item_capacity_bounds=item_capacity_bounds, item_value_bounds=item_value_bounds, normalized_sum_of_values=normalized_sum_of_values)
+    result = algorithm(random_instance, **kwargs)
+    return result
 
 if __name__ == "__main__":
     import doctest, sys
     print(doctest.testmod())
+
+    print(
+        divide_random_instance(
+            crs.round_robin, num_of_agents=70, num_of_items=10, agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], item_value_bounds=[0,200], normalized_sum_of_values=1000
+        )
+    )

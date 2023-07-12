@@ -84,6 +84,29 @@ def round_robin(instance: Instance, agent_order:list=None) -> List[List[Any]]:
     return picking_sequence(instance, agent_order)
 
 
+def serial_dictatorship(instance: Instance, agent_order:list=None) -> List[List[Any]]:
+    """
+    Allocate the given items to the given agents using the serial_dictatorship protocol, in the given agent-order.
+    :param agents a list of Agent objects.
+    :param agent_order (optional): a list of indices of agents. The agents will pick items in this order.
+    :param items (optional): a list of items to allocate. Default is allocate all items.
+    :return a list of bundles; each bundle is a list of items.
+
+    >>> s1 = {"c1": 10, "c2": 8, "c3": 6}
+    >>> s2 = {"c1": 6, "c2": 8, "c3": 10}
+    >>> agent_capacities = {"Alice": 2, "Bob": 3, "Chana": 2, "Dana": 3}      # 10 seats required
+    >>> course_capacities = {"c1": 2, "c2": 3, "c3": 4}                       # 9 seats available
+    >>> valuations = {"Alice": s1, "Bob": s1, "Chana": s2, "Dana": s2}
+    >>> instance = Instance(agent_capacities=agent_capacities, item_capacities=course_capacities, valuations=valuations)
+    >>> serial_dictatorship(instance)
+    {'Alice': ['c1', 'c2'], 'Bob': ['c1', 'c2', 'c3'], 'Chana': ['c2', 'c3'], 'Dana': ['c3']}
+    """
+    if agent_order is None: agent_order = instance.agents
+    agent_order = sum([instance.agent_capacity(agent) * [agent] for agent in agent_order], [])
+    # print("agent_order=",agent_order)
+    return picking_sequence(instance, agent_order)
+
+
 round_robin.logger = picking_sequence.logger = logger
 
 

@@ -6,6 +6,7 @@ Since: 2023-07
 """
 
 from typing import Callable, List, Any, Tuple
+import numpy as np
 
 
 class Instance:
@@ -29,6 +30,8 @@ class Instance:
     5
     >>> instance.agent_item_value("Bob", "c1")
     33
+    >>> instance.agent_bundle_value("Bob", ["c1","c2"])
+    77
 
     ### dict of lists:
     >>> instance = Instance(
@@ -60,6 +63,48 @@ class Instance:
         self.agent_priority = agent_priority_func or default_agent_priority_func(1)
         self.item_capacity  = item_capacity_func  or default_item_capacity_func(1)
         self.agent_item_value = agent_item_value_func
+
+        # Keep the input parameters, for debug
+        self._agent_capacities = agent_capacities
+        self._item_capacities  = item_capacities
+        self._valuations       = valuations
+
+
+    def agent_bundle_value(self, agent:Any, bundle:List[Any]):
+        return sum([self.agent_item_value(agent,item) for item in bundle])
+    
+
+    @staticmethod
+    def random(num_of_agents, num_of_items, 
+               agent_capacity_bounds,
+               item_capacity_bounds,
+               item_value_bounds,
+               normalized_sum_of_values):
+        """
+        Generate a random instance.
+        """
+        agents  = [f"s{i+1}" for i in range(num_of_agents)]
+        items   = [f"c{i+1}" for i in range(num_of_items)]
+        agent_capacities  = {agent: np.random.randint(agent_capacity_bounds[0], agent_capacity_bounds[1]+1) for agent in agents}
+        item_capacities   = {item: np.random.randint(item_capacity_bounds[0], item_capacity_bounds[1]+1) for item in items}
+        valuations = {
+            agent: random_valuation(items, item_value_bounds, normalized_sum_of_values)
+            for agent in agents
+        }
+        return Instance(valuations=valuations, agent_capacities=agent_capacities, item_capacities=item_capacities)
+        
+
+
+def random_valuation(items, item_value_bounds, normalized_sum_of_values):
+    valuations = {
+        item: np.random.randint(item_value_bounds[0],item_value_bounds[1]+1)
+        for item in items
+    }
+    raw_sum_of_values = sum(valuations.values())
+    return  { 
+        item: int(np.round(value*normalized_sum_of_values/raw_sum_of_values))
+        for item,value in valuations.items()
+    }
 
 
 
@@ -176,3 +221,13 @@ def default_item_capacity_func(default_capacity:int=1):
 if __name__ == "__main__":
     import doctest
     print(doctest.testmod())
+
+    random_instance = Instance.random(num_of_agents=4, num_of_items=2, agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], item_value_bounds=[1,200], normalized_sum_of_values=1000)
+    print(random_instance.agents)
+    print(random_instance.items)
+    print(random_instance._valuations)
+
+    random_instance = Instance.random(num_of_agents=70, num_of_items=10, agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], item_value_bounds=[1,200], normalized_sum_of_values=1000)
+    print(random_instance.agents)
+    print(random_instance.items)
+    print(random_instance._valuations)

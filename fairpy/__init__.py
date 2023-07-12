@@ -27,9 +27,7 @@ class items:
 
 
 class courses:
-	from fairpy.courses.picking_sequence import picking_sequence, round_robin
+	from fairpy.courses.picking_sequence import picking_sequence, round_robin, serial_dictatorship
 	from fairpy.courses.instance import Instance
-	from fairpy.courses.adaptors import divide
-
-
-	
+	from fairpy.courses.adaptors import divide, divide_random_instance
+	from fairpy.courses.satisfaction import AgentBundleValueMatrix
