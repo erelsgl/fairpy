@@ -21,7 +21,7 @@ class AgentBundleValueMatrix:
         >>> matrix.matrix
         {'Alice': {'Alice': 11, 'Bob': 22}, 'Bob': {'Alice': 33, 'Bob': 44}}
         >>> matrix.utilitarian_value()
-        55
+        27.5
         >>> matrix.egalitarian_value()
         11
         >>> matrix.make_envy_matrix()
