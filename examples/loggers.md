@@ -17,8 +17,8 @@ fairpy.divide(fairpy.items.round_robin, instance)
 
 ```
 
-Round Robin with agent-order [0, 1] and items ['green', 'red', 'blue',
-'yellow']
+Picking-sequence with agent-order [0, 1] and items ['green', 'red',
+'blue', 'yellow']
 Ami takes green (value 8)
 Tami takes red (value 8)
 Ami takes blue (value 6)
@@ -41,7 +41,8 @@ fairpy.divide(fairpy.items.round_robin, instance, agent_order=[1,0], items=["gre
 
 ```
 
-Round Robin with agent-order [1, 0] and items ['green', 'red', 'blue']
+Picking-sequence with agent-order [1, 0] and items ['green', 'red',
+'blue']
 Tami takes green (value 12)
 Ami takes red (value 7)
 Tami takes blue (value 4)
@@ -69,4 +70,4 @@ Tami gets {red,yellow} with value 10.
 
 
 ---
-Markdown generated automatically from [loggers.py](loggers.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2022-11-19.
+Markdown generated automatically from [loggers.py](loggers.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2023-07-17.

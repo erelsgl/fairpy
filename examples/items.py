@@ -3,6 +3,7 @@
 import fairpy
 divide = fairpy.divide
 
+
 #' `fairpy` contains various algorithms for fair allocation of items,
 #' both divisible and indivisible.
 #' Before starting the algorithms, let us create some inputs for them.

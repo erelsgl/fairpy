@@ -167,4 +167,4 @@ For more information see:
 * [List of cake-cutting algorithms for future work](../fairpy/cake/README-future.md).
 
 ---
-Markdown generated automatically from [cake.py](cake.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2022-11-19.
+Markdown generated automatically from [cake.py](cake.py) using [Pweave](http://mpastell.com/pweave) 0.30.3 on 2023-07-17.

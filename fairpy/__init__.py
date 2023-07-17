@@ -10,7 +10,7 @@ from fairpy.families import *
 from fairpy.agents import *
 from fairpy.agentlist import *
 from fairpy.adaptors import *
-
+import fairpy.items as items
 
 # class items:
 # 	from fairpy.items.picking_sequence import round_robin
