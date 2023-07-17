@@ -6,7 +6,7 @@ Since: 2022-12.
 '''
 import numpy as np
 
-from fairpy.items.valuations import ValuationMatrix
+from fairpy.valuations import ValuationMatrix
 from fairpy.items.bidding_for_envy_freeness import BiddingForEnvyFreeness, bidding_for_envy_freeness
 
 def test_find_best_matching():

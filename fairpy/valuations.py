@@ -1,5 +1,3 @@
-#!python3
-
 """
 Defines various kinds of valuation functions over indivisible items. Classes:
 * Valuation
@@ -502,7 +500,7 @@ class AdditiveValuation(Valuation):
         >>> mms_part = valuation.partition_1_of_c_MMS(4,['a','b','c']) # just verify that there is no exception
         """
         partition = prtpy.partition(
-            algorithm=prtpy.partitioning.integer_programming,
+            algorithm=prtpy.partitioning.complete_greedy,
             numbins=c,
             items=items,
             valueof=lambda item: self.value(item),
@@ -524,7 +522,7 @@ class AdditiveValuation(Valuation):
             return 0
         else:
             return prtpy.partition(
-                algorithm=prtpy.partitioning.integer_programming,
+                algorithm=prtpy.partitioning.complete_greedy,
                 numbins=c,
                 items=self.desired_items,
                 valueof=lambda item: self.value(item),

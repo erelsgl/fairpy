@@ -20,7 +20,7 @@ import logging
 import math
 from typing import List, Dict, Set
 import numpy as np
-from fairpy.items.valuations import ValuationMatrix
+from fairpy.valuations import ValuationMatrix
 from queue import PriorityQueue
 import cvxpy as cp
 

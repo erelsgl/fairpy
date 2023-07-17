@@ -16,7 +16,7 @@ import numpy as np
 from collections import defaultdict
 from collections.abc import Iterable
 import fairpy
-from fairpy import ValuationMatrix
+from fairpy.valuations import ValuationMatrix
 from fairpy.agentlist import AgentList
 from fairpy.bundles import *
 

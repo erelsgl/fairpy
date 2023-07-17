@@ -6,6 +6,7 @@ Since: 2023-07
 """
 
 from typing import Callable, List, Any, Tuple
+from numbers import Number
 import numpy as np
 
 
@@ -44,9 +45,21 @@ class Instance:
     3
     >>> instance.agent_item_value("Alice", 3)
     55
+
+    ### default capacities:
+    >>> instance = Instance(valuations={"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}})
+    >>> instance.agent_capacity("avi")
+    2
+    >>> instance.item_capacity("x")
+    1
+    >>> instance.agent_item_value("beni", "y")
+    3
+    >>> instance = Instance(valuations={"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}}, agent_capacities=1)
+    >>> instance.agent_capacity("avi")
+    1
     """
 
-    def __init__(self, valuations:Any, agent_capacities:Any=None, agent_priorities:Any=None, item_capacities:Any=None, agents:list=None, items:list=None):
+    def __init__(self, valuations:Any, agent_capacities:Any=None, agent_priorities:Any=None, agent_entitlements:Any=None, item_capacities:Any=None, agents:list=None, items:list=None):
         """
         Initialize an instance from the given 
         """
@@ -54,14 +67,18 @@ class Instance:
 
         agent_capacity_keys, agent_capacity_func = get_keys_and_mapping(agent_capacities)
         agent_priority_keys, agent_priority_func = get_keys_and_mapping(agent_priorities)
+        agent_entitlement_keys, agent_entitlement_func = get_keys_and_mapping(agent_entitlements)
         item_capacity_keys , item_capacity_func  = get_keys_and_mapping(item_capacities)
 
         self.agents = agents or agent_capacity_keys or agent_priority_keys or agent_value_keys
+        assert (self.agents is not None)
         self.items  = items  or item_capacity_keys or item_value_keys
+        assert (self.items is not None)
 
-        self.agent_capacity = agent_capacity_func or default_agent_capacity_func(len(self.items))
-        self.agent_priority = agent_priority_func or default_agent_priority_func(1)
-        self.item_capacity  = item_capacity_func  or default_item_capacity_func(1)
+        self.agent_capacity = agent_capacity_func or constant_function(len(self.items))
+        self.agent_priority = agent_priority_func or constant_function(1)
+        self.agent_entitlement = agent_entitlement_func or constant_function(1)
+        self.item_capacity  = item_capacity_func  or constant_function(1)
         self.agent_item_value = agent_item_value_func
 
         # Keep the input parameters, for debug
@@ -75,11 +92,11 @@ class Instance:
     
 
     @staticmethod
-    def random(num_of_agents, num_of_items, 
-               agent_capacity_bounds,
-               item_capacity_bounds,
-               item_value_bounds,
-               normalized_sum_of_values):
+    def random(num_of_agents:int, num_of_items:int, 
+               agent_capacity_bounds:Tuple[int,int],
+               item_capacity_bounds:Tuple[int,int],
+               item_value_bounds:Tuple[int,int],
+               normalized_sum_of_values:int):
         """
         Generate a random instance.
         """
@@ -133,6 +150,12 @@ def get_keys_and_mapping(container: Any) -> Tuple[List,Callable]:
     >>> k   # None
     >>> f(2)
     7
+
+    ### constant value
+    >>> k,f = get_keys_and_mapping(1)
+    >>> k   # None
+    >>> f(2)
+    1
     """
     if container is None:
         f = k = None
@@ -142,6 +165,9 @@ def get_keys_and_mapping(container: Any) -> Tuple[List,Callable]:
     elif isinstance(container, list):
         k = range(len(container))
         f = container.__getitem__
+    elif isinstance(container,Number):
+        k = None    # keys are unknown
+        f = constant_function(container)
     elif callable(container):
         k = None   # keys are unknown
         f = container 
@@ -206,28 +232,20 @@ def get_keys_and_mapping_2d(container: Any) -> Tuple[List,Callable]:
     
 
 
-def default_agent_capacity_func(default_capacity:int):
-    return lambda agent:default_capacity
-
-
-def default_agent_priority_func(default_priority:int):
-    return lambda agent:default_priority
-
-
-def default_item_capacity_func(default_capacity:int=1):
-    return lambda item:default_capacity
+def constant_function(constant_value)->Callable:
+    return lambda key:constant_value
 
 
 if __name__ == "__main__":
     import doctest
     print(doctest.testmod())
 
-    random_instance = Instance.random(num_of_agents=4, num_of_items=2, agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], item_value_bounds=[1,200], normalized_sum_of_values=1000)
-    print(random_instance.agents)
-    print(random_instance.items)
-    print(random_instance._valuations)
+    # random_instance = Instance.random(num_of_agents=4, num_of_items=2, agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], item_value_bounds=[1,200], normalized_sum_of_values=1000)
+    # print(random_instance.agents)
+    # print(random_instance.items)
+    # print(random_instance._valuations)
 
-    random_instance = Instance.random(num_of_agents=70, num_of_items=10, agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], item_value_bounds=[1,200], normalized_sum_of_values=1000)
-    print(random_instance.agents)
-    print(random_instance.items)
-    print(random_instance._valuations)
+    # random_instance = Instance.random(num_of_agents=70, num_of_items=10, agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], item_value_bounds=[1,200], normalized_sum_of_values=1000)
+    # print(random_instance.agents)
+    # print(random_instance.items)
+    # print(random_instance._valuations)

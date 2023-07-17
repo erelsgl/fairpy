@@ -37,7 +37,7 @@ def divide(algorithm: Callable, input: Any, *args, **kwargs):
     :return: an allocation of the items among the agents.
 
     >>> from dicttools import stringify
-    >>> import fairpy
+    >>> import fairpy, fairpy.items
 
     ### List of lists of values, plus an optional parameter:
     >>> divide(algorithm=fairpy.items.round_robin, input=[[11,22,44,0],[22,11,66,33]], agent_order=[1,0])

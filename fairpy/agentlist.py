@@ -8,7 +8,7 @@ Since: 2022-11
 
 from typing import Any, List
 
-from fairpy.items.valuations import *
+from fairpy.valuations import *
 from fairpy.cake.valuations  import *
 from fairpy.agents import Agent, AdditiveAgent, BinaryAgent
 

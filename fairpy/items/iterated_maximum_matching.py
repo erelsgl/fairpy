@@ -15,7 +15,7 @@ Since : 2021-05
 
 import networkx
 from typing import *
-from fairpy.items.utilitarian_matching import instance_to_graph, matching_to_allocation
+from fairpy.items.graph_utils import instance_to_graph, matching_to_allocation
 from fairpy import AgentList
 
 import logging

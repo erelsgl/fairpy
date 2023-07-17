@@ -35,53 +35,32 @@ def picking_sequence(instance: Instance, agent_order:list) -> List[List[Any]]:
     """
     agent_order = list(agent_order) 
     remaining_agents = set(instance.agents) 
-    remaining_course_capacities = {course: instance.item_capacity(course) for course in instance.items}
-    remaining_courses = {c for c in instance.items if instance.item_capacity(c)>0}   # should be a set, to allow set-difference
-    logger.info("\nPicking-sequence with agents %s, agent-order %s, and courses %s", remaining_agents, agent_order, remaining_courses)
+    remaining_item_capacities = {item: instance.item_capacity(item) for item in instance.items}
+    logger.info("\nPicking-sequence with agents %s, agent-order %s, and courses %s", remaining_agents, agent_order, remaining_item_capacities)
     bundles = {agent: set() for agent in instance.agents}    # Each bundle is a set, since each agent can get at most one seat in each course
     for agent in agent_order:
         if agent not in instance.agents:
             raise ValueError(f"Agent {agent} in agent_order but not in instance.agents")
     for agent in cycle(agent_order):
-        if len(remaining_agents)==0 or len(remaining_courses)==0:
+        if len(remaining_agents)==0 or len(remaining_item_capacities)==0:
             break 
         if not agent in remaining_agents:
             continue
-        potential_courses_for_agent = remaining_courses.difference(bundles[agent])
-        if len(potential_courses_for_agent)==0:
-            logger.info("Agent %s cannot pick any more courses: remaining=%s, bundle=%s", agent, remaining_courses, bundles[agent])
+        potential_items_for_agent = set(remaining_item_capacities.keys()).difference(bundles[agent])
+        if len(potential_items_for_agent)==0:
+            logger.info("Agent %s cannot pick any more courses: remaining=%s, bundle=%s", agent, remaining_item_capacities, bundles[agent])
             remaining_agents.remove(agent)
             continue
-        best_item_for_agent = max(potential_courses_for_agent, key=lambda item: instance.agent_item_value(agent,item))
+        best_item_for_agent = max(potential_items_for_agent, key=lambda item: instance.agent_item_value(agent,item))
         bundles[agent].add(best_item_for_agent)
         logger.info("Agent %s takes %s (value %d)", agent, best_item_for_agent, instance.agent_item_value(agent, best_item_for_agent))
-        remaining_course_capacities[best_item_for_agent] -= 1
-        if remaining_course_capacities[best_item_for_agent]==0:
-            remaining_courses.remove(best_item_for_agent)
+        remaining_item_capacities[best_item_for_agent] -= 1
+        if remaining_item_capacities[best_item_for_agent]==0:
+            del remaining_item_capacities[best_item_for_agent]
         if len(bundles[agent]) == instance.agent_capacity(agent):
             logger.info("Agent %s has already picked %d courses: %s", agent, len(bundles[agent]), bundles[agent])
             remaining_agents.remove(agent)
     return {agent: sorted(bundle) for agent,bundle in bundles.items()}
-
-def round_robin(instance: Instance, agent_order:list=None) -> List[List[Any]]:
-    """
-    Allocate the given items to the given agents using the round-robin protocol, in the given agent-order.
-    :param agents a list of Agent objects.
-    :param agent_order (optional): a list of indices of agents. The agents will pick items in this order.
-    :param items (optional): a list of items to allocate. Default is allocate all items.
-    :return a list of bundles; each bundle is a list of items.
-
-    >>> s1 = {"c1": 10, "c2": 8, "c3": 6}
-    >>> s2 = {"c1": 6, "c2": 8, "c3": 10}
-    >>> agent_capacities = {"Alice": 2, "Bob": 3, "Chana": 2, "Dana": 3}      # 10 seats required
-    >>> course_capacities = {"c1": 2, "c2": 3, "c3": 4}                       # 9 seats available
-    >>> valuations = {"Alice": s1, "Bob": s1, "Chana": s2, "Dana": s2}
-    >>> instance = Instance(agent_capacities=agent_capacities, item_capacities=course_capacities, valuations=valuations)
-    >>> round_robin(instance)
-    {'Alice': ['c1', 'c2'], 'Bob': ['c1', 'c2', 'c3'], 'Chana': ['c2', 'c3'], 'Dana': ['c3']}
-    """
-    if agent_order is None: agent_order = instance.agents
-    return picking_sequence(instance, agent_order)
 
 
 def serial_dictatorship(instance: Instance, agent_order:list=None) -> List[List[Any]]:
@@ -105,6 +84,47 @@ def serial_dictatorship(instance: Instance, agent_order:list=None) -> List[List[
     agent_order = sum([instance.agent_capacity(agent) * [agent] for agent in agent_order], [])
     # print("agent_order=",agent_order)
     return picking_sequence(instance, agent_order)
+
+
+def round_robin(instance: Instance, agent_order:list=None) -> List[List[Any]]:
+    """
+    Allocate the given items to the given agents using the round-robin protocol, in the given agent-order.
+    :param agents a list of Agent objects.
+    :param agent_order (optional): a list of indices of agents. The agents will pick items in this order.
+    :param items (optional): a list of items to allocate. Default is allocate all items.
+    :return a list of bundles; each bundle is a list of items.
+
+    >>> s1 = {"c1": 10, "c2": 8, "c3": 6}
+    >>> s2 = {"c1": 6, "c2": 8, "c3": 10}
+    >>> agent_capacities = {"Alice": 2, "Bob": 3, "Chana": 2, "Dana": 3}      # 10 seats required
+    >>> course_capacities = {"c1": 2, "c2": 3, "c3": 4}                       # 9 seats available
+    >>> valuations = {"Alice": s1, "Bob": s1, "Chana": s2, "Dana": s2}
+    >>> instance = Instance(agent_capacities=agent_capacities, item_capacities=course_capacities, valuations=valuations)
+    >>> round_robin(instance)
+    {'Alice': ['c1', 'c2'], 'Bob': ['c1', 'c2', 'c3'], 'Chana': ['c2', 'c3'], 'Dana': ['c3']}
+    """
+    if agent_order is None: agent_order = instance.agents
+    return picking_sequence(instance, agent_order)
+
+def bidirectional_round_robin(instance: Instance, agent_order:list=None) -> List[List[Any]]:
+    """
+    Allocate the given items to the given agents using the bidirectional-round-robin protocol (ABCCBA), in the given agent-order.
+    :param agents a list of Agent objects.
+    :param agent_order (optional): a list of indices of agents. The agents will pick items in this order.
+    :param items (optional): a list of items to allocate. Default is allocate all items.
+    :return a list of bundles; each bundle is a list of items.
+
+    >>> s1 = {"c1": 10, "c2": 8, "c3": 6}
+    >>> s2 = {"c1": 6, "c2": 8, "c3": 10}
+    >>> agent_capacities = {"Alice": 2, "Bob": 3, "Chana": 2, "Dana": 3}      # 10 seats required
+    >>> course_capacities = {"c1": 2, "c2": 3, "c3": 4}                       # 9 seats available
+    >>> valuations = {"Alice": s1, "Bob": s1, "Chana": s2, "Dana": s2}
+    >>> instance = Instance(agent_capacities=agent_capacities, item_capacities=course_capacities, valuations=valuations)
+    >>> bidirectional_round_robin(instance)
+    {'Alice': ['c1', 'c3'], 'Bob': ['c1', 'c2', 'c3'], 'Chana': ['c2', 'c3'], 'Dana': ['c2', 'c3']}
+    """
+    if agent_order is None: agent_order = instance.agents
+    return picking_sequence(instance, list(agent_order) + list(reversed(agent_order)))
 
 
 round_robin.logger = picking_sequence.logger = logger

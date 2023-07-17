@@ -5,7 +5,7 @@ Programmer: Erel Segal-Halevi
 Since: 2020-04
 """
 
-from fairpy.items.valuations import *
+from fairpy.valuations import *
 from fairpy.cake.valuations  import *
 
 from abc import ABC, abstractmethod

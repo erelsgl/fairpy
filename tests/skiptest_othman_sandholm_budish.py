@@ -19,7 +19,7 @@ between courses for students given a list of preferences for each student.
 import pytest
 from typing import List
 from fairpy.courses.othman_sandholm_budish import course_allocation, neighbors, score, max_utility
-from fairpy.items.valuations import ValuationMatrix
+from fairpy.valuations import ValuationMatrix
 
 """
     Since the definition of fairness is not unambiguous in this algorithm,

@@ -11,7 +11,6 @@ Since: 2023-07
 """
 
 import fairpy
-crs = fairpy.courses
 from typing import Callable, List, Any
 from fairpy.courses.instance import Instance
 
@@ -38,7 +37,7 @@ def divide(
     >>> valuations = {"Alice": {"c1":2, "c2": 3, "c3": 4}, "Bob": {"c1": 4, "c2": 5, "c3": 6}}
     >>> agent_capacities = {"Alice": 2, "Bob": 1}
     >>> item_capacities  = {"c1": 2, "c2": 1, "c3": 1}
-    >>> divide(algorithm=crs.round_robin, agent_capacities=agent_capacities, item_capacities=item_capacities, valuations=valuations)
+    >>> divide(algorithm=fairpy.courses.round_robin, agent_capacities=agent_capacities, item_capacities=item_capacities, valuations=valuations)
     {'Alice': ['c1', 'c3'], 'Bob': ['c2']}
     """
     instance = Instance(valuations=valuations, agent_capacities=agent_capacities, agent_priorities=agent_priorities, item_capacities=item_capacities)
@@ -61,6 +60,6 @@ if __name__ == "__main__":
 
     print(
         divide_random_instance(
-            crs.round_robin, num_of_agents=70, num_of_items=10, agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], item_value_bounds=[0,200], normalized_sum_of_values=1000
+            fairpy.courses.round_robin, num_of_agents=70, num_of_items=10, agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], item_value_bounds=[0,200], normalized_sum_of_values=1000
         )
     )
