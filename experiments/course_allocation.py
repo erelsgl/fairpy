@@ -1,9 +1,8 @@
 """
-Compare the performance of algorithms for the many-to-many matching problem.
+Compare the performance of algorithms for fair course allocation.
 
 To run this file, you need
     pip install experiments_csv[plotting]
-
 
 Programmer: Erel Segal-Halevi
 Since: 2023-07
