@@ -12,10 +12,10 @@ Since:  2023-01
 import pytest
 
 from fairpy.agents import AdditiveAgent
-from fairpy.courses.course_allocation_by_proxy_auction import course_allocation
+from fairpy.courses.course_allocation_by_proxy_auction import course_allocation_by_proxy_auction
 
 def test_none_fail_input_agents():
-    assert pytest.raises(TypeError, course_allocation, None, 5, ["c1", "c2", "c3", "c4"], 2)
+    assert pytest.raises(TypeError, course_allocation_by_proxy_auction, None, 5, ["c1", "c2", "c3", "c4"], 2)
 
         
 def test_none_fail_input_capacity():
@@ -23,14 +23,14 @@ def test_none_fail_input_capacity():
     Bob = AdditiveAgent({"c1": 1, "c2": 2, "c3": 3, }, name="Bob")
     Eve = AdditiveAgent({"c2": 1, "c3": 2, "c1": 3, }, name="Eve")
     agents = [Alice,Bob,Eve]
-    assert pytest.raises(TypeError, course_allocation, agents, None, ["c1", "c2", "c3"], 1)
+    assert pytest.raises(TypeError, course_allocation_by_proxy_auction, agents, None, ["c1", "c2", "c3"], 1)
 
 def test_big_input_no_exception_100():
     agents = []
     for i in range (0,100):
         agents.append(AdditiveAgent({"c1": 1, "c2": 2, "c3": 3,"c4":4}, name=f"{i}"))
     try:
-        allocation = course_allocation(agents,25,["c1","c2","c3","c4"],1)
+        allocation = course_allocation_by_proxy_auction(agents,25,["c1","c2","c3","c4"],1)
         for _,v in enumerate(allocation):
             assert len(v) == 1
     except Exception as e:
@@ -42,7 +42,7 @@ def test_big_input_no_exception_1000():
     for i in range (0,1000):
         agents.append(AdditiveAgent({"c1": 1, "c2": 2, "c3": 3,"c4":4}, name=f"{i}"))
     try:
-        allocation = course_allocation(agents,250,["c1","c2","c3","c4"],1)
+        allocation = course_allocation_by_proxy_auction(agents,250,["c1","c2","c3","c4"],1)
         for _,v in enumerate(allocation):
             assert len(v) == 1
     except Exception as e:
@@ -54,12 +54,12 @@ def test_big_input_no_exception_10000():
     for i in range (0,10000):
         agents.append(AdditiveAgent({"c1": 1, "c2": 2, "c3": 3,"c4":4}, name=f"{i}"))
     try:
-        course_allocation(agents,250,["c1","c2","c3","c4"],2)
+        course_allocation_by_proxy_auction(agents,250,["c1","c2","c3","c4"],2)
     except Exception as e:
          assert False, "Big input of 1000 students raise an error"
 
 def test_fail_empty_agents():
-    assert pytest.raises(ZeroDivisionError, course_allocation, [], 5, ["c1", "c2", "c3", "c4"], 1)
+    assert pytest.raises(ZeroDivisionError, course_allocation_by_proxy_auction, [], 5, ["c1", "c2", "c3", "c4"], 1)
 
 
 def test_fail_zero_capacity():
@@ -67,7 +67,7 @@ def test_fail_zero_capacity():
     Bob = AdditiveAgent({"c1": 1, "c2": 2, "c3": 3, }, name="Bob")
     Eve = AdditiveAgent({"c2": 1, "c3": 2, "c1": 3, }, name="Eve")
     agents = [Alice,Bob,Eve]
-    assert pytest.raises(ValueError, course_allocation, agents, 0, ["c1", "c2", "c3"], 1)
+    assert pytest.raises(ValueError, course_allocation_by_proxy_auction, agents, 0, ["c1", "c2", "c3"], 1)
 
   
 if __name__ == "__main__":

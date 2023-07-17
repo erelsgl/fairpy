@@ -17,26 +17,107 @@ from typing import List
 from collections import defaultdict
 from fairpy.agents import AdditiveAgent
 from fairpy.allocations import Allocation
+from fairpy.courses.instance  import Instance
 import logging
 
 logger = logging.getLogger(__name__)
 
-def create_bid_sets(num_players, bid_set_size):
+def course_allocation_by_proxy_auction(instance:Instance):
+    """
+    :param agents: The agents who participate in the allocation and there course preferences.
+    :param course_capacity: The courses capacity.
+    :param course_list: The names of the courses.
+    :param course_amount_per_agent how many courses each agent can take.
+    :return: An allocation for each of the agents.
+    >>> valuations = {"Alice": {"c1": 1, "c2": 2, "c3": 3,} ,"Bob": {"c1": 1, "c2": 2, "c3": 3, }, "Eve": {"c2": 1, "c3": 2, "c1": 3, }}
+    >>> instance = Instance(valuations=valuations, item_capacities=2, agent_capacities=2)
+    >>> course_allocation_by_proxy_auction(instance)
+    {'Alice': ['c1', 'c3'], 'Bob': ['c1', 'c2'], 'Eve': ['c2', 'c3']}
+
+    Two exampels that represent a problem in the algo where its better for Bob to give false preferences and get a better result
+    >>> valuations = {"Alice": {"c1": 1, "c2": 2, "c3": 3, "c4": 4} ,"Bob": {"c2": 1, "c3": 2, "c4": 3, "c1": 4}}
+    >>> instance = Instance(valuations=valuations, item_capacities=1, agent_capacities=2)
+    >>> course_allocation_by_proxy_auction(instance)
+    {'Alice': ['c1', 'c2'], 'Bob': ['c3', 'c4']}
+
+    >>> valuations = {"Alice": {"c1": 1, "c2": 2, "c3": 3, "c4": 4} ,"Bob": {"c1": 1, "c2": 2, "c3": 3, "c4": 4}}
+    >>> instance = Instance(valuations=valuations, item_capacities=1, agent_capacities=2)
+    >>> course_allocation_by_proxy_auction(instance)
+    {'Alice': ['c1', 'c4'], 'Bob': ['c2', 'c3']}
+    """
+    # instance: Instance 
+    list_of_course_preference = [[] for _ in instance.agents]
+
+    for i,agent in enumerate(instance.agents):
+        list_of_course_preference[i] = sorted(instance.items, key= lambda x: instance.agent_item_value(agent,x))
+    bids_coins = create_bid_sets(instance.agents, instance.agent_capacity)
+    logger.info(f"Created the bids for each player: {bids_coins}")
+
+    Ac = {}
+    for course in instance.items:
+        Ac[course] = [] 
+    active = True
+
+    while active:
+        active = False
+        for i,agent in enumerate(instance.agents):
+            B_TAG = []
+            logger.info(f"{agent} starts its turn")
+
+            for course in list_of_course_preference[i]:
+                if has_common_object(bids_coins[i],Ac[course]) is False:
+                    p_Ac  = 0 if len(Ac[course])< instance.item_capacity(course) else min(Ac[course])
+                    b_star = calculate_b_star(bids_coins[i],B_TAG,p_Ac)
+                    if b_star:
+                        B_TAG.append(b_star)
+                        min_bid_to_add = min([bid for bid in bids_coins[i] if bid > p_Ac ])
+                        Ac[course].append(min_bid_to_add)
+                        logger.info(f"Agent {instance} added bid coin {min_bid_to_add} for course {course}")
+                        if len(Ac[course]) > instance.item_capacity(course): 
+                            Ac[course].remove(min(Ac[course]))
+                            logger.info(f"Bid coin {p_Ac} removed from {course} bids group current bids are:{Ac[course]}")
+                        active = True
+
+                else:
+                    b_star = [bid for bid in bids_coins[i] if bid in Ac[course]][0]
+                    b_double_star = calculate_b_double_star(bids_coins[i],B_TAG,b_star)
+
+                    if b_double_star:
+                        B_TAG.append(b_double_star)
+
+                    else:
+                        Ac[course].remove(b_star)
+                        logger.info(f"Bid coin {b_star} removed from {course} current bids are:{Ac[course]}")
+
+            logger.info(f"{agent} end its turn")
+
+    bundles = defaultdict(list)
+    for i,agent in enumerate(instance.agents):
+        for course in instance.items:
+            if [bid for bid in bids_coins[i] if bid in Ac[course]]: 
+                bundles[agent].append(course)
+    logger.info(f"Algorithm ends successfully")
+    return dict(bundles)
+
+
+
+
+########### Auxiliary functions
+
+
+def create_bid_sets(agents, agent_capacity):
     """
     This function create the bid set for each Agent with this bids he can buy courses
-    >>> create_bid_sets(3,2)
+    >>> create_bid_sets(range(3), lambda _:2)
     [[6, 1], [5, 2], [4, 3]]
     """
     # Define the global bid set B as a list of integers from 1 to num_players*bid_set_size
-    B = [i for i in range(1, num_players*bid_set_size+1)]
-  
+    num_of_bids = sum([agent_capacity(agent) for agent in agents])
+    B = list(reversed(range(1, num_of_bids+1)))
+
     # Initialize a list to hold the bid sets
-    bid_sets = [[] for _ in range(num_players)]
-  
-    # Sort the bids in decreasing order
-    B = sorted(B, reverse=True)
-  
-    turn_list = create_turns(num_players=num_players,num_picks=num_players*bid_set_size)
+    bid_sets = [[] for _ in range(len(agents))]
+    turn_list = create_turns(num_players=len(agents), num_picks=num_of_bids)
     for i in range(len(turn_list)):
         bid_sets[turn_list[i]].append(B[i])
   
@@ -45,17 +126,17 @@ def create_bid_sets(num_players, bid_set_size):
 
 def create_turns(num_players, num_picks):
     """
-    This function create a an array that represt turn of each player by index to create a fair bids.
-    >>> create_turns(3,6)
-    [0, 1, 2, 2, 1, 0]
+    This function create a an array that represents the turn of each player by index to create a fair bids.
+    >>> create_turns(3,9)
+    [0, 1, 2, 2, 1, 0, 0, 1, 2]
     """
     turns = []
   
     for i in range(int(num_picks / num_players)):
         if i % 2 == 0:
-            turns.extend([player for player in range(0,num_players)])
+            turns.extend(range(0,num_players))
         else:
-            turns.extend(reversed([player for player in range(0,num_players)]))
+            turns.extend(reversed(range(0,num_players)))
     return turns
 
 def has_common_object(list1, list2):
@@ -87,89 +168,7 @@ def calculate_b_double_star(Bi,B_tag_i,b_star):
     Bi_without_B_tag_i_ = [bid for bid in Bi if bid not in B_tag_i and bid >= b_star]
     return min(Bi_without_B_tag_i_) if Bi_without_B_tag_i_ else None
            
-def course_allocation(agents: List[AdditiveAgent],course_capacity:int,course_list: List[str],course_amount_per_agent:int) -> Allocation:
-    """
-    :param agents: The agents who participate in the allocation and there course preferences.
-    :param course_capacity: The courses capacity.
-    :param course_list: The names of the courses.
-    :param course_amount_per_agent how many courses each agent can take.
-    :return: An allocation for each of the agents.
-    >>> Alice = AdditiveAgent({"c1": 1, "c2": 2, "c3": 3,}, name="Alice")
-    >>> Bob = AdditiveAgent({"c1": 1, "c2": 2, "c3": 3, }, name="Bob")
-    >>> Eve = AdditiveAgent({"c2": 1, "c3": 2, "c1": 3, }, name="Eve")
-    >>> agents = [Alice,Bob,Eve]
-    >>> allocation = course_allocation(agents,2,["c1","c2","c3"],2)
-    >>> {agents[i].name():allocation[i] for i,_ in enumerate(agents)}
-    {'Alice': {c1,c3}, 'Bob': {c1,c2}, 'Eve': {c2,c3}}
 
-
-    Two exampels that represent a problem in the algo where its better for Bob to give false preferences and get a better result
-    >>> Alice = AdditiveAgent({"c1": 1, "c2": 2, "c3": 3,"c4":4}, name="Alice")
-    >>> Bob = AdditiveAgent({"c2": 1, "c3": 2, "c4": 3,"c1":4 }, name="Bob")
-    >>> agents = [Alice,Bob]
-    >>> allocation = course_allocation(agents,1,["c1","c2","c3","c4"],2)
-    >>> {agents[i].name():allocation[i] for i,_ in enumerate(agents)}
-    {'Alice': {c1,c2}, 'Bob': {c3,c4}}
-
-
-    >>> Alice = AdditiveAgent({"c1": 1, "c2": 2, "c3": 3,"c4":4}, name="Alice")
-    >>> Bob = AdditiveAgent({"c1": 1, "c2": 2, "c3": 3,"c4":4 }, name="Bob")
-    >>> agents = [Alice,Bob]
-    >>> allocation = course_allocation(agents,1,["c1","c2","c3","c4"],2)
-    >>> {agents[i].name():allocation[i] for i,_ in enumerate(agents)}
-    {'Alice': {c1,c4}, 'Bob': {c2,c3}}
-    """
-    list_of_course_preference = [[] for _ in agents]
-
-    for i,agent in enumerate(agents):
-        list_of_course_preference [i] = sorted([course for course in course_list],key= lambda x: agent.value({x})) 
-    bids_coins =create_bid_sets(len(agents),course_amount_per_agent)
-    logger.info(f"Created the bids for each player: {bids_coins}")
-
-    Ac = {}
-    for course in course_list:
-        Ac[course] = [] 
-    active = True
-
-    while active:
-        active = False
-        for i in range(len(agents)):
-            B_TAG = []
-            logger.info(f"{agents[i].name()} start its turn")
-
-            for course in list_of_course_preference[i]:
-                if has_common_object(bids_coins[i],Ac[course]) is False:
-                    p_Ac  = 0 if len(Ac[course])< course_capacity else min(Ac[course])
-                    b_star = calculate_b_star(bids_coins[i],B_TAG,p_Ac)
-                    if b_star:
-                        B_TAG.append(b_star)
-                        min_bid_to_add = min([bid for bid in bids_coins[i] if bid > p_Ac ])
-                        Ac[course].append(min_bid_to_add)
-                        logger.info(f"Agent {agents[i].name()} added bid coin {min_bid_to_add} for course {course}")
-                        if len(Ac[course]) > course_capacity: 
-                            Ac[course].remove(min(Ac[course]))
-                            logger.info(f"Bid coin {p_Ac} removed from {course} bids group current bids are:{Ac[course]}")
-                        active = True
-
-                else:
-                    b_star = [bid for bid in bids_coins[i] if bid in Ac[course]][0]
-                    b_double_star = calculate_b_double_star(bids_coins[i],B_TAG,b_star)
-
-                    if b_double_star:
-                        B_TAG.append(b_double_star)
-
-                    else:
-                        Ac[course].remove(b_star)
-                        logger.info(f"Bid coin {b_star} removed from {course} current bids are:{Ac[course]}")
-
-            logger.info(f"{agents[i].name()} end its turn")
-
-    bundle = defaultdict(list)
-    for i,agent in enumerate(agents):
-        for course in course_list:
-            if [bid for bid in bids_coins[i] if bid in Ac[course]]: bundle[agent.name()].append(course)
-    logger.info(f"Algorithm ends successfully")
-    return Allocation(agents=[agent.name() for agent in agents], bundles=bundle)
 
 if __name__ == "__main__":
     # logging.basicConfig(level = logging.INFO)
