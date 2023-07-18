@@ -33,6 +33,10 @@ class Instance:
     33
     >>> instance.agent_bundle_value("Bob", ["c1","c2"])
     77
+    >>> instance.agent_maximum_value("Alice")
+    33
+    >>> instance.agent_maximum_value("Bob")
+    77
 
     ### dict of lists:
     >>> instance = Instance(
@@ -45,6 +49,11 @@ class Instance:
     3
     >>> instance.agent_item_value("Alice", 3)
     55
+    >>> instance.agent_maximum_value("Alice")
+    99
+    >>> instance.agent_maximum_value("Bob")
+    264
+
 
     ### default capacities:
     >>> instance = Instance(valuations={"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}})
@@ -88,14 +97,23 @@ class Instance:
 
 
     def agent_bundle_value(self, agent:Any, bundle:List[Any]):
+        """
+        Return the agent's value for a bundle (a list of items).
+        """
         return sum([self.agent_item_value(agent,item) for item in bundle])
     
+    def agent_maximum_value(self, agent:Any):
+        """
+        Return the maximum possible value of an agent: the sum of the top x items, where x is the agent's capacity.
+        """
+        return sum(sorted([self.agent_item_value(agent,item) for item in self.items],reverse=True)[0:self.agent_capacity(agent)])
 
     @staticmethod
     def random(num_of_agents:int, num_of_items:int, 
                agent_capacity_bounds:Tuple[int,int],
                item_capacity_bounds:Tuple[int,int],
-               item_value_bounds:Tuple[int,int],
+               item_base_value_bounds:Tuple[int,int],
+               item_subjective_ratio_bounds:Tuple[float,float],
                normalized_sum_of_values:int):
         """
         Generate a random instance.
@@ -104,31 +122,35 @@ class Instance:
         items   = [f"c{i+1}" for i in range(num_of_items)]
         agent_capacities  = {agent: np.random.randint(agent_capacity_bounds[0], agent_capacity_bounds[1]+1) for agent in agents}
         item_capacities   = {item: np.random.randint(item_capacity_bounds[0], item_capacity_bounds[1]+1) for item in items}
+        base_values = normalized_valuation(random_valuation(num_of_items, item_base_value_bounds), normalized_sum_of_values)
         valuations = {
-            agent: random_valuation(items, item_value_bounds, normalized_sum_of_values)
+            agent: dict(zip(items, normalized_valuation(
+                base_values *  random_valuation(num_of_items, item_subjective_ratio_bounds),
+                normalized_sum_of_values
+            )))
             for agent in agents
         }
         return Instance(valuations=valuations, agent_capacities=agent_capacities, item_capacities=item_capacities)
-        
 
+def random_valuation(numitems:int, item_value_bounds: Tuple[float,float])->np.ndarray:
+    """
+    >>> r = random_valuation(10, [30, 40])
+    >>> len(r)
+    10
+    >>> all(r>=30)
+    True
+    """
+    return np.random.uniform(low=item_value_bounds[0], high=item_value_bounds[1]+1, size=numitems)
 
-def random_valuation(items, item_value_bounds, normalized_sum_of_values):
-    valuations = {
-        item: np.random.randint(item_value_bounds[0],item_value_bounds[1]+1)
-        for item in items
-    }
-    raw_sum_of_values = sum(valuations.values())
-    return  { 
-        item: int(np.round(value*normalized_sum_of_values/raw_sum_of_values))
-        for item,value in valuations.items()
-    }
-
+def normalized_valuation(raw_valuations:np.ndarray, normalized_sum_of_values:float):
+    raw_sum_of_values = sum(raw_valuations)
+    return  np.round(raw_valuations * normalized_sum_of_values / raw_sum_of_values).astype(int)
 
 
 def get_keys_and_mapping(container: Any) -> Tuple[List,Callable]:
     """
     Given a container of any supported type, returns:
-    * a list of the container's keys;
+    * an iterable of the container's keys;
     * a callable function that maps each key to its value.
 
     ### dict
@@ -158,22 +180,25 @@ def get_keys_and_mapping(container: Any) -> Tuple[List,Callable]:
     1
     """
     if container is None:
-        f = k = None
+        func = keys = None
     elif isinstance(container, dict):
-        k = container.keys()
-        f = container.__getitem__
+        keys = container.keys()
+        func = container.__getitem__
     elif isinstance(container, list):
-        k = range(len(container))
-        f = container.__getitem__
+        keys = range(len(container))
+        func = container.__getitem__
+    elif isinstance(container, np.ndarray):
+        keys = range(len(container))
+        func = container.__getitem__
     elif isinstance(container,Number):
-        k = None    # keys are unknown
-        f = constant_function(container)
+        keys = None    # keys are unknown
+        func = constant_function(container)
     elif callable(container):
-        k = None   # keys are unknown
-        f = container 
+        keys = None   # keys are unknown
+        func = container 
     else:
         raise TypeError(f"container {container} of unknown type: {type(container)}")
-    return k,f
+    return keys,func
     
 
 def get_keys_and_mapping_2d(container: Any) -> Tuple[List,Callable]:
@@ -240,12 +265,14 @@ if __name__ == "__main__":
     import doctest
     print(doctest.testmod())
 
-    # random_instance = Instance.random(num_of_agents=4, num_of_items=2, agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], item_value_bounds=[1,200], normalized_sum_of_values=1000)
-    # print(random_instance.agents)
-    # print(random_instance.items)
-    # print(random_instance._valuations)
+    # print(normalized_valuation(random_valuation(10, [1,1000]),1000))
 
-    # random_instance = Instance.random(num_of_agents=70, num_of_items=10, agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], item_value_bounds=[1,200], normalized_sum_of_values=1000)
-    # print(random_instance.agents)
-    # print(random_instance.items)
-    # print(random_instance._valuations)
+    random_instance = Instance.random(
+        # num_of_agents=4, num_of_items=2, 
+        num_of_agents=70, num_of_items=10, 
+        agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], 
+        item_base_value_bounds=[1,200], item_subjective_ratio_bounds=[0.5,1.5],
+        normalized_sum_of_values=1000)
+    print(random_instance.agents)
+    print(random_instance.items)
+    print(random_instance._valuations)
