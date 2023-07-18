@@ -54,7 +54,7 @@ if __name__ == "__main__":
         "algorithm": [
             crs.utilitarian_matching, 
             crs.iterated_maximum_matching, 
-            crs.serial_dictatorship, 
+            # crs.serial_dictatorship,                  # Very bad performance
             # crs.course_allocation_by_proxy_auction,   # Very bad performance
             crs.round_robin, 
             crs.bidirectional_round_robin,
