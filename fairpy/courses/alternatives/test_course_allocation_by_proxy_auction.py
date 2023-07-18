@@ -18,7 +18,6 @@ from fairpy.courses import Instance
 def test_none_fail_input_agents():
     assert pytest.raises(TypeError, course_allocation_by_proxy_auction, None, 5, ["c1", "c2", "c3", "c4"], 2)
 
-        
 def test_big_input_no_exception_100():
     valuations = dict()
     for i in range (0,100):
