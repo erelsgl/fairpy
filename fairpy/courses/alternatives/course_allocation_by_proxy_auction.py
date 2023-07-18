@@ -15,8 +15,6 @@ Since:  2023-01
 
 from typing import List
 from collections import defaultdict
-from fairpy.agents import AdditiveAgent
-from fairpy.allocations import Allocation
 from fairpy.courses.instance  import Instance
 import logging
 
