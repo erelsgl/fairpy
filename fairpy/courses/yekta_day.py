@@ -23,11 +23,24 @@ def yekta_day(instance: Instance):
     >>> from dicttools import stringify
 
     >>> instance = Instance(valuations={"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}}, agent_capacities=1, item_capacities=1)
-    >>> yekta_day(instance)
+    >>> map_agent_name_to_bundle = yekta_day(instance)
+    >>> stringify(map_agent_name_to_bundle)
+    "{avi:['x'], beni:['w']}"
 
-    # >>> map_agent_name_to_bundle = yekta_day(instance)
-    # >>> stringify(map_agent_name_to_bundle)
-    # "{avi:['x'], beni:['w']}"
+    >>> instance = Instance(valuations={"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}}, agent_capacities=2, item_capacities=1)
+    >>> map_agent_name_to_bundle = yekta_day(instance)
+    >>> stringify(map_agent_name_to_bundle)
+    "{avi:['x', 'y'], beni:['w', 'z']}"
+
+    >>> instance = Instance(valuations={"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}}, agent_capacities=3, item_capacities=2)
+    >>> map_agent_name_to_bundle = yekta_day(instance)
+    >>> stringify(map_agent_name_to_bundle)
+    "{avi:['x', 'y', 'z'], beni:['w', 'y', 'z']}"
+
+    >>> instance = Instance(valuations={"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}}, agent_capacities=4, item_capacities=2)
+    >>> map_agent_name_to_bundle = yekta_day(instance)
+    >>> stringify(map_agent_name_to_bundle)
+    "{avi:['w', 'x', 'y', 'z'], beni:['w', 'x', 'y', 'z']}"
     """
     student_list = [
         OOPStudent(id=agent, capacity=instance.agent_capacity(agent), student_office=0, 
@@ -56,12 +69,17 @@ def yekta_day(instance: Instance):
 
     algorithm(student_list, course_list)
 
+    return {
+        student.id: sorted([item for item in instance.items if student.enrolled_or_not[item]])
+        for student in student_list
+    }
+
 
 
 if __name__ == "__main__":
     import sys
     logger.addHandler(logging.StreamHandler(sys.stdout))
-    logger.setLevel(logging.INFO)
+    # logger.setLevel(logging.INFO)
 
     import doctest
     print(doctest.testmod(report=True,optionflags=doctest.NORMALIZE_WHITESPACE))

@@ -34,17 +34,16 @@ class OOPCourse:
         """
 
         """
-        if self.capacity > 0 and student_name not in self.students and student_element.get_need_to_enroll() > 0:
+        if self.capacity == 0:
+            raise Exception(f"The course named {self.name} have no remaining capacity")
+        elif student_name in self.students_name:
+            raise Exception(f"The student {student_name} had been enrolled already for course {self.name}")
+        elif student_element.get_remaining_capacity() ==0:
+            raise Exception(f"Student {student_name} got to his capacity of enrollments for course: {self.name}")
+        else:
             self.capacity -= 1
             self.students.append(student_element)
             self.students_name.append(student_name)
-
-        elif self.capacity == 0:
-            raise Exception(f"The course named {self.name} have no remaining capacity")
-        elif student_name in self.students:
-            raise Exception(f"The student {student_name} had been enrolled already for course {self.name}")
-        else:
-            raise Exception(f"Student {student_name} got to his capacity of enrollments for course: {self.name}")
 
 
     def set_overlap(self, overlap_list):
@@ -71,7 +70,7 @@ class OOPCourse:
     def get_name(self):
         return self.name
 
-    def get_capacity(self):
+    def get_remaining_capacity(self):
         return self.capacity
 
     def get_start(self):

@@ -73,7 +73,7 @@ class OOPStudent:
     def get_ordinal_utility(self):
         return self.ordinal_utility
 
-    def get_need_to_enroll(self):
+    def get_remaining_capacity(self):
         return self.capacity
 
     def get_enrolment_status(self):

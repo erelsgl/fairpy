@@ -67,7 +67,7 @@ def SP_calibration(student_list, elective_course_list):
     for student in student_list:
         pre = list(student.get_next_preference(False).items())
         for course in elective_course_list:
-            if course.get_capacity() == 0 and pre[0][0] == course.get_name():
+            if course.get_remaining_capacity() == 0 and pre[0][0] == course.get_name():
                 logger.info("student ID: %s, preferred course : %s , bid amount: %d, reason: capacity calibration"
                              , student.get_id(), pre[0][0], pre[0][1])
 
@@ -91,6 +91,7 @@ def SP_Algorithm(student_list, elective_course_list, round):
 
         student_need_to_enroll = list(filter(lambda x: x.get_number_of_enrollments() < round, student_need_to_enroll))
         student_need_to_enroll = list(filter(lambda x: x.get_current_highest_bid() != 0, student_need_to_enroll))
+        student_need_to_enroll = list(filter(lambda x: x.get_remaining_capacity() > 0, student_need_to_enroll))
         student_need_to_enroll = sorted(student_need_to_enroll, key=lambda x:
         [x.get_current_highest_bid(), x.current_highest_ordinal()], reverse=True)
 
@@ -115,7 +116,7 @@ def SP_Algorithm(student_list, elective_course_list, round):
 
             for course in elective_course_list:
                 if course.get_name() == bid_data[0]:
-                    if course.get_capacity() > 0:
+                    if course.get_remaining_capacity() > 0:
                         if not check_overlap(student, course):
                             logger.info("Student: %s, enroll to course: %s", student.get_id(), bid_data[0])
                             course.student_enrollment(student.get_id(), student)
