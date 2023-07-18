@@ -4,6 +4,37 @@ Given an instance and an allocation, calculate various measures of satisfaction.
 
 from fairpy.courses.instance import Instance
 from typing import *
+from collections import defaultdict
+
+def validate_allocation(instance:Instance, allocation:dict):
+    """
+    Validate that the given allocation is feasible for the given input-instance.
+    Checks agent capacities, item capacities, and uniqueness of items.
+
+    >>> instance = Instance(
+    ...   agent_capacities = {"Alice": 2, "Bob": 3}, 
+    ...   item_capacities  = {"c1": 4, "c2": 5}, 
+    ...   valuations       = {"Alice": {"c1": 11, "c2": 22}, "Bob": {"c1": 33, "c2": 44}})
+    """
+
+    ### validate agent capacity and uniqueness:
+    for agent,bundle in allocation:
+        agent_capacity = instance.agent_capacity(agent)
+        if len(bundle) > agent_capacity:
+            raise ValueError(f"Agent {agent} has capacity {agent_capacity}, but received more items: {bundle}.")
+        if len(set(bundle))!=len(bundle):
+            raise ValueError(f"Agent {agent} received two or more copies of the same item. Bundle: {bundle}.")
+        
+    ### validate item capacity:
+    map_item_to_num_of_owners = defaultdict(int)
+    for agent,bundle in allocation:
+        for item in bundle:
+            map_item_to_num_of_owners[item] += 1
+    for item,num_of_owners in map_item_to_num_of_owners:
+        item_capacity = instance.item_capacity(item)
+        if num_of_owners > item_capacity:
+            raise ValueError(f"Item {item} has capacity {item_capacity}, but has {num_of_owners} owners.")
+
 
 class AgentBundleValueMatrix:
 

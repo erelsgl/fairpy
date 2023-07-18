@@ -9,7 +9,6 @@ programmers: Itay Hasidi & Amichai Bitan
 
 from fairpy import fairpy
 from fairpy.items.two_players_fair_division import *
-import unittest
 
 items = []
 agents = []
