@@ -1,8 +1,8 @@
 from copy import deepcopy, copy
 import logging
-from fairpy.courses.yekta_day.course import OOPCourse
-from fairpy.courses.yekta_day.course_group import Course_group
-from fairpy.courses.yekta_day.student import OOPStudent
+from fairpy.courses.yekta_day_impl.course import OOPCourse
+from fairpy.courses.yekta_day_impl.course_group import Course_group
+from fairpy.courses.yekta_day_impl.student import OOPStudent
 from collections import OrderedDict
 
 import logging
@@ -460,5 +460,5 @@ def main(raw_student_list, raw_course_list, raw_rank_list):
 if __name__ == "__main__":
     import doctest
 
-    logging.basicConfig(level=logging.DEBUG)
-    doctest.testmod()
+    logger.setLevel(logging.INFO)
+    print(doctest.testmod())

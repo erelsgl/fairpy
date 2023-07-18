@@ -12,9 +12,9 @@ Programmers: Joseph Schtein, Itay Simchayev, Lihi Belfer
 
 
 from fairpy.courses.instance    import Instance
-from fairpy.courses.yekta_day.main import algorithm, logger
-from fairpy.courses.yekta_day.course import OOPCourse
-from fairpy.courses.yekta_day.student import OOPStudent
+from fairpy.courses.yekta_day_impl.main import algorithm, logger
+from fairpy.courses.yekta_day_impl.course import OOPCourse
+from fairpy.courses.yekta_day_impl.student import OOPStudent
 import logging
 
 

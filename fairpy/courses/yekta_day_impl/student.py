@@ -1,6 +1,9 @@
 import logging
 from copy import deepcopy
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 def check_budget(order):
     sum_bidding = 0
@@ -227,7 +230,7 @@ class OOPStudent:
             max_value_index = cardinal_value.index(max(cardinal_value))
             course_name = cardinal_keys[max_value_index]
             self.changeable_cardinal_order[course_name] = cardinal_value[max_value_index] + gap
-            logging.info("student: %s, add to course: %s, the rejected amount: %d, original bid: %d"
+            logger.info("student: %s, add to course: %s, the rejected amount: %d, original bid: %d"
                          ", total bid: %s", self.id, course_name, gap, self.changeable_cardinal_order[course_name]-gap
                          ,self.changeable_cardinal_order[course_name])
 
@@ -244,7 +247,7 @@ class OOPStudent:
                 gap = 0
             self.changeable_cardinal_order[cardinal_keys[max_value_index]] += gap
             if gap > 0:
-                logging.info(
+                logger.info(
                     "Returning points from: %s, to: %s, returning amount: %d, original bid: %d student ID: %s"
                     , course_name, cardinal_keys[max_value_index], gap,
                     self.changeable_cardinal_order[cardinal_keys[max_value_index]]-gap, self.id)
@@ -350,7 +353,7 @@ class OOPStudent:
         """
 
         if self.capacity > 0 and self.enrolled_or_not[course_name] == 0:
-            #logging.info("We enroll student with ID %s to coursed named %s", self.id, course_name)
+            #logger.info("We enroll student with ID %s to coursed named %s", self.id, course_name)
             self.capacity -= 1
             self.cardinal_utility += self.cardinal_order[course_name]
             self.changeable_cardinal_order[course_name] = 0

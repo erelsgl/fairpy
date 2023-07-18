@@ -1,5 +1,4 @@
 from copy import deepcopy
-import logging
 
 class OOPCourse:
 

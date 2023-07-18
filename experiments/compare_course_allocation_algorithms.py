@@ -57,7 +57,8 @@ if __name__ == "__main__":
             crs.serial_dictatorship, 
             # crs.course_allocation_by_proxy_auction,   # Very bad performance
             crs.round_robin, 
-            crs.bidirectional_round_robin
+            crs.bidirectional_round_robin,
+            crs.yekta_day
             ],
         "random_seed": range(5),
     }
