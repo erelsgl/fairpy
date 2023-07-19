@@ -88,7 +88,6 @@ iterated_maximum_matching.logger = logger
 
 
 
-#### MAIN
 
 if __name__ == "__main__":
     import doctest, sys

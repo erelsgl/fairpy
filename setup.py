@@ -30,7 +30,7 @@ setuptools.setup(
         "Source Code": URL,
         "Bug Reports": f"{URL}/issues",
     },
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     include_package_data=True,
     classifiers=[
         # see https://pypi.org/classifiers/

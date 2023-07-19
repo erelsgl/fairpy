@@ -8,6 +8,7 @@ Since: 2023-07
 from typing import Callable, List, Any, Tuple
 from numbers import Number
 import numpy as np
+from functools import cache
 
 import logging
 logger = logging.getLogger(__name__)
@@ -84,8 +85,10 @@ class Instance:
 
         self.agents = agents or agent_capacity_keys or agent_priority_keys or agent_value_keys
         assert (self.agents is not None)
+        self.num_of_agents = len(self.agents)
         self.items  = items  or item_capacity_keys or item_value_keys
         assert (self.items is not None)
+        self.num_of_items = len(self.items)
 
         self.agent_capacity = agent_capacity_func or constant_function(len(self.items))
         self.agent_priority = agent_priority_func or constant_function(1)
@@ -105,6 +108,7 @@ class Instance:
         """
         return sum([self.agent_item_value(agent,item) for item in bundle])
     
+    @cache
     def agent_maximum_value(self, agent:Any):
         """
         Return the maximum possible value of an agent: the sum of the top x items, where x is the agent's capacity.
