@@ -101,4 +101,4 @@ if __name__ == "__main__":
     divide_random_instance(algorithm=iterated_maximum_matching, 
                            num_of_agents=10, num_of_items=4, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
                            item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
-                           random_seed=None)
+                           random_seed=1)
