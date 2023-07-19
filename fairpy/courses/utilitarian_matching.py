@@ -59,9 +59,14 @@ utilitarian_matching.logger = logger
 #### MAIN
 
 if __name__ == "__main__":
-    import sys
-    logger.addHandler(logging.StreamHandler(sys.stdout))
-    # logger.setLevel(logging.INFO)
+    import doctest, sys
+    print("\n",doctest.testmod(), "\n")
 
-    import doctest
-    print(doctest.testmod(report=True,optionflags=doctest.NORMALIZE_WHITESPACE))
+    logger.addHandler(logging.StreamHandler(sys.stdout))
+    logger.setLevel(logging.INFO)
+
+    from fairpy.courses.adaptors import divide_random_instance
+    divide_random_instance(algorithm=utilitarian_matching, 
+                           num_of_agents=10, num_of_items=4, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
+                           item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
+                           random_seed=None)

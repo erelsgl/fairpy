@@ -9,6 +9,9 @@ from typing import Callable, List, Any, Tuple
 from numbers import Number
 import numpy as np
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class Instance:
     """
@@ -114,10 +117,15 @@ class Instance:
                item_capacity_bounds:Tuple[int,int],
                item_base_value_bounds:Tuple[int,int],
                item_subjective_ratio_bounds:Tuple[float,float],
-               normalized_sum_of_values:int):
+               normalized_sum_of_values:int,
+               random_seed:int=None):
         """
         Generate a random instance.
         """
+        if random_seed is None:
+            random_seed = np.random.randint(1, 2**31)
+        np.random.seed(random_seed)
+        logger.info("Random seed: %d", random_seed)
         agents  = [f"s{i+1}" for i in range(num_of_agents)]
         items   = [f"c{i+1}" for i in range(num_of_items)]
         agent_capacities  = {agent: np.random.randint(agent_capacity_bounds[0], agent_capacity_bounds[1]+1) for agent in agents}
@@ -256,13 +264,17 @@ def get_keys_and_mapping_2d(container: Any) -> Tuple[List,Callable]:
 
     
 
+Instance.logger = logger
 
 def constant_function(constant_value)->Callable:
     return lambda key:constant_value
 
 
 if __name__ == "__main__":
-    import doctest
+    import doctest, sys
+    logger.addHandler(logging.StreamHandler(sys.stdout))
+    logger.setLevel(logging.INFO)
+
     print(doctest.testmod())
 
     # print(normalized_valuation(random_valuation(10, [1,1000]),1000))

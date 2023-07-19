@@ -10,9 +10,10 @@ Author: Erel Segal-Halevi
 Since: 2023-07
 """
 
-import fairpy
+import fairpy, numpy as np
 from typing import Callable, List, Any
 from fairpy.courses.instance import Instance
+from fairpy.courses.satisfaction import AgentBundleValueMatrix
 
 def divide(
     algorithm: Callable,
@@ -45,21 +46,37 @@ def divide(
     return result
 
 
-def divide_random_instance(algorithm,
-                           num_of_agents, num_of_items, 
-                           agent_capacity_bounds, item_capacity_bounds, item_value_bounds,
-                           normalized_sum_of_values,
-                           **kwargs):
-    random_instance = Instance.random(num_of_agents=num_of_agents, num_of_items=num_of_items, agent_capacity_bounds=agent_capacity_bounds, item_capacity_bounds=item_capacity_bounds, item_value_bounds=item_value_bounds, normalized_sum_of_values=normalized_sum_of_values)
-    result = algorithm(random_instance, **kwargs)
-    return result
+def divide_random_instance(algorithm, num_of_agents, num_of_items, 
+                           agent_capacity_bounds, item_capacity_bounds, 
+                           item_base_value_bounds, item_subjective_ratio_bounds,
+                           normalized_sum_of_values, random_seed=None, **kwargs):
+    if random_seed is None:
+        random_seed = np.random.randint(1, 2**31)
+    np.random.seed(random_seed)
+    print("Random seed: ", random_seed)
+
+    random_instance = Instance.random(num_of_agents=num_of_agents, num_of_items=num_of_items, agent_capacity_bounds=agent_capacity_bounds, item_capacity_bounds=item_capacity_bounds, 
+                                      item_base_value_bounds=item_base_value_bounds, item_subjective_ratio_bounds=item_subjective_ratio_bounds,
+                                      normalized_sum_of_values=normalized_sum_of_values, random_seed=random_seed)
+    allocation = algorithm(random_instance, **kwargs)
+    matrix = AgentBundleValueMatrix(random_instance, allocation)
+    matrix.use_normalized_values()
+
+    print("\nAllocation: ", allocation)
+    print(f"   utilitarian value: {matrix.utilitarian_value().astype(int)}%")
+    print(f"   egalitarian value: {matrix.egalitarian_value().astype(int)}%")
+    print(f"   max envy: {matrix.max_envy().astype(int)}%")
+    print(f"   mean envy: {matrix.mean_envy().astype(int)}%")
+    
+    return allocation
+
 
 if __name__ == "__main__":
     import doctest, sys
     print(doctest.testmod())
 
-    print(
-        divide_random_instance(
-            fairpy.courses.round_robin, num_of_agents=70, num_of_items=10, agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], item_value_bounds=[0,200], normalized_sum_of_values=1000
-        )
+    divide_random_instance(
+        fairpy.courses.round_robin, num_of_agents=70, num_of_items=10, agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], 
+        item_base_value_bounds=[0,200], item_subjective_ratio_bounds=[0.5,1.5],
+        normalized_sum_of_values=1000
     )

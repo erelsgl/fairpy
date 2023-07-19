@@ -48,34 +48,37 @@ def iterated_maximum_matching(instance: Instance):
     "{avi:['w', 'x', 'y', 'z'], beni:['w', 'x', 'y', 'z']}"
     """
     map_agent_name_to_final_bundle = {agent: [] for agent in instance.agents}
-    remaining_item_capacities = {item: instance.item_capacity(item) for item in instance.items}
-    remaining_agents = [agent for agent in instance.agents if instance.agent_capacity(agent)>0]
+    remaining_item_capacities  = {item: instance.item_capacity(item) for item in instance.items}
+    remaining_agent_capacities = {agent: instance.agent_capacity(agent) for agent in instance.agents}
     remaining_agent_item_value = {agent: {item:instance.agent_item_value(agent,item) for item in instance.items} for agent in instance.agents}
 
-    while len(remaining_item_capacities)>0:
-        logger.info("\nremaining_agents: %s", remaining_agents)
-        logger.info("remaining_item_capacities: %s", remaining_item_capacities)
-        logger.info("remaining_agent_item_value: %s", remaining_agent_item_value)
+    iteration = 1
+    while len(remaining_item_capacities)>0 and len(remaining_agent_capacities)>0:
+        logger.info("\nIteration %d", iteration)
+        logger.info("  remaining_agent_capacities: %s", remaining_agent_capacities)
+        logger.info("  remaining_item_capacities: %s", remaining_item_capacities)
+        logger.debug("  remaining_agent_item_value: %s", remaining_agent_item_value)
         map_agent_to_bundle = many_to_many_matching_using_network_flow(
             items=remaining_item_capacities.keys(), 
             item_capacity=remaining_item_capacities.__getitem__, 
-            agents=remaining_agents,
+            agents=remaining_agent_capacities.keys(),
             agent_capacity=lambda _:1,
             agent_item_value=lambda agent,item: remaining_agent_item_value[agent][item])
-        logger.info("matching: %s", map_agent_to_bundle)
+        logger.info("  matching: %s", dict(map_agent_to_bundle))
         for agent,bundle in map_agent_to_bundle.items():
             if len(bundle)==0:
-                remaining_agents.remove(agent)
+                del remaining_agent_capacities[agent]
+                continue
             map_agent_name_to_final_bundle[agent] += bundle
+            remaining_agent_capacities[agent]-=len(bundle)
+            if remaining_agent_capacities[agent]==0:
+                del remaining_agent_capacities[agent]
             for item in bundle:
                 remaining_item_capacities[item]-=1
                 if remaining_item_capacities[item]==0:
                     del remaining_item_capacities[item]
                 remaining_agent_item_value[agent][item] = -1  # prevent the agent from getting the same item again.
-            if len(map_agent_name_to_final_bundle[agent])>=instance.agent_capacity(agent):
-                remaining_agents.remove(agent)
-        if len(remaining_agents)==0 or len(remaining_item_capacities)==0:
-            break
+        iteration += 1
     return sorted_allocation(map_agent_name_to_final_bundle)
 
 
@@ -88,14 +91,14 @@ iterated_maximum_matching.logger = logger
 #### MAIN
 
 if __name__ == "__main__":
-    import sys
+    import doctest, sys
+    print("\n",doctest.testmod(), "\n")
+
     logger.addHandler(logging.StreamHandler(sys.stdout))
     logger.setLevel(logging.INFO)
 
-    # import doctest
-    # print(doctest.testmod(report=True,optionflags=doctest.NORMALIZE_WHITESPACE))
-
-    random_instance = Instance.random(num_of_agents=10, num_of_items=3, agent_capacity_bounds=[2,6], item_capacity_bounds=[30,50], 
-                                      item_base_value_bounds=[1,1000], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=1000)
-
-    print(iterated_maximum_matching(random_instance))
+    from fairpy.courses.adaptors import divide_random_instance
+    divide_random_instance(algorithm=iterated_maximum_matching, 
+                           num_of_agents=10, num_of_items=4, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
+                           item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
+                           random_seed=None)
