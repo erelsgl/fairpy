@@ -70,7 +70,7 @@ def yekta_day(instance: Instance):
     algorithm(student_list, course_list)
 
     return {
-        student.id: sorted([item for item in instance.items if student.enrolled_or_not[item]])
+        student.id: sorted(filter(student.enrolled_or_not.__getitem__, instance.items))
         for student in student_list
     }
 

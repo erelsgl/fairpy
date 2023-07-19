@@ -11,6 +11,7 @@ Since : 2023-07
 
 from fairpy.courses.graph_utils import many_to_many_matching_using_network_flow
 from fairpy.courses.instance    import Instance
+from fairpy.courses.allocation import sorted_allocation
 
 import logging
 logger = logging.getLogger(__name__)
@@ -18,10 +19,7 @@ logger = logging.getLogger(__name__)
 
 def utilitarian_matching(instance: Instance):
     """
-    Finds a maximum-weight matching with the given preferences, agent_weights and capacities.
-    :param agents: maps each agent to a map from an item's name to its value for the agent.
-    :param item_capacities [optional]: maps each item to its number of units. Default is 1.
-    :param agent_weights [optional]: maps each agent to an integer priority. The weights of each agent are multiplied by WEIGHT_BASE^priority.
+    Finds an allocation maximizing the sum of utilities for the given instance, using max-weight many-to-many matching.
 
     >>> from dicttools import stringify
 
@@ -45,12 +43,12 @@ def utilitarian_matching(instance: Instance):
     >>> stringify(map_agent_name_to_bundle)
     "{avi:['w', 'x', 'y', 'z'], beni:['w', 'x', 'y', 'z']}"
     """
-    return many_to_many_matching_using_network_flow(
+    return sorted_allocation(many_to_many_matching_using_network_flow(
         items=instance.items,
         item_capacity=instance.item_capacity,
         agents=instance.agents,
         agent_capacity=instance.agent_capacity,
-        agent_item_value=instance.agent_item_value)
+        agent_item_value=instance.agent_item_value))
 
 
 utilitarian_matching.logger = logger

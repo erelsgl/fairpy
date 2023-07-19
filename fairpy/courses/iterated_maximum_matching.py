@@ -15,6 +15,7 @@ Since : 2021-05
 
 from fairpy.courses.graph_utils import many_to_many_matching_using_network_flow
 from fairpy.courses.instance    import Instance
+from fairpy.courses.allocation import sorted_allocation
 
 import logging
 logger = logging.getLogger(__name__)
@@ -22,10 +23,7 @@ logger = logging.getLogger(__name__)
 
 def iterated_maximum_matching(instance: Instance):
     """
-    Finds a maximum-weight matching with the given preferences, agent_weights and capacities.
-    :param agents: maps each agent to a map from an item's name to its value for the agent.
-    :param item_capacities [optional]: maps each item to its number of units. Default is 1.
-    :param agent_weights [optional]: maps each agent to an integer priority. The weights of each agent are multiplied by WEIGHT_BASE^priority.
+    Finds a allocation for the given instance, using iterated maximum matching.
 
     >>> from dicttools import stringify
 
@@ -53,6 +51,7 @@ def iterated_maximum_matching(instance: Instance):
     remaining_item_capacities = {item: instance.item_capacity(item) for item in instance.items}
     remaining_agents = [agent for agent in instance.agents if instance.agent_capacity(agent)>0]
     remaining_agent_item_value = {agent: {item:instance.agent_item_value(agent,item) for item in instance.items} for agent in instance.agents}
+
     while len(remaining_item_capacities)>0:
         logger.info("\nremaining_agents: %s", remaining_agents)
         logger.info("remaining_item_capacities: %s", remaining_item_capacities)
@@ -77,9 +76,7 @@ def iterated_maximum_matching(instance: Instance):
                 remaining_agents.remove(agent)
         if len(remaining_agents)==0 or len(remaining_item_capacities)==0:
             break
-    for agent,bundle in map_agent_name_to_final_bundle.items():
-        bundle.sort()
-    return map_agent_name_to_final_bundle
+    return sorted_allocation(map_agent_name_to_final_bundle)
 
 
 
@@ -95,5 +92,10 @@ if __name__ == "__main__":
     logger.addHandler(logging.StreamHandler(sys.stdout))
     logger.setLevel(logging.INFO)
 
-    import doctest
-    print(doctest.testmod(report=True,optionflags=doctest.NORMALIZE_WHITESPACE))
+    # import doctest
+    # print(doctest.testmod(report=True,optionflags=doctest.NORMALIZE_WHITESPACE))
+
+    random_instance = Instance.random(num_of_agents=10, num_of_items=3, agent_capacity_bounds=[2,6], item_capacity_bounds=[30,50], 
+                                      item_base_value_bounds=[1,1000], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=1000)
+
+    print(iterated_maximum_matching(random_instance))

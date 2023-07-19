@@ -9,6 +9,7 @@ Since: 2023-06
 
 from fairpy.courses.instance import Instance
 from itertools import cycle
+from fairpy.courses.allocation import sorted_allocation
 
 import logging
 logger = logging.getLogger(__name__)
@@ -60,7 +61,8 @@ def picking_sequence(instance: Instance, agent_order:list) -> List[List[Any]]:
         if len(bundles[agent]) == instance.agent_capacity(agent):
             logger.info("Agent %s has already picked %d courses: %s", agent, len(bundles[agent]), bundles[agent])
             remaining_agents.remove(agent)
-    return {agent: sorted(bundle) for agent,bundle in bundles.items()}
+    return sorted_allocation(bundles)
+    # return {agent: sorted(bundle) for agent,bundle in bundles.items()}
 
 
 def serial_dictatorship(instance: Instance, agent_order:list=None) -> List[List[Any]]:
@@ -137,7 +139,6 @@ if __name__ == "__main__":
     logger.setLevel(logging.INFO)
     
     import doctest
-    (failures,tests) = doctest.testmod(report=True)
-    print (f"{failures} failures, {tests} tests")
+    print(doctest.testmod(report=True))
     # doctest.run_docstring_examples(picking_sequence, globals())
         

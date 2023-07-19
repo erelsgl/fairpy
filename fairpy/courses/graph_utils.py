@@ -76,8 +76,6 @@ def many_to_many_matching_using_network_flow(items:List, item_capacity: Callable
                 map_agent_name_to_bundle[agent].append(item)
             elif itemflow!=0:
                 raise ValueError(f"non-binary flow in network: {flow}")
-    for agent,bundle in map_agent_name_to_bundle.items():
-        bundle.sort()
     return map_agent_name_to_bundle
 
 
@@ -129,8 +127,6 @@ def many_to_many_matching_using_node_cloning(items:List, item_capacity: Callable
         else:
             raise ValueError(f"Cannot find an agent in {edge}")
         map_agent_name_to_bundle[agent].append(item)
-    for agent,bundle in map_agent_name_to_bundle.items():
-        bundle.sort()
     return map_agent_name_to_bundle
 
 
