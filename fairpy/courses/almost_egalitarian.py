@@ -8,7 +8,7 @@ Since: 2023-07
 
 from fairpy.courses.instance import Instance
 from fairpy.courses.allocation_utils import AllocationBuilder
-from fairpy.courses.fractional_egalitarian import fractional_leximin_optimal_allocation
+from fairpy.courses.fractional_egalitarian import fractional_leximin_optimal_allocation, fractional_egalitarian_utilitarian_allocation
 
 import cvxpy, numpy as np, networkx
 from cvxpy_leximin import Problem, Leximin
@@ -41,11 +41,35 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
     # >>> stringify(almost_egalitarian_allocation(instance))
     # "{avi:['w', 'x', 'y', 'z'], beni:['w', 'x', 'y', 'z']}"
     """
-    fractional_allocation = fractional_leximin_optimal_allocation(instance, **solver_options)
+    # fractional_allocation = fractional_leximin_optimal_allocation(instance, **solver_options)
+    fractional_allocation = fractional_egalitarian_utilitarian_allocation(instance, **solver_options)
     logger.debug("\nfractional_allocation:\n%s", fractional_allocation)
 
     fractional_allocation_graph = consumption_graph(fractional_allocation)
     logger.debug("\nfractional_allocation_graph:\n%s", fractional_allocation_graph.edges.data())
+
+    def remove_edge_from_graph(agent,item):
+        """
+        Remove the edge (agent,item) from the graph, and redistribute its weight among the neighboring agents of item.
+        """
+        weight_for_redistribution = fractional_allocation[agent][item] # this weight should be redistributed to other neighbors of the item
+        fractional_allocation[agent][item] = 0
+        fractional_allocation_graph.remove_edge(agent,item)
+        for neighbor_agent in fractional_allocation_graph.neighbors(item):
+            current_neighbor_weight = fractional_allocation_graph[neighbor_agent][item]['weight']
+            if weight_for_redistribution <= 1 - current_neighbor_weight:
+                fractional_allocation[neighbor_agent][item] = fractional_allocation_graph[neighbor_agent][item]['weight'] = current_neighbor_weight + weight_for_redistribution
+                logger.info("\nAdd weight %g to (%s,%s)", weight_for_redistribution, neighbor_agent, item)
+                break
+            else:
+                fractional_allocation[neighbor_agent][item] = fractional_allocation_graph[neighbor_agent][item]['weight'] = 1
+                weight_for_redistribution -= 1 - current_neighbor_weight
+                logger.info("\nSet to 1 the weight of (%s,%s)", neighbor_agent, item)
+
+    def remove_agent_from_graph(agent):
+        neighbors = list(fractional_allocation_graph.neighbors(agent))
+        for item in neighbors:
+            remove_edge_from_graph(agent,item)
 
     alloc = AllocationBuilder(instance)
 
@@ -53,7 +77,6 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
     while fractional_allocation_graph.number_of_nodes()>0:
         # Look for an item leaf:
         found_item_leaf = False
-        edges_to_remove = []
         for item in instance.items:
             if item in fractional_allocation_graph.nodes:
                 item_neighbors = list(fractional_allocation_graph.neighbors(item))
@@ -64,9 +87,11 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
                         logger.info("\nItem %s is a leaf: give it to to agent %s", item, agent)
                         fractional_allocation[agent][item] = 0
                         fractional_allocation_graph.remove_edge(agent,item)
+                        if not agent in alloc.remaining_agent_capacities:
+                            logger.info("\nAgent %s has received %s and has no remaining capacity: remove it", agent, alloc.bundles[agent])
+                            remove_agent_from_graph(agent)
                         logger.debug("\nfractional_allocation_graph:\n%s", fractional_allocation_graph.edges.data())
                         found_item_leaf = True
-        # fractional_allocation_graph.remove_edges_from(edges_to_remove)
         if found_item_leaf:
             # draw_bipartite_weighted_graph(fractional_allocation_graph, instance.agents)
             continue
@@ -74,27 +99,13 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
         # No item is a leaf - look for an agent leaf:
         found_agent_leaf = False
         for agent in instance.agents:
+            if not agent in fractional_allocation_graph:
+                continue
             if fractional_allocation_graph.degree[agent]==1:
                 # A leaf agent: disconnect him from his only neighbor (since it is a good)
                 item = next(fractional_allocation_graph.neighbors(agent))
                 logger.info("\nAgent %s is a leaf: disconnect from the only neighbor %s", agent, item)
-                weight_for_redistribution = fractional_allocation[agent][item] # this weight should be redistributed to other neighbors
-                # fractional_allocation_graph.remove_node(agent)
-                fractional_allocation[agent][item] = 0
-                fractional_allocation_graph.remove_edge(agent,item)
-                assert (fractional_allocation_graph.degree[item]>=1)
-                for neighbor_agent in fractional_allocation_graph.neighbors(item):
-                    current_neighbor_weight = fractional_allocation[neighbor_agent][item] 
-                    if weight_for_redistribution <= 1 - current_neighbor_weight:
-                        fractional_allocation[neighbor_agent][item] += weight_for_redistribution
-                        fractional_allocation_graph[neighbor_agent][item]['weight'] = fractional_allocation[neighbor_agent][item]
-                        logger.info("\nAdd weight %g to (%s,%s)", weight_for_redistribution, neighbor_agent, item)
-                        break
-                    else:
-                        fractional_allocation[neighbor_agent][item] = 1
-                        weight_for_redistribution -= 1 - current_neighbor_weight
-                        fractional_allocation_graph[neighbor_agent][item]['weight'] = fractional_allocation[neighbor_agent][item]
-                        logger.info("\nSet to 1 the weight of (%s,%s)", neighbor_agent, item)
+                remove_agent_from_graph(agent)
                 logger.debug("\nfractional_allocation_graph:\n%s", fractional_allocation_graph.edges.data())
                 found_agent_leaf = True
                 break  # after removing one agent, proceed to remove leaf items
@@ -104,7 +115,6 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
         
         # If no leaf is found, break
         break
-            
     return alloc.sorted()
 
 
@@ -141,7 +151,7 @@ def draw_bipartite_weighted_graph(G: networkx.Graph, top_nodes:list):
 
 if __name__ == "__main__":
     import doctest, sys
-    print("\n",doctest.testmod(), "\n")
+    # print("\n",doctest.testmod(), "\n")
 
     logger.addHandler(logging.StreamHandler(sys.stdout))
     logger.setLevel(logging.DEBUG)
