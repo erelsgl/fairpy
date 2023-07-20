@@ -9,7 +9,7 @@ Since: 2023-06
 
 from fairpy.courses.instance import Instance
 from itertools import cycle
-from fairpy.courses.allocation import sorted_allocation
+from fairpy.courses.allocation_utils import sorted_allocation
 
 import logging
 logger = logging.getLogger(__name__)

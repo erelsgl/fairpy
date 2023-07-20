@@ -2,7 +2,7 @@
 from fairpy.courses.instance import Instance
 from fairpy.courses.adaptors import divide
 from fairpy.courses.satisfaction import AgentBundleValueMatrix
-from fairpy.courses.validation import validate_allocation
+from fairpy.courses.allocation_utils import validate_allocation
 
 # Algorithms:
 from fairpy.courses.iterated_maximum_matching import iterated_maximum_matching

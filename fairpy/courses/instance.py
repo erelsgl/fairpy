@@ -114,6 +114,9 @@ class Instance:
         Return the maximum possible value of an agent: the sum of the top x items, where x is the agent's capacity.
         """
         return sum(sorted([self.agent_item_value(agent,item) for item in self.items],reverse=True)[0:self.agent_capacity(agent)])
+    
+    def agent_normalized_item_value(self, agent:Any, item:Any):
+        return self.agent_item_value(agent,item) / self.agent_maximum_value(agent) * 100
 
     @staticmethod
     def random(num_of_agents:int, num_of_items:int, 
@@ -279,16 +282,19 @@ if __name__ == "__main__":
     logger.addHandler(logging.StreamHandler(sys.stdout))
     logger.setLevel(logging.INFO)
 
-    print(doctest.testmod())
-
-    # print(normalized_valuation(random_valuation(10, [1,1000]),1000))
+    # print(doctest.testmod())
 
     random_instance = Instance.random(
-        # num_of_agents=4, num_of_items=2, 
-        num_of_agents=70, num_of_items=10, 
-        agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], 
+        num_of_agents=5, num_of_items=3, 
+        agent_capacity_bounds=[2,6], item_capacity_bounds=[30,50], 
         item_base_value_bounds=[1,200], item_subjective_ratio_bounds=[0.5,1.5],
         normalized_sum_of_values=1000)
-    print(random_instance.agents)
-    print(random_instance.items)
-    print(random_instance._valuations)
+    print("agents: ", random_instance.agents)
+    print("items: ", random_instance.items)
+    print("valuations: ", random_instance._valuations)
+
+    # Test the cache    
+    # print(random_instance.agent_maximum_value("s1"))
+    # print(random_instance.agent_maximum_value("s2"))
+    # print(random_instance.agent_maximum_value("s1"))
+

@@ -1,10 +1,13 @@
 """
-Given an instance and an allocation, validate that the allocation is feasible.
+Utils for post-processing allocations
 """
+
+import numpy as np
 
 from fairpy.courses.instance import Instance
 from typing import *
 from collections import defaultdict
+
 
 def validate_allocation(instance:Instance, allocation:dict, title:str=""):
     """
@@ -50,6 +53,17 @@ def validate_allocation(instance:Instance, allocation:dict, title:str=""):
             raise ValueError(f"{title}: Item {item} has capacity {item_capacity}, but is given to more agents: {list_of_owners}.")
 
 
+
+def sorted_allocation(map_agent_name_to_bundle:dict):
+    for agent,bundle in map_agent_name_to_bundle.items():
+        if isinstance(bundle,list):
+            bundle.sort()
+        else: 
+            map_agent_name_to_bundle[agent] = sorted(bundle)
+    return map_agent_name_to_bundle
+
+def rounded_allocation(allocation_matrix:dict, digits:int):
+    return {agent:{item:np.round(allocation_matrix[agent][item],digits) for item in allocation_matrix[agent].keys()} for agent in allocation_matrix.keys()}
 
 
 if __name__ == "__main__":

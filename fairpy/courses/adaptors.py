@@ -14,6 +14,7 @@ import fairpy, numpy as np
 from typing import Callable, List, Any
 from fairpy.courses.instance import Instance
 from fairpy.courses.satisfaction import AgentBundleValueMatrix
+from fairpy.courses.allocation_utils import validate_allocation
 
 def divide(
     algorithm: Callable,
@@ -63,11 +64,12 @@ def divide_random_instance(algorithm, num_of_agents, num_of_items,
     matrix.use_normalized_values()
 
     print("\nAllocation: ", allocation)
-    print(f"   utilitarian value: {matrix.utilitarian_value().astype(int)}%")
-    print(f"   egalitarian value: {matrix.egalitarian_value().astype(int)}%")
-    print(f"   max envy: {matrix.max_envy().astype(int)}%")
-    print(f"   mean envy: {matrix.mean_envy().astype(int)}%")
-    
+    validate_allocation(random_instance, allocation)
+    print(f"   utilitarian value: {int(matrix.utilitarian_value())}%")
+    print(f"   egalitarian value: {int(matrix.egalitarian_value())}%")
+    print(f"   max envy: {int(matrix.max_envy())}%")
+    print(f"   mean envy: {int(matrix.mean_envy())}%")
+
     return allocation
 
 

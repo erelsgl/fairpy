@@ -11,7 +11,7 @@ Since : 2023-07
 
 from fairpy.courses.graph_utils import many_to_many_matching_using_network_flow
 from fairpy.courses.instance    import Instance
-from fairpy.courses.allocation import sorted_allocation
+from fairpy.courses.allocation_utils import sorted_allocation
 
 import logging
 logger = logging.getLogger(__name__)
