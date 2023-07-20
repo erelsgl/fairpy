@@ -14,7 +14,7 @@ import fairpy, numpy as np
 from typing import Callable, List, Any
 from fairpy.courses.instance import Instance
 from fairpy.courses.satisfaction import AgentBundleValueMatrix
-from fairpy.courses.allocation_utils import validate_allocation
+from fairpy.courses.allocation_utils import validate_allocation, allocation_is_fractional
 
 def divide(
     algorithm: Callable,
@@ -60,15 +60,21 @@ def divide_random_instance(algorithm, num_of_agents, num_of_items,
                                       item_base_value_bounds=item_base_value_bounds, item_subjective_ratio_bounds=item_subjective_ratio_bounds,
                                       normalized_sum_of_values=normalized_sum_of_values, random_seed=random_seed)
     allocation = algorithm(random_instance, **kwargs)
-    matrix = AgentBundleValueMatrix(random_instance, allocation)
-    matrix.use_normalized_values()
-
     print("\nAllocation: ", allocation)
-    validate_allocation(random_instance, allocation)
-    print(f"   utilitarian value: {int(matrix.utilitarian_value())}%")
-    print(f"   egalitarian value: {int(matrix.egalitarian_value())}%")
-    print(f"   max envy: {int(matrix.max_envy())}%")
-    print(f"   mean envy: {int(matrix.mean_envy())}%")
+
+    if not allocation_is_fractional(allocation):
+        validate_allocation(random_instance, allocation)
+        matrix = AgentBundleValueMatrix(random_instance, allocation)
+        matrix.use_normalized_values()
+
+        print(f"   utilitarian value: {int(matrix.utilitarian_value())}%")
+        print(f"   egalitarian value: {int(matrix.egalitarian_value())}%")
+        print(f"   max envy: {int(matrix.max_envy())}%")
+        print(f"   mean envy: {int(matrix.mean_envy())}%")
+
+    else:
+        pass 
+
 
     return allocation
 

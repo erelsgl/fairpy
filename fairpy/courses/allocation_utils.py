@@ -76,6 +76,25 @@ def validate_allocation(instance:Instance, allocation:dict, title:str=""):
 def rounded_allocation(allocation_matrix:dict, digits:int):
     return {agent:{item:np.round(allocation_matrix[agent][item],digits) for item in allocation_matrix[agent].keys()} for agent in allocation_matrix.keys()}
 
+def allocation_is_fractional(allocation:dict)->bool:
+    """
+    Weak check if the given allocation is fractional.
+    The check is made only on one arbitrary bundle.
+
+    >>> allocation_is_fractional({"agent1": {"item1": 0.3, "item2": 0.4}})
+    True
+    >>> allocation_is_fractional({"agent1": ["item1", "item2"]})
+    False
+    """
+    arbitrary_bundle = next(iter(allocation.values()))
+    if isinstance(arbitrary_bundle,list):
+        return False
+    elif isinstance(arbitrary_bundle,dict):
+        arbitrary_value = next(iter(arbitrary_bundle.values()))
+        if isinstance(arbitrary_value,float):
+            return True
+    raise ValueError(f"Bundle format is unknown: {arbitrary_bundle}")
+
 
 class AllocationBuilder:
     """
