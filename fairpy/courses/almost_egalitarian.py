@@ -41,7 +41,7 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
     # >>> stringify(almost_egalitarian_allocation(instance))
     # "{avi:['w', 'x', 'y', 'z'], beni:['w', 'x', 'y', 'z']}"
     """
-    # fractional_allocation = fractional_leximin_optimal_allocation(instance, **solver_options)
+    # fractional_allocation = fractional_leximin_optimal_allocation(instance, **solver_options) # Too slow
     fractional_allocation = fractional_egalitarian_utilitarian_allocation(instance, **solver_options)
     logger.debug("\nfractional_allocation:\n%s", fractional_allocation)
 

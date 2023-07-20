@@ -7,7 +7,8 @@ To run this file, you need
 Programmer: Erel Segal-Halevi
 Since: 2023-07
 """
-import fairpy.courses as crs
+from fairpy.courses.fractional_egalitarian import *
+from fairpy.courses import Instance
 from typing import *
 import numpy as np
 
@@ -23,7 +24,7 @@ def course_allocation_with_random_instance(
     algorithm:Callable,
     random_seed: int,):
     np.random.seed(random_seed)
-    instance = crs.Instance.random(
+    instance = Instance.random(
         num_of_agents=num_of_agents, num_of_items=num_of_items, normalized_sum_of_values=normalized_sum_of_values,
         agent_capacity_bounds=agent_capacity_bounds, 
         item_capacity_bounds=item_capacity_bounds, 
@@ -31,34 +32,25 @@ def course_allocation_with_random_instance(
         item_subjective_ratio_bounds=[1-value_noise_ratio, 1+value_noise_ratio]
         )
     allocation = algorithm(instance)
-    matrix = crs.AgentBundleValueMatrix(instance, allocation)
-    matrix.use_normalized_values()
     return {
-        "utilitarian_value": matrix.utilitarian_value(),
-        "egalitarian_value": matrix.egalitarian_value(),
-        "max_envy": matrix.max_envy(),
-        "mean_envy": matrix.mean_envy(),
+        
     }
 
 
 if __name__ == "__main__":
     import logging, experiments_csv
     experiments_csv.logger.setLevel(logging.INFO)
-    experiment = experiments_csv.Experiment("results/", "course_allocation_biased.csv", backup_folder="results/backup/")
+    experiment = experiments_csv.Experiment("results/", "fractional_course_allocation.csv", backup_folder="results/backup/")
 
-    TIME_LIMIT = 100
+    TIME_LIMIT = 60
     input_ranges = {
-        "num_of_agents": [100,200,300],
-        "num_of_items":  [10,20,30],
-        "value_noise_ratio": [0, 0.1, 0.3, 0.5, 0.7, 1],
+        "num_of_agents": [10,20,50,100,200,300],
+        "num_of_items":  [5,10,20,30],
+        "value_noise_ratio": [0.3],
         "algorithm": [
-            crs.utilitarian_matching, 
-            crs.iterated_maximum_matching, 
-            # crs.serial_dictatorship,                  # Very bad performance
-            # crs.course_allocation_by_proxy_auction,   # Very bad performance
-            crs.round_robin, 
-            crs.bidirectional_round_robin,
-            crs.yekta_day
+            fractional_egalitarian_allocation, 
+            fractional_egalitarian_utilitarian_allocation, 
+            # fractional_leximin_optimal_allocation, 
             ],
         "random_seed": range(5),
     }

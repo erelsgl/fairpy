@@ -21,6 +21,7 @@ def test_feasibility():
         crs.round_robin, 
         crs.bidirectional_round_robin,
         crs.yekta_day,
+        crs.almost_egalitarian_allocation,
         ]
     for i in range(10):
         np.random.seed(i)
