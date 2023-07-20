@@ -6,8 +6,7 @@ Since: 2023-07.
 """
 
 import fairpy
-round_robin = fairpy.courses.round_robin
-
+from fairpy.courses import round_robin
 
 import logging
 round_robin.logger.addHandler(logging.StreamHandler())

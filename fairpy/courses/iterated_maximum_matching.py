@@ -15,7 +15,7 @@ Since : 2021-05
 
 from fairpy.courses.graph_utils import many_to_many_matching_using_network_flow
 from fairpy.courses.instance    import Instance
-from fairpy.courses.allocation_utils import sorted_allocation
+from fairpy.courses.allocation_utils import AllocationBuilder
 
 import logging
 logger = logging.getLogger(__name__)
@@ -47,39 +47,31 @@ def iterated_maximum_matching(instance: Instance):
     >>> stringify(map_agent_name_to_bundle)
     "{avi:['w', 'x', 'y', 'z'], beni:['w', 'x', 'y', 'z']}"
     """
-    map_agent_name_to_final_bundle = {agent: [] for agent in instance.agents}
-    remaining_item_capacities  = {item: instance.item_capacity(item) for item in instance.items}
-    remaining_agent_capacities = {agent: instance.agent_capacity(agent) for agent in instance.agents}
+    alloc = AllocationBuilder(instance)
     remaining_agent_item_value = {agent: {item:instance.agent_item_value(agent,item) for item in instance.items} for agent in instance.agents}
 
     iteration = 1
-    while len(remaining_item_capacities)>0 and len(remaining_agent_capacities)>0:
+    while len(alloc.remaining_item_capacities)>0 and len(alloc.remaining_agent_capacities)>0:
         logger.info("\nIteration %d", iteration)
-        logger.info("  remaining_agent_capacities: %s", remaining_agent_capacities)
-        logger.info("  remaining_item_capacities: %s", remaining_item_capacities)
+        logger.info("  remaining_agent_capacities: %s", alloc.remaining_agent_capacities)
+        logger.info("  remaining_item_capacities: %s", alloc.remaining_item_capacities)
         logger.debug("  remaining_agent_item_value: %s", remaining_agent_item_value)
         map_agent_to_bundle = many_to_many_matching_using_network_flow(
-            items=remaining_item_capacities.keys(), 
-            item_capacity=remaining_item_capacities.__getitem__, 
-            agents=remaining_agent_capacities.keys(),
+            items=alloc.remaining_item_capacities.keys(), 
+            item_capacity=alloc.remaining_item_capacities.__getitem__, 
+            agents=alloc.remaining_agent_capacities.keys(),
             agent_capacity=lambda _:1,
             agent_item_value=lambda agent,item: remaining_agent_item_value[agent][item])
         logger.info("  matching: %s", dict(map_agent_to_bundle))
         for agent,bundle in map_agent_to_bundle.items():
             if len(bundle)==0:
-                del remaining_agent_capacities[agent]
+                alloc.remove_agent(agent)
                 continue
-            map_agent_name_to_final_bundle[agent] += bundle
-            remaining_agent_capacities[agent]-=len(bundle)
-            if remaining_agent_capacities[agent]==0:
-                del remaining_agent_capacities[agent]
             for item in bundle:
-                remaining_item_capacities[item]-=1
-                if remaining_item_capacities[item]==0:
-                    del remaining_item_capacities[item]
+                alloc.give(agent,item)
                 remaining_agent_item_value[agent][item] = -1  # prevent the agent from getting the same item again.
         iteration += 1
-    return sorted_allocation(map_agent_name_to_final_bundle)
+    return alloc.sorted()
 
 
 

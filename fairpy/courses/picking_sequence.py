@@ -9,7 +9,7 @@ Since: 2023-06
 
 from fairpy.courses.instance import Instance
 from itertools import cycle
-from fairpy.courses.allocation_utils import sorted_allocation
+from fairpy.courses.allocation_utils import AllocationBuilder
 
 import logging
 logger = logging.getLogger(__name__)
@@ -35,34 +35,25 @@ def picking_sequence(instance: Instance, agent_order:list) -> List[List[Any]]:
     {'Alice': ['c1', 'c3'], 'Bob': ['c1', 'c2', 'c3'], 'Chana': ['c2', 'c3'], 'Dana': ['c2', 'c3']}
     """
     agent_order = list(agent_order) 
-    remaining_agents = set(instance.agents) 
-    remaining_item_capacities = {item: instance.item_capacity(item) for item in instance.items}
-    logger.info("\nPicking-sequence with agents %s, agent-order %s, and courses %s", remaining_agents, agent_order, remaining_item_capacities)
-    bundles = {agent: set() for agent in instance.agents}    # Each bundle is a set, since each agent can get at most one seat in each course
     for agent in agent_order:
         if agent not in instance.agents:
             raise ValueError(f"Agent {agent} in agent_order but not in instance.agents")
+
+    alloc = AllocationBuilder(instance)
+    logger.info("\nPicking-sequence with items %s , agents %s, and agent-order %s", alloc.remaining_item_capacities, alloc.remaining_agent_capacities, agent_order)
     for agent in cycle(agent_order):
-        if len(remaining_agents)==0 or len(remaining_item_capacities)==0:
+        if len(alloc.remaining_agent_capacities)==0 or len(alloc.remaining_item_capacities)==0:
             break 
-        if not agent in remaining_agents:
+        if not agent in alloc.remaining_agent_capacities:
             continue
-        potential_items_for_agent = set(remaining_item_capacities.keys()).difference(bundles[agent])
+        potential_items_for_agent = set(alloc.remaining_item_capacities.keys()).difference(alloc.bundles[agent])
         if len(potential_items_for_agent)==0:
-            logger.info("Agent %s cannot pick any more courses: remaining=%s, bundle=%s", agent, remaining_item_capacities, bundles[agent])
-            remaining_agents.remove(agent)
+            logger.info("Agent %s cannot pick any more items: remaining=%s, bundle=%s", agent, alloc.remaining_item_capacities, alloc.bundles[agent])
+            alloc.remove_agent(agent)
             continue
         best_item_for_agent = max(potential_items_for_agent, key=lambda item: instance.agent_item_value(agent,item))
-        bundles[agent].add(best_item_for_agent)
-        logger.info("Agent %s takes %s (value %d)", agent, best_item_for_agent, instance.agent_item_value(agent, best_item_for_agent))
-        remaining_item_capacities[best_item_for_agent] -= 1
-        if remaining_item_capacities[best_item_for_agent]==0:
-            del remaining_item_capacities[best_item_for_agent]
-        if len(bundles[agent]) == instance.agent_capacity(agent):
-            logger.info("Agent %s has already picked %d courses: %s", agent, len(bundles[agent]), bundles[agent])
-            remaining_agents.remove(agent)
-    return sorted_allocation(bundles)
-    # return {agent: sorted(bundle) for agent,bundle in bundles.items()}
+        alloc.give(agent, best_item_for_agent, logger)
+    return alloc.sorted()
 
 
 def serial_dictatorship(instance: Instance, agent_order:list=None) -> List[List[Any]]:

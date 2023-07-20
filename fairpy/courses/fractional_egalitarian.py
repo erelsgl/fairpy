@@ -7,13 +7,11 @@ Since: 2023-07
 """
 
 from fairpy.courses.instance import Instance
-from fairpy.courses.allocation_utils import sorted_allocation, rounded_allocation
 from fairpy.courses.linear_programming_utils import allocation_variables, allocation_constraints
 
-import cvxpy, numpy as np, networkx
+import cvxpy
 from cvxpy_leximin import Problem, Leximin
 from fairpy.solve import solve
-import matplotlib.pyplot as plt # for plotting the consumption graph (for debugging)
 
 
 import logging
@@ -29,7 +27,7 @@ def fractional_leximin_optimal_allocation(instance: Instance, normalize_utilitie
     :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
     The allocation should maximize the leximin vector of utilities.
     >>> logger.setLevel(logging.WARNING)
-    >>> np.set_printoptions(precision=3)
+    >>> from allocation_utils import rounded_allocation
 
     >>> instance = Instance(valuations=[[5,0],[3,3]])
     >>> a = fractional_leximin_optimal_allocation(instance, normalize_utilities=False)
