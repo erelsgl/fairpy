@@ -44,15 +44,34 @@ if __name__ == "__main__":
 
     TIME_LIMIT = 60
     input_ranges = {
-        "num_of_agents": [10,20,50,100,200,300],
-        "num_of_items":  [5,10,20,30],
+        # "num_of_agents": [10,20,50,100,200,300],
+        "num_of_agents": [10,20,50],
+        # "num_of_items":  [5,10,20,30],
+        "num_of_items":  [5,10,20],
         "value_noise_ratio": [0.3],
         "algorithm": [
-            fractional_egalitarian_allocation, 
-            fractional_egalitarian_utilitarian_allocation, 
-            # fractional_leximin_optimal_allocation, 
+            # fractional_egalitarian_allocation, 
+            # fractional_egalitarian_utilitarian_allocation, 
+            fractional_leximin_optimal_allocation, 
             ],
         "random_seed": range(5),
     }
+
+    # fractional_leximin_optimal_allocation.logger.addHandler(logging.StreamHandler())
+    # fractional_leximin_optimal_allocation.logger.setLevel(logging.DEBUG)
+    # input_ranges_error = {
+    #     "num_of_agents": [50],
+    #     "num_of_items":  [5],
+    #     "value_noise_ratio": [0.3],
+    #     "algorithm": [fractional_leximin_optimal_allocation],
+    #     "random_seed": [0],
+    # }
+
     experiment.run_with_time_limit(course_allocation_with_random_instance, input_ranges, time_limit=TIME_LIMIT)
+
+
+# RESULTS: 
+# * egalitarian is fastest; 
+# * egalitarian_utilitarian takes twice (naturally);
+# * leximin is much slower.
 

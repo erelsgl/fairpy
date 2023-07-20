@@ -112,7 +112,11 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
         if found_agent_leaf:
             # draw_bipartite_weighted_graph(fractional_allocation_graph, instance.agents)
             continue
-        
+
+        # No leaf at all - remove an edge with a small weight:
+        # for edge in fractional_allocation_graph.edges():
+
+
         # If no leaf is found, break
         break
     return alloc.sorted()

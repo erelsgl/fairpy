@@ -26,49 +26,19 @@ def fractional_egalitarian_allocation(instance: Instance, normalize_utilities=Tr
     :param normalize_utilities: True to use utilities normalized by the max possible agent value; False to use raw utilities.
     :param solver_options: kwargs sent to the cvxpy solver.
 
-        :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
     :param allocation_constraint_function: a predicate w: R -> {true,false} representing an additional constraint on the allocation variables.
     :param solver_options: kwargs sent to the cvxpy solver.
 
-    :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
-    The allocation should maximize the leximin vector of utilities.
+    :return a fractional allocation --- a dict of dicts, in which alloc[i][j] is the fraction allocated to agent i from object j.
+    
     >>> logger.setLevel(logging.WARNING)
     >>> from fairpy.courses.allocation_utils import rounded_allocation
 
     >>> instance = Instance(valuations=[[5,0],[3,3]])
-    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False)
+    >>> a = fractional_egalitarian_allocation(instance, normalize_utilities=False)
     >>> rounded_allocation(a,3)
     {0: {0: 0.75, 1: 0.0}, 1: {0: 0.25, 1: 1.0}}
-
-    >>> instance = Instance(valuations=[[3,0],[5,5]])
-    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False)
-    >>> rounded_allocation(a,3)
-    {0: {0: 1.0, 1: 0.0}, 1: {0: 0.0, 1: 1.0}}
-
-    >>> instance = Instance(valuations=[[5,5],[3,0]])
-    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False)
-    >>> rounded_allocation(a,3)
-    {0: {0: 0.0, 1: 1.0}, 1: {0: 1.0, 1: 0.0}}
-
-    >>> instance = Instance(valuations=[[3,0,0],[0,4,0],[5,5,5]])
-    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False)
-    >>> rounded_allocation(a,3)
-    {0: {0: 1.0, 1: 0.0, 2: 0.0}, 1: {0: 0.0, 1: 0.75, 2: 0.0}, 2: {0: 0.0, 1: 0.25, 2: 1.0}}
-
-    >>> instance = Instance(valuations=[[4,0,0],[0,3,0],[5,5,10],[5,5,10]])
-    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False)
-    >>> rounded_allocation(a,3)
-    {0: {0: 0.75, 1: 0.0, 2: 0.0}, 1: {0: 0.0, 1: 1.0, 2: 0.0}, 2: {0: 0.0, 1: 0.0, 2: 0.825}, 3: {0: 0.25, 1: 0.0, 2: 0.175}}
-
-    >>> instance = Instance(valuations=[[3,0,0],[0,3,0],[5,5,10],[5,5,10]])
-    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False)
-    >>> rounded_allocation(a,3)
-    {0: {0: 1.0, 1: 0.0, 2: 0.0}, 1: {0: 0.0, 1: 1.0, 2: 0.0}, 2: {0: 0.0, 1: 0.0, 2: 0.7}, 3: {0: 0.0, 1: 0.0, 2: 0.3}}
-
-    >>> instance = Instance(valuations=[[1/3, 0, 1/3, 1/3],[1, 1, 1, 0]])
-    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False)
-    >>> rounded_allocation(a,3)
-    {0: {0: 1.0, 1: 0.0, 2: 1.0, 3: 1.0}, 1: {0: 0.0, 1: 1.0, 2: 0.0, 3: 0.0}}
     """
 
     allocation_vars, raw_utilities, normalized_utilities = allocation_variables(instance)
@@ -92,7 +62,7 @@ def fractional_egalitarian_allocation(instance: Instance, normalize_utilities=Tr
     # logger.debug("\nNormalized utilities:\n%s", {agent: normalized_utilities[agent].value+0 for agent in instance.agents})
     return allocation_matrix
 
-def fractional_egalitarian_utilitarian_allocation(instance: Instance, normalize_utilities=True, **solver_options):
+def fractional_egalitarian_utilitarian_allocation(instance: Instance, normalize_utilities=True, tolerance_factor=0.01, **solver_options):
     """
     Find an egalitarian allocation - an allocation that maximizes the minimum utility.
     Among all egalitarian allocations, find one that also maximizes the sum of utilities (so that it is Pareto-optimal).
@@ -101,47 +71,47 @@ def fractional_egalitarian_utilitarian_allocation(instance: Instance, normalize_
     :param normalize_utilities: True to use utilities normalized by the max possible agent value; False to use raw utilities.
     :param solver_options: kwargs sent to the cvxpy solver.
 
-        :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
+    :param instance: a matrix v in which each row represents an agent, each column represents an object, and v[i][j] is the value of agent i to object j.
     :param allocation_constraint_function: a predicate w: R -> {true,false} representing an additional constraint on the allocation variables.
     :param solver_options: kwargs sent to the cvxpy solver.
 
-    :return allocation_matrix:  a matrix alloc of a similar shape in which alloc[i][j] is the fraction allocated to agent i from object j.
-    The allocation should maximize the leximin vector of utilities.
+    :return a fractional allocation --- a dict of dicts, in which alloc[i][j] is the fraction allocated to agent i from object j.
+
     >>> logger.setLevel(logging.WARNING)
     >>> from fairpy.courses.allocation_utils import rounded_allocation
 
     >>> instance = Instance(valuations=[[5,0],[3,3]])
-    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False)
+    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False, tolerance_factor=0)
     >>> rounded_allocation(a,3)
     {0: {0: 0.75, 1: 0.0}, 1: {0: 0.25, 1: 1.0}}
 
     >>> instance = Instance(valuations=[[3,0],[5,5]])
-    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False)
+    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False, tolerance_factor=0)
     >>> rounded_allocation(a,3)
     {0: {0: 1.0, 1: 0.0}, 1: {0: 0.0, 1: 1.0}}
 
     >>> instance = Instance(valuations=[[5,5],[3,0]])
-    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False)
+    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False, tolerance_factor=0)
     >>> rounded_allocation(a,3)
     {0: {0: 0.0, 1: 1.0}, 1: {0: 1.0, 1: 0.0}}
 
     >>> instance = Instance(valuations=[[3,0,0],[0,4,0],[5,5,5]])
-    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False)
+    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False, tolerance_factor=0)
     >>> rounded_allocation(a,3)
     {0: {0: 1.0, 1: 0.0, 2: 0.0}, 1: {0: 0.0, 1: 0.75, 2: 0.0}, 2: {0: 0.0, 1: 0.25, 2: 1.0}}
 
     >>> instance = Instance(valuations=[[4,0,0],[0,3,0],[5,5,10],[5,5,10]])
-    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False)
+    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False, tolerance_factor=0)
     >>> rounded_allocation(a,3)
     {0: {0: 0.75, 1: 0.0, 2: 0.0}, 1: {0: 0.0, 1: 1.0, 2: 0.0}, 2: {0: 0.0, 1: 0.0, 2: 0.825}, 3: {0: 0.25, 1: 0.0, 2: 0.175}}
 
     >>> instance = Instance(valuations=[[3,0,0],[0,3,0],[5,5,10],[5,5,10]])
-    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False)
+    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False, tolerance_factor=0)
     >>> rounded_allocation(a,3)
     {0: {0: 1.0, 1: 0.0, 2: 0.0}, 1: {0: 0.0, 1: 1.0, 2: 0.0}, 2: {0: 0.0, 1: 0.0, 2: 0.7}, 3: {0: 0.0, 1: 0.0, 2: 0.3}}
 
     >>> instance = Instance(valuations=[[1/3, 0, 1/3, 1/3],[1, 1, 1, 0]])
-    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False)
+    >>> a = fractional_egalitarian_utilitarian_allocation(instance, normalize_utilities=False, tolerance_factor=0)
     >>> rounded_allocation(a,3)
     {0: {0: 1.0, 1: 0.0, 2: 1.0, 3: 1.0}, 1: {0: 0.0, 1: 1.0, 2: 0.0, 3: 0.0}}
     """
@@ -161,11 +131,13 @@ def fractional_egalitarian_utilitarian_allocation(instance: Instance, normalize_
 
     # 2. Find the utilitarian-subject-to-egalitarian value:
     min_utility_value = min_utility.value
-    logger.debug("\nMin utility:\n%s", min_utility_value)
+    logger.debug("\nEgalitarian utility:\n%s", min_utility_value)
+    threshold_utility = (1-tolerance_factor)*min_utility_value
+    logger.debug("\nThreshold for utilitarian allocation:\n%s", threshold_utility)
 
     problem = cvxpy.Problem(
         cvxpy.Maximize(sum(utilities.values())),
-        constraints=basic_constraints + [utilities[agent] >= min_utility_value for agent in instance.agents],
+        constraints=basic_constraints + [utilities[agent] >= threshold_utility for agent in instance.agents],
         **solver_options
     )
     solve(problem, solvers = [(cvxpy.SCIPY, {'method':'highs-ds'})])
@@ -233,6 +205,8 @@ def fractional_leximin_optimal_allocation(instance: Instance, normalize_utilitie
     problem = Problem(
         Leximin(utilities.values()),
         constraints=allocation_constraints(instance, allocation_vars),
+        upper_tolerance=1.01,
+        lower_tolerance=0.99,
         **solver_options
     )
     solve(problem, solvers = [(cvxpy.SCIPY, {'method':'highs-ds'})])  # highs-ds is a variant of simplex (guaranteed to return a corner solution)
@@ -244,6 +218,7 @@ def fractional_leximin_optimal_allocation(instance: Instance, normalize_utilitie
     return allocation_matrix
 
 
+fractional_egalitarian_allocation.logger = fractional_egalitarian_utilitarian_allocation.logger = fractional_leximin_optimal_allocation.logger = logger
 
 if __name__ == "__main__":
     import doctest, sys
