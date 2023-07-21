@@ -8,6 +8,7 @@ Since: 2023-07
 
 from fairpy.courses.instance import Instance
 from fairpy.courses.allocation_utils import AllocationBuilder
+from fairpy.courses.picking_sequence import complete_allocation_using_picking_sequence
 from fairpy.courses.fractional_egalitarian import fractional_leximin_optimal_allocation, fractional_egalitarian_utilitarian_allocation
 
 import cvxpy, numpy as np, networkx
@@ -19,6 +20,7 @@ import matplotlib.pyplot as plt # for plotting the consumption graph (for debugg
 import logging
 logger = logging.getLogger(__name__)
 
+MIN_EDGE_FRACTION=0.01
 def almost_egalitarian_allocation(instance: Instance, **solver_options):
     """
     Finds an almost-egalitarian allocation.
@@ -45,8 +47,14 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
     fractional_allocation = fractional_egalitarian_utilitarian_allocation(instance, **solver_options)
     logger.debug("\nfractional_allocation:\n%s", fractional_allocation)
 
-    fractional_allocation_graph = consumption_graph(fractional_allocation)
+    fractional_allocation_graph = consumption_graph(fractional_allocation, min_fraction=MIN_EDGE_FRACTION, agent_item_value=instance.agent_item_value)
     logger.debug("\nfractional_allocation_graph:\n%s", fractional_allocation_graph.edges.data())
+
+    def agent_item_tuple(edge):
+        if edge[0] in instance.agents:
+            return (edge[0],edge[1])
+        else:
+            return (edge[1],edge[0])
 
     def remove_edge_from_graph(agent,item):
         """
@@ -59,12 +67,12 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
             current_neighbor_weight = fractional_allocation_graph[neighbor_agent][item]['weight']
             if weight_for_redistribution <= 1 - current_neighbor_weight:
                 fractional_allocation[neighbor_agent][item] = fractional_allocation_graph[neighbor_agent][item]['weight'] = current_neighbor_weight + weight_for_redistribution
-                logger.info("\nAdd weight %g to (%s,%s)", weight_for_redistribution, neighbor_agent, item)
+                logger.debug("   Add weight %g to (%s,%s)", weight_for_redistribution, neighbor_agent, item)
                 break
             else:
                 fractional_allocation[neighbor_agent][item] = fractional_allocation_graph[neighbor_agent][item]['weight'] = 1
                 weight_for_redistribution -= 1 - current_neighbor_weight
-                logger.info("\nSet to 1 the weight of (%s,%s)", neighbor_agent, item)
+                logger.debug("   Set to 1 the weight of (%s,%s)", neighbor_agent, item)
 
     def remove_agent_from_graph(agent):
         neighbors = list(fractional_allocation_graph.neighbors(agent))
@@ -76,12 +84,15 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
     # draw_bipartite_weighted_graph(fractional_allocation_graph, instance.agents)
     while fractional_allocation_graph.number_of_edges()>0:
         # Look for an item leaf:
+        # edges_with_fraction_near_1 = [(u,v) for u,v in fractional_allocation_graph.edges if fractional_allocation_graph[u][v]['weight'] >= 1-2*MIN_EDGE_FRACTION]
+        # max_value_edge = max(edges_with_fraction_near_1, key=lambda u,v: fractional_allocation_graph[u][v]['value'])
+
         found_item_leaf = False
         for item in instance.items:
             if item in fractional_allocation_graph.nodes:
                 item_neighbors = list(fractional_allocation_graph.neighbors(item))
                 for agent in item_neighbors:
-                    if fractional_allocation[agent][item] >= 0.99:
+                    if fractional_allocation[agent][item] >= 1-2*MIN_EDGE_FRACTION:
                         # Give an entire unit of the item to the neighbor agent
                         alloc.give(agent, item)
                         logger.info("\nItem %s is a leaf: give it to to agent %s", item, agent)
@@ -104,8 +115,15 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
             if fractional_allocation_graph.degree[agent]==1:
                 # A leaf agent: disconnect him from his only neighbor (since it is a good)
                 item = next(fractional_allocation_graph.neighbors(agent))
-                logger.info("\nAgent %s is a leaf: disconnect from the only neighbor %s", agent, item)
-                remove_agent_from_graph(agent)
+                if fractional_allocation_graph.degree[item]>1:
+                    logger.info("\nAgent %s is a leaf: disconnect from the only neighbor %s", agent, item)
+                    remove_agent_from_graph(agent)
+                else:
+                    alloc.give(agent, item)
+                    logger.info("\nBoth Agent %s and Item %s are leafs: give the item to the agent", item, agent)
+                    fractional_allocation[agent][item] = 0
+                    fractional_allocation_graph.remove_edge(agent,item)
+
                 logger.debug("\nfractional_allocation_graph:\n%s", fractional_allocation_graph.edges.data())
                 found_agent_leaf = True
                 break  # after removing one agent, proceed to remove leaf items
@@ -114,15 +132,16 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
             continue
 
         # No leaf at all - remove an edge with a small weight:
-        # for edge in fractional_allocation_graph.edges():
-
-
-        # If no leaf is found, break
-        raise ValueError("No leaf!")
+        edge_with_min_weight = min(fractional_allocation_graph.edges(), key=lambda edge:fractional_allocation_graph[edge[0]][edge[1]]["weight"])
+        min_weight = fractional_allocation_graph[edge_with_min_weight[0]][edge_with_min_weight[1]]["weight"]
+        logger.warning(f"No leafs - removing edge {edge_with_min_weight} with minimum weight {min_weight}")
+        remove_edge_from_graph(*agent_item_tuple(edge_with_min_weight))
+        
+    complete_allocation_using_picking_sequence(instance, alloc, instance.agents)  # Avoid waste
     return alloc.sorted()
 
 
-def consumption_graph(allocation:dict, min_fraction=0.01)->networkx.Graph:
+def consumption_graph(allocation:dict, min_fraction=0.01, agent_item_value=None)->networkx.Graph:
     """
     Generate the consumption graph of the given allocation.
     It is a bipartite graph between agents and items, where there is an edge if the agent consumes a positive amount of the item.
@@ -131,7 +150,8 @@ def consumption_graph(allocation:dict, min_fraction=0.01)->networkx.Graph:
     for agent,bundle in allocation.items():
         for item,fraction in bundle.items():
             if fraction>=min_fraction:
-                G.add_edge(agent,item, weight=np.round(fraction,2))
+                value = None if agent_item_value is None else agent_item_value(agent,item)
+                G.add_edge(agent,item, weight=np.round(fraction,2), value=value)
     return G
 
 
@@ -162,6 +182,6 @@ if __name__ == "__main__":
 
     from fairpy.courses.adaptors import divide_random_instance
     divide_random_instance(algorithm=almost_egalitarian_allocation, 
-                           num_of_agents=10, num_of_items=3, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
+                           num_of_agents=10, num_of_items=3, agent_capacity_bounds=[2,4], item_capacity_bounds=[5,15], 
                            item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
                            random_seed=1, normalize_utilities=True)
