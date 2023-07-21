@@ -114,8 +114,9 @@ def complete_allocation_using_picking_sequence(instance: Instance, alloc:Allocat
     A subroutine for picking sequence algorithms: receives an instance and a partial allocation, 
     and completes the partial allocation using the given picking sequence.    
 
-    :param instance
+    :param instance: an instance of the fair course allocation problem. 
     :param alloc: a partial allocation (in an AllocationBuilder object).
+    :param agent_order: a list of indices of agents, representing the picking sequence. The agents will pick items in this order.
     """
     logger.info("\nPicking-sequence with items %s , agents %s, and agent-order %s", alloc.remaining_item_capacities, alloc.remaining_agent_capacities, agent_order)
     for agent in cycle(agent_order):

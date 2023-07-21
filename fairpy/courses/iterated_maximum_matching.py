@@ -48,20 +48,31 @@ def iterated_maximum_matching(instance: Instance):
     "{avi:['w', 'x', 'y', 'z'], beni:['w', 'x', 'y', 'z']}"
     """
     alloc = AllocationBuilder(instance)
-    remaining_agent_item_value = {agent: {item:instance.agent_item_value(agent,item) for item in instance.items} for agent in instance.agents}
+    complete_allocation_using_iterated_maximum_matching(instance, alloc)
+    return alloc.sorted()
 
+
+
+def complete_allocation_using_iterated_maximum_matching(instance: Instance, alloc:AllocationBuilder):
+    """
+    A subroutine for iterated maximum matching: receives an instance and a partial allocation, 
+    and completes the partial allocation using the given picking sequence.    
+
+    :param instance: an instance of the fair course allocation problem. 
+    :param alloc: a partial allocation (in an AllocationBuilder object).
+    """
     iteration = 1
     while len(alloc.remaining_item_capacities)>0 and len(alloc.remaining_agent_capacities)>0:
         logger.info("\nIteration %d", iteration)
         logger.info("  remaining_agent_capacities: %s", alloc.remaining_agent_capacities)
         logger.info("  remaining_item_capacities: %s", alloc.remaining_item_capacities)
-        logger.debug("  remaining_agent_item_value: %s", remaining_agent_item_value)
+        logger.debug("  remaining_agent_item_value: %s", alloc.remaining_agent_item_value)
         map_agent_to_bundle = many_to_many_matching_using_network_flow(
             items=alloc.remaining_item_capacities.keys(), 
             item_capacity=alloc.remaining_item_capacities.__getitem__, 
             agents=alloc.remaining_agent_capacities.keys(),
             agent_capacity=lambda _:1,
-            agent_item_value=lambda agent,item: remaining_agent_item_value[agent][item])
+            agent_item_value=lambda agent,item: alloc.remaining_agent_item_value[agent][item])
         logger.info("  matching: %s", dict(map_agent_to_bundle))
         for agent,bundle in map_agent_to_bundle.items():
             if len(bundle)==0:
@@ -69,13 +80,10 @@ def iterated_maximum_matching(instance: Instance):
                 continue
             for item in bundle:
                 alloc.give(agent,item)
-                remaining_agent_item_value[agent][item] = -1  # prevent the agent from getting the same item again.
         iteration += 1
-    return alloc.sorted()
 
 
-
-iterated_maximum_matching.logger = logger
+iterated_maximum_matching.logger = complete_allocation_using_iterated_maximum_matching.logger = logger
 
 
 

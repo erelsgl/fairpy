@@ -15,7 +15,7 @@ from fairpy.courses.instance    import Instance
 from fairpy.courses.yekta_day_impl.main import algorithm, logger
 from fairpy.courses.yekta_day_impl.course import OOPCourse
 from fairpy.courses.yekta_day_impl.student import OOPStudent
-from fairpy.courses.picking_sequence import complete_allocation_using_picking_sequence
+from fairpy.courses.iterated_maximum_matching import complete_allocation_using_iterated_maximum_matching
 from fairpy.courses.allocation_utils import AllocationBuilder
 import logging
 
@@ -77,7 +77,7 @@ def yekta_day(instance: Instance):
     logger.info("Yekta-Day allocation: %s", yekta_day_allocation)
     alloc = AllocationBuilder(instance)
     alloc.add_bundles(yekta_day_allocation)
-    complete_allocation_using_picking_sequence(instance, alloc, instance.agents)  # Avoid waste
+    complete_allocation_using_iterated_maximum_matching(instance, alloc)  # Avoid waste
     return alloc.sorted()
 
 
@@ -90,8 +90,8 @@ if __name__ == "__main__":
     logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.INFO)
 
-    complete_allocation_using_picking_sequence.logger.addHandler(logging.StreamHandler())
-    complete_allocation_using_picking_sequence.logger.setLevel(logging.INFO)
+    complete_allocation_using_iterated_maximum_matching.logger.addHandler(logging.StreamHandler())
+    complete_allocation_using_iterated_maximum_matching.logger.setLevel(logging.INFO)
 
     from fairpy.courses.adaptors import divide_random_instance
     divide_random_instance(algorithm=yekta_day, 

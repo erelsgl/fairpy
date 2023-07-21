@@ -47,6 +47,7 @@ if __name__ == "__main__":
     experiment = experiments_csv.Experiment("results/", "course_allocation_biased.csv", backup_folder="results/backup/")
 
     TIME_LIMIT = 100
+
     input_ranges = {
         "num_of_agents": [100,200,300],
         "num_of_items":  [10,20,30],

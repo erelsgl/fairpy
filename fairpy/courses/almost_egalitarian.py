@@ -8,7 +8,7 @@ Since: 2023-07
 
 from fairpy.courses.instance import Instance
 from fairpy.courses.allocation_utils import AllocationBuilder
-from fairpy.courses.picking_sequence import complete_allocation_using_picking_sequence
+from fairpy.courses.iterated_maximum_matching import complete_allocation_using_iterated_maximum_matching
 from fairpy.courses.fractional_egalitarian import fractional_leximin_optimal_allocation, fractional_egalitarian_utilitarian_allocation
 
 import cvxpy, numpy as np, networkx
@@ -119,8 +119,9 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
                     logger.info("\nAgent %s is a leaf: disconnect from the only neighbor %s", agent, item)
                     remove_agent_from_graph(agent)
                 else:
-                    alloc.give(agent, item)
-                    logger.info("\nBoth Agent %s and Item %s are leafs: give the item to the agent", item, agent)
+                    if agent in alloc.remaining_agent_capacities and item in alloc.remaining_item_capacities:
+                        alloc.give(agent, item)
+                        logger.info("\nBoth Agent %s and Item %s are leafs: give the item to the agent", item, agent)
                     fractional_allocation[agent][item] = 0
                     fractional_allocation_graph.remove_edge(agent,item)
 
@@ -137,7 +138,10 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
         logger.warning(f"No leafs - removing edge {edge_with_min_weight} with minimum weight {min_weight}")
         remove_edge_from_graph(*agent_item_tuple(edge_with_min_weight))
         
-    complete_allocation_using_picking_sequence(instance, alloc, instance.agents)  # Avoid waste
+    print("Before: ", alloc.sorted())
+    complete_allocation_using_iterated_maximum_matching.logger.addHandler(logging.StreamHandler())
+    complete_allocation_using_iterated_maximum_matching.logger.setLevel(logging.INFO)
+    complete_allocation_using_iterated_maximum_matching(instance, alloc)  # Avoid waste
     return alloc.sorted()
 
 
@@ -178,10 +182,10 @@ if __name__ == "__main__":
     # print("\n",doctest.testmod(), "\n")
 
     logger.addHandler(logging.StreamHandler(sys.stdout))
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.WARNING)
 
     from fairpy.courses.adaptors import divide_random_instance
     divide_random_instance(algorithm=almost_egalitarian_allocation, 
-                           num_of_agents=10, num_of_items=3, agent_capacity_bounds=[2,4], item_capacity_bounds=[5,15], 
+                           num_of_agents=200, num_of_items=30, agent_capacity_bounds=[2,4], item_capacity_bounds=[15,25], 
                            item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
                            random_seed=1, normalize_utilities=True)

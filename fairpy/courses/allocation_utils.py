@@ -114,6 +114,7 @@ class AllocationBuilder:
         self.instance = instance
         self.remaining_agent_capacities = {agent: instance.agent_capacity(agent) for agent in instance.agents}
         self.remaining_item_capacities = {item: instance.item_capacity(item) for item in instance.items}
+        self.remaining_agent_item_value = {agent: {item:instance.agent_item_value(agent,item) for item in instance.items} for agent in instance.agents}
         self.bundles = {agent: set() for agent in instance.agents}    # Each bundle is a set, since each agent can get at most one seat in each course
 
     def remove_item(self, item:Any):
@@ -136,6 +137,7 @@ class AllocationBuilder:
         self.remaining_item_capacities[item] -= 1
         if self.remaining_item_capacities[item] <= 0:
             self.remove_item(item)
+        self.remaining_agent_item_value[agent][item] = -1  # prevent the agent from getting the same item again.
 
     def add_bundles(self, new_bundles:dict):
         """
@@ -149,21 +151,25 @@ class AllocationBuilder:
                 map_item_to_num_of_owners[item] += 1
 
         for agent,num_of_items in map_agent_to_num_of_items.items():
-            if not agent in self.remaining_agent_capacities or self.remaining_agent_capacities[agent]<num_of_items:
-                raise ValueError(f"Agent {agent} has no remaining capacity {num_of_items} new items")
+            if num_of_items==0: continue
+            if agent not in self.remaining_agent_capacities or self.remaining_agent_capacities[agent]<num_of_items:
+                raise ValueError(f"Agent {agent} has no remaining capacity for {num_of_items} new items")
             self.remaining_agent_capacities[agent] -= num_of_items
             if self.remaining_agent_capacities[agent] <= 0:
                 self.remove_agent(agent)
 
         for item,num_of_owners in map_item_to_num_of_owners.items():
-            if not item in self.remaining_item_capacities or self.remaining_item_capacities[item]<num_of_owners:
-                raise ValueError(f"Item {item} has no remaining capacity {num_of_owners} new agents")
+            if num_of_owners==0: continue
+            if item not in self.remaining_item_capacities or self.remaining_item_capacities[item]<num_of_owners:
+                raise ValueError(f"Item {item} has no remaining capacity for {num_of_owners} new agents")
             self.remaining_item_capacities[item] -= num_of_owners
             if self.remaining_item_capacities[item] <= 0:
                 self.remove_item(item)
 
         for agent,bundle in new_bundles.items():
             self.bundles[agent].update(bundle)
+            for item in bundle:
+                self.remaining_agent_item_value[agent][item] = -1  # prevent the agent from getting the same item again.
 
 
 
