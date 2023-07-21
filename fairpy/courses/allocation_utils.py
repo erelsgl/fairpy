@@ -73,6 +73,16 @@ def validate_allocation(instance:Instance, allocation:dict, title:str=""):
                 agent_message = f"Agent {agent} has remaining capacity: {instance.agent_capacity(agent)}>{bundle}."
                 raise ValueError(f"{title}: Wasteful allocation:\n{item_message}\n{agent_message}")
 
+# def complete_wasteful_allocation(instance:Instance, allocation:dict):
+#     """
+#     If there are agents below their capacity and items below their capacity, give items to agents arbitrarily to avoid waste
+#     """
+#     # agents_below_their_capacity = [agent for agent in instance.agents if len(allocation[agent])<instance.agent_capacity(agent)]
+#     # items_below_their_capacity = [item for item in instance.items if len(allocation[item])<instance.item_capacity(item)]
+
+
+
+
 def rounded_allocation(allocation_matrix:dict, digits:int):
     return {agent:{item:np.round(allocation_matrix[agent][item],digits) for item in allocation_matrix[agent].keys()} for agent in allocation_matrix.keys()}
 
@@ -114,9 +124,9 @@ class AllocationBuilder:
 
     def give(self, agent:Any, item:Any, logger=None):
         if agent not in self.remaining_agent_capacities:
-            raise ValueError(f"Agent {agent} has no remaining capacity")
+            raise ValueError(f"Agent {agent} has no remaining capacity for item {item}")
         if item not in self.remaining_item_capacities:
-            raise ValueError(f"Item {item} has no remaining capacity")
+            raise ValueError(f"Item {item} has no remaining capacity for agent {agent}")
         self.bundles[agent].add(item)
         if logger is not None:
             logger.info("Agent %s takes item %s with value %s", agent, item, self.instance.agent_item_value(agent, item))
@@ -126,6 +136,39 @@ class AllocationBuilder:
         self.remaining_item_capacities[item] -= 1
         if self.remaining_item_capacities[item] <= 0:
             self.remove_item(item)
+
+    def add_bundles(self, new_bundles:dict):
+        """
+        Add an entire set of bundles to this allocation.
+        NOTE: No validity check is done - use at your own risk!
+        """
+        map_agent_to_num_of_items = {agent: len(bundle) for agent,bundle in new_bundles.items()}
+        map_item_to_num_of_owners = {item: 0 for item in self.instance.items}
+        for agent,bundle in new_bundles.items():
+            for item in bundle:
+                map_item_to_num_of_owners[item] += 1
+
+        for agent,num_of_items in map_agent_to_num_of_items.items():
+            if not agent in self.remaining_agent_capacities or self.remaining_agent_capacities[agent]<num_of_items:
+                raise ValueError(f"Agent {agent} has no remaining capacity {num_of_items} new items")
+            self.remaining_agent_capacities[agent] -= num_of_items
+            if self.remaining_agent_capacities[agent] <= 0:
+                self.remove_agent(agent)
+
+        for item,num_of_owners in map_item_to_num_of_owners.items():
+            if not item in self.remaining_item_capacities or self.remaining_item_capacities[item]<num_of_owners:
+                raise ValueError(f"Item {item} has no remaining capacity {num_of_owners} new agents")
+            self.remaining_item_capacities[item] -= num_of_owners
+            if self.remaining_item_capacities[item] <= 0:
+                self.remove_item(item)
+
+        for agent,bundle in new_bundles.items():
+            self.bundles[agent].update(bundle)
+
+
+
+
+        
 
 
     def sorted(self):

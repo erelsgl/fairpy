@@ -74,7 +74,7 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
     alloc = AllocationBuilder(instance)
 
     # draw_bipartite_weighted_graph(fractional_allocation_graph, instance.agents)
-    while fractional_allocation_graph.number_of_nodes()>0:
+    while fractional_allocation_graph.number_of_edges()>0:
         # Look for an item leaf:
         found_item_leaf = False
         for item in instance.items:
@@ -118,7 +118,7 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
 
 
         # If no leaf is found, break
-        break
+        raise ValueError("No leaf!")
     return alloc.sorted()
 
 

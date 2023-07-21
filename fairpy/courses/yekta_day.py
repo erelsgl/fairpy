@@ -15,6 +15,8 @@ from fairpy.courses.instance    import Instance
 from fairpy.courses.yekta_day_impl.main import algorithm, logger
 from fairpy.courses.yekta_day_impl.course import OOPCourse
 from fairpy.courses.yekta_day_impl.student import OOPStudent
+from fairpy.courses.picking_sequence import complete_allocation_using_picking_sequence
+from fairpy.courses.allocation_utils import AllocationBuilder
 import logging
 
 
@@ -68,20 +70,28 @@ def yekta_day(instance: Instance):
     #  overlap_course(tmp_course_list)  # Currently we do not check whether courses overlap. This is left for the secretaries.
 
     algorithm(student_list, course_list)
-
-    return {
+    yekta_day_allocation = {
         student.id: sorted(filter(student.enrolled_or_not.__getitem__, instance.items))
         for student in student_list
     }
+    logger.info("Yekta-Day allocation: %s", yekta_day_allocation)
+    alloc = AllocationBuilder(instance)
+    alloc.add_bundles(yekta_day_allocation)
+    complete_allocation_using_picking_sequence(instance, alloc, instance.agents)  # Avoid waste
+    return alloc.sorted()
+
 
 
 
 if __name__ == "__main__":
-    import doctest, sys
+    import doctest
     print("\n",doctest.testmod(), "\n")
 
-    logger.addHandler(logging.StreamHandler(sys.stdout))
+    logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.INFO)
+
+    complete_allocation_using_picking_sequence.logger.addHandler(logging.StreamHandler())
+    complete_allocation_using_picking_sequence.logger.setLevel(logging.INFO)
 
     from fairpy.courses.adaptors import divide_random_instance
     divide_random_instance(algorithm=yekta_day, 

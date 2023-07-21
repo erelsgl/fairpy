@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 from typing import List, Any, Dict
 
 
+
 def picking_sequence(instance: Instance, agent_order:list) -> List[List[Any]]:
     """
     Allocate the given items to the given agents using the given picking sequence.
@@ -38,21 +39,8 @@ def picking_sequence(instance: Instance, agent_order:list) -> List[List[Any]]:
     for agent in agent_order:
         if agent not in instance.agents:
             raise ValueError(f"Agent {agent} in agent_order but not in instance.agents")
-
     alloc = AllocationBuilder(instance)
-    logger.info("\nPicking-sequence with items %s , agents %s, and agent-order %s", alloc.remaining_item_capacities, alloc.remaining_agent_capacities, agent_order)
-    for agent in cycle(agent_order):
-        if len(alloc.remaining_agent_capacities)==0 or len(alloc.remaining_item_capacities)==0:
-            break 
-        if not agent in alloc.remaining_agent_capacities:
-            continue
-        potential_items_for_agent = set(alloc.remaining_item_capacities.keys()).difference(alloc.bundles[agent])
-        if len(potential_items_for_agent)==0:
-            logger.info("Agent %s cannot pick any more items: remaining=%s, bundle=%s", agent, alloc.remaining_item_capacities, alloc.bundles[agent])
-            alloc.remove_agent(agent)
-            continue
-        best_item_for_agent = max(potential_items_for_agent, key=lambda item: instance.agent_item_value(agent,item))
-        alloc.give(agent, best_item_for_agent, logger)
+    complete_allocation_using_picking_sequence(instance, alloc, agent_order)
     return alloc.sorted()
 
 
@@ -120,7 +108,32 @@ def bidirectional_round_robin(instance: Instance, agent_order:list=None) -> List
     return picking_sequence(instance, list(agent_order) + list(reversed(agent_order)))
 
 
-round_robin.logger = picking_sequence.logger = logger
+
+def complete_allocation_using_picking_sequence(instance: Instance, alloc:AllocationBuilder, agent_order: list):
+    """
+    A subroutine for picking sequence algorithms: receives an instance and a partial allocation, 
+    and completes the partial allocation using the given picking sequence.    
+
+    :param instance
+    :param alloc: a partial allocation (in an AllocationBuilder object).
+    """
+    logger.info("\nPicking-sequence with items %s , agents %s, and agent-order %s", alloc.remaining_item_capacities, alloc.remaining_agent_capacities, agent_order)
+    for agent in cycle(agent_order):
+        if len(alloc.remaining_agent_capacities)==0 or len(alloc.remaining_item_capacities)==0:
+            break 
+        if not agent in alloc.remaining_agent_capacities:
+            continue
+        potential_items_for_agent = set(alloc.remaining_item_capacities.keys()).difference(alloc.bundles[agent])
+        if len(potential_items_for_agent)==0:
+            logger.info("Agent %s cannot pick any more items: remaining=%s, bundle=%s", agent, alloc.remaining_item_capacities, alloc.bundles[agent])
+            alloc.remove_agent(agent)
+            continue
+        best_item_for_agent = max(potential_items_for_agent, key=lambda item: instance.agent_item_value(agent,item))
+        alloc.give(agent, best_item_for_agent, logger)
+
+
+
+round_robin.logger = picking_sequence.logger = serial_dictatorship.logger = complete_allocation_using_picking_sequence.logger = logger
 
 
 ### MAIN
