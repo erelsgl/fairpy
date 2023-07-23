@@ -40,6 +40,12 @@ class Instance:
     33
     >>> instance.agent_maximum_value("Bob")
     77
+    >>> instance.agent_ranking("Alice", [])
+    {'c2': 1, 'c1': 2}
+    >>> instance.agent_ranking("Alice", ["c1"])
+    {'c2': 1, 'c1': 2}
+    >>> instance.agent_ranking("Alice", ["c2"])
+    {'c2': 1, 'c1': 2}
 
     ### dict of lists:
     >>> instance = Instance(
@@ -66,9 +72,14 @@ class Instance:
     1
     >>> instance.agent_item_value("beni", "y")
     3
-    >>> instance = Instance(valuations={"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}}, agent_capacities=1)
+
+    >>> instance = Instance(valuations={"avi": {"x":5, "y": 5}, "beni": {"x":3, "y":3}}, agent_capacities=1)
     >>> instance.agent_capacity("avi")
     1
+    >>> instance.agent_ranking("avi", ["x"])
+    {'x': 1, 'y': 2}
+    >>> instance.agent_ranking("avi", ["y"])
+    {'y': 1, 'x': 2}
     """
 
     def __init__(self, valuations:any, agent_capacities:any=None, agent_priorities:any=None, agent_entitlements:any=None, item_capacities:any=None, agents:list=None, items:list=None):
@@ -106,6 +117,32 @@ class Instance:
         Return the agent's value for a bundle (a list of items).
         """
         return sum([self.agent_item_value(agent,item) for item in bundle])
+    
+    def agent_ranking(self, agent:any, prioritized_items:list)->dict:
+        """
+        Compute a map in which each item is mapped to its ranking: the best item is mapped to 1, the second-best to 2, etc.
+
+        :prioritized_items: a list of items that are "prioritized". 
+             This list is used for tie-breaking, in cases the agent assigns the same value to different items.
+        """
+        other_items = [item for item in self.items if item not in prioritized_items]
+        valuation = lambda item: self.agent_item_value(agent,item)
+        sorted_items = sorted(prioritized_items + other_items, key=valuation, reverse=True)
+        result = {}
+        for i,item in enumerate(sorted_items):
+            result[item] = i+1
+        return result
+    
+    def map_agent_to_ranking(self, map_agent_to_prioritized_items={})->dict:
+        """
+        Compute a map in which each agent is mapped to a dict mapping each item to its ranking.
+        For example, if item 'x' is the best item of Alice, then result["Alice"]["x"]==1.
+
+        :map_agent_to_prioritized_items: maps each agent to a list of items that are "prioritized". 
+             This list is used for tie-breaking, in cases the agent assigns the same value to different items.
+        """
+        return {agent: self.agent_ranking(agent, map_agent_to_prioritized_items[agent]) for agent in self.agents}
+
     
     @cache
     def agent_maximum_value(self, agent:any):
@@ -281,7 +318,7 @@ if __name__ == "__main__":
     logger.addHandler(logging.StreamHandler(sys.stdout))
     logger.setLevel(logging.INFO)
 
-    # print(doctest.testmod())
+    print(doctest.testmod())
 
     random_instance = Instance.random(
         num_of_agents=5, num_of_items=3, 

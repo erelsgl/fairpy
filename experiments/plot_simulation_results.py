@@ -52,13 +52,57 @@ multi_plot_results(
 
 multi_plot_results(
      "results/course_allocation_biased.csv", 
+     save_to_file="results/course_allocation_biased_meandeficit.png",
+     filter=filter, 
+     x_field="value_noise_ratio", y_field="mean_deficit", z_field="algorithm", mean=True, 
+     subplot_field = "num_of_agents", subplot_rows=2, subplot_cols=2, sharey=True, sharex=True,
+     legend_properties={"size":6}, 
+     )
+
+multi_plot_results(
+     "results/course_allocation_biased.csv", 
+     save_to_file="results/course_allocation_biased_maxdeficit.png",
+     filter=filter, 
+     x_field="value_noise_ratio", y_field="max_deficit", z_field="algorithm", mean=True, 
+     subplot_field = "num_of_agents", subplot_rows=2, subplot_cols=2, sharey=True, sharex=True,
+     legend_properties={"size":6}, 
+     )
+
+multi_plot_results(
+     "results/course_allocation_biased.csv", 
+     save_to_file="results/course_allocation_biased_top1.png",
+     filter=filter, 
+     x_field="value_noise_ratio", y_field="num_with_top_1", z_field="algorithm", mean=True, 
+     subplot_field = "num_of_agents", subplot_rows=2, subplot_cols=2, sharey=True, sharex=True,
+     legend_properties={"size":6}, 
+     )
+
+multi_plot_results(
+     "results/course_allocation_biased.csv", 
+     save_to_file="results/course_allocation_biased_top2.png",
+     filter=filter, 
+     x_field="value_noise_ratio", y_field="num_with_top_2", z_field="algorithm", mean=True, 
+     subplot_field = "num_of_agents", subplot_rows=2, subplot_cols=2, sharey=True, sharex=True,
+     legend_properties={"size":6}, 
+     )
+
+multi_plot_results(
+     "results/course_allocation_biased.csv", 
+     save_to_file="results/course_allocation_biased_top3.png",
+     filter=filter, 
+     x_field="value_noise_ratio", y_field="num_with_top_3", z_field="algorithm", mean=True, 
+     subplot_field = "num_of_agents", subplot_rows=2, subplot_cols=2, sharey=True, sharex=True,
+     legend_properties={"size":6}, 
+     )
+
+multi_plot_results(
+     "results/course_allocation_biased.csv", 
      save_to_file="results/course_allocation_biased_runtime.png",
      filter=filter, 
      x_field="value_noise_ratio", y_field="runtime", z_field="algorithm", mean=True, 
      subplot_field = "num_of_agents", subplot_rows=2, subplot_cols=2, sharey=True, sharex=True,
      legend_properties={"size":6}, 
      )
-
 
 
 ######## OLD PLOTS

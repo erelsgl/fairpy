@@ -38,6 +38,11 @@ def course_allocation_with_random_instance(
         "egalitarian_value": matrix.egalitarian_value(),
         "max_envy": matrix.max_envy(),
         "mean_envy": matrix.mean_envy(),
+        "max_deficit": matrix.max_deficit(),
+        "mean_deficit": matrix.mean_deficit(),
+        "num_with_top_1": matrix.count_agents_with_top_rank(1),
+        "num_with_top_2": matrix.count_agents_with_top_rank(2),
+        "num_with_top_3": matrix.count_agents_with_top_rank(3),
     }
 
 
@@ -47,6 +52,9 @@ if __name__ == "__main__":
     experiment = experiments_csv.Experiment("results/", "course_allocation_biased.csv", backup_folder="results/backup/")
 
     TIME_LIMIT = 100
+
+    crs.almost_egalitarian_allocation.logger.addHandler(logging.StreamHandler())
+    crs.almost_egalitarian_allocation.logger.setLevel(logging.WARNING)
 
     input_ranges = {
         "num_of_agents": [100,200,300],

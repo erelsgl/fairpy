@@ -4,6 +4,9 @@ Given an instance and an allocation, calculate various measures of satisfaction.
 
 from fairpy.courses.instance import Instance
 from collections import defaultdict
+import numpy as np
+
+from functools import cache
 
 
 class AgentBundleValueMatrix:
@@ -19,12 +22,14 @@ class AgentBundleValueMatrix:
         ...   valuations       = {"Alice": {"c1": 11, "c2": 22}, "Bob": {"c1": 33, "c2": 44}})
         >>> allocation = {"Alice": ["c1"], "Bob": ["c2"]}
         >>> matrix = AgentBundleValueMatrix(instance, allocation)
+
         >>> matrix.matrix
         {'Alice': {'Alice': 11, 'Bob': 22}, 'Bob': {'Alice': 33, 'Bob': 44}}
         >>> matrix.utilitarian_value()
         27.5
         >>> matrix.egalitarian_value()
         11
+
         >>> matrix.make_envy_matrix()
         >>> matrix.envy_matrix
         {'Alice': {'Alice': 0, 'Bob': 11}, 'Bob': {'Alice': -11, 'Bob': 0}}
@@ -32,9 +37,13 @@ class AgentBundleValueMatrix:
         11
         >>> matrix.mean_envy()
         5.5
+        >>> matrix.count_agents_with_top_rank(1)
+        1
+        >>> matrix.count_agents_with_top_rank(2)
+        2
         """
+        self.instance = instance
         self.agents = instance.agents
-        self.allocation = allocation
         self.raw_matrix = {
             agent1: {
                 agent2: instance.agent_bundle_value(agent1, allocation[agent2])
@@ -43,8 +52,16 @@ class AgentBundleValueMatrix:
             for agent1 in self.agents
         }
         self.maximum_values = {
-            agent1: instance.agent_maximum_value(agent1)
-            for agent1 in self.agents
+            agent: instance.agent_maximum_value(agent)
+            for agent in instance.agents
+        }
+        self.rankings = {
+            agent: instance.agent_ranking(agent, allocation[agent])
+            for agent in instance.agents
+        }
+        self.allocation = {
+            agent: sorted(allocation[agent], key=self.rankings[agent].__getitem__)
+            for agent in instance.agents
         }
         self.normalized_matrix = {
             agent1: {
@@ -104,18 +121,59 @@ class AgentBundleValueMatrix:
 
     def egalitarian_value(self):
         return min([self.matrix[agent][agent] for agent in self.agents])
+
+    @cache
+    def agent_deficit(self, agent):
+        """ A "deficit" is the number of courses the agent received below its capacity. """
+        return self.instance.agent_capacity(agent) - len(self.allocation[agent])
+
+    def mean_deficit(self):
+        return sum([self.agent_deficit(agent) for agent in self.agents])/len(self.agents)
+
+    def max_deficit(self):
+        return max([self.agent_deficit(agent) for agent in self.agents])
+
+    @cache
+    def top_rank(self, agent):
+        if len(self.allocation[agent])>0:
+            return self.rankings[agent][self.allocation[agent][0]]
+        else:
+            return np.inf
     
-    def explanation(self, agent):
+    def count_agents_with_top_rank(self, rank=1):
+        return sum([self.top_rank(agent)<=rank for agent in self.agents])
+
+    def explanation(self, agent, map_course_to_name={}):
         """
         Generate a verbal explanation for the given agent.
         """
+        item_explanations = [
+            f"* Course {map_course_to_name.get(item,item)}: number {self.rankings[agent][item]} in your ranking, with value {self.instance.agent_item_value(agent,item)}"
+            for item in self.allocation[agent]
+        ]
+        joined_item_explanations = '\n'.join(item_explanations)
         return f"""
-        Hi, {agent}!
+Hi, {agent}! Here are the courses you received:
 
+{joined_item_explanations}
 
+The maximum possible value you could get for {self.instance.agent_capacity(agent)} courses is {self.maximum_values[agent]}.
+Your total value is {self.raw_matrix[agent][agent]}, which is {np.round(self.normalized_matrix[agent][agent])}% of the maximum.
         """
 
 
 if __name__ == "__main__":
     import doctest
     print(doctest.testmod())
+
+    from picking_sequence import round_robin
+
+    random_instance = Instance.random(
+        num_of_agents=10, num_of_items=8, 
+        agent_capacity_bounds=[4,4], item_capacity_bounds=[5,5], 
+        item_base_value_bounds=[1,200], item_subjective_ratio_bounds=[0.5,1.5],
+        normalized_sum_of_values=1000)
+    allocation = round_robin(random_instance)
+    matrix = AgentBundleValueMatrix(random_instance, allocation)
+    print(matrix.explanation(next(iter(random_instance.agents))))
+
