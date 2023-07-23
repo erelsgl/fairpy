@@ -3,13 +3,12 @@ Given an instance and an allocation, calculate various measures of satisfaction.
 """
 
 from fairpy.courses.instance import Instance
-from typing import *
 from collections import defaultdict
 
 
 class AgentBundleValueMatrix:
 
-    def __init__(self, instance:Instance, allocation:Dict[Any, List[Any]]):
+    def __init__(self, instance:Instance, allocation:dict[any, list[any]]):
         """
         :param instance: an input instance to the fair-course-allocation problem.
         :param allocation: a dict mapping each agent to its bundle (a list)
@@ -74,7 +73,6 @@ class AgentBundleValueMatrix:
            self.matrix = self.normalized_matrix
            self.envy_matrix = self.envy_vector = None
 
-
     def utilitarian_value(self)->float:
         return sum([self.matrix[agent][agent] for agent in self.agents])/len(self.agents)
 
@@ -106,6 +104,16 @@ class AgentBundleValueMatrix:
 
     def egalitarian_value(self):
         return min([self.matrix[agent][agent] for agent in self.agents])
+    
+    def explanation(self, agent):
+        """
+        Generate a verbal explanation for the given agent.
+        """
+        return f"""
+        Hi, {agent}!
+
+
+        """
 
 
 if __name__ == "__main__":

@@ -5,7 +5,6 @@ Author: Erel Segal-Halevi
 Since: 2023-07
 """
 
-from typing import Callable, List, Any, Tuple
 from numbers import Number
 import numpy as np
 from functools import cache
@@ -72,7 +71,7 @@ class Instance:
     1
     """
 
-    def __init__(self, valuations:Any, agent_capacities:Any=None, agent_priorities:Any=None, agent_entitlements:Any=None, item_capacities:Any=None, agents:list=None, items:list=None):
+    def __init__(self, valuations:any, agent_capacities:any=None, agent_priorities:any=None, agent_entitlements:any=None, item_capacities:any=None, agents:list=None, items:list=None):
         """
         Initialize an instance from the given 
         """
@@ -102,28 +101,28 @@ class Instance:
         self._valuations       = valuations
 
 
-    def agent_bundle_value(self, agent:Any, bundle:List[Any]):
+    def agent_bundle_value(self, agent:any, bundle:list[any]):
         """
         Return the agent's value for a bundle (a list of items).
         """
         return sum([self.agent_item_value(agent,item) for item in bundle])
     
     @cache
-    def agent_maximum_value(self, agent:Any):
+    def agent_maximum_value(self, agent:any):
         """
         Return the maximum possible value of an agent: the sum of the top x items, where x is the agent's capacity.
         """
         return sum(sorted([self.agent_item_value(agent,item) for item in self.items],reverse=True)[0:self.agent_capacity(agent)])
     
-    def agent_normalized_item_value(self, agent:Any, item:Any):
+    def agent_normalized_item_value(self, agent:any, item:any):
         return self.agent_item_value(agent,item) / self.agent_maximum_value(agent) * 100
 
     @staticmethod
     def random(num_of_agents:int, num_of_items:int, 
-               agent_capacity_bounds:Tuple[int,int],
-               item_capacity_bounds:Tuple[int,int],
-               item_base_value_bounds:Tuple[int,int],
-               item_subjective_ratio_bounds:Tuple[float,float],
+               agent_capacity_bounds:tuple[int,int],
+               item_capacity_bounds:tuple[int,int],
+               item_base_value_bounds:tuple[int,int],
+               item_subjective_ratio_bounds:tuple[float,float],
                normalized_sum_of_values:int,
                random_seed:int=None):
         """
@@ -147,7 +146,7 @@ class Instance:
         }
         return Instance(valuations=valuations, agent_capacities=agent_capacities, item_capacities=item_capacities)
 
-def random_valuation(numitems:int, item_value_bounds: Tuple[float,float])->np.ndarray:
+def random_valuation(numitems:int, item_value_bounds: tuple[float,float])->np.ndarray:
     """
     >>> r = random_valuation(10, [30, 40])
     >>> len(r)
@@ -162,7 +161,7 @@ def normalized_valuation(raw_valuations:np.ndarray, normalized_sum_of_values:flo
     return  np.round(raw_valuations * normalized_sum_of_values / raw_sum_of_values).astype(int)
 
 
-def get_keys_and_mapping(container: Any) -> Tuple[List,Callable]:
+def get_keys_and_mapping(container: any) -> tuple[list,callable]:
     """
     Given a container of any supported type, returns:
     * an iterable of the container's keys;
@@ -216,7 +215,7 @@ def get_keys_and_mapping(container: Any) -> Tuple[List,Callable]:
     return keys,func
     
 
-def get_keys_and_mapping_2d(container: Any) -> Tuple[List,Callable]:
+def get_keys_and_mapping_2d(container: any) -> tuple[list,callable]:
     """
     Given a 2-dimensional container of any supported type, returns:
     * a list of the container's keys at first level;
@@ -273,7 +272,7 @@ def get_keys_and_mapping_2d(container: Any) -> Tuple[List,Callable]:
 
 Instance.logger = logger
 
-def constant_function(constant_value)->Callable:
+def constant_function(constant_value)->callable:
     return lambda key:constant_value
 
 

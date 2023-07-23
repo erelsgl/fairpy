@@ -14,11 +14,10 @@ from fairpy.courses.allocation_utils import AllocationBuilder
 import logging
 logger = logging.getLogger(__name__)
 
-from typing import List, Any, Dict
 
 
 
-def picking_sequence(instance: Instance, agent_order:list) -> List[List[Any]]:
+def picking_sequence(instance: Instance, agent_order:list) -> list[list[any]]:
     """
     Allocate the given items to the given agents using the given picking sequence.
     :param instance: an instance of the fair course allocation problem. 
@@ -44,7 +43,7 @@ def picking_sequence(instance: Instance, agent_order:list) -> List[List[Any]]:
     return alloc.sorted()
 
 
-def serial_dictatorship(instance: Instance, agent_order:list=None) -> List[List[Any]]:
+def serial_dictatorship(instance: Instance, agent_order:list=None) -> list[list[any]]:
     """
     Allocate the given items to the given agents using the serial_dictatorship protocol, in the given agent-order.
     :param agents a list of Agent objects.
@@ -67,7 +66,7 @@ def serial_dictatorship(instance: Instance, agent_order:list=None) -> List[List[
     return picking_sequence(instance, agent_order)
 
 
-def round_robin(instance: Instance, agent_order:list=None) -> List[List[Any]]:
+def round_robin(instance: Instance, agent_order:list=None) -> list[list[any]]:
     """
     Allocate the given items to the given agents using the round-robin protocol, in the given agent-order.
     :param agents a list of Agent objects.
@@ -87,7 +86,7 @@ def round_robin(instance: Instance, agent_order:list=None) -> List[List[Any]]:
     if agent_order is None: agent_order = instance.agents
     return picking_sequence(instance, agent_order)
 
-def bidirectional_round_robin(instance: Instance, agent_order:list=None) -> List[List[Any]]:
+def bidirectional_round_robin(instance: Instance, agent_order:list=None) -> list[list[any]]:
     """
     Allocate the given items to the given agents using the bidirectional-round-robin protocol (ABCCBA), in the given agent-order.
     :param agents a list of Agent objects.

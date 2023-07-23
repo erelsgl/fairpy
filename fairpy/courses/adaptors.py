@@ -11,17 +11,16 @@ Since: 2023-07
 """
 
 import fairpy, numpy as np
-from typing import Callable, List, Any
 from fairpy.courses.instance import Instance
 from fairpy.courses.satisfaction import AgentBundleValueMatrix
 from fairpy.courses.allocation_utils import validate_allocation, allocation_is_fractional
 
 def divide(
-    algorithm: Callable,
-    valuations: Any,
-    agent_capacities: Any = None,  # default is unbounded (= num of items)
-    agent_priorities: Any = None,  # default is that all agents have same priority
-    item_capacities:  Any = None,  # default is 1 per course
+    algorithm: callable,
+    valuations: any,
+    agent_capacities: any = None,  # default is unbounded (= num of items)
+    agent_priorities: any = None,  # default is that all agents have same priority
+    item_capacities:  any = None,  # default is 1 per course
     **kwargs
 ):
     """

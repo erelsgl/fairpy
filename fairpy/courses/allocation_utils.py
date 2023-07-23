@@ -5,7 +5,6 @@ Utils for post-processing allocations
 import numpy as np
 
 from fairpy.courses.instance import Instance
-from typing import *
 from collections import defaultdict
 
 
@@ -117,13 +116,13 @@ class AllocationBuilder:
         self.remaining_agent_item_value = {agent: {item:instance.agent_item_value(agent,item) for item in instance.items} for agent in instance.agents}
         self.bundles = {agent: set() for agent in instance.agents}    # Each bundle is a set, since each agent can get at most one seat in each course
 
-    def remove_item(self, item:Any):
+    def remove_item(self, item:any):
         del self.remaining_item_capacities[item]
 
-    def remove_agent(self, agent:Any):
+    def remove_agent(self, agent:any):
         del self.remaining_agent_capacities[agent]
 
-    def give(self, agent:Any, item:Any, logger=None):
+    def give(self, agent:any, item:any, logger=None):
         if agent not in self.remaining_agent_capacities:
             raise ValueError(f"Agent {agent} has no remaining capacity for item {item}")
         if item not in self.remaining_item_capacities:

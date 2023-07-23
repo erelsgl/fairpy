@@ -7,11 +7,10 @@ Since : 2021-04
 """
 
 import networkx
-from typing import *
 from collections import defaultdict
 from itertools import product
 
-def many_to_many_matching(item_capacities: Dict[Any,int], agent_capacities:Dict[Any,int], valuations:Dict[Any,Dict[Any,int]], agent_entitlement:Callable=lambda x:1)->networkx.Graph:
+def many_to_many_matching(item_capacities: dict[any,int], agent_capacities:dict[any,int], valuations:dict[any,dict[any,int]], agent_entitlement:callable=lambda x:1)->networkx.Graph:
     """
     Computes a many-to-many matching of items to agents.
 
@@ -43,7 +42,7 @@ def many_to_many_matching(item_capacities: Dict[Any,int], agent_capacities:Dict[
         agent_entitlement = agent_entitlement)
 
 
-def many_to_many_matching_using_network_flow(items:List, item_capacity: Callable, agents:List, agent_capacity: Callable, agent_item_value:Callable, agent_entitlement:Callable=lambda x:1, allow_negative_value_assignments=False)->networkx.Graph:
+def many_to_many_matching_using_network_flow(items:list, item_capacity: callable, agents:list, agent_capacity: callable, agent_item_value:callable, agent_entitlement:callable=lambda x:1, allow_negative_value_assignments=False)->networkx.Graph:
     """
     Computes a many-to-many matching of items to agents. 
     
@@ -80,7 +79,7 @@ def many_to_many_matching_using_network_flow(items:List, item_capacity: Callable
     return map_agent_name_to_bundle
 
 
-def many_to_many_matching_using_node_cloning(items:List, item_capacity: Callable, agents:List, agent_capacity: Callable, agent_item_value:Callable, agent_entitlement:Callable=lambda x:1)->networkx.Graph:
+def many_to_many_matching_using_node_cloning(items:list, item_capacity: callable, agents:list, agent_capacity: callable, agent_item_value:callable, agent_entitlement:callable=lambda x:1)->networkx.Graph:
     """
     Computes a many-to-many matching of items to agents. 
     

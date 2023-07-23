@@ -18,7 +18,6 @@ between courses for students given a list of preferences for each student.
 
 import logging
 import math
-from typing import List, Dict, Set
 import numpy as np
 from fairpy.valuations import ValuationMatrix
 from queue import PriorityQueue
@@ -31,9 +30,9 @@ logger = logging.getLogger(__name__)
 Epsilon = 0.01
 
 
-def general_course_allocation(utilities: ValuationMatrix, capacity: List[int], num_of_courses: int,
-                      bound: int = 0, effect_variables: List[Dict[Set, int]] = None, constraint: List[Dict[Set, int]] = None) \
-        -> List[List[int]]:
+def general_course_allocation(utilities: ValuationMatrix, capacity: list[int], num_of_courses: int,
+                      bound: int = 0, effect_variables: list[dict[set, int]] = None, constraint: list[dict[set, int]] = None) \
+        -> list[list[int]]:
 
     """
     This function find the optimal course package for each student.
@@ -81,10 +80,10 @@ def general_course_allocation(utilities: ValuationMatrix, capacity: List[int], n
     return allocation
 
 
-def course_allocation(utilities: ValuationMatrix, budgets: List[float], prices: List[float], capacity: List[int],
+def course_allocation(utilities: ValuationMatrix, budgets: list[float], prices: list[float], capacity: list[int],
                       num_of_courses: int, bound: int = 0,
-                      effect_variables: List[Dict[Set, int]] = None, constraint: List[Dict[Set, int]] = None) \
-        -> List[List[bool]]:
+                      effect_variables: list[dict[set, int]] = None, constraint: list[dict[set, int]] = None) \
+        -> list[list[bool]]:
     """
     The main function.
     The tabu search aims to find the price vector P for which the gap between demand and supply
@@ -144,10 +143,10 @@ def course_allocation(utilities: ValuationMatrix, budgets: List[float], prices: 
     return best_node.placement
 
 
-def neighbors(utilities: ValuationMatrix, budgets: List[float], prices: List[float], capacity: List[int],
+def neighbors(utilities: ValuationMatrix, budgets: list[float], prices: list[float], capacity: list[int],
               num_of_courses: int,
-              effect_variables: List[Dict[Set, int]] = None, constraint: List[Dict[Set, int]] = None) \
-        -> List[List[float]]:
+              effect_variables: list[dict[set, int]] = None, constraint: list[dict[set, int]] = None) \
+        -> list[list[float]]:
     """
     The neighbors function receives a current price vector, and produces for it a list of
     price vectors that are close to it according to the algorithm described in the article,
@@ -230,7 +229,7 @@ def neighbors(utilities: ValuationMatrix, budgets: List[float], prices: List[flo
     return neighbors_list
 
 
-def score(placement: List[List[bool]], capacity: List[int]) -> float:
+def score(placement: list[list[bool]], capacity: list[int]) -> float:
     """
     The function receives the course packages assigned to the students and a vector with
     the number of places for all courses, and returns the gap between demand and supply.
@@ -259,9 +258,9 @@ def score(placement: List[List[bool]], capacity: List[int]) -> float:
     return round(math.sqrt(ans), 3)
 
 
-def max_utility(utility: List[float], budget: float, prices: List[float], num_of_courses: int,
-                effect_variables: List[Dict[Set, int]] = None, constraint: List[Dict[Set, int]] = None) \
-        -> List[bool]:
+def max_utility(utility: list[float], budget: float, prices: list[float], num_of_courses: int,
+                effect_variables: list[dict[set, int]] = None, constraint: list[dict[set, int]] = None) \
+        -> list[bool]:
     """
     Given a price vector for the courses, the program will return
     the most affordable course package for the student,
@@ -297,9 +296,9 @@ def max_utility(utility: List[float], budget: float, prices: List[float], num_of
     return x.value.ravel().astype(int).tolist()
 
 
-def max_utilities(utilities: ValuationMatrix, budgets: List[float], prices: List[float], num_of_courses: int,
-                  effect_variables: List[Dict[Set, int]] = None, constraint: List[Dict[Set, int]] = None) \
-        -> List[List[bool]]:
+def max_utilities(utilities: ValuationMatrix, budgets: list[float], prices: list[float], num_of_courses: int,
+                  effect_variables: list[dict[set, int]] = None, constraint: list[dict[set, int]] = None) \
+        -> list[list[bool]]:
 
     """
     The function receives a ValuationMatrix containing utilities of several students,
@@ -327,7 +326,7 @@ def max_utilities(utilities: ValuationMatrix, budgets: List[float], prices: List
     placements = []
 
     for student in utilities.agents():
-        placement: List[bool] = max_utility(utilities[student], budgets[student], prices, num_of_courses)
+        placement: list[bool] = max_utility(utilities[student], budgets[student], prices, num_of_courses)
         placements.append(placement)
 
     return placements
@@ -356,8 +355,8 @@ class Course_Bundle:
 
     """
 
-    def __init__(self, utilities: ValuationMatrix, budgets: List[float],
-                 prices: List[float], capacity: List[int], num_of_courses: int):
+    def __init__(self, utilities: ValuationMatrix, budgets: list[float],
+                 prices: list[float], capacity: list[int], num_of_courses: int):
         self.utilities = utilities
         self.budgets = budgets
         self.prices = prices
