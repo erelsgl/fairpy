@@ -8,7 +8,7 @@ Since: 2023-07
 
 from fairpy.courses.instance import Instance
 from fairpy.courses.allocation_utils import AllocationBuilder
-from fairpy.courses.iterated_maximum_matching import complete_allocation_using_iterated_maximum_matching
+from fairpy.courses.iterated_maximum_matching import iterated_maximum_matching
 from fairpy.courses.fractional_egalitarian import fractional_leximin_optimal_allocation, fractional_egalitarian_utilitarian_allocation
 
 import cvxpy, numpy as np, networkx
@@ -21,37 +21,38 @@ import logging
 logger = logging.getLogger(__name__)
 
 MIN_EDGE_FRACTION=0.01
-def almost_egalitarian_allocation(instance: Instance, **solver_options):
+def almost_egalitarian_allocation(alloc: AllocationBuilder, **solver_options):
     """
     Finds an almost-egalitarian allocation.
+    >>> from fairpy.courses.adaptors import divide
 
     >>> from dicttools import stringify
 
     >>> instance = Instance(valuations={"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}}, agent_capacities=1, item_capacities=1)
-    >>> stringify(almost_egalitarian_allocation(instance))
+    >>> stringify(divide(almost_egalitarian_allocation, instance=instance))
     "{avi:['x'], beni:['w']}"
 
-    # >>> instance = Instance(valuations={"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}}, agent_capacities=2, item_capacities=1)
-    # >>> stringify(almost_egalitarian_allocation(instance))
-    # "{avi:['x', 'y'], beni:['w', 'z']}"
+    >>> instance = Instance(valuations={"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}}, agent_capacities=2, item_capacities=1)
+    >>> stringify(divide(almost_egalitarian_allocation, instance=instance))
+    "{avi:['x', 'y'], beni:['w', 'z']}"
 
-    # >>> instance = Instance(valuations={"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}}, agent_capacities=3, item_capacities=2)
-    # >>> stringify(almost_egalitarian_allocation(instance))
-    # "{avi:['x', 'y', 'z'], beni:['w', 'y', 'z']}"
+    >>> instance = Instance(valuations={"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}}, agent_capacities=3, item_capacities=2)
+    >>> stringify(divide(almost_egalitarian_allocation, instance=instance))
+    "{avi:['x', 'y', 'z'], beni:['w', 'y', 'z']}"
 
-    # >>> instance = Instance(valuations={"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}}, agent_capacities=4, item_capacities=2)
-    # >>> stringify(almost_egalitarian_allocation(instance))
-    # "{avi:['w', 'x', 'y', 'z'], beni:['w', 'x', 'y', 'z']}"
+    >>> instance = Instance(valuations={"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}}, agent_capacities=4, item_capacities=2)
+    >>> stringify(divide(almost_egalitarian_allocation, instance=instance))
+    "{avi:['w', 'x', 'y', 'z'], beni:['w', 'x', 'y', 'z']}"
     """
-    # fractional_allocation = fractional_leximin_optimal_allocation(instance, **solver_options) # Too slow
-    fractional_allocation = fractional_egalitarian_utilitarian_allocation(instance, **solver_options)
+    # fractional_allocation = fractional_leximin_optimal_allocation(alloc.remaining_instance(), **solver_options) # Too slow
+    fractional_allocation = fractional_egalitarian_utilitarian_allocation(alloc.remaining_instance(), **solver_options)
     logger.debug("\nfractional_allocation:\n%s", fractional_allocation)
 
-    fractional_allocation_graph = consumption_graph(fractional_allocation, min_fraction=MIN_EDGE_FRACTION, agent_item_value=instance.agent_item_value)
+    fractional_allocation_graph = consumption_graph(fractional_allocation, min_fraction=MIN_EDGE_FRACTION, agent_item_value=lambda agent,item:alloc.remaining_agent_item_value[agent][item])
     logger.debug("\nfractional_allocation_graph:\n%s", fractional_allocation_graph.edges.data())
 
     def agent_item_tuple(edge):
-        if edge[0] in instance.agents:
+        if edge[0] in alloc.remaining_agents():
             return (edge[0],edge[1])
         else:
             return (edge[1],edge[0])
@@ -79,16 +80,14 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
         for item in neighbors:
             remove_edge_from_graph(agent,item)
 
-    alloc = AllocationBuilder(instance)
-
-    # draw_bipartite_weighted_graph(fractional_allocation_graph, instance.agents)
+    # draw_bipartite_weighted_graph(fractional_allocation_graph, alloc.remaining_agents())
     while fractional_allocation_graph.number_of_edges()>0:
         # Look for an item leaf:
         # edges_with_fraction_near_1 = [(u,v) for u,v in fractional_allocation_graph.edges if fractional_allocation_graph[u][v]['weight'] >= 1-2*MIN_EDGE_FRACTION]
         # max_value_edge = max(edges_with_fraction_near_1, key=lambda u,v: fractional_allocation_graph[u][v]['value'])
 
         found_item_leaf = False
-        for item in instance.items:
+        for item in list(alloc.remaining_items()):
             if item in fractional_allocation_graph.nodes:
                 item_neighbors = list(fractional_allocation_graph.neighbors(item))
                 for agent in item_neighbors:
@@ -104,12 +103,12 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
                         logger.debug("\nfractional_allocation_graph:\n%s", fractional_allocation_graph.edges.data())
                         found_item_leaf = True
         if found_item_leaf:
-            # draw_bipartite_weighted_graph(fractional_allocation_graph, instance.agents)
+            # draw_bipartite_weighted_graph(fractional_allocation_graph, alloc.remaining_agents())
             continue
 
         # No item is a leaf - look for an agent leaf:
         found_agent_leaf = False
-        for agent in instance.agents:
+        for agent in alloc.remaining_agents():
             if not agent in fractional_allocation_graph:
                 continue
             if fractional_allocation_graph.degree[agent]==1:
@@ -133,7 +132,7 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
                 found_agent_leaf = True
                 break  # after removing one agent, proceed to remove leaf items
         if found_agent_leaf:
-            # draw_bipartite_weighted_graph(fractional_allocation_graph, instance.agents)
+            # draw_bipartite_weighted_graph(fractional_allocation_graph, alloc.remaining_agents())
             continue
 
         # No leaf at all - remove an edge with a small weight:
@@ -142,7 +141,7 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
         logger.warning(f"No leafs - removing edge {edge_with_min_weight} with minimum weight {min_weight}")
         remove_edge_from_graph(*agent_item_tuple(edge_with_min_weight))
         
-    complete_allocation_using_iterated_maximum_matching(alloc)  # Avoid waste
+    iterated_maximum_matching(alloc)  # Avoid waste
     return alloc.sorted()
 
 
@@ -183,13 +182,13 @@ def draw_bipartite_weighted_graph(G: networkx.Graph, top_nodes:list):
 
 if __name__ == "__main__":
     import doctest, sys
-    # print("\n",doctest.testmod(), "\n")
+    print("\n",doctest.testmod(), "\n")
 
-    logger.addHandler(logging.StreamHandler(sys.stdout))
-    logger.setLevel(logging.WARNING)
+    # logger.addHandler(logging.StreamHandler(sys.stdout))
+    # logger.setLevel(logging.WARNING)
 
-    from fairpy.courses.adaptors import divide_random_instance
-    divide_random_instance(algorithm=almost_egalitarian_allocation, 
-                           num_of_agents=50, num_of_items=8, agent_capacity_bounds=[2,4], item_capacity_bounds=[15,25], 
-                           item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
-                           random_seed=1, normalize_utilities=True)
+    # from fairpy.courses.adaptors import divide_random_instance
+    # divide_random_instance(algorithm=almost_egalitarian_allocation, 
+    #                        num_of_agents=50, num_of_items=8, agent_capacity_bounds=[2,4], item_capacity_bounds=[15,25], 
+    #                        item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
+    #                        random_seed=1, normalize_utilities=True)

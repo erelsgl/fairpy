@@ -225,14 +225,14 @@ if __name__ == "__main__":
     logger.addHandler(logging.StreamHandler(sys.stdout))
     print("\n",doctest.testmod(), "\n")
 
-    logger.setLevel(logging.DEBUG)
-    from fairpy.courses.adaptors import divide_random_instance
-    divide_random_instance(algorithm=fractional_egalitarian_utilitarian_allocation, 
-                           num_of_agents=10, num_of_items=3, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
-                           item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
-                           random_seed=1, normalize_utilities=True)
+    # logger.setLevel(logging.DEBUG)
+    # from fairpy.courses.adaptors import divide_random_instance
+    # divide_random_instance(algorithm=fractional_egalitarian_utilitarian_allocation, 
+    #                        num_of_agents=10, num_of_items=3, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
+    #                        item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
+    #                        random_seed=1, normalize_utilities=True)
 
-    divide_random_instance(algorithm=fractional_leximin_optimal_allocation, 
-                           num_of_agents=10, num_of_items=3, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
-                           item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
-                           random_seed=1, normalize_utilities=True)
+    # divide_random_instance(algorithm=fractional_leximin_optimal_allocation, 
+    #                        num_of_agents=10, num_of_items=3, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
+    #                        item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
+    #                        random_seed=1, normalize_utilities=True)

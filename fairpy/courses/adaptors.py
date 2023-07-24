@@ -13,11 +13,12 @@ Since: 2023-07
 import fairpy, numpy as np
 from fairpy.courses.instance import Instance
 from fairpy.courses.satisfaction import AgentBundleValueMatrix
-from fairpy.courses.allocation_utils import validate_allocation, allocation_is_fractional
+from fairpy.courses.allocation_utils import validate_allocation, allocation_is_fractional, AllocationBuilder
 
 def divide(
     algorithm: callable,
-    valuations: any,
+    instance: Instance = None,
+    valuations: any = None,
     agent_capacities: any = None,  # default is unbounded (= num of items)
     agent_priorities: any = None,  # default is that all agents have same priority
     item_capacities:  any = None,  # default is 1 per course
@@ -41,15 +42,22 @@ def divide(
     >>> divide(algorithm=fairpy.courses.round_robin, agent_capacities=agent_capacities, item_capacities=item_capacities, valuations=valuations)
     {'Alice': ['c1', 'c3'], 'Bob': ['c2']}
     """
-    instance = Instance(valuations=valuations, agent_capacities=agent_capacities, agent_priorities=agent_priorities, item_capacities=item_capacities)
-    result = algorithm(instance, **kwargs)
-    return result
+    if instance is None:
+        instance = Instance(valuations=valuations, agent_capacities=agent_capacities, agent_priorities=agent_priorities, item_capacities=item_capacities)
+    alloc = AllocationBuilder(instance)
+    algorithm(alloc, **kwargs)
+    return alloc.sorted()
 
 
-def divide_random_instance(algorithm, num_of_agents, num_of_items, 
-                           agent_capacity_bounds, item_capacity_bounds, 
-                           item_base_value_bounds, item_subjective_ratio_bounds,
-                           normalized_sum_of_values, random_seed=None, **kwargs):
+def divide_random_instance(
+        algorithm:callable, 
+        num_of_agents:int, num_of_items:int, 
+        agent_capacity_bounds:tuple, item_capacity_bounds:tuple, 
+        item_base_value_bounds:tuple, item_subjective_ratio_bounds:tuple,
+        normalized_sum_of_values:float, 
+        random_seed:int=None, 
+        **kwargs
+):
     if random_seed is None:
         random_seed = np.random.randint(1, 2**31)
     np.random.seed(random_seed)
@@ -58,7 +66,7 @@ def divide_random_instance(algorithm, num_of_agents, num_of_items,
     random_instance = Instance.random(num_of_agents=num_of_agents, num_of_items=num_of_items, agent_capacity_bounds=agent_capacity_bounds, item_capacity_bounds=item_capacity_bounds, 
                                       item_base_value_bounds=item_base_value_bounds, item_subjective_ratio_bounds=item_subjective_ratio_bounds,
                                       normalized_sum_of_values=normalized_sum_of_values, random_seed=random_seed)
-    allocation = algorithm(random_instance, **kwargs)
+    allocation = divide(algorithm, instance=random_instance)
     print("\nAllocation: ", allocation)
 
     if not allocation_is_fractional(allocation):

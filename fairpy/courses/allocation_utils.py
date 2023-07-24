@@ -116,6 +116,18 @@ class AllocationBuilder:
         self.remaining_agent_item_value = {agent: {item:instance.agent_item_value(agent,item) for item in instance.items} for agent in instance.agents}
         self.bundles = {agent: set() for agent in instance.agents}    # Each bundle is a set, since each agent can get at most one seat in each course
 
+    def remaining_items(self)->list: 
+        return self.remaining_item_capacities.keys()
+
+    def remaining_agents(self)->list: 
+        return self.remaining_agent_capacities.keys()
+    
+    def remaining_instance(self)->Instance:
+        return Instance(
+            valuations=self.remaining_agent_item_value, 
+            agent_capacities=self.remaining_agent_capacities, agent_entitlements=self.instance.agent_entitlement, agents=self.remaining_agents(), 
+            item_capacities=self.remaining_item_capacities, items=self.remaining_items())
+
     def remove_item(self, item:any):
         del self.remaining_item_capacities[item]
 
@@ -138,7 +150,11 @@ class AllocationBuilder:
             self.remove_item(item)
         self.remaining_agent_item_value[agent][item] = -1  # prevent the agent from getting the same item again.
 
-    def add_bundles(self, new_bundles:dict):
+    def give_bundle(self, agent:any, new_bundle:list, logger=None):
+        for item in new_bundle:
+            self.give(agent, item, logger)
+
+    def give_bundles(self, new_bundles:dict, logger=None):
         """
         Add an entire set of bundles to this allocation.
         NOTE: No validity check is done - use at your own risk!

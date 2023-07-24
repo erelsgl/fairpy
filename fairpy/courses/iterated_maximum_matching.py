@@ -21,44 +21,33 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def iterated_maximum_matching(instance: Instance):
+def iterated_maximum_matching(alloc:AllocationBuilder):
     """
-    Finds a allocation for the given instance, using iterated maximum matching.
+    Builds a allocation using Iterated Maximum Matching.
+    :param alloc: an allocation builder, which tracks the allocation and the remaining capacity for items and agents. of the fair course allocation problem. 
 
     >>> from dicttools import stringify
+    >>> from fairpy.courses.adaptors import divide
 
     >>> instance = Instance(valuations={"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}}, agent_capacities=1, item_capacities=1)
-    >>> map_agent_name_to_bundle = iterated_maximum_matching(instance)
+    >>> map_agent_name_to_bundle = divide(iterated_maximum_matching,instance=instance)
     >>> stringify(map_agent_name_to_bundle)
     "{avi:['x'], beni:['w']}"
 
     >>> instance = Instance(valuations={"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}}, agent_capacities=2, item_capacities=1)
-    >>> map_agent_name_to_bundle = iterated_maximum_matching(instance)
+    >>> map_agent_name_to_bundle = divide(iterated_maximum_matching,instance=instance)
     >>> stringify(map_agent_name_to_bundle)
     "{avi:['x', 'y'], beni:['w', 'z']}"
 
     >>> instance = Instance(valuations={"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}}, agent_capacities=3, item_capacities=2)
-    >>> map_agent_name_to_bundle = iterated_maximum_matching(instance)
+    >>> map_agent_name_to_bundle = divide(iterated_maximum_matching,instance=instance)
     >>> stringify(map_agent_name_to_bundle)
     "{avi:['x', 'y', 'z'], beni:['w', 'y', 'z']}"
 
     >>> instance = Instance(valuations={"avi": {"x":5, "y":4, "z":3, "w":2}, "beni": {"x":2, "y":3, "z":4, "w":5}}, agent_capacities=4, item_capacities=2)
-    >>> map_agent_name_to_bundle = iterated_maximum_matching(instance)
+    >>> map_agent_name_to_bundle = divide(iterated_maximum_matching,instance=instance)
     >>> stringify(map_agent_name_to_bundle)
     "{avi:['w', 'x', 'y', 'z'], beni:['w', 'x', 'y', 'z']}"
-    """
-    alloc = AllocationBuilder(instance)
-    complete_allocation_using_iterated_maximum_matching(alloc)
-    return alloc.sorted()
-
-
-
-def complete_allocation_using_iterated_maximum_matching(alloc:AllocationBuilder):
-    """
-    A subroutine for iterated maximum matching: receives an instance and a partial allocation, 
-    and completes the partial allocation using the given picking sequence.    
-
-    :param alloc: a partial allocation (in an AllocationBuilder object).
     """
     iteration = 1
     while len(alloc.remaining_item_capacities)>0 and len(alloc.remaining_agent_capacities)>0:
@@ -67,9 +56,9 @@ def complete_allocation_using_iterated_maximum_matching(alloc:AllocationBuilder)
         logger.info("  remaining_item_capacities: %s", alloc.remaining_item_capacities)
         logger.debug("  remaining_agent_item_value: %s", alloc.remaining_agent_item_value)
         map_agent_to_bundle = many_to_many_matching_using_network_flow(
-            items=alloc.remaining_item_capacities.keys(), 
+            items=alloc.remaining_items(), 
             item_capacity=alloc.remaining_item_capacities.__getitem__, 
-            agents=alloc.remaining_agent_capacities.keys(),
+            agents=alloc.remaining_agents(),
             agent_capacity=lambda _:1,
             agent_item_value=lambda agent,item: alloc.remaining_agent_item_value[agent][item])
         logger.info("  matching: %s", dict(map_agent_to_bundle))
@@ -82,7 +71,9 @@ def complete_allocation_using_iterated_maximum_matching(alloc:AllocationBuilder)
         iteration += 1
 
 
-iterated_maximum_matching.logger = complete_allocation_using_iterated_maximum_matching.logger = logger
+
+
+iterated_maximum_matching.logger = logger
 
 
 
