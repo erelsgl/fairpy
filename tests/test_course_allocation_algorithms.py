@@ -33,10 +33,10 @@ def test_feasibility():
             item_subjective_ratio_bounds=[0.5, 1.5]
             )
         for algorithm in algorithms:
-            allocation = algorithm(instance)
+            allocation = crs.divide(algorithm, instance=instance)
             crs.validate_allocation(instance, allocation, title=f"Seed {i}, algorithm {algorithm.__name__}")
 
-  
+
 if __name__ == "__main__":
      pytest.main(["-v",__file__])
 
