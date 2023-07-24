@@ -39,7 +39,7 @@ def picking_sequence(instance: Instance, agent_order:list) -> list[list[any]]:
         if agent not in instance.agents:
             raise ValueError(f"Agent {agent} in agent_order but not in instance.agents")
     alloc = AllocationBuilder(instance)
-    complete_allocation_using_picking_sequence(instance, alloc, agent_order)
+    complete_allocation_using_picking_sequence(alloc, agent_order)
     return alloc.sorted()
 
 
@@ -108,7 +108,7 @@ def bidirectional_round_robin(instance: Instance, agent_order:list=None) -> list
 
 
 
-def complete_allocation_using_picking_sequence(instance: Instance, alloc:AllocationBuilder, agent_order: list):
+def complete_allocation_using_picking_sequence(alloc: AllocationBuilder, agent_order: list):
     """
     A subroutine for picking sequence algorithms: receives an instance and a partial allocation, 
     and completes the partial allocation using the given picking sequence.    
@@ -128,7 +128,7 @@ def complete_allocation_using_picking_sequence(instance: Instance, alloc:Allocat
             logger.info("Agent %s cannot pick any more items: remaining=%s, bundle=%s", agent, alloc.remaining_item_capacities, alloc.bundles[agent])
             alloc.remove_agent(agent)
             continue
-        best_item_for_agent = max(potential_items_for_agent, key=lambda item: instance.agent_item_value(agent,item))
+        best_item_for_agent = max(potential_items_for_agent, key=lambda item: alloc.remaining_agent_item_value[agent][item])
         alloc.give(agent, best_item_for_agent, logger)
 
 
@@ -142,8 +142,8 @@ if __name__ == "__main__":
     import doctest, sys
     print("\n",doctest.testmod(), "\n")
 
-    logger.addHandler(logging.StreamHandler(sys.stdout))
-    logger.setLevel(logging.INFO)
+    # logger.addHandler(logging.StreamHandler(sys.stdout))
+    # logger.setLevel(logging.INFO)
 
     from fairpy.courses.adaptors import divide_random_instance
     divide_random_instance(algorithm=round_robin, 

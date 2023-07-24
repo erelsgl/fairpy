@@ -77,7 +77,7 @@ def yekta_day(instance: Instance):
     logger.info("Yekta-Day allocation: %s", yekta_day_allocation)
     alloc = AllocationBuilder(instance)
     alloc.add_bundles(yekta_day_allocation)
-    complete_allocation_using_iterated_maximum_matching(instance, alloc)  # Avoid waste
+    complete_allocation_using_iterated_maximum_matching(alloc)  # Avoid waste
     return alloc.sorted()
 
 

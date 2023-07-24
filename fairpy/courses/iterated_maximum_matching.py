@@ -48,17 +48,16 @@ def iterated_maximum_matching(instance: Instance):
     "{avi:['w', 'x', 'y', 'z'], beni:['w', 'x', 'y', 'z']}"
     """
     alloc = AllocationBuilder(instance)
-    complete_allocation_using_iterated_maximum_matching(instance, alloc)
+    complete_allocation_using_iterated_maximum_matching(alloc)
     return alloc.sorted()
 
 
 
-def complete_allocation_using_iterated_maximum_matching(instance: Instance, alloc:AllocationBuilder):
+def complete_allocation_using_iterated_maximum_matching(alloc:AllocationBuilder):
     """
     A subroutine for iterated maximum matching: receives an instance and a partial allocation, 
     and completes the partial allocation using the given picking sequence.    
 
-    :param instance: an instance of the fair course allocation problem. 
     :param alloc: a partial allocation (in an AllocationBuilder object).
     """
     iteration = 1

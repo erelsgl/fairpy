@@ -70,12 +70,12 @@ def divide_random_instance(algorithm, num_of_agents, num_of_items,
         print(f"   egalitarian value: {int(matrix.egalitarian_value())}%")
         print(f"   max envy: {int(matrix.max_envy())}%")
         print(f"   mean envy: {int(matrix.mean_envy())}%")
-
     else:
-        pass 
-
+        pass # TODO: compute statistics of fractional allocations
 
     return allocation
+
+
 
 
 if __name__ == "__main__":

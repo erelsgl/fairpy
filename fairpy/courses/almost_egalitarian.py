@@ -142,7 +142,7 @@ def almost_egalitarian_allocation(instance: Instance, **solver_options):
         logger.warning(f"No leafs - removing edge {edge_with_min_weight} with minimum weight {min_weight}")
         remove_edge_from_graph(*agent_item_tuple(edge_with_min_weight))
         
-    complete_allocation_using_iterated_maximum_matching(instance, alloc)  # Avoid waste
+    complete_allocation_using_iterated_maximum_matching(alloc)  # Avoid waste
     return alloc.sorted()
 
 
