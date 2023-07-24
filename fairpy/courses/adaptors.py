@@ -20,18 +20,18 @@ def divide(
     instance: Instance = None,
     valuations: any = None,
     agent_capacities: any = None,  # default is unbounded (= num of items)
-    agent_priorities: any = None,  # default is that all agents have same priority
     item_capacities:  any = None,  # default is 1 per course
     **kwargs
 ):
     """
-    An adaptor partition function.
+    Apply the given algorithm to the given fair-course-allocation instance.
 
-    :param algorithm: a specific algorithm for course-allocation. Should accept (at least) the following parameters: 
-        agent_capacity:       callable; maps an agent name/index to its capacity (num of seats required).
-        item_capacity:        callable; maps an item name/index to its capacity  (num of seats allocated).
-        agent_item_value:     callable; maps an agent,item pair to the agent's value for the item.
+    :param algorithm: a specific algorithm for course-allocation. Should accept an AllocationBuilder object as a parameter.
 
+    :param instance (optional): a fair-allocation instance. If instance is not given, then it is constructed using the following arguments (valuations, agent_capacities, item_capacities).
+    :param valuations: any structure that maps an agent and an item to a value.
+    :param agent_capacities: any structure that maps an agent to an integer capacity.
+    :param item_capacities: any structure that maps an item to an integer capacity.
     :param kwargs: any other arguments expected by `algorithm`.
 
     :return: an allocation.
@@ -43,10 +43,55 @@ def divide(
     {'Alice': ['c1', 'c3'], 'Bob': ['c2']}
     """
     if instance is None:
-        instance = Instance(valuations=valuations, agent_capacities=agent_capacities, agent_priorities=agent_priorities, item_capacities=item_capacities)
+        instance = Instance(valuations=valuations, agent_capacities=agent_capacities, item_capacities=item_capacities)
     alloc = AllocationBuilder(instance)
     algorithm(alloc, **kwargs)
     return alloc.sorted()
+
+
+def divide_with_priorities(
+    algorithm: callable,
+    agent_priority_classes = list[list[any]],
+    instance: Instance = None,
+    valuations: any = None,
+    agent_capacities: any = None,  # default is unbounded (= num of items)
+    item_capacities:  any = None,  # default is 1 per course
+    **kwargs
+):
+    """
+    Apply the given algorithm to the given fair-course-allocation instance, where agents are grouped into priority classes.
+    Each priority class receives all its items first, before the next priority class starts getting items.
+
+    :param algorithm: a specific algorithm for course-allocation. Should accept an AllocationBuilder object as a parameter.
+    :param agent_priority_classes: a list of lists, describing a partition of the agents in the instance into priority classes.
+
+    :param instance (optional): a fair-allocation instance. If instance is not given, then it is constructed using the following arguments (valuations, agent_capacities, item_capacities).
+    :param valuations: any structure that maps an agent and an item to a value.
+    :param agent_capacities: any structure that maps an agent to an integer capacity.
+    :param item_capacities: any structure that maps an item to an integer capacity.
+    :param kwargs: any other arguments expected by `algorithm`.
+
+    :return: an allocation.
+
+    >>> valuations = {"Alice": {"c1":2, "c2": 3, "c3": 4}, "Bob": {"c1": 4, "c2": 5, "c3": 6}}
+    >>> agent_capacities = {"Alice": 2, "Bob": 1}
+    >>> item_capacities  = {"c1": 2, "c2": 1, "c3": 1}
+    >>> instance = Instance(agent_capacities=agent_capacities, item_capacities=item_capacities, valuations=valuations)
+    >>> divide_with_priorities(fairpy.courses.round_robin, instance=instance, agent_priority_classes=[["Alice","Bob"]])
+    {'Alice': ['c1', 'c3'], 'Bob': ['c2']}
+    >>> divide_with_priorities(fairpy.courses.round_robin, instance=instance, agent_priority_classes=[["Alice"],["Bob"]]) # Alice has priority
+    {'Alice': ['c2', 'c3'], 'Bob': ['c1']}
+    >>> divide_with_priorities(fairpy.courses.round_robin, instance=instance, agent_priority_classes=[["Bob"],["Alice"]]) # Bob has priority
+    {'Alice': ['c1', 'c2'], 'Bob': ['c3']}
+    """
+    if instance is None:
+        instance = Instance(valuations=valuations, agent_capacities=agent_capacities, item_capacities=item_capacities)
+    alloc = AllocationBuilder(instance)
+    for priority_class in agent_priority_classes:
+        alloc.remaining_agent_capacities = {agent:instance.agent_capacity(agent) for agent in priority_class}
+        algorithm(alloc, **kwargs)
+    return alloc.sorted()
+
 
 
 def divide_random_instance(
@@ -90,8 +135,8 @@ if __name__ == "__main__":
     import doctest, sys
     print(doctest.testmod())
 
-    divide_random_instance(
-        fairpy.courses.round_robin, num_of_agents=70, num_of_items=10, agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], 
-        item_base_value_bounds=[0,200], item_subjective_ratio_bounds=[0.5,1.5],
-        normalized_sum_of_values=1000
-    )
+    # divide_random_instance(
+    #     fairpy.courses.round_robin, num_of_agents=70, num_of_items=10, agent_capacity_bounds=[6,6], item_capacity_bounds=[40,40], 
+    #     item_base_value_bounds=[0,200], item_subjective_ratio_bounds=[0.5,1.5],
+    #     normalized_sum_of_values=1000
+    # )
