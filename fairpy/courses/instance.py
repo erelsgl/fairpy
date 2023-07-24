@@ -82,18 +82,17 @@ class Instance:
     {'y': 1, 'x': 2}
     """
 
-    def __init__(self, valuations:any, agent_capacities:any=None, agent_priorities:any=None, agent_entitlements:any=None, item_capacities:any=None, agents:list=None, items:list=None):
+    def __init__(self, valuations:any, agent_capacities:any=None, agent_entitlements:any=None, item_capacities:any=None, agents:list=None, items:list=None):
         """
         Initialize an instance from the given 
         """
         agent_value_keys, item_value_keys, agent_item_value_func = get_keys_and_mapping_2d(valuations)
 
         agent_capacity_keys, agent_capacity_func = get_keys_and_mapping(agent_capacities)
-        agent_priority_keys, agent_priority_func = get_keys_and_mapping(agent_priorities)
         agent_entitlement_keys, agent_entitlement_func = get_keys_and_mapping(agent_entitlements)
         item_capacity_keys , item_capacity_func  = get_keys_and_mapping(item_capacities)
 
-        self.agents = agents or agent_capacity_keys or agent_priority_keys or agent_value_keys
+        self.agents = agents or agent_capacity_keys or agent_entitlement_keys or agent_value_keys
         assert (self.agents is not None)
         self.num_of_agents = len(self.agents)
         self.items  = items  or item_capacity_keys or item_value_keys
@@ -101,7 +100,6 @@ class Instance:
         self.num_of_items = len(self.items)
 
         self.agent_capacity = agent_capacity_func or constant_function(len(self.items))
-        self.agent_priority = agent_priority_func or constant_function(1)
         self.agent_entitlement = agent_entitlement_func or constant_function(1)
         self.item_capacity  = item_capacity_func  or constant_function(1)
         self.agent_item_value = agent_item_value_func
