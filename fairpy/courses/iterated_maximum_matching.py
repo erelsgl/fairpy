@@ -83,8 +83,8 @@ if __name__ == "__main__":
     import doctest
     print("\n",doctest.testmod(), "\n")
 
-    logger.addHandler(logging.StreamHandler())
-    logger.setLevel(logging.INFO)
+    # logger.addHandler(logging.StreamHandler())
+    # logger.setLevel(logging.INFO)
 
     from fairpy.courses.adaptors import divide_random_instance
     divide_random_instance(algorithm=iterated_maximum_matching, 

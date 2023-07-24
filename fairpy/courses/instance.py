@@ -269,11 +269,22 @@ def get_keys_and_mapping_2d(container: any) -> tuple[list,callable]:
     44
 
     ### list
-    >>> k1,k2,f = get_keys_and_mapping_2d([[11,22],[33,44]])
+    >>> k1,k2,f = get_keys_and_mapping_2d([[11,22,33],[33,44,55]])
     >>> sorted(k1)
     [0, 1]
     >>> sorted(k2)
+    [0, 1, 2]
+    >>> f(0,1)
+    22
+    >>> f(1,0)
+    33
+
+    ### ndarray
+    >>> k1,k2,f = get_keys_and_mapping_2d(np.array([[11,22,33],[33,44,55]]))
+    >>> sorted(k1)
     [0, 1]
+    >>> sorted(k2)
+    [0, 1, 2]
     >>> f(0,1)
     22
     >>> f(1,0)
@@ -296,6 +307,10 @@ def get_keys_and_mapping_2d(container: any) -> tuple[list,callable]:
         f = lambda agent,item: container[agent][item]
         k1 = range(len(container))
         k2, _ = get_keys_and_mapping(container[0])
+    elif isinstance(container, np.ndarray):
+        f = lambda agent,item: container[agent][item]
+        k1 = range(container.shape[0])
+        k2 = range(container.shape[1])
     elif callable(container):
         f = container
         k1 = k2 = None

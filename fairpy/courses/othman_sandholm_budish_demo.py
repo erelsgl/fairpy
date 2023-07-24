@@ -17,24 +17,22 @@ between courses for students given a list of preferences for each student.
 """
 import numpy
 
-import fairpy
+import fairpy.courses
 from fairpy import ValuationMatrix
-from fairpy.courses import othman_sandholm_budish
-from fairpy.courses.othman_sandholm_budish import general_course_allocation
 
 import logging
 
-othman_sandholm_budish.logger.addHandler(logging.StreamHandler())
-othman_sandholm_budish.logger.setLevel(logging.INFO)
+fairpy.courses.othman_sandholm_budish.logger.addHandler(logging.StreamHandler())
+fairpy.courses.othman_sandholm_budish.logger.setLevel(logging.INFO)
 
 # The preference rating of the courses for each of the students:
-utilities = ValuationMatrix(numpy.array([[60,30,6,4],[6,2,42,26]]))
+utilities = numpy.array([[60,30,6,4],[6,2,42,26]])
 
 # The capacity for each of the existing courses:
-capacity = [2, 3, 1, 2]
+item_capacities = [2, 3, 1, 2]
 
 # The maximum number of courses per student:
 num_of_courses = 2
 
 # The Placement of students in the courses according to the algorithm:
-print(fairpy.divide(general_course_allocation, utilities, capacity, num_of_courses))
+print(fairpy.courses.divide(fairpy.courses.othman_sandholm_budish, valuations=utilities, item_capacities=item_capacities, agent_capacities=num_of_courses))

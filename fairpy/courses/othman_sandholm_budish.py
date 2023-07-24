@@ -65,14 +65,20 @@ def general_course_allocation(
         [alloc.remaining_agent_item_value[agent][item] for item in alloc.remaining_items()]
         for agent in alloc.remaining_agents()
     ])
+    remaining_items =  list(alloc.remaining_items())
+    remaining_agents = list(alloc.remaining_agents())
+    item_capacities = [alloc.remaining_item_capacities[item] for item in remaining_items]
+    agent_capacities = [alloc.remaining_agent_capacities[agent] for agent in remaining_agents]
     allocation_matrix = course_allocation(utilities, budgets, prices, 
-        alloc.remaining_item_capacities, alloc.remaining_agent_capacities, 
+        item_capacities, agent_capacities, 
         bound, effect_variables, constraint)
 
-    for agent in list(alloc.remaining_agents()):
-        for item in list(alloc.remaining_items()):
-            if allocation_matrix[agent][item] == 1:
+    for iagent,agent in enumerate(remaining_agents):
+        for iitem,item in enumerate(remaining_items):
+            if allocation_matrix[iagent][iitem] == 1:
                 alloc.give(agent,item)
+
+general_course_allocation.logger = logger
 
 
 def course_allocation(utilities:ValuationMatrix, budgets: list[float], prices: list[float], 
@@ -330,6 +336,10 @@ def max_utilities(utilities: ValuationMatrix, budgets: list[float], prices: list
 
     placements = []
 
+    # print("utilities: ", utilities)
+    # print("budgets: ", budgets)
+    # print("prices: ", prices)
+    # print("agent_capacity: ", agent_capacity)
     for agent in utilities.agents():
         placement: list[bool] = max_utility(utilities[agent], budgets[agent], prices, agent_capacity[agent])
         placements.append(placement)
@@ -392,3 +402,9 @@ if __name__ == '__main__':
     doctest.run_docstring_examples(max_utility, globals())
     doctest.run_docstring_examples(max_utilities, globals())
     doctest.run_docstring_examples(Course_Bundle, globals())
+
+    from fairpy.courses.adaptors import divide_random_instance
+    divide_random_instance(algorithm=general_course_allocation, 
+                           num_of_agents=10, num_of_items=4, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
+                           item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
+                           random_seed=1)
