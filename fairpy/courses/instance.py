@@ -19,6 +19,7 @@ class Instance:
     Exposes the following functions:
      * agent_capacity:       maps an agent name/index to its capacity (num of seats required).
      * item_capacity:        maps an item  name/index to its capacity (num of seats allocated).
+     * agent_conflicts:      maps an agent  name/index to a set of items that conflict with it (- cannot be allocated to this agent).
      * item_conflicts:       maps an item  name/index to a set of items that conflict with it (- cannot be allocated together).
      * agent_item_value:     maps an agent,item pair to the agent's value for the item.
      * agents: an enumeration of the agents (derived from agent_capacity).
@@ -65,7 +66,7 @@ class Instance:
     264
 
 
-    ### default capacities:
+    ### default values:
     >>> instance = Instance(valuations={"avi": {"x":5, "y": 4}, "beni": {"x":2, "y":3}})
     >>> instance.agent_capacity("avi")
     2
@@ -73,7 +74,14 @@ class Instance:
     1
     >>> instance.agent_item_value("beni", "y")
     3
+    >>> instance.agent_entitlement("Alice")
+    1
+    >>> instance.agent_conflicts("Alice")
+    set()
+    >>> instance.item_conflicts("c1")
+    set()
 
+    ### agent rankings
     >>> instance = Instance(valuations={"avi": {"x":5, "y": 5}, "beni": {"x":3, "y":3}}, agent_capacities=1)
     >>> instance.agent_capacity("avi")
     1
@@ -81,9 +89,19 @@ class Instance:
     {'x': 1, 'y': 2}
     >>> instance.agent_ranking("avi", ["y"])
     {'y': 1, 'x': 2}
+
+    ### conflicts:
+    >>> instance = Instance(
+    ...   agent_conflicts = {"Alice": {0,1,2}, "Bob": {2,3,4}}, 
+    ...   item_conflicts  = [{"Alice", "Bob"}, set(), {"Alice"}, {"Bob"}, set()], 
+    ...   valuations       = {"Alice": [22,33,44,55,66], "Bob": [66,77,88,99,100]})
+    >>> instance.agent_conflicts("Bob")
+    {2, 3, 4}
+    >>> instance.item_conflicts(2)
+    {'Alice'}
     """
 
-    def __init__(self, valuations:any, agent_capacities:any=None, agent_entitlements:any=None, item_capacities:any=None, item_conflicts:any=None, agents:list=None, items:list=None):
+    def __init__(self, valuations:any, agent_capacities:any=None, agent_entitlements:any=None, item_capacities:any=None, agent_conflicts:any=None, item_conflicts:any=None, agents:list=None, items:list=None):
         """
         Initialize an instance from the given 
         """
@@ -104,6 +122,9 @@ class Instance:
         self.agent_entitlement = agent_entitlement_func or constant_function(1)
         self.item_capacity  = item_capacity_func  or constant_function(1)
         self.agent_item_value = agent_item_value_func
+
+        self.agent_conflicts = get_conflicts(agent_conflicts) or constant_function(set())
+        self.item_conflicts = get_conflicts(item_conflicts) or constant_function(set())
 
         # Keep the input parameters, for debug
         self._agent_capacities = agent_capacities
@@ -321,7 +342,26 @@ def get_keys_and_mapping_2d(container: any) -> tuple[list,callable]:
 
 
 def get_conflicts(container:any):
-    pass
+    """
+    Given a container of any supported type, returns a callable function 
+    that maps each key to a list of conflicting items.
+
+    ### dict of lists
+    >>> f = get_conflicts({"a":[1,2,3], "b":[3,4,5]})
+    >>> f("a")
+    [1, 2, 3]
+    """
+    if container is None:
+        func = None
+    elif isinstance(container, dict):   # dict of lists
+        func = lambda x: container.get(x, set())
+    elif isinstance(container, list):   # list of lists
+        func = container.__getitem__
+    elif callable(container):
+        func = container 
+    else:
+        raise TypeError(f"container {container} of unknown type: {type(container)}")
+    return func
     
 
 Instance.logger = logger
