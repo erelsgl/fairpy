@@ -19,7 +19,8 @@ class Instance:
     Exposes the following functions:
      * agent_capacity:       maps an agent name/index to its capacity (num of seats required).
      * item_capacity:        maps an item  name/index to its capacity (num of seats allocated).
-     * agent_item_value:      maps an agent,item pair to the agent's value for the item.
+     * item_conflicts:       maps an item  name/index to a set of items that conflict with it (- cannot be allocated together).
+     * agent_item_value:     maps an agent,item pair to the agent's value for the item.
      * agents: an enumeration of the agents (derived from agent_capacity).
      * items: an enumeration of the items (derived from item_capacity).
 
@@ -82,7 +83,7 @@ class Instance:
     {'y': 1, 'x': 2}
     """
 
-    def __init__(self, valuations:any, agent_capacities:any=None, agent_entitlements:any=None, item_capacities:any=None, agents:list=None, items:list=None):
+    def __init__(self, valuations:any, agent_capacities:any=None, agent_entitlements:any=None, item_capacities:any=None, item_conflicts:any=None, agents:list=None, items:list=None):
         """
         Initialize an instance from the given 
         """
@@ -318,6 +319,9 @@ def get_keys_and_mapping_2d(container: any) -> tuple[list,callable]:
         raise TypeError(f"agent_item_value {container} of unknown type: {type(container)}")
     return k1,k2,f
 
+
+def get_conflicts(container:any):
+    pass
     
 
 Instance.logger = logger
