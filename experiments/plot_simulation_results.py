@@ -7,6 +7,7 @@ To run this file, you need to
 from experiments_csv import single_plot_results, multi_plot_results
 from matplotlib import pyplot as plt
 from pathlib import Path
+import sys
 
 filter={"num_of_items": 20, 
         "algorithm": [
@@ -105,7 +106,13 @@ multi_plot_results(
      )
 
 
+
+sys.exit()
+
+
+
 ######## OLD PLOTS
+
 
 # multi_plot_results(
 #      "results/many_to_many_matchings.csv", save_to_file=True,
@@ -122,5 +129,15 @@ multi_plot_results(
 #      filter={}, 
 #      x_field="num_of_agents", y_field="runtime", z_field="algorithm", mean=True, 
 #      subplot_field = "num_of_items", subplot_rows=2, subplot_cols=2, sharey=True, sharex=True,
+#      legend_properties={"size":6}, 
+#      )
+
+
+# multi_plot_results(
+#      "results/check_effect_of_name_size.csv", 
+#      save_to_file="results/check_effect_of_name_size.png",
+#      filter={}, 
+#      x_field="agent_name_size", y_field="runtime", z_field="algorithm", mean=True, 
+#      subplot_field = "item_name_size", subplot_rows=2, subplot_cols=2, sharey=True, sharex=True,
 #      legend_properties={"size":6}, 
 #      )

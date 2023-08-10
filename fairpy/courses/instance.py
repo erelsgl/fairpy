@@ -181,7 +181,9 @@ class Instance:
                item_base_value_bounds:tuple[int,int],
                item_subjective_ratio_bounds:tuple[float,float],
                normalized_sum_of_values:int,
-               random_seed:int=None):
+               agent_name_template="s{index}", item_name_template="c{index}",
+               random_seed:int=None,
+               ):
         """
         Generate a random instance.
         """
@@ -189,8 +191,8 @@ class Instance:
             random_seed = np.random.randint(1, 2**31)
         np.random.seed(random_seed)
         logger.info("Random seed: %d", random_seed)
-        agents  = [f"s{i+1}" for i in range(num_of_agents)]
-        items   = [f"c{i+1}" for i in range(num_of_items)]
+        agents  = [agent_name_template.format(index=i+1) for i in range(num_of_agents)]
+        items   = [item_name_template.format(index=i+1) for i in range(num_of_items)]
         agent_capacities  = {agent: np.random.randint(agent_capacity_bounds[0], agent_capacity_bounds[1]+1) for agent in agents}
         item_capacities   = {item: np.random.randint(item_capacity_bounds[0], item_capacity_bounds[1]+1) for item in items}
         base_values = normalized_valuation(random_valuation(num_of_items, item_base_value_bounds), normalized_sum_of_values)
@@ -381,6 +383,7 @@ if __name__ == "__main__":
         num_of_agents=5, num_of_items=3, 
         agent_capacity_bounds=[2,6], item_capacity_bounds=[30,50], 
         item_base_value_bounds=[1,200], item_subjective_ratio_bounds=[0.5,1.5],
+        # agent_name_template="agent{index}", item_name_template="item{index}",
         normalized_sum_of_values=1000)
     print("agents: ", random_instance.agents)
     print("items: ", random_instance.items)
