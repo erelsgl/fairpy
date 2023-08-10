@@ -8,6 +8,7 @@ Programmer: Erel Segal-Halevi
 Since: 2023-07
 """
 import fairpy.courses as crs
+from fairpy.courses.adaptors import divide
 from typing import *
 import numpy as np
 
@@ -30,7 +31,7 @@ def course_allocation_with_random_instance(
         item_base_value_bounds=[1,max_value],
         item_subjective_ratio_bounds=[1-value_noise_ratio, 1+value_noise_ratio]
         )
-    allocation = algorithm(instance)
+    allocation = divide(algorithm, instance)
     matrix = crs.AgentBundleValueMatrix(instance, allocation)
     matrix.use_normalized_values()
     return {
@@ -62,7 +63,8 @@ if __name__ == "__main__":
         "value_noise_ratio": [0, 0.1, 0.3, 0.5, 0.7, 1],
         "algorithm": [
             crs.utilitarian_matching, 
-            crs.iterated_maximum_matching, 
+            crs.iterated_maximum_matching_unadjusted, 
+            crs.iterated_maximum_matching_adjusted, 
             # crs.serial_dictatorship,                  # Very bad performance
             # crs.course_allocation_by_proxy_auction,   # Very bad performance
             crs.round_robin, 

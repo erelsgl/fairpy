@@ -130,11 +130,14 @@ if __name__ == "__main__":
     # logger.setLevel(logging.INFO)
 
     from fairpy.courses.adaptors import divide_random_instance
+
+    print("\n\nRound robin:")
     divide_random_instance(algorithm=round_robin, 
-                           num_of_agents=10, num_of_items=4, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
+                           num_of_agents=30, num_of_items=10, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
                            item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
-                           random_seed=2)
+                           random_seed=1)
+    print("\n\nBidirectional round robin:")
     divide_random_instance(algorithm=bidirectional_round_robin, 
-                           num_of_agents=10, num_of_items=4, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
+                           num_of_agents=30, num_of_items=10, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
                            item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
-                           random_seed=2)
+                           random_seed=1)

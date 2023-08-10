@@ -10,7 +10,7 @@ from pathlib import Path
 
 filter={"num_of_items": 20, 
         "algorithm": [
-            "yekta_day", "almost_egalitarian_allocation", "iterated_maximum_matching",
+            "yekta_day", "almost_egalitarian_allocation", "iterated_maximum_matching_unadjusted","iterated_maximum_matching_adjusted",
             "round_robin", "bidirectional_round_robin"
           ]}
 

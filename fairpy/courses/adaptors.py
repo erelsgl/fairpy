@@ -111,7 +111,7 @@ def divide_random_instance(
     random_instance = Instance.random(num_of_agents=num_of_agents, num_of_items=num_of_items, agent_capacity_bounds=agent_capacity_bounds, item_capacity_bounds=item_capacity_bounds, 
                                       item_base_value_bounds=item_base_value_bounds, item_subjective_ratio_bounds=item_subjective_ratio_bounds,
                                       normalized_sum_of_values=normalized_sum_of_values, random_seed=random_seed)
-    allocation = divide(algorithm, instance=random_instance)
+    allocation = divide(algorithm, instance=random_instance, **kwargs)
     print("\nAllocation: ", allocation)
 
     if not allocation_is_fractional(allocation):

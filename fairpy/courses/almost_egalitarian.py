@@ -187,8 +187,8 @@ if __name__ == "__main__":
     # logger.addHandler(logging.StreamHandler(sys.stdout))
     # logger.setLevel(logging.WARNING)
 
-    # from fairpy.courses.adaptors import divide_random_instance
-    # divide_random_instance(algorithm=almost_egalitarian_allocation, 
-    #                        num_of_agents=50, num_of_items=8, agent_capacity_bounds=[2,4], item_capacity_bounds=[15,25], 
-    #                        item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
-    #                        random_seed=1, normalize_utilities=True)
+    from fairpy.courses.adaptors import divide_random_instance
+    divide_random_instance(algorithm=almost_egalitarian_allocation, 
+                           num_of_agents=30, num_of_items=10, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
+                           item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
+                           random_seed=1)
