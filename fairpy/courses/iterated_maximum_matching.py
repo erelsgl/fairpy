@@ -16,13 +16,12 @@ Since : 2021-05
 from fairpy.courses.graph_utils import many_to_many_matching_using_network_flow
 from fairpy.courses.instance    import Instance
 from fairpy.courses.allocation_utils import AllocationBuilder
+from fairpy.courses.explanations import *
 
 import logging
 logger = logging.getLogger(__name__)
-dummy_logger = logging.getLogger('dummy')
 
-
-def iterated_maximum_matching(alloc:AllocationBuilder, adjust_utilities:bool=False, explanation_logger=dummy_logger):
+def iterated_maximum_matching(alloc:AllocationBuilder, adjust_utilities:bool=False, explanation_logger:ExplanationLogger=ExplanationLogger()):
     """
     Builds a allocation using Iterated Maximum Matching.
     :param alloc: an allocation builder, which tracks the allocation and the remaining capacity for items and agents. of the fair course allocation problem. 
@@ -58,30 +57,26 @@ def iterated_maximum_matching(alloc:AllocationBuilder, adjust_utilities:bool=Fal
     "{avi:['x', 'y', 'z'], beni:['w', 'y', 'z']}"
     """
     iteration = 1
+    explanation_logger.info("\n## Iterated Maximum Matching Algorithm\n")
     while len(alloc.remaining_item_capacities)>0 and len(alloc.remaining_agent_capacities)>0:
-        logger.info("\nIteration %d", iteration)
-        explanation_logger.info("\nIteration %d:", iteration)
-        logger.info("  remaining_agent_capacities: %s", alloc.remaining_agent_capacities)
-        logger.info("  remaining_item_capacities: %s", alloc.remaining_item_capacities)
-        logger.debug("  remaining_agent_item_value: %s", alloc.remaining_agent_item_value)
+        explanation_logger.info("\nIteration %d:", iteration, agents=alloc.remaining_agents())
+        explanation_logger.info("  Remaining seats: %s", alloc.remaining_item_capacities, agents=alloc.remaining_agents())
+        # logger.info("  remaining_agent_capacities: %s", alloc.remaining_agent_capacities)
+        # logger.debug("  remaining_agent_item_value: %s", alloc.remaining_agent_item_value)
         map_agent_to_bundle = many_to_many_matching_using_network_flow(
             items=alloc.remaining_items(), 
             item_capacity=alloc.remaining_item_capacities.__getitem__, 
             agents=alloc.remaining_agents(),
             agent_capacity=lambda _:1,
             agent_item_value=lambda agent,item: alloc.remaining_agent_item_value[agent][item])
-        # logger.info("Matching: %s", dict(map_agent_to_bundle))
 
         agents_with_empty_bundles = [agent for agent,bundle in map_agent_to_bundle.items() if len(bundle)==0]
         for agent in agents_with_empty_bundles:
-            logger.info("  Agent %s cannot be given any more items.", agent)
-            explanation_logger.info("[%s]  All remaining courses are not acceptable to you.", agent)
+            explanation_logger.info("You did not get any course, because all remaining courses are not acceptable to you.", agents=agent)
             alloc.remove_agent(agent)
             del map_agent_to_bundle[agent]
 
         map_agent_to_item = {agent: bundle[0] for agent,bundle in map_agent_to_bundle.items()}
-
-        logger.info("Matching: ")
 
         if adjust_utilities:
             map_agent_to_value = {
@@ -93,25 +88,31 @@ def iterated_maximum_matching(alloc:AllocationBuilder, adjust_utilities:bool=Fal
                 for agent in map_agent_to_item.keys()
             }
             for agent,item in map_agent_to_item.items():
-                logger.info("  Agent %s gets item %s with value %g (max possible: %g).", agent, item, map_agent_to_value[agent], map_agent_to_max_possible_value[agent])
-                explanation_logger.info("[%s]  You get course %s. Its value for you is %g. The maximum possible value you could get in this iteration is %g", agent, item, map_agent_to_value[agent], map_agent_to_max_possible_value[agent])
                 alloc.give(agent,item)
             if alloc.remaining_items():
                 for agent,item in map_agent_to_item.items():
-                    next_best_item = max(alloc.remaining_items(), key=lambda item:alloc.remaining_agent_item_value[agent][item])
-                    current_value_of_next_best_item = alloc.remaining_agent_item_value[agent][next_best_item]
-                    utility_difference = map_agent_to_max_possible_value[agent] - map_agent_to_value[agent]
-                    if utility_difference>0:
-                        alloc.remaining_agent_item_value[agent][next_best_item] += utility_difference
-                        explanation_logger.info("[%s]  As compensation, we added the difference %g to your next-best course, %s", agent, utility_difference, item)
-                        logger.info("   Increasing value of agent %s to next-best item %s from %g to %g", agent, next_best_item, current_value_of_next_best_item, current_value_of_next_best_item+utility_difference)
+                    explanation_logger.info("The maximum possible value you could get in this iteration is %g. You get course %s whose value for you is %g.", map_agent_to_max_possible_value[agent], item, map_agent_to_value[agent], agents=agent)
+                    if len(alloc.bundles[agent])==alloc.instance.agent_capacity(agent):
+                        explanation_logger.info("\nYou now have all your %d courses!", alloc.instance.agent_capacity(agent), agents=agent)
                     else:
-                        pass
+                        next_best_item = max(alloc.remaining_items(), key=lambda item:alloc.remaining_agent_item_value[agent][item])
+                        current_value_of_next_best_item = alloc.remaining_agent_item_value[agent][next_best_item]
+                        if current_value_of_next_best_item>=0:
+                            utility_difference = map_agent_to_max_possible_value[agent] - map_agent_to_value[agent]
+                            if utility_difference>0:
+                                alloc.remaining_agent_item_value[agent][next_best_item] += utility_difference
+                                explanation_logger.info("    As compensation, we added the difference %g to your next-best course, %s.",  utility_difference, next_best_item, agents=agent)
+                                # logger.info("   Increasing value of agent %s to next-best item %s from %g to %g", agent, next_best_item, current_value_of_next_best_item, current_value_of_next_best_item+utility_difference)
+                            else:
+                                pass
+            else:
+                for agent,item in map_agent_to_item.items():
+                    explanation_logger.info("The maximum possible value you could get in this iteration is %g. You get course %s whose value for you is %g.", map_agent_to_max_possible_value[agent], item, map_agent_to_value[agent], agents=agent)
+                explanation_logger.info("\nThere are no more remaining courses!", agents=map_agent_to_item.keys())
 
         else:
             for agent,item in map_agent_to_item.items():
-                logger.info("  Agent %s gets item %s.", agent, item)
-                explanation_logger.info("[%s]  You get course %s", agent, item)
+                explanation_logger.info("You get course %s", item, agents=agent)
                 alloc.give(agent,item)
         iteration += 1
 
@@ -133,16 +134,16 @@ if __name__ == "__main__":
     import doctest
     print("\n",doctest.testmod(), "\n")
 
-    logger.addHandler(logging.StreamHandler())
-    logger.setLevel(logging.WARNING)
-
-    explanation_logger = logging.getLogger("explanation")
-    explanation_logger.addHandler(logging.StreamHandler())
-    explanation_logger.setLevel(logging.INFO)
-
     from fairpy.courses.adaptors import divide_random_instance
     num_of_agents = 30
     num_of_items = 10
+
+    console_explanation_logger = ConsoleExplanationLogger()
+    files_explanation_logger = FilesExplanationLogger({
+        f"s{i+1}": f"logs/s{i+1}.log"
+        for i in range(num_of_agents)
+    }, mode='w')
+
 
     print("\n\nIterated Maximum Matching without adjustments:")
     divide_random_instance(algorithm=iterated_maximum_matching, adjust_utilities=False,
@@ -151,7 +152,9 @@ if __name__ == "__main__":
                            random_seed=1)
 
     print("\n\nIterated Maximum Matching with adjustments:")
-    divide_random_instance(algorithm=iterated_maximum_matching, adjust_utilities=True, explanation_logger=explanation_logger,
+    divide_random_instance(algorithm=iterated_maximum_matching, adjust_utilities=True, 
+                           explanation_logger=console_explanation_logger,
+                        #    explanation_logger = files_explanation_logger,
                            num_of_agents=num_of_agents, num_of_items=num_of_items, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
                            item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
                            random_seed=1)
