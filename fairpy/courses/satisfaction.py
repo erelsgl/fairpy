@@ -23,7 +23,7 @@ class AgentBundleValueMatrix:
         ...   item_capacities  = {"c1": 4, "c2": 5}, 
         ...   valuations       = {"Alice": {"c1": 11, "c2": 22}, "Bob": {"c1": 33, "c2": 44}})
         >>> allocation = {"Alice": ["c1"], "Bob": ["c2"]}
-        >>> matrix = AgentBundleValueMatrix(instance, allocation)
+        >>> matrix = AgentBundleValueMatrix(instance, allocation, normalized=False)
 
         >>> matrix.matrix
         {'Alice': {'Alice': 11, 'Bob': 22}, 'Bob': {'Alice': 33, 'Bob': 44}}
