@@ -4,6 +4,7 @@ Given an instance and an allocation, calculate various measures of satisfaction.
 
 from fairpy.courses.instance import Instance
 from collections import defaultdict
+from fairpy.courses.explanations import *
 import numpy as np
 
 from functools import cache
@@ -143,23 +144,23 @@ class AgentBundleValueMatrix:
     def count_agents_with_top_rank(self, rank=1):
         return sum([self.top_rank(agent)<=rank for agent in self.agents])
 
-    def explanation(self, agent, map_course_to_name={}):
+    def explain(self, explanation_logger:ExplanationLogger, map_course_to_name:dict={}):
         """
         Generate a verbal explanation for the given agent.
         """
-        item_explanations = [
-            f"* Course {map_course_to_name.get(item,item)}: number {self.rankings[agent][item]} in your ranking, with value {self.instance.agent_item_value(agent,item)}"
-            for item in self.allocation[agent]
-        ]
-        joined_item_explanations = '\n'.join(item_explanations)
-        return f"""
-Hi, {agent}! Here are the courses you received:
+        for agent in self.instance.agents:
+            explanation_logger.info("\nHere is your final allocation: ", agents=agent)
+            for item in self.allocation[agent]:
+                explanation_logger.info(f" * Course {map_course_to_name.get(item,item)}: number {self.rankings[agent][item]} in your ranking, with value {self.instance.agent_item_value(agent,item)}", agents=agent)
+            explanation_logger.info(f"The maximum possible value you could get for {self.instance.agent_capacity(agent)} courses is {self.maximum_values[agent]}.", agents=agent)
+            explanation_logger.info(f"Your total value is {self.raw_matrix[agent][agent]}, which is {np.round(self.normalized_matrix[agent][agent])}% of the maximum.", agents=agent)
 
-{joined_item_explanations}
+def explain_allocation(instance: Instance, allocation: dict, explanation_logger: ExplanationLogger, map_course_to_name:dict={}):
+    matrix = AgentBundleValueMatrix(instance, allocation)
+    matrix.use_normalized_values()
+    matrix.explain(explanation_logger, map_course_to_name)
 
-The maximum possible value you could get for {self.instance.agent_capacity(agent)} courses is {self.maximum_values[agent]}.
-Your total value is {self.raw_matrix[agent][agent]}, which is {np.round(self.normalized_matrix[agent][agent])}% of the maximum.
-        """
+    
 
 
 if __name__ == "__main__":
@@ -167,13 +168,14 @@ if __name__ == "__main__":
     print(doctest.testmod())
 
     from picking_sequence import round_robin
+    from adaptors import divide
 
     random_instance = Instance.random(
         num_of_agents=10, num_of_items=8, 
-        agent_capacity_bounds=[4,4], item_capacity_bounds=[5,5], 
+        agent_capacity_bounds=[2,4], item_capacity_bounds=[5,5], 
         item_base_value_bounds=[1,200], item_subjective_ratio_bounds=[0.5,1.5],
         normalized_sum_of_values=1000)
-    allocation = round_robin(random_instance)
+    allocation = divide(round_robin,random_instance)
     matrix = AgentBundleValueMatrix(random_instance, allocation)
-    print(matrix.explanation(next(iter(random_instance.agents))))
+    matrix.explain(ConsoleExplanationLogger())
 

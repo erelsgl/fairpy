@@ -153,8 +153,8 @@ if __name__ == "__main__":
 
     print("\n\nIterated Maximum Matching with adjustments:")
     divide_random_instance(algorithm=iterated_maximum_matching, adjust_utilities=True, 
-                           explanation_logger=console_explanation_logger,
-                        #    explanation_logger = files_explanation_logger,
+                        #    explanation_logger=console_explanation_logger,
+                           explanation_logger = files_explanation_logger,
                            num_of_agents=num_of_agents, num_of_items=num_of_items, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
                            item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
                            random_seed=1)

@@ -12,7 +12,7 @@ Since: 2023-07
 
 import fairpy, numpy as np
 from fairpy.courses.instance import Instance
-from fairpy.courses.satisfaction import AgentBundleValueMatrix
+from fairpy.courses.satisfaction import AgentBundleValueMatrix, explain_allocation
 from fairpy.courses.allocation_utils import validate_allocation, allocation_is_fractional, AllocationBuilder
 
 def divide(
@@ -46,7 +46,10 @@ def divide(
         instance = Instance(valuations=valuations, agent_capacities=agent_capacities, item_capacities=item_capacities)
     alloc = AllocationBuilder(instance)
     algorithm(alloc, **kwargs)
-    return alloc.sorted()
+    allocation = alloc.sorted()
+    if "explanation_logger" in kwargs:
+        explain_allocation(instance, allocation, kwargs["explanation_logger"])
+    return allocation
 
 
 def divide_with_priorities(
@@ -90,7 +93,10 @@ def divide_with_priorities(
     for priority_class in agent_priority_classes:
         alloc.remaining_agent_capacities = {agent:instance.agent_capacity(agent) for agent in priority_class}
         algorithm(alloc, **kwargs)
-    return alloc.sorted()
+    allocation = alloc.sorted()
+    if "explanation_logger" in kwargs:
+        explain_allocation(instance, allocation, kwargs["explanation_logger"])
+    return allocation
 
 
 
@@ -140,3 +146,4 @@ if __name__ == "__main__":
     #     item_base_value_bounds=[0,200], item_subjective_ratio_bounds=[0.5,1.5],
     #     normalized_sum_of_values=1000
     # )
+
