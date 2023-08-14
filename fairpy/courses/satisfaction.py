@@ -12,10 +12,11 @@ from functools import cache
 
 class AgentBundleValueMatrix:
 
-    def __init__(self, instance:Instance, allocation:dict[any, list[any]]):
+    def __init__(self, instance:Instance, allocation:dict[any, list[any]], normalized=True):
         """
         :param instance: an input instance to the fair-course-allocation problem.
         :param allocation: a dict mapping each agent to its bundle (a list)
+        :param normalized: if True, it normalizes the valuations by the max-value.
 
         >>> instance = Instance(
         ...   agent_capacities = {"Alice": 2, "Bob": 3}, 
@@ -74,6 +75,8 @@ class AgentBundleValueMatrix:
         self.matrix = self.raw_matrix
         self.envy_matrix = None  # maps each agent-pair to the envy between them.
         self.envy_vector = None  # maps each agent to his maximum envy.
+        if normalized:
+            self.use_normalized_values()
 
     def use_raw_values(self)->float:
         """
@@ -155,12 +158,7 @@ class AgentBundleValueMatrix:
             explanation_logger.info(f"The maximum possible value you could get for {self.instance.agent_capacity(agent)} courses is {self.maximum_values[agent]}.", agents=agent)
             explanation_logger.info(f"Your total value is {self.raw_matrix[agent][agent]}, which is {np.round(self.normalized_matrix[agent][agent])}% of the maximum.", agents=agent)
 
-def explain_allocation(instance: Instance, allocation: dict, explanation_logger: ExplanationLogger, map_course_to_name:dict={}):
-    matrix = AgentBundleValueMatrix(instance, allocation)
-    matrix.use_normalized_values()
-    matrix.explain(explanation_logger, map_course_to_name)
 
-    
 
 
 if __name__ == "__main__":

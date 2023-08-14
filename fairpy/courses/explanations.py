@@ -24,6 +24,12 @@ class SingleExplanationLogger(ExplanationLogger):
     def __init__(self, logger:logging.Logger):
         self.logger = logger
 
+    def debug(self, message:str, *args, agents=None):
+        if agents is None or not isinstance(agents,str):  # to all agents
+            self.logger.debug(message, *args)
+        else:                                          # to one agent
+            self.logger.debug(agents+": "+message.strip(), *args)
+
     def info(self, message:str, *args, agents=None):
         if agents is None or not isinstance(agents,str):  # to all agents
             self.logger.info(message, *args)
@@ -51,6 +57,16 @@ class ExplanationLoggerPerAgent(ExplanationLogger):
         self.map_agent_to_logger = map_agent_to_logger
 
 
+    def debug(self, message:str, *args, agents=None):
+        if agents is None:
+            for agent,logger in self.map_agent_to_logger.items():
+                logger.debug(message, *args)
+        elif isinstance(agents,str):
+            self.map_agent_to_logger[agents].debug(message, *args)
+        else:
+            for agent in agents:
+                self.map_agent_to_logger[agent].debug(message, *args)
+
     def info(self, message:str, *args, agents=None):
         if agents is None:
             for agent,logger in self.map_agent_to_logger.items():
@@ -71,7 +87,7 @@ class FilesExplanationLogger(ExplanationLoggerPerAgent):
         map_agent_to_logger ={}
         for agent,filename in map_agent_to_filename.items():
             logger = logging.getLogger(f"Explanations for agent {agent}")
-            logger.setLevel(logging.INFO)
+            logger.setLevel(logging.DEBUG)
             logger.addHandler(logging.FileHandler(filename, **kwargs))
             map_agent_to_logger[agent] = logger
         super().__init__(map_agent_to_logger)

@@ -12,8 +12,9 @@ Since: 2023-07
 
 import fairpy, numpy as np
 from fairpy.courses.instance import Instance
-from fairpy.courses.satisfaction import AgentBundleValueMatrix, explain_allocation
+from fairpy.courses.satisfaction import AgentBundleValueMatrix
 from fairpy.courses.allocation_utils import validate_allocation, allocation_is_fractional, AllocationBuilder
+from fairpy.courses.explanations import ExplanationLogger
 
 def divide(
     algorithm: callable,
@@ -45,10 +46,13 @@ def divide(
     if instance is None:
         instance = Instance(valuations=valuations, agent_capacities=agent_capacities, item_capacities=item_capacities)
     alloc = AllocationBuilder(instance)
+    explanation_logger:ExplanationLogger = kwargs.get("explanation_logger", None)
+    if explanation_logger:
+        instance.explain_valuations(explanation_logger)
     algorithm(alloc, **kwargs)
     allocation = alloc.sorted()
-    if "explanation_logger" in kwargs:
-        explain_allocation(instance, allocation, kwargs["explanation_logger"])
+    if explanation_logger:
+        AgentBundleValueMatrix(instance, allocation, normalized=True).explain(explanation_logger)
     return allocation
 
 
@@ -90,12 +94,15 @@ def divide_with_priorities(
     if instance is None:
         instance = Instance(valuations=valuations, agent_capacities=agent_capacities, item_capacities=item_capacities)
     alloc = AllocationBuilder(instance)
+    explanation_logger = kwargs.get("explanation_logger",None)
+    if explanation_logger:
+        instance.explain_valuations(explanation_logger)
     for priority_class in agent_priority_classes:
         alloc.remaining_agent_capacities = {agent:instance.agent_capacity(agent) for agent in priority_class}
         algorithm(alloc, **kwargs)
     allocation = alloc.sorted()
-    if "explanation_logger" in kwargs:
-        explain_allocation(instance, allocation, kwargs["explanation_logger"])
+    if explanation_logger:
+        AgentBundleValueMatrix(instance, allocation, normalized=True).explain(explanation_logger)
     return allocation
 
 

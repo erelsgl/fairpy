@@ -57,7 +57,7 @@ def iterated_maximum_matching(alloc:AllocationBuilder, adjust_utilities:bool=Fal
     "{avi:['x', 'y', 'z'], beni:['w', 'y', 'z']}"
     """
     iteration = 1
-    explanation_logger.info("\n## Iterated Maximum Matching Algorithm\n")
+    explanation_logger.info("\nAlgorithm Iterated Maximum Matching starts\n")
     while len(alloc.remaining_item_capacities)>0 and len(alloc.remaining_agent_capacities)>0:
         explanation_logger.info("\nIteration %d:", iteration, agents=alloc.remaining_agents())
         explanation_logger.info("  Remaining seats: %s", alloc.remaining_item_capacities, agents=alloc.remaining_agents())
