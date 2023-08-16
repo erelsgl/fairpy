@@ -74,7 +74,7 @@ def many_to_many_matching_using_network_flow(items:list, item_capacity: callable
             if itemflow==1:
                 map_agent_name_to_bundle[agent].append(item)
             elif itemflow!=0:
-                raise ValueError(f"non-binary flow in network: {flow}")
+                raise ValueError(f"non-binary flow in network: agent={agent}, item={item}, flow={itemflow}.\n Entire flow: {flow}")
         map_agent_name_to_bundle[agent].sort()
     return map_agent_name_to_bundle
 

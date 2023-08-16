@@ -93,3 +93,41 @@ class FilesExplanationLogger(ExplanationLoggerPerAgent):
         super().__init__(map_agent_to_logger)
 
 
+
+class LogStream(object):
+    def __init__(self):
+        self.text = ''
+    def write(self, str):
+        self.text += str
+    def flush(self):
+        pass
+    def __str__(self):
+        return self.text
+
+
+# from io import StringIO
+class StringsExplanationLogger(ExplanationLoggerPerAgent):
+    """
+    A convenience class: an explanation logger in which all messages for each agent are written to an agent-specific string. 
+    """
+    def __init__(self, agents:list, **kwargs):
+        map_agent_to_logger = {}
+        self.map_agent_to_stream = {}
+        for agent in agents:
+            self.map_agent_to_stream[agent] = LogStream()
+            logger = logging.getLogger(f"Explanations for agent {agent}")
+            logger.setLevel(logging.DEBUG)
+            logger.addHandler(logging.StreamHandler(self.map_agent_to_stream[agent]))
+            map_agent_to_logger[agent] = logger
+        super().__init__(map_agent_to_logger)
+
+    def agent_string(self, agent):
+        return str(self.map_agent_to_stream[agent])
+
+    def map_agent_to_explanation(self):
+        return {
+            agent: str(self.map_agent_to_stream[agent])
+            for agent in self.map_agent_to_stream.keys()
+        }
+
+

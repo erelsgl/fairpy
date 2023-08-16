@@ -137,8 +137,8 @@ class AllocationBuilder:
     """
     def __init__(self, instance:Instance):
         self.instance = instance
-        self.remaining_agent_capacities = {agent: instance.agent_capacity(agent) for agent in instance.agents}
-        self.remaining_item_capacities = {item: instance.item_capacity(item) for item in instance.items}
+        self.remaining_agent_capacities = {agent: instance.agent_capacity(agent) for agent in instance.agents if instance.agent_capacity(agent) > 0}
+        self.remaining_item_capacities = {item: instance.item_capacity(item) for item in instance.items if instance.item_capacity(item) > 0}
         self.remaining_agent_item_value = {agent: {item:instance.agent_item_value(agent,item) for item in instance.items} for agent in instance.agents}
         for agent in self.remaining_agents():
             for conflicting_item in self.instance.agent_conflicts(agent):
