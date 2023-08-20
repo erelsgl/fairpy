@@ -9,6 +9,7 @@ from numbers import Number
 import numpy as np
 from functools import cache
 from fairpy.courses.explanations import ExplanationLogger
+from collections import defaultdict
 
 import logging
 logger = logging.getLogger(__name__)
@@ -112,7 +113,7 @@ class Instance:
         agent_entitlement_keys, agent_entitlement_func = get_keys_and_mapping(agent_entitlements)
         item_capacity_keys , item_capacity_func  = get_keys_and_mapping(item_capacities)
 
-        self.agents = agents or agent_capacity_keys or agent_entitlement_keys or agent_value_keys
+        self.agents = agents or agent_value_keys or agent_capacity_keys or agent_entitlement_keys 
         assert (self.agents is not None)
         self.num_of_agents = len(self.agents)
         self.items  = items  or item_capacity_keys or item_value_keys
@@ -186,7 +187,7 @@ class Instance:
                random_seed:int=None,
                ):
         """
-        Generate a random instance.
+        Generate a random instance by drawing values from uniform distributions.
         """
         if random_seed is None:
             random_seed = np.random.randint(1, 2**31)
@@ -205,6 +206,30 @@ class Instance:
             for agent in agents
         }
         return Instance(valuations=valuations, agent_capacities=agent_capacities, item_capacities=item_capacities)
+    
+    def random_sample(num_of_agents:int, prototype_agent_capacities:dict, prototype_valuations:dict,
+        item_capacities:dict, random_seed:int=None,
+        ):
+        """
+        Generate a random instance by sampling values of existing agents.
+        """
+        if random_seed is None:
+            random_seed = np.random.randint(1, 2**31)
+        np.random.seed(random_seed)
+        logger.info("Random seed: %d", random_seed)
+        agents = list(prototype_valuations.keys())
+
+        agent_capacities = dict()
+        valuations = defaultdict(dict)
+        for i in range(num_of_agents):
+            prototype_agent = np.random.choice(agents)
+            new_agent = f"{prototype_agent}.{i}"
+            agent_capacities[new_agent] = prototype_agent_capacities[prototype_agent]
+            valuations[new_agent] = prototype_valuations[prototype_agent]
+
+        return Instance(valuations=valuations, agent_capacities=agent_capacities, item_capacities=item_capacities)
+
+
     
     def explain_valuations(self, explanation_logger: ExplanationLogger):
         for agent in self.agents:
@@ -334,7 +359,11 @@ def get_keys_and_mapping_2d(container: any) -> tuple[list,callable]:
     if container is None:
         f = k1 = k2 = None
     elif isinstance(container,dict):
-        f = lambda agent,item: container[agent][item]
+        # f = lambda agent,item: container.get(agent,dict()).get(item,0)
+        # f = lambda agent,item: container[agent].get(item,0)
+        # f = lambda agent,item: container[agent][item]
+        f = lambda agent,item: \
+            container[agent].get(item,0) if isinstance(container[agent],dict) else container[agent][item]
         k1 = container.keys()
         k2, _ = get_keys_and_mapping(container[next(iter(container))])
     elif isinstance(container,list):
@@ -398,6 +427,15 @@ if __name__ == "__main__":
     print("agents: ", random_instance.agents)
     print("items: ", random_instance.items)
     print("valuations: ", random_instance._valuations)
+
+    random_instance = Instance.random_sample(
+        num_of_agents=5, 
+        prototype_agent_capacities={"Alice": 5, "Bob": 6, "Chana": 7}, prototype_valuations={"Alice": {"c1": 55, "c2": 66, "c3": 77}, "Bob": {"c1": 77, "c2": 66, "c3": 55}, "Chana": {"c1": 66, "c2": 77, "c3": 55}},
+        item_capacities={"c1": 5, "c2": 6, "c3": 7})
+    print("agents: ", random_instance.agents)
+    print("items: ", random_instance.items)
+    print("valuations: ", dict(random_instance._valuations))
+
 
     # Test the cache    
     # print(random_instance.agent_maximum_value("s1"))
