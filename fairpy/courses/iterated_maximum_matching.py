@@ -18,9 +18,6 @@ from fairpy.courses.instance    import Instance
 from fairpy.courses.allocation_utils import AllocationBuilder
 from fairpy.courses.explanations import *
 
-import logging
-logger = logging.getLogger(__name__)
-
 def iterated_maximum_matching(alloc:AllocationBuilder, adjust_utilities:bool=False, explanation_logger:ExplanationLogger=ExplanationLogger()):
     """
     Builds a allocation using Iterated Maximum Matching.
@@ -61,8 +58,6 @@ def iterated_maximum_matching(alloc:AllocationBuilder, adjust_utilities:bool=Fal
     while len(alloc.remaining_item_capacities)>0 and len(alloc.remaining_agent_capacities)>0:
         explanation_logger.info("\nIteration %d:", iteration, agents=alloc.remaining_agents())
         explanation_logger.info("  Remaining seats: %s", alloc.remaining_item_capacities, agents=alloc.remaining_agents())
-        # logger.info("  remaining_agent_capacities: %s", alloc.remaining_agent_capacities)
-        # logger.debug("  remaining_agent_item_value: %s", alloc.remaining_agent_item_value)
         map_agent_to_bundle = many_to_many_matching_using_network_flow(
             items=alloc.remaining_items(), 
             item_capacity=alloc.remaining_item_capacities.__getitem__, 
@@ -102,7 +97,6 @@ def iterated_maximum_matching(alloc:AllocationBuilder, adjust_utilities:bool=Fal
                             if utility_difference>0:
                                 alloc.remaining_agent_item_value[agent][next_best_item] += utility_difference
                                 explanation_logger.info("    As compensation, we added the difference %g to your next-best course, %s.",  utility_difference, next_best_item, agents=agent)
-                                # logger.info("   Increasing value of agent %s to next-best item %s from %g to %g", agent, next_best_item, current_value_of_next_best_item, current_value_of_next_best_item+utility_difference)
                             else:
                                 pass
             else:
@@ -117,16 +111,11 @@ def iterated_maximum_matching(alloc:AllocationBuilder, adjust_utilities:bool=Fal
         iteration += 1
 
 
-def iterated_maximum_matching_adjusted(alloc:AllocationBuilder):
-    return iterated_maximum_matching(alloc, adjust_utilities=True)
+def iterated_maximum_matching_adjusted(alloc:AllocationBuilder, **kwargs):
+    return iterated_maximum_matching(alloc, adjust_utilities=True, **kwargs)
 
-def iterated_maximum_matching_unadjusted(alloc:AllocationBuilder):
-    return iterated_maximum_matching(alloc, adjust_utilities=False)
-
-
-iterated_maximum_matching.logger = logger
-
-
+def iterated_maximum_matching_unadjusted(alloc:AllocationBuilder, **kwargs):
+    return iterated_maximum_matching(alloc, adjust_utilities=False, **kwargs)
 
 
 
@@ -153,11 +142,11 @@ if __name__ == "__main__":
 
     print("\n\nIterated Maximum Matching with adjustments:")
     divide_random_instance(algorithm=iterated_maximum_matching, adjust_utilities=True, 
-                        #    explanation_logger=console_explanation_logger,
+                           explanation_logger=console_explanation_logger,
                         #    explanation_logger = files_explanation_logger,
-                           explanation_logger = string_explanation_logger,
+                        #    explanation_logger = string_explanation_logger,
                            num_of_agents=num_of_agents, num_of_items=num_of_items, agent_capacity_bounds=[2,5], item_capacity_bounds=[3,12], 
                            item_base_value_bounds=[1,100], item_subjective_ratio_bounds=[0.5,1.5], normalized_sum_of_values=100,
                            random_seed=1)
     
-    print(string_explanation_logger.map_agent_to_explanation())
+    # print(string_explanation_logger.map_agent_to_explanation())
