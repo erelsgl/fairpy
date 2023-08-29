@@ -8,7 +8,7 @@ Since: 2023-07
 from numbers import Number
 import numpy as np
 from functools import cache
-from fairpy.courses.explanations import ExplanationLogger
+# from fairpy.courses.explanations import ExplanationLogger
 from collections import defaultdict
 
 import logging
@@ -40,6 +40,8 @@ class Instance:
     33
     >>> instance.agent_bundle_value("Bob", ["c1","c2"])
     77
+    >>> instance.agent_fractionalbundle_value("Bob", {"c1":1, "c2":0.5})
+    55.0
     >>> instance.agent_maximum_value("Alice")
     33
     >>> instance.agent_maximum_value("Bob")
@@ -139,8 +141,14 @@ class Instance:
         Return the agent's value for a bundle (a list of items).
         """
         return sum([self.agent_item_value(agent,item) for item in bundle])
+
+    def agent_fractionalbundle_value(self, agent:any, bundle:list[any]):
+        """
+        Return the agent's value for a fractional bundle (a dict mapping items to fractions).
+        """
+        return sum([self.agent_item_value(agent,item)*fraction for item,fraction in bundle.items()])
     
-    def agent_ranking(self, agent:any, prioritized_items:list)->dict:
+    def agent_ranking(self, agent:any, prioritized_items:list=[])->dict:
         """
         Compute a map in which each item is mapped to its ranking: the best item is mapped to 1, the second-best to 2, etc.
 
@@ -172,7 +180,7 @@ class Instance:
         Return the maximum possible value of an agent: the sum of the top x items, where x is the agent's capacity.
         """
         return sum(sorted([self.agent_item_value(agent,item) for item in self.items],reverse=True)[0:self.agent_capacity(agent)])
-    
+
     def agent_normalized_item_value(self, agent:any, item:any):
         return self.agent_item_value(agent,item) / self.agent_maximum_value(agent) * 100
 
@@ -230,13 +238,12 @@ class Instance:
         return Instance(valuations=valuations, agent_capacities=agent_capacities, item_capacities=item_capacities)
 
 
-    
-    def explain_valuations(self, explanation_logger: ExplanationLogger):
-        for agent in self.agents:
-            explanation_logger.debug("Your valuations:", agents=agent)
-            for item in sorted(self.items, key=lambda item: self.agent_item_value(agent,item), reverse=True):
-                explanation_logger.debug(" * %s: %g", item, self.agent_item_value(agent,item), agents=agent)
-            explanation_logger.debug("You need %d courses, so your maximum possible value is %g.", self.agent_capacity(agent), self.agent_maximum_value(agent), agents=agent)
+    # def explain_valuations(self, explanation_logger: ExplanationLogger):
+    #     for agent in self.agents:
+    #         explanation_logger.debug("Your valuations:", agents=agent)
+    #         for item in sorted(self.items, key=lambda item: self.agent_item_value(agent,item), reverse=True):
+    #             explanation_logger.debug(" * %s: %g", item, self.agent_item_value(agent,item), agents=agent)
+    #         explanation_logger.debug("You need %d courses, so your maximum possible value is %g.", self.agent_capacity(agent), self.agent_maximum_value(agent), agents=agent)
 
         
 

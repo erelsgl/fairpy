@@ -175,5 +175,5 @@ if __name__ == "__main__":
         normalized_sum_of_values=1000)
     allocation = divide(round_robin,random_instance)
     matrix = AgentBundleValueMatrix(random_instance, allocation)
-    matrix.explain(ConsoleExplanationLogger())
+    # matrix.explain(ConsoleExplanationLogger()) 
 

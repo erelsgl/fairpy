@@ -70,7 +70,8 @@ if __name__ == "__main__":
             crs.round_robin, 
             crs.bidirectional_round_robin,
             crs.yekta_day,
-            crs.almost_egalitarian_allocation,
+            crs.almost_egalitarian_without_donation,
+            crs.almost_egalitarian_with_donation,
             ],
         "random_seed": range(5),
     }

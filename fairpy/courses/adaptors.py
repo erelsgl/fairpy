@@ -48,11 +48,14 @@ def divide(
     alloc = AllocationBuilder(instance)
     explanation_logger:ExplanationLogger = kwargs.get("explanation_logger", None)
     if explanation_logger:
-        instance.explain_valuations(explanation_logger)
+        # instance.explain_valuations(explanation_logger)
+        explanation_logger.explain_valuations(instance)
     algorithm(alloc, **kwargs)
     allocation = alloc.sorted()
     if explanation_logger:
-        AgentBundleValueMatrix(instance, allocation, normalized=True).explain(explanation_logger)
+        explanation_logger.info("")
+        explanation_logger.explain_allocation(allocation, instance)
+        # AgentBundleValueMatrix(instance, allocation, normalized=True).explain(explanation_logger)
     return allocation
 
 
@@ -96,13 +99,15 @@ def divide_with_priorities(
     alloc = AllocationBuilder(instance)
     explanation_logger = kwargs.get("explanation_logger",None)
     if explanation_logger:
-        instance.explain_valuations(explanation_logger)
+        # instance.explain_valuations(explanation_logger)
+        explanation_logger.explain_valuations(instance)
     for priority_class in agent_priority_classes:
         alloc.remaining_agent_capacities = {agent:instance.agent_capacity(agent) for agent in priority_class}
         algorithm(alloc, **kwargs)
     allocation = alloc.sorted()
     if explanation_logger:
-        AgentBundleValueMatrix(instance, allocation, normalized=True).explain(explanation_logger)
+        explanation_logger.info("")
+        explanation_logger.explain_allocation(allocation, instance)
     return allocation
 
 
