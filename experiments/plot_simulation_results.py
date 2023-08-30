@@ -11,7 +11,7 @@ import sys
 
 filter={"num_of_items": 20, 
         "algorithm": [
-            "yekta_day", "almost_egalitarian_allocation", "iterated_maximum_matching_unadjusted","iterated_maximum_matching_adjusted",
+            "yekta_day", "almost_egalitarian_allocation", "iterated_maximum_matching_unadjusted","iterated_maximum_matching_adjusted","almost_egalitarian_without_donation","almost_egalitarian_with_donation",
             "round_robin", "bidirectional_round_robin"
           ]}
 
