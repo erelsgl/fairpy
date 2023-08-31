@@ -71,14 +71,17 @@ def almost_egalitarian_allocation(alloc: AllocationBuilder, surplus_donation:boo
 
     def add_surplus (agent, value_to_add):
         agent_surplus[agent] += value_to_add
-        for neighbor_item in list(fractional_allocation_graph.neighbors(agent)):
+        items_to_remove = []
+        for neighbor_item in fractional_allocation_graph.neighbors(agent):
             current_neighbor_weight = fractional_allocation_graph[agent][neighbor_item]['weight']
             current_neighbor_value  = current_neighbor_weight * alloc.remaining_agent_item_value[agent][neighbor_item]
             if current_neighbor_value <= agent_surplus[agent]:
                 explanation_logger.info("  You have a surplus of %g, so you donate your share of %g%% in course %s (value %g)", agent_surplus[agent], np.round(100*current_neighbor_weight), neighbor_item, current_neighbor_value, agents=agent)
-                remove_edge_from_graph(agent, neighbor_item)
+                items_to_remove.append(neighbor_item)
                 agent_surplus[agent] -= current_neighbor_value
-            
+        for neighbor_item in items_to_remove:
+            remove_edge_from_graph(agent, neighbor_item)
+
 
     def remove_edge_from_graph(agent,item):
         """
@@ -86,8 +89,10 @@ def almost_egalitarian_allocation(alloc: AllocationBuilder, surplus_donation:boo
         """
         weight_for_redistribution = fractional_allocation[agent][item] # this weight should be redistributed to other neighbors of the item
         fractional_allocation[agent][item] = 0
-        fractional_allocation_graph.remove_edge(agent,item)
-        for neighbor_agent in list(fractional_allocation_graph.neighbors(item)):
+        if fractional_allocation_graph.has_edge(agent,item):
+            fractional_allocation_graph.remove_edge(agent,item)
+        surplus_to_add = {}
+        for neighbor_agent in fractional_allocation_graph.neighbors(item):
             current_neighbor_weight = fractional_allocation_graph[neighbor_agent][item]['weight']
 
             weight_to_add = min(weight_for_redistribution, 1-current_neighbor_weight)
@@ -96,11 +101,13 @@ def almost_egalitarian_allocation(alloc: AllocationBuilder, surplus_donation:boo
 
             value_to_add = weight_to_add*alloc.remaining_agent_item_value[agent][item]
             explanation_logger.info("  Edge (%s,%s) is removed, so you receive additional %g%% of course %s (value %g).", agent,item,np.round(100*weight_to_add),item, value_to_add, agents=neighbor_agent)
-            if surplus_donation:
-                add_surplus(neighbor_agent, value_to_add)
-
+            surplus_to_add[neighbor_agent] = value_to_add
             if weight_for_redistribution<=0:
                 break
+        if surplus_donation:
+            for neighbor_agent,value_to_add in surplus_to_add.items():
+                add_surplus(neighbor_agent, value_to_add)
+
 
     def remove_agent_from_graph(agent):
         """
@@ -168,7 +175,7 @@ def almost_egalitarian_allocation(alloc: AllocationBuilder, surplus_donation:boo
         # No leaf at all - remove an edge with a small weight:
         edge_with_min_weight = min(fractional_allocation_graph.edges(), key=lambda edge:fractional_allocation_graph[edge[0]][edge[1]]["weight"])
         min_weight = fractional_allocation_graph[edge_with_min_weight[0]][edge_with_min_weight[1]]["weight"]
-        logger.warn("No leafs - removing edge %s with minimum weight%g", edge_with_min_weight, min_weight)
+        logger.warn("No leafs - removing edge %s with minimum weight %g", edge_with_min_weight, min_weight)
         explanation_logger.info("There are no leaf nodes, but the edge %s has minimum weight %g, so it is removed.", edge_with_min_weight, min_weight, agents=agent)
         remove_edge_from_graph(*agent_item_tuple(edge_with_min_weight))
 
