@@ -9,7 +9,7 @@ Since: 2023-07
 from fairpy.courses.instance    import Instance
 from fairpy.courses.allocation_utils import AllocationBuilder
 from fairpy.courses.iterated_maximum_matching import iterated_maximum_matching
-from fairpy.courses.fractional_egalitarian import fractional_leximin_optimal_allocation, fractional_egalitarian_utilitarian_allocation
+from fairpy.courses.fractional_egalitarian import fractional_egalitarian_utilitarian_allocation
 from fairpy.courses.explanations import *
 
 import cvxpy, numpy as np, networkx

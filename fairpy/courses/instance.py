@@ -215,27 +215,57 @@ class Instance:
         }
         return Instance(valuations=valuations, agent_capacities=agent_capacities, item_capacities=item_capacities)
     
-    def random_sample(num_of_agents:int, prototype_agent_capacities:dict, prototype_valuations:dict,
-        item_capacities:dict, random_seed:int=None,
+    def random_sample(max_num_of_agents:int, max_total_agent_capacity:int,
+        prototype_valuations:dict, prototype_agent_capacities:dict, prototype_agent_conflicts:dict,
+        item_capacities:dict, item_conflicts:dict, 
+        random_seed:int=None,
         ):
         """
         Generate a random instance by sampling values of existing agents.
+
+        :param max_num_of_agents: creates at most this number of agents.
+        :param max_total_agent_capacity: the total capacity of all agents will be at most this number plus one agent.
+
+
         """
         if random_seed is None:
             random_seed = np.random.randint(1, 2**31)
         np.random.seed(random_seed)
         logger.info("Random seed: %d", random_seed)
-        agents = list(prototype_valuations.keys())
+        prototype_agents = list(prototype_valuations.keys())
 
         agent_capacities = dict()
-        valuations = defaultdict(dict)
-        for i in range(num_of_agents):
-            prototype_agent = np.random.choice(agents)
-            new_agent = f"{prototype_agent}.{i}"
-            agent_capacities[new_agent] = prototype_agent_capacities[prototype_agent]
-            valuations[new_agent] = prototype_valuations[prototype_agent]
+        agent_conflicts = dict()
+        valuations = dict()
 
-        return Instance(valuations=valuations, agent_capacities=agent_capacities, item_capacities=item_capacities)
+        def add_agent(new_agent, prototype_agent):
+            nonlocal max_total_agent_capacity, max_num_of_agents, agent_capacities, valuations, agent_conflicts
+            new_agent_capacity = prototype_agent_capacities[prototype_agent]
+            agent_capacities[new_agent] = new_agent_capacity
+            if prototype_agent in prototype_agent_conflicts:
+                agent_conflicts[new_agent]  = prototype_agent_conflicts[prototype_agent]
+            valuations[new_agent] = prototype_valuations[prototype_agent]
+            max_total_agent_capacity -= new_agent_capacity
+            max_num_of_agents -= 1
+
+        # First, add one copy of each prototype agent:
+        for agent in prototype_agents:
+            add_agent(f"{agent}", agent)
+
+        # Next, add random copies until one of the max_ values is hit:
+        i = 1
+        while True:
+            prototype_agent = np.random.choice(prototype_agents)
+            new_agent = f"random{i}.{prototype_agent}"
+            add_agent(new_agent, prototype_agent)
+            if max_total_agent_capacity<=0:
+                break
+            if max_num_of_agents<=0:
+                break
+            i += 1
+
+        return Instance(valuations=valuations, agent_capacities=agent_capacities, agent_conflicts=agent_conflicts,
+                        item_capacities=item_capacities, item_conflicts=item_conflicts)
 
 
     # def explain_valuations(self, explanation_logger: ExplanationLogger):
@@ -433,15 +463,16 @@ if __name__ == "__main__":
         normalized_sum_of_values=1000)
     print("agents: ", random_instance.agents)
     print("items: ", random_instance.items)
-    print("valuations: ", random_instance._valuations)
+    print("valuations: ", random_instance._valuations, "\n")
 
     random_instance = Instance.random_sample(
-        num_of_agents=5, 
+        max_num_of_agents=8, max_total_agent_capacity=1000,
         prototype_agent_capacities={"Alice": 5, "Bob": 6, "Chana": 7}, prototype_valuations={"Alice": {"c1": 55, "c2": 66, "c3": 77}, "Bob": {"c1": 77, "c2": 66, "c3": 55}, "Chana": {"c1": 66, "c2": 77, "c3": 55}},
-        item_capacities={"c1": 5, "c2": 6, "c3": 7})
+        prototype_agent_conflicts={"Alice": ["c1"]},
+        item_capacities={"c1": 5, "c2": 6, "c3": 7}, item_conflicts={})
     print("agents: ", random_instance.agents)
     print("items: ", random_instance.items)
-    print("valuations: ", dict(random_instance._valuations))
+    print("valuations: ", dict(random_instance._valuations), "\n")
 
 
     # Test the cache    
