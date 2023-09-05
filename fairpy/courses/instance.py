@@ -268,13 +268,6 @@ class Instance:
                         item_capacities=item_capacities, item_conflicts=item_conflicts)
 
 
-    # def explain_valuations(self, explanation_logger: ExplanationLogger):
-    #     for agent in self.agents:
-    #         explanation_logger.debug("Your valuations:", agents=agent)
-    #         for item in sorted(self.items, key=lambda item: self.agent_item_value(agent,item), reverse=True):
-    #             explanation_logger.debug(" * %s: %g", item, self.agent_item_value(agent,item), agents=agent)
-    #         explanation_logger.debug("You need %d courses, so your maximum possible value is %g.", self.agent_capacity(agent), self.agent_maximum_value(agent), agents=agent)
-
         
 
 def random_valuation(numitems:int, item_value_bounds: tuple[float,float])->np.ndarray:
