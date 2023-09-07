@@ -87,8 +87,8 @@ def iterated_maximum_matching(alloc:AllocationBuilder, adjust_utilities:bool=Fal
     iteration = 1
     explanation_logger.info("\n"+_("algorithm_starts")+"\n")
     while len(alloc.remaining_item_capacities)>0 and len(alloc.remaining_agent_capacities)>0:
-        explanation_logger.info("\n"+_("iteration_number"), iteration, agents=alloc.remaining_agents())
-        explanation_logger.info("  "+_("remaining_seats"), alloc.remaining_item_capacities, agents=alloc.remaining_agents())
+        explanation_logger.info("\n== "+_("iteration_number")+" ==", iteration, agents=alloc.remaining_agents())
+        explanation_logger.info(_("remaining_seats")+"\n", alloc.remaining_item_capacities, agents=alloc.remaining_agents())
         map_agent_to_bundle = many_to_many_matching_using_network_flow(
             items=alloc.remaining_items(), 
             item_capacity=alloc.remaining_item_capacities.__getitem__, 
