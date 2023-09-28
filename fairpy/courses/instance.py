@@ -185,7 +185,7 @@ class Instance:
         return self.agent_item_value(agent,item) / self.agent_maximum_value(agent) * 100
 
     @staticmethod
-    def random(num_of_agents:int, num_of_items:int, 
+    def random_uniform(num_of_agents:int, num_of_items:int, 
                agent_capacity_bounds:tuple[int,int],
                item_capacity_bounds:tuple[int,int],
                item_base_value_bounds:tuple[int,int],
@@ -215,6 +215,48 @@ class Instance:
         }
         return Instance(valuations=valuations, agent_capacities=agent_capacities, item_capacities=item_capacities)
     
+
+    @staticmethod
+    def random_szws(num_of_agents:int, num_of_items:int, 
+               agent_capacity:int,
+               supply_ratio:float,         # The ratio: total number of items / total demand. The item capacity is determined by this number; all items have the same capacity.
+               num_of_popular_items:int,   # Items 1,...,num_of_popular_items will be considered "popular", and have a high value for many students.
+               num_of_favorite_items:int,  # For each student, a subset of num_of_favorite_items items out of the popular ones will be selected as "favorite".
+               favorite_item_value_bounds:tuple[int,int],    # The value of a favorite course will be selected uniformly at random from this range.
+               nonfavorite_item_value_bounds:tuple[int,int], # The value of a non-favorite course will be selected uniformly at random from this range.
+               normalized_sum_of_values:int,
+               agent_name_template="s{index}", item_name_template="c{index}",
+               random_seed:int=None,
+               ):
+        """
+        Generate a random instance with additive utilities, using the process described at:
+            Soumalias, Zamanlooy, Weissteiner, Seuken: "Machine Learning-powered Course Allocation", arXiv 2210.00954, subsection 5.1
+        NOTE: currently, we do not generate complementarities and substitutabilities. We also do not model reporting mistakes.
+        """
+        if random_seed is None:
+            random_seed = np.random.randint(1, 2**31)
+        np.random.seed(random_seed)
+        logger.info("Random seed: %d", random_seed)
+
+        item_capacity = np.round((supply_ratio * agent_capacity * num_of_agents) / num_of_items)
+
+        agents  = [agent_name_template.format(index=i+1) for i in range(num_of_agents)]
+        items   = [item_name_template.format(index=i+1) for i in range(num_of_items)]
+
+        valuations = {}
+        for agent in agents:
+            favorite_items = np.random.choice(num_of_popular_items, num_of_favorite_items, replace=False)
+            print(f"favorite_items for {agent}: ",favorite_items)
+            valuation = np.zeros(num_of_items)
+            for item_index in range(num_of_items):
+                value_bounds = favorite_item_value_bounds if item_index in favorite_items else nonfavorite_item_value_bounds
+                valuation[item_index] = np.random.uniform(low=value_bounds[0], high=value_bounds[1]+1)
+            valuations[agent] = dict(zip(items, normalized_valuation(valuation, normalized_sum_of_values)))
+
+        return Instance(valuations=valuations, agent_capacities=agent_capacity, item_capacities=item_capacity)
+
+
+    @staticmethod
     def random_sample(max_num_of_agents:int, max_total_agent_capacity:int,
         prototype_valuations:dict, prototype_agent_capacities:dict, prototype_agent_conflicts:dict,
         item_capacities:dict, item_conflicts:dict, 
@@ -448,7 +490,7 @@ if __name__ == "__main__":
 
     print(doctest.testmod())
 
-    random_instance = Instance.random(
+    random_instance = Instance.random_uniform(
         num_of_agents=5, num_of_items=3, 
         agent_capacity_bounds=[2,6], item_capacity_bounds=[30,50], 
         item_base_value_bounds=[1,200], item_subjective_ratio_bounds=[0.5,1.5],
@@ -456,6 +498,20 @@ if __name__ == "__main__":
         normalized_sum_of_values=1000)
     print("agents: ", random_instance.agents)
     print("items: ", random_instance.items)
+    print("valuations: ", random_instance._valuations, "\n")
+
+    random_instance = Instance.random_szws(  # SZWS experiment:
+        num_of_agents=10, num_of_items=10, 
+        agent_capacity=5, 
+        supply_ratio = 1.25,      # 1.25, 1.5
+        num_of_popular_items=6,   # 6, 9
+        num_of_favorite_items=4,  # ?
+        favorite_item_value_bounds=[100,200],
+        nonfavorite_item_value_bounds=[1,100],
+        normalized_sum_of_values=1000)
+    print("agents: ", random_instance.agents)
+    print("items: ", random_instance.items)
+    print("item_capacities: ", random_instance._item_capacities)
     print("valuations: ", random_instance._valuations, "\n")
 
     random_instance = Instance.random_sample(

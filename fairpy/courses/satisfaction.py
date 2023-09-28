@@ -168,7 +168,7 @@ if __name__ == "__main__":
     from picking_sequence import round_robin
     from adaptors import divide
 
-    random_instance = Instance.random(
+    random_instance = Instance.random_uniform(
         num_of_agents=10, num_of_items=8, 
         agent_capacity_bounds=[2,4], item_capacity_bounds=[5,5], 
         item_base_value_bounds=[1,200], item_subjective_ratio_bounds=[0.5,1.5],

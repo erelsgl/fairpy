@@ -23,7 +23,7 @@ def many_to_many_matching_on_random_instance(
     random_seed: int, # dummy parameter, to allow multiple instances of the same run
     algorithm:Callable):
     np.random.seed()
-    instance = Instance.random(
+    instance = Instance.random_uniform(
         num_of_agents=num_of_agents, num_of_items=num_of_items, normalized_sum_of_values=normalized_sum_of_values,
         agent_capacity_bounds=[agent_capacity,agent_capacity], 
         item_capacity_bounds=[item_capacity,item_capacity], 

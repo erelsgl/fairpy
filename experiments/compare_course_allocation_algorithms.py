@@ -24,7 +24,7 @@ def course_allocation_with_random_instance(
     algorithm:Callable,
     random_seed: int,):
     np.random.seed(random_seed)
-    instance = crs.Instance.random(
+    instance = crs.Instance.random_uniform(
         num_of_agents=num_of_agents, num_of_items=num_of_items, normalized_sum_of_values=normalized_sum_of_values,
         agent_capacity_bounds=agent_capacity_bounds, 
         item_capacity_bounds=item_capacity_bounds, 

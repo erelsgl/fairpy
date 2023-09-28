@@ -25,7 +25,7 @@ def test_feasibility():
         ]
     for i in range(10):
         np.random.seed(i)
-        instance = crs.Instance.random(
+        instance = crs.Instance.random_uniform(
             num_of_agents=70, num_of_items=10, normalized_sum_of_values=1000,
             agent_capacity_bounds=[2,6], 
             item_capacity_bounds=[20,40], 

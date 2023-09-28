@@ -126,7 +126,7 @@ def divide_random_instance(
     np.random.seed(random_seed)
     print("Random seed: ", random_seed)
 
-    random_instance = Instance.random(num_of_agents=num_of_agents, num_of_items=num_of_items, agent_capacity_bounds=agent_capacity_bounds, item_capacity_bounds=item_capacity_bounds, 
+    random_instance = Instance.random_uniform(num_of_agents=num_of_agents, num_of_items=num_of_items, agent_capacity_bounds=agent_capacity_bounds, item_capacity_bounds=item_capacity_bounds, 
                                       item_base_value_bounds=item_base_value_bounds, item_subjective_ratio_bounds=item_subjective_ratio_bounds,
                                       normalized_sum_of_values=normalized_sum_of_values, random_seed=random_seed)
     allocation = divide(algorithm, instance=random_instance, **kwargs)
