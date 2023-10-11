@@ -221,7 +221,8 @@ class Instance:
                agent_capacity:int,
                supply_ratio:float,         # The ratio: total number of items / total demand. The item capacity is determined by this number; all items have the same capacity.
                num_of_popular_items:int,   # Items 1,...,num_of_popular_items will be considered "popular", and have a high value for many students.
-               num_of_favorite_items:int,  # For each student, a subset of num_of_favorite_items items out of the popular ones will be selected as "favorite".
+               mean_num_of_favorite_items:float,  # For each student, a subset of num_of_favorite_items items out of the popular ones will be selected as "favorite".
+                                                  # num_of_favorite_items is selected at random to be either floor(mean_num_of_favorite_items) or ceil(mean_num_of_favorite_items), so that the mean is mean_num_of_favorite_items.
                favorite_item_value_bounds:tuple[int,int],    # The value of a favorite course will be selected uniformly at random from this range.
                nonfavorite_item_value_bounds:tuple[int,int], # The value of a non-favorite course will be selected uniformly at random from this range.
                normalized_sum_of_values:int,
@@ -245,8 +246,13 @@ class Instance:
 
         valuations = {}
         for agent in agents:
+            # copied from https://github.com/marketdesignresearch/Course-Match-Preference-Simulator/blob/main/preference_generator.py
+            if np.random.uniform(0,1) <= mean_num_of_favorite_items - np.floor(mean_num_of_favorite_items):
+                num_of_favorite_items = int(np.ceil(mean_num_of_favorite_items))
+            else:
+                num_of_favorite_items = int(np.floor(mean_num_of_favorite_items))
+
             favorite_items = np.random.choice(num_of_popular_items, num_of_favorite_items, replace=False)
-            print(f"favorite_items for {agent}: ",favorite_items)
             valuation = np.zeros(num_of_items)
             for item_index in range(num_of_items):
                 value_bounds = favorite_item_value_bounds if item_index in favorite_items else nonfavorite_item_value_bounds
@@ -505,7 +511,7 @@ if __name__ == "__main__":
         agent_capacity=5, 
         supply_ratio = 1.25,      # 1.25, 1.5
         num_of_popular_items=6,   # 6, 9
-        num_of_favorite_items=4,  # ?
+        mean_num_of_favorite_items=4,  # ?
         favorite_item_value_bounds=[100,200],
         nonfavorite_item_value_bounds=[1,100],
         normalized_sum_of_values=1000)
