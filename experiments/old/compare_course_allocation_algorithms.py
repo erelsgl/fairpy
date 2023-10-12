@@ -6,6 +6,10 @@ To run this file, you need
 
 Programmer: Erel Segal-Halevi
 Since: 2023-07
+
+
+NOTE: The uptodate version of this experiment have moved to here:
+https://github.com/ariel-research/course-allocation-experiment
 """
 import fairpy.courses as crs
 from fairpy.courses.adaptors import divide
