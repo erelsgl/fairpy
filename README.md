@@ -1,14 +1,14 @@
 # fairpy
 
-NOTE: [fairpyx](https://github.com/ariel-research/fairpyx) is a newer library, that provides cleaner handling of fair allocation with constraints, e.g. course-seat allocation.
-Please visit there first.
+`fairpy` is an open-source library of [fair division algorithms](https://en.wikipedia.org/wiki/Fair_division) in Python.
+
+NOTE: [fairpyx](https://github.com/ariel-research/fairpyx) is a newer library, that provides cleaner handling of fair allocation with constraints, e.g. course-seat allocation. Please visit there first.
 
 ---
 
 ![PyTest result](https://github.com/erelsgl/fairpy/workflows/pytest/badge.svg)
 
-An open-source library of [fair division algorithms](https://en.wikipedia.org/wiki/Fair_division) in Python.
-Designed for three target audiences:
+`fairpy` is designed for three target audiences:
 
 * Laypeople, who want to use existing fair division algorithms for real-life problems.
 * Researchers, who develop new fair division algorithms and want to quickly implement them and compare to existing algorithms.
