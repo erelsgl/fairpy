@@ -1,0 +1,20 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  fairpy - an open-source library of fair division
+  algorithms in Python
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Erel
+    family-names: Segal-Halevi
+    email: erelsgl@gmail.com
+    affiliation: Ariel University
+    orcid: 'https://orcid.org/0000-0002-7497-5834'
+repository-code: 'https://github.com/erelsgl/fairpy'
+license: GPL-3.0
+date-released: '2023-12-31'
